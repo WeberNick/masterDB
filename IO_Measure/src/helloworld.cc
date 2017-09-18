@@ -3,7 +3,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
-#include "../MasterTeamProjekt/IO_Measure/src/measure.hh"
+#include "measure.hh"
 
 int main(int argc, char* argv[]){
 
