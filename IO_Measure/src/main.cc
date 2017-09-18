@@ -11,8 +11,17 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef __linux__
+#define O_FLAG O_DIRECT
+#elif __APPLE__
+#define O_FLAG F_NOCACHE
+#endif
+
 int main(const int argc, const char* argv[])
 {
+	std::cout << "Flag: " << O_FLAG << std::endl;
+	return 0;
+
 	/* Check if user input has enough arguments */
 	if(argc != 4)
 	{
@@ -60,7 +69,9 @@ int main(const int argc, const char* argv[])
 				<< std::endl;
 
 	/* Initialize helper variables */
-	const int C_MODE = (lMode == "read") ? O_RDONLY : O_WRONLY | O_CREAT;
+	const int C_MODE = (lMode == "read") ? 
+							((lStatusFlag == "simple") ? O_RDONLY : O_RDONLY | O_FLAG) : 
+							((lStatusFlag == "simple") ? O_WRONLY | O_CREAT : O_WRONLY | O_CREAT | O_FLAG);
 	const char* C_RESULT_FILE_NAME = (lMode == "read") ? "read.txt" : "write.txt";
 	const size_t C_FILE_SIZE_IN_BYTES = 1024 * 2000000;
 	const size_t C_BUF_SIZE_IN_BYTES = 8192;
@@ -135,7 +146,7 @@ int main(const int argc, const char* argv[])
 		avg += lMeasurements[i];
 		lResultFile << "Measurement " << i << ": " << std::fixed << std::setprecision(3) << lMeasurements[i] << std::endl;
 	}
-	lResultFile << "Avergae: " << std::fixed << std::setprecision(3) << (avg / lNoMeasurements) << std::endl;
+	lResultFile << "Average: " << std::fixed << std::setprecision(3) << (avg / lNoMeasurements) << std::endl;
 	lResultFile.close();
 
 	return 0;
