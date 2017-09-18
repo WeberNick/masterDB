@@ -16,16 +16,29 @@ int main(const int argc, const char* argv[])
 	/* Check if user input has enough arguments */
 	if(argc != 4)
 	{
-		std::cerr << "Usage: './main [PathToFile] [MODE] [STATUS FLAG]'\n"
-					<< "\t-where 'PathToFile' is a path from the current directory\n"
+		std::cerr 	<< "==================================================\n"
+					<< "Usage:\t'./main [CREATE/PATH] [MODE] [STATUS FLAG]'\n\n"
+					<< "\t-where 'CREATE/PATH' can be either 'create' to create a 2GB sized file in the home directory and use this file\n"
+					<< "\t\tOR a path from the current directory to a file already created\n"
 					<< "\t-where 'MODE' can either be 'read' or 'write'\n"
-					<< "\t-where 'STATUS FLAG' can either be 'simple' or 'direct'\n"
+					<< "\t-where 'STATUS FLAG' can either be 'simple' or 'direct' for simple/direct IO\n"
+					<< "==================================================\n"
 					<< std::endl;
 		return -1;
 	}
-	std::string lOutputFile = argv[1];
-	std::string lMode = argv[2];
-	std::string lStatusFlag = argv[3];
+
+	const bool lCreate = (std::string(argv[1]) == "create") ? true : false ;
+	const std::string lMode = argv[2];
+	const std::string lStatusFlag = argv[3];
+
+	/* Creating the dummy file */
+	if(lCreate)
+	{
+		std::cout << "A 2GB sized dummy file is created..." << std::endl;
+		system("dd if=/dev/zero of=$HOME/BigFile bs=1024 count=2000000");
+		system("echo A 2GB sized dummy file was created in the home directory: $HOME");
+	}
+
 	/* Check if user input is valid */
 	if((lMode != "read") && (lMode != "write"))
 	{
@@ -38,15 +51,17 @@ int main(const int argc, const char* argv[])
 		return -1;
 	}
 
-	std::cout << "Path to file: '" <<  lOutputFile << "'\n"
+	std::string temp = (lCreate) ? std::string(getenv("HOME")) + "/BigFile" : argv[1];
+	const char* C_FILE_NAME =  (lMode == "read") ? temp.c_str() : temp.append("Out").c_str();
+
+	std::cout << "Path to file: '" <<  C_FILE_NAME << "'\n"
 				<< "Selected mode: '" << lMode << "'\n"
 				<< "Status flag: '" << lStatusFlag << "'\n"
 				<< std::endl;
 
-
 	/* Initialize helper variables */
+	const int C_MODE = (lMode == "read") ? O_RDONLY : O_WRONLY | O_CREAT;
 	const char* C_RESULT_FILE_NAME = (lMode == "read") ? "read.txt" : "write.txt";
-	const int C_MODE = (lMode == "read") ? O_RDONLY : O_CREAT;
 	const size_t C_FILE_SIZE_IN_BYTES = 1024 * 2000000;
 	const size_t C_BUF_SIZE_IN_BYTES = 8192;
 	if(C_FILE_SIZE_IN_BYTES % C_BUF_SIZE_IN_BYTES != 0)
@@ -64,9 +79,9 @@ int main(const int argc, const char* argv[])
 	{
 		std::cout << "Run (" << (runs + 1) << "/" << C_NUMB_RUNS << ")" << std::endl;
 		int fdescr;
-		if((fdescr = open(lOutputFile.c_str(), C_MODE)) == -1)
+		if((fdescr = open(C_FILE_NAME, C_MODE, 0644)) == -1)
 		{
-			std::cerr << "Can not open '" << lOutputFile << "'" << std::endl;
+			std::cerr << "Can not open '" << C_FILE_NAME << "'" << std::endl;
 			return -1;
 		}
 		else
@@ -83,7 +98,8 @@ int main(const int argc, const char* argv[])
 				lMeasure.start();
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
 				{
-					read(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
+					// read(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
+					pread(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, (i * C_BUF_SIZE_IN_BYTES));
 				}
 				lMeasure.stop();
 			}
@@ -92,26 +108,12 @@ int main(const int argc, const char* argv[])
 				lMeasure.start();
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
 				{
-					write(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
+					// write(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
+					pwrite(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, (i * C_BUF_SIZE_IN_BYTES));
 				}
 				lMeasure.stop();
 			}
 			lMeasurements.push_back(lMeasure.mTotalTime());
-	  		
-
-	  		std::ofstream lResultFile;
-			lResultFile.open(C_RESULT_FILE_NAME, std::ofstream::out | std::ofstream::trunc);
-
-	  		double avg = 0;
-	  		const size_t lNoMeasurements = lMeasurements.size();
-	  		for(size_t i = 0; i < lNoMeasurements; ++i)
-	  		{
-	  			avg += lMeasurements[i];
-	  			lResultFile << "Measurement " << i << ": " << std::fixed << std::setprecision(3) << lMeasurements[i] << std::endl;
-	  		}
-
-	  		lResultFile << "Avergae: " << std::fixed << std::setprecision(3) << (avg / lNoMeasurements) << std::endl;
-		  	lResultFile.close();
 
 			if(close(fdescr) == -1)
 			{
@@ -121,5 +123,20 @@ int main(const int argc, const char* argv[])
 			std::cout << "File closed successfully!" << std::endl;
 		}
 	}
+
+	/* print measurement results to file */
+	std::ofstream lResultFile;
+	lResultFile.open(C_RESULT_FILE_NAME, std::ofstream::out | std::ofstream::trunc);
+
+	double avg = 0;
+	const size_t lNoMeasurements = lMeasurements.size();
+	for(size_t i = 0; i < lNoMeasurements; ++i)
+	{
+		avg += lMeasurements[i];
+		lResultFile << "Measurement " << i << ": " << std::fixed << std::setprecision(3) << lMeasurements[i] << std::endl;
+	}
+	lResultFile << "Avergae: " << std::fixed << std::setprecision(3) << (avg / lNoMeasurements) << std::endl;
+	lResultFile.close();
+
 	return 0;
 }
