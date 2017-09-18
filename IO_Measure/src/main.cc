@@ -13,34 +13,40 @@
 
 int main(const int argc, const char* argv[])
 {
-	bool lReadMode;
+	/* Check if user input has enough arguments */
+	if(argc != 4)
+	{
+		std::cerr << "Usage: './main [PathToFile] [MODE] [STATUS FLAG]'\n"
+					<< "\t-where 'PathToFile' is a path from the current directory\n"
+					<< "\t-where 'MODE' can either be 'read' or 'write'\n"
+					<< "\t-where 'STATUS FLAG' can either be 'simple' or 'direct'\n"
+					<< std::endl;
+		return -1;
+	}
 	std::string lOutputFile = argv[1];
+	std::string lMode = argv[2];
+	std::string lStatusFlag = argv[3];
 	/* Check if user input is valid */
-	if(argc != 3)
+	if((lMode != "read") && (lMode != "write"))
 	{
-		std::cerr << "Usage: './main [PathToFile] [MODE]' where 'MODE' can either be 'read' or 'write'" << std::endl;
-		return 0;
+		std::cerr << "Invalid mode. Only 'read' or 'write' are allowed!" << std::endl;
+		return -1;
 	}
-	else if(!(strcmp(argv[2], "read") == 0 || strcmp(argv[2], "write") == 0)) //C functions
+	else if((lStatusFlag != "simple") && (lStatusFlag != "direct"))
 	{
-		std::cerr << "Invalid mode. Only 'read' or 'write' allowed!" << std::endl;
-		return 0;
-	}
-	else if(strcmp(argv[2], "read") == 0)
-	{
-		lReadMode = true;
-		std::cout << "Read Mode!" << std::endl;
-	}
-	else
-	{
-		lReadMode = false;
-		lOutputFile.append("Out");
-		std::cout << "Write Mode!" << std::endl;
+		std::cerr << "Invalid status flag. Only 'simple' or 'direct' are allowed!" << std::endl;
+		return -1;
 	}
 
+	std::cout << "Path to file: '" <<  lOutputFile << "'\n"
+				<< "Selected mode: '" << lMode << "'\n"
+				<< "Status flag: '" << lStatusFlag << "'\n"
+				<< std::endl;
+
+
 	/* Initialize helper variables */
-	const char* C_RESULT_FILE_NAME = (lReadMode) ? "read.txt" : "write.txt";
-	const int C_MODE = (lReadMode) ? O_RDONLY : O_CREAT;
+	const char* C_RESULT_FILE_NAME = (lMode == "read") ? "read.txt" : "write.txt";
+	const int C_MODE = (lMode == "read") ? O_RDONLY : O_CREAT;
 	const size_t C_FILE_SIZE_IN_BYTES = 1024 * 2000000;
 	const size_t C_BUF_SIZE_IN_BYTES = 8192;
 	if(C_FILE_SIZE_IN_BYTES % C_BUF_SIZE_IN_BYTES != 0)
@@ -72,7 +78,7 @@ int main(const int argc, const char* argv[])
 			}
 		
 			Measure lMeasure;
-			if(lReadMode)
+			if(lMode == "read")
 			{
 				lMeasure.start();
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
