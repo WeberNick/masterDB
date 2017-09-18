@@ -42,5 +42,4 @@ IO_Measure/src/main
 *.aux
 *.log
 *.gz
-*.tex
 *.toc

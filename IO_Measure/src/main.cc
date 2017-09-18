@@ -19,9 +19,6 @@
 
 int main(const int argc, const char* argv[])
 {
-	std::cout << "Flag: " << O_FLAG << std::endl;
-	return 0;
-
 	/* Check if user input has enough arguments */
 	if(argc != 4)
 	{
