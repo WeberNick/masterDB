@@ -72,7 +72,7 @@ int main(const int argc, const char* argv[])
 							((lStatusFlag == "simple") ? O_WRONLY | O_CREAT | O_SYNC : O_WRONLY | O_CREAT | O_NOCACHE | O_SYNC );
 	const char* C_RESULT_FILE_NAME = (lMode == "read") ? "read.txt" : "write.txt";
 	const size_t C_FILE_SIZE_IN_BYTES = 1024 * 2000000;
-	const size_t C_BUF_SIZE_IN_BYTES = 8192;
+	const size_t C_BUF_SIZE_IN_BYTES = 131072; //217
 	if(C_FILE_SIZE_IN_BYTES % C_BUF_SIZE_IN_BYTES != 0)
 	{
 		std::cerr << "Buffer size must be a factor of the file size" << std::endl;
@@ -81,7 +81,11 @@ int main(const int argc, const char* argv[])
 	const size_t C_NUMB_ITERS = C_FILE_SIZE_IN_BYTES / C_BUF_SIZE_IN_BYTES;
 	const size_t C_NUMB_RUNS = 10;
 
-
+	char* lBuffer = new char[C_BUF_SIZE_IN_BYTES];
+	for(size_t i = 0; i < C_BUF_SIZE_IN_BYTES; ++i)
+	{
+		lBuffer[i] = 'X';
+	}
 	std::vector<double> lMeasurements;
 	std::cout << "Measurement is repeated " << C_NUMB_RUNS << " times." << std::endl;
 	for(size_t runs = 0; runs < C_NUMB_RUNS; ++runs)
@@ -95,12 +99,6 @@ int main(const int argc, const char* argv[])
 		}
 		else
 		{
-			char lBuffer[C_BUF_SIZE_IN_BYTES];
-			for(size_t i = 0; i < C_BUF_SIZE_IN_BYTES; ++i)
-			{
-				lBuffer[i] = 'X';
-			}
-		
 			Measure lMeasure;
 			if(lMode == "read")
 			{
@@ -108,8 +106,8 @@ int main(const int argc, const char* argv[])
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
 				{
 					size_t lRandomOffset = (rand() % C_NUMB_ITERS) * C_BUF_SIZE_IN_BYTES;
-					// read(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
-					pread(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, lRandomOffset);
+					// read(fdescr, lBuffer, C_BUF_SIZE_IN_BYTES);
+					pread(fdescr, lBuffer, C_BUF_SIZE_IN_BYTES, lRandomOffset);
 				}
 				lMeasure.stop();
 			}
@@ -119,8 +117,8 @@ int main(const int argc, const char* argv[])
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
 				{
 					size_t lRandomOffset = (rand() % C_NUMB_ITERS) * C_BUF_SIZE_IN_BYTES;
-					// write(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
-					pwrite(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, lRandomOffset);
+					// write(fdescr, lBuffer, C_BUF_SIZE_IN_BYTES);
+					pwrite(fdescr, lBuffer, C_BUF_SIZE_IN_BYTES, lRandomOffset);
 				}
 				lMeasure.stop();
 			}
@@ -134,6 +132,7 @@ int main(const int argc, const char* argv[])
 			std::cout << "File closed successfully!" << std::endl;
 		}
 	}
+	delete[] lBuffer;
 
 	/* print measurement results to file */
 	std::ofstream lResultFile;
