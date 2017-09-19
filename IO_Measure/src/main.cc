@@ -5,6 +5,7 @@
 #include <fcntl.h>
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 #include <string>
@@ -12,9 +13,9 @@
 #include <fstream>
 
 #ifdef __linux__
-#define O_FLAG O_DIRECT
+#define O_NOCACHE O_DIRECT
 #elif __APPLE__
-#define O_FLAG F_NOCACHE
+#define O_NOCACHE F_NOCACHE
 #endif
 
 int main(const int argc, const char* argv[])
@@ -67,8 +68,8 @@ int main(const int argc, const char* argv[])
 
 	/* Initialize helper variables */
 	const int C_MODE = (lMode == "read") ? 
-							((lStatusFlag == "simple") ? O_RDONLY : O_RDONLY | O_FLAG) : 
-							((lStatusFlag == "simple") ? O_WRONLY | O_CREAT : O_WRONLY | O_CREAT | O_FLAG);
+							((lStatusFlag == "simple") ? O_RDONLY | O_SYNC : O_RDONLY | O_NOCACHE | O_SYNC ) : 
+							((lStatusFlag == "simple") ? O_WRONLY | O_CREAT | O_SYNC : O_WRONLY | O_CREAT | O_NOCACHE | O_SYNC );
 	const char* C_RESULT_FILE_NAME = (lMode == "read") ? "read.txt" : "write.txt";
 	const size_t C_FILE_SIZE_IN_BYTES = 1024 * 2000000;
 	const size_t C_BUF_SIZE_IN_BYTES = 8192;
@@ -106,8 +107,9 @@ int main(const int argc, const char* argv[])
 				lMeasure.start();
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
 				{
+					size_t lRandomOffset = (rand() % C_NUMB_ITERS) * C_BUF_SIZE_IN_BYTES;
 					// read(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
-					pread(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, (i * C_BUF_SIZE_IN_BYTES));
+					pread(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, lRandomOffset);
 				}
 				lMeasure.stop();
 			}
@@ -116,8 +118,9 @@ int main(const int argc, const char* argv[])
 				lMeasure.start();
 				for(size_t i = 0; i < C_NUMB_ITERS; i++)
 				{
+					size_t lRandomOffset = (rand() % C_NUMB_ITERS) * C_BUF_SIZE_IN_BYTES;
 					// write(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES);
-					pwrite(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, (i * C_BUF_SIZE_IN_BYTES));
+					pwrite(fdescr, &lBuffer, C_BUF_SIZE_IN_BYTES, lRandomOffset);
 				}
 				lMeasure.stop();
 			}
