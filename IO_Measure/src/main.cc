@@ -72,7 +72,7 @@ int main(const int argc, const char* argv[])
 							((lStatusFlag == "simple") ? O_WRONLY | O_CREAT | O_SYNC : O_WRONLY | O_CREAT | O_NOCACHE | O_SYNC );
 	const char* C_RESULT_FILE_NAME = (lMode == "read") ? "read.txt" : "write.txt";
 	const size_t C_FILE_SIZE_IN_BYTES = 1024 * 2000000;
-	const size_t C_BUF_SIZE_IN_BYTES = 131072; //217
+	const size_t C_BUF_SIZE_IN_BYTES = 131072; //2^17
 	if(C_FILE_SIZE_IN_BYTES % C_BUF_SIZE_IN_BYTES != 0)
 	{
 		std::cerr << "Buffer size must be a factor of the file size" << std::endl;
