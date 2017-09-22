@@ -1,0 +1,37 @@
+class Partition {
+    public:
+        Partition(path, size, blocksize, rights, growthIndicator);
+        ~Partition();
+    public:
+        int create(); // OS CALLS
+        int delete();
+        void read(buffer&, blockID);
+        void write(buffer&); // block page in FSIP vector; remove block if write fails
+        int alloc(); // get information from FSIP
+        void free(blockID);
+    private:
+        void init();
+    private:
+        constructor...
+}
+
+Basic Header:               own struct
+        +----------------+--Fix-16B-+---+
+        |                |HeaderType|LSN|
+        +----------------+----------+---+
+
+Interpreter (determines via struct HeaderType|LSN which Interpreter is needed)
+    PageInterpreter extends Interpreter
+    FSIPInterpreter extends Interpreter
+
+HeaderTypes:
+
+    FSIP Header:
+        +-----------------------------------------+-----Fix--+---+
+        | uint: #Blocks; uint: nextFreeBlock;     |HeaderType|LSN|
+        +-----------------------------------------+----------+---+
+
+    NSM Header:
+        +-----------------------------------------+-----Fix--+---+
+        | uint: numRecords; uint: freeSpace       |HeaderType|LSN|
+        +-----------------------------------------+----------+---+
