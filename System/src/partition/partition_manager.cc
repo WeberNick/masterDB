@@ -1,9 +1,17 @@
 #include "partition_manager.hh"
 
-PartitionManager::PartitionManager(): _noPartitions(0) {}
+PartitionManager::PartitionManager(): _partitions(NULL) {}
 
-Partition& PartitionManager::createPartition(const uint id){
-  Partition& partition = new Partition()
-  partitions[id] = partition;
-  return partitions.at(id);
+PartitionManager::~PartitionManager(): {
+  // iterate over map and delete every map item (Partition)
+}
+
+int PartitionManager::createPartitionInstance(){
+  Partition* partition = new Partition();
+  _partitions[partition->getPartitionID()] = partition;
+  return _partitions.at(id);
+}
+
+int PartitionManager::getNoPartitions(){
+  return _partitions.size();
 }

@@ -10,9 +10,10 @@
 #ifndef PARTITION_MANAGER_HH
 #define PARTITION_MANAGER_HH
 
-#include <map>
 #include "infra/types.hh"
 #include "partition.hh"
+
+#include <map>
 
 class PartitionManager {
   public:
@@ -20,17 +21,15 @@ class PartitionManager {
     ~PartitionManager();
 
   public:
-    void createPartition();
-    Partition& getPartition(const uint id);
+    // creates instance of partition; creation of partition on disk happens in class Partition
+    int createPartitionInstance();
   
   public:
-    static int getNoPartitions();
+    int getNoPartitions();
+    Partition* getPartition(const uint aID);
   
   private:
-    std::map <uint, Partition&> partitions;
-
-  private:
-    static uint _noPartitions;
+    std::map <uint, Partition*> _partitions;
 };
 
 #endif
