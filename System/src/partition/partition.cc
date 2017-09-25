@@ -165,4 +165,3 @@ const int Partition::init()
 	delete[] lPagePointer;
 	return 0;
 }
-

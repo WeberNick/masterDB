@@ -1,4 +1,4 @@
-// #include "partition/partition_manager.hh"
+#include "partition/partition_manager.hh"
 #include "partition/partition.hh"
 
 #include <cmath>
