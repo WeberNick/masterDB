@@ -32,6 +32,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP)
 					uint8_t lMask=1;
 					lPartBits |= (lMask << lResult);
 					_header->_nextFreeBlock=i;
+					// increase LSN ... Nick?
 					break;
 				}
 			}
