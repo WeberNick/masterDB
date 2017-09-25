@@ -6,12 +6,14 @@ INCL = -I../.. -I..
 
 HDR = \
 	../infra/types.hh \
+	../interpreter/fsip_interpreter.hh \
 	\
 	../partition/partition.hh \
 	\
 
 
 OBJ = \
+	../interpreter/fsip_interpreter.o \
 	../partition/partition.o \
 	\
 

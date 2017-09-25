@@ -3,19 +3,21 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A class implementing the interface of a partition stored on disk (currently a file)
  *  @bugs    Currently no bugs known
- *  @todos   Write todos
+ *  @todos   Todos: Update LSN etc. if a block is allocated (think about communication with fsip_interpreter)
  *  @section TBD
  */
 #ifndef PARTITION_HH
 #define PARTITION_HH
 
-#include <infra/types.hh>
+#include "infra/types.hh"
+#include "interpreter/fsip_interpreter.hh"
 
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <cmath>
 #include <iostream>
 
 class Partition
@@ -30,12 +32,13 @@ class Partition
 		const int createPartition();
 		const int removePartition();
 		const int allocBlock();
-		const int freeBlock();
-		const int readBlock();
-		const int writeBlock();
+		const int freeBlock(const uint aBlockNo);
+		const int readBlock(byte* aBuffer, const uint aBlockNo, const uint aBufferSize = 4096);
+		const int writeBlock(const byte* aBuffer, const uint aBlockNo, const uint aBufferSize = 4096);
 
 	private:
-		void init();
+		const uint totalBlocks();
+		const int init();
 
 	private:
 		/* A path to a partition (i.e., a file) */
@@ -56,7 +59,8 @@ class Partition
 		static uint s_IDCounter;
 		/* An ID representing this partition */
 		uint _partitionID;
-
+		/* A counter for the next LSN */
+		static long s_LSNCounter;
 };
 
 

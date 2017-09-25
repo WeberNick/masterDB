@@ -13,7 +13,7 @@ OBJ = \
 
 all : $(OBJ)
 
-partition.o : partition.cc partition.hh ../infra/types.hh
+partition.o : partition.cc partition.hh ../infra/types.hh ../interpreter/fsip_interpreter.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) partition.cc
 
 clean :

@@ -1,3 +1,11 @@
+/**
+ *  @file    basic_interpreter.hh
+ *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Jonas Thietke (jthietke@mail.uni-mannheim.de)
+ *  @brief   A class implementing a basic, content independent, block interpreter
+ *  @bugs    Currently no bugs known
+ *  @todos   Write todos
+ *  @section TBD
+ */
 #ifndef BASIC_INTERPRETER_HH
 #define BASIC_INTERPRETER_HH
 
@@ -10,8 +18,9 @@ class BasicInterpreter
 			uint64_t _LSN; 
 			uint32_t _Offset; //offset from the start of the partition
 			uint8_t _PID; //partition ID
-			uint16_t _padding1;
+			uint8_t _padding1;
 			uint8_t _padding2;
+			uint8_t _padding3;
 	};
 		BasicInterpreter();
 		~BasicInterpreter();
