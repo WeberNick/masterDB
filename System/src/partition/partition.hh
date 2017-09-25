@@ -57,8 +57,6 @@ class Partition
 		/* An ID representing this partition */
 		uint _partitionID;
 
-
-
 };
 
 
