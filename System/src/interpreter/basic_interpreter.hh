@@ -14,7 +14,7 @@
 class BasicInterpreter
 {
 	public:
-		struct header_Block {
+		struct basic_header_t {
 			uint64_t _LSN; 
 			uint32_t _offset; //offset from the start of the partition
 			uint8_t _PID; //partition ID
@@ -26,21 +26,32 @@ class BasicInterpreter
 		~BasicInterpreter();
 
 	public:
+		inline void attach(byte* aPP);
 		void init(byte* aPP, uint64_t aLSN, uint32_t aOffset, uint8_t aPID);
 		
-		inline uint16_t getBlockSize{return (_blocksize)};
-		inline uint16_t getHeaderSize{return (_headersize)};
-		inline header_Block* getHeader{return (_header)};
-		inline uint_32_t getPartitionOffset{ return (_header._offset)}
+	public:
+		inline byte* 			pagePtr()	{ return _pp; }
+		inline basic_header_t* 	header()	{ return _header; }
+		inline size_t			getHeaderSize(){ return sizeof(basic_header_t); }
+		inline uint16_t 		getBlockSize(){ return _blockSize; } //do we need this function? do clients need to call this?
+		inline uint32_t 		getPartitionOffset(){ return header()->_offset; } //do we need this function? do clients need to call this?
+
+	private:
+    	inline basic_header_t* get_hdr_ptr(){ return (basic_header_t*)(_pp + _blockSize - sizeof(basic_header_t)); }
 
 	private:
 		byte* _pp;
-		header_Block* _header;
-		static uint16_t _blocksize //4096 bytes
-		static uint16_t _headersize //16 bytes
+		basic_header_t* _header;
+		uint16_t _blockSize; //4096 bytes
 
 };
 
+void BasicInterpreter::attach(byte* aPP)
+{
+	_pp = aPP;
+	_header = get_hdr_ptr();
+	_blockSize = 4096; //atm hard coded
+}
 
 
 #endif

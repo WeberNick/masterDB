@@ -10,6 +10,7 @@
 #define FSIP_INTERPRETER_HH
 
 #include "infra/types.hh"
+#include "basic_interpreter.hh"
 
 class FSIPInterpreter
 {
@@ -46,21 +47,27 @@ class FSIPInterpreter
 		inline uint 			noManagedBlocks() { return header()->_managedBlocks; }
 
 	private:
-    	inline FSIP_header_t* get_hdr_ptr(){ return 0; } //to implement
+    	inline FSIP_header_t* get_hdr_ptr()
+    	{ 
+			BasicInterpreter bi;
+			return (FSIP_header_t*)(_pp + _blockSize - bi.getHeaderSize() - sizeof(FSIP_header_t));
+		}
 
 
 	private:
 		byte* _pp;
 		FSIP_header_t* _header;
-		static uint16_t _headersize; //8 bytes //Note(Nick): kein attribut benötigt, einfach sizeof(FSIP_header_t)
+		uint16_t _blockSize; //4096 bytes
 
 };
 
 void FSIPInterpreter::attach(byte* aPP) 
 {
 	_pp = aPP;
+	_blockSize = 4096; //atm hard coded
 	_header = get_hdr_ptr();
 }
+
 
 
 

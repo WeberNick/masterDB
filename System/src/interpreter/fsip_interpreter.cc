@@ -1,6 +1,6 @@
 #include "fsip_interpreter.hh"
 
-FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL)
+FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _blockSize(0)
 {}
 
 FSIPInterpreter::~FSIPInterpreter(){}
@@ -17,21 +17,21 @@ void FSIPInterpreter::initNewFSIP(const byte* aPP, const uint64_t aLSN, const ui
 
 const int FSIPInterpreter::getNewBlock(byte* aPP)
 {
-	BasicInterpreter lInterp = BasicInterpreter();
-	uint32_t lResult=-1;
-	uint32_t lReturnValue = _header._nextFreeBlock;
-	for(uint32_t i=lReturnValue;(lInterp->getBlockSize()-(_headersize+lInterp->getHeaderSize())/8-1;i++){
-		uint8_t lPartBits = (uint8_t) *aPP+(i*1);
+	BasicInterpreter lInterp = BasicInterpreter(); //hier reicht 'BasicInterpreter lInterp;' um den standardkonstruktor aufzurufen
+	uint32_t lResult = -1;
+	uint32_t lReturnValue = _header->_nextFreeBlock;
+	for(uint32_t i = lReturnValue; (lInterp.getBlockSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize()) / 8 - 1/*DIESE KLAMMER WURDE HINZUGEFÜGT-->*/); ++i){ //hier wären kommentare schön, hab es mal formatiert damit es leserlicher ist. ausserdem: wo kommt hier die letzte klammer hin? die hat gefehlt... hab sie ans ende gemacht
+		uint8_t lPartBits = (uint8_t) *aPP+(i*1); //sieht für mich fehleranfällig aus. ist *(aPP + i)  gemeint? warum i*1?
 		if((~lPartBits)!=0){
 			for(uint8_t i= 7;i<=0;i--){
 				uint8_t	lTemp= lPartBits;
 				lTemp >> i;
-				if((temp % 2 == 0){
+				if(lTemp % 2 == 0){
 					lResult=7-i;
-					lResult+=lInterp.getPartitionOffset()
+					lResult+=lInterp.getPartitionOffset();
 					uint8_t lMask=1;
 					lPartBits |= (lMask << lResult);
-					_nextFreeBlock=i;
+					_header->_nextFreeBlock=i;
 					break;
 				}
 			}
@@ -43,17 +43,19 @@ const int FSIPInterpreter::getNewBlock(byte* aPP)
 
 void FSIPInterpreter::freeBlock(uint aOffset)
 {
-	aOffset-=_basicInterpreter.getPartitionOffset();
+	BasicInterpreter lInterp;
+	aOffset -= lInterp.getPartitionOffset();
 
-	if(_header.nextFreeBlock > aOffset){
-		_header.nextFreeBlock=aOffset;
+	if(_header->_nextFreeBlock > aOffset){
+		_header->_nextFreeBlock = aOffset;
 	}
 	byte* lPP = _pp;
-	lPP+=(aOffset/8);
-	uint8_t lCurrByte = (uint8_t) *lPP;
-	uint8_t lBitindex = 7-(aOffset % 8);
+	lPP += (aOffset / 8);
+	uint8_t lCurrByte = (uint8_t) *lPP; //hier meinst du vermutlich *(uint8_t*)lPP?
+	uint8_t lBitindex = 7 - (aOffset % 8);
 	uint8_t lMask = 1;
 	lMask << lBitindex;
 	lCurrByte &= lMask;
 	//ändert das tatsächlich den Wert, oder ändert das nur was aufm Stack?
+	//Antwort: nur auf dem stack wenn ich das richtig lese
 }

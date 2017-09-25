@@ -13,6 +13,7 @@ HDR = \
 
 
 OBJ = \
+	../interpreter/basic_interpreter.o \
 	../interpreter/fsip_interpreter.o \
 	../partition/partition.o \
 	\
