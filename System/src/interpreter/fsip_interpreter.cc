@@ -21,7 +21,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP)
 	uint32_t lResult=-1;
 	uint32_t lReturnValue = _header._nextFreeBlock;
 	for(uint32_t i=lReturnValue;(lInterp->getBlockSize()-(_headersize+lInterp->getHeaderSize())/8-1;i++){
-		uint8_t lPartBits = (uint8_t) *aPP+(i*1);
+		uint8_t lPartBits = (uint8_t) *aPP+((i-lReturnValue)*1);
 		if((~lPartBits)!=0){
 			for(uint8_t i= 7;i<=0;i--){
 				uint8_t	lTemp= lPartBits;
@@ -32,6 +32,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP)
 					uint8_t lMask=1;
 					lPartBits |= (lMask << lResult);
 					_nextFreeBlock=i;
+					// increase LSN ... Nick?
 					break;
 				}
 			}
