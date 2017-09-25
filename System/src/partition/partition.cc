@@ -88,6 +88,6 @@ const int Partition::writeBlock()
 
 void Partition::init()
 {
-	//todo
+	
 }
 

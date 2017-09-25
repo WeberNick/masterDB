@@ -10,7 +10,7 @@ class BasicInterpreter
 		~BasicInterpreter();
 
 	public:
-		void init();
+		void init(byte* aPP, uint64_t aLSN, uint32_t aOffset, uint8_t aPID);
 
 	private:
 		byte* _pp;
