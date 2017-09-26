@@ -21,7 +21,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP)
 	uint32_t lResult = -1;
 	uint32_t lReturnValue = _header->_nextFreeBlock;
 	for(uint32_t i = lReturnValue; (lInterp.getBlockSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize()) / 8 - 1/*DIESE KLAMMER WURDE HINZUGEFÜGT-->*/); ++i){ //hier wären kommentare schön, hab es mal formatiert damit es leserlicher ist. ausserdem: wo kommt hier die letzte klammer hin? die hat gefehlt... hab sie ans ende gemacht
-		uint8_t lPartBits = (uint8_t) *aPP+(i*1); //sieht für mich fehleranfällig aus. ist *(aPP + i)  gemeint? warum i*1?
+		uint8_t lPartBits = (uint8_t) *(aPP+i); //sieht für mich fehleranfällig aus
 		if((~lPartBits)!=0){
 			for(uint8_t i= 7;i<=0;i--){
 				uint8_t	lTemp= lPartBits;
