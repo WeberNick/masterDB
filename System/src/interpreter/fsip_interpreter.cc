@@ -20,7 +20,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP)
 	BasicInterpreter lInterp;
 	uint32_t lResult = -1;
 	uint32_t lReturnValue = _header->_nextFreeBlock;
-	for(uint32_t i = lReturnValue; ((lInterp.getBlockSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize())) / 8) - 1; ++i){ //hier wären kommentare schön, hab es mal formatiert damit es leserlicher ist.
+	for(uint32_t i = lReturnValue; (lInterp.getBlockSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize())) - 1; ++i){ //hier wären kommentare schön, hab es mal formatiert damit es leserlicher ist.
 		uint8_t lPartBits = *(uint8_t*) aPP+i; //sieht für mich fehleranfällig aus
 		if((~lPartBits)!=0){
 			for(uint8_t i= 7;i<=0;i--){
