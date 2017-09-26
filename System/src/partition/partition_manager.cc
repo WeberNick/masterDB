@@ -1,24 +1,24 @@
 #include "partition_manager.hh"
 
-PartitionManager::PartitionManager(): _partitions(NULL) {}
+PartitionManager::PartitionManager() : _partitions() {}
 
-PartitionManager::~PartitionManager(): {
+PartitionManager::~PartitionManager(){
   // iterate over map and delete every map item (Partition)
-  map<uint, Partition*>::iterator it;
+  std::map<uint, Partition*>::iterator it;
   for(auto it = _partitions.cbegin(); it !=_partitions.cend();) {
     _partitions.erase(it++);
   }
 }
 
-int PartitionManager::createPartitionInstance(Partition* partition) {
-  _partitions[partition->getPartitionID()] = partition;
-  return _partitions.at(id);
-}
+// Partition* PartitionManager::createPartitionInstance(Partition* partition) {
+//   _partitions[partition->getPartitionID()] = partition;
+//   return _partitions.at(partition->getPartitionID());
+// }
 
-int PartitionManager::createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aBlockSize, const uint aGrowthIndicator, const mode_t aAccessRights){
+Partition* PartitionManager::createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aBlockSize, const uint aGrowthIndicator, const mode_t aAccessRights){
   Partition* partition = new Partition(aPath, aPartitionSize, aBlockSize, aGrowthIndicator, aAccessRights);
   _partitions[partition->getPartitionID()] = partition;
-  return _partitions.at(id);
+  return _partitions.at(partition->getPartitionID());
 }
 
 int PartitionManager::getNoPartitions(){

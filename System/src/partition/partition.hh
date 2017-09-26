@@ -36,6 +36,9 @@ class Partition
 		const int readBlock(byte* aBuffer, const uint aBlockNo, const uint aBufferSize = 4096);
 		const int writeBlock(const byte* aBuffer, const uint aBlockNo, const uint aBufferSize = 4096);
 
+	public:
+		inline const uint getPartitionID(){ return _partitionID; }
+
 	private:
 		const uint totalBlocks();
 		const int init();

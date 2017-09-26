@@ -22,8 +22,8 @@ class PartitionManager {
 
   public:
     // creates instance of partition; creation of partition on disk happens in class Partition
-    int createPartitionInstance(Partition* partition);
-    int createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aBlockSize, const uint aGrowthIndicator, const mode_t aAccessRights);
+    // Partition* createPartitionInstance(Partition* partition);
+    Partition* createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aBlockSize, const uint aGrowthIndicator, const mode_t aAccessRights);
   
   public:
     int getNoPartitions();
