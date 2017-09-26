@@ -1,5 +1,4 @@
 DIRECTORIES = \
-	infra \
 	interpreter \
 	partition \
 	main \

@@ -20,7 +20,7 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 
 const int FSIPInterpreter::getNewBlock(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
 {
-	if(_header._freeBlocksCount == 0){
+	if(_header->_freeBlocksCount == 0){
 		return -1;
 	}
 	attach(aPP);
@@ -42,7 +42,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP, const uint64_t aLSN, const uin
 				lTemp >> i;
 				if(lTemp % 2 == 0){
 					lResult = 7-i;
-					_header._nextFreeBlock = (j*8) + lResult;
+					_header->_nextFreeBlock = (j*8) + lResult;
 					// increase LSN ... Nick?
 					break;
 				}
@@ -50,7 +50,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP, const uint64_t aLSN, const uin
 			break; 
 		}
 	}
-	-- _header._freeBlocksCount;
+	--(_header->_freeBlocksCount);
 	return lReturnValue + lInterp.getPartitionOffset();
 }
 
@@ -69,7 +69,7 @@ void FSIPInterpreter::freeBlock(uint aOffset)
 	uint8_t lMask = 1;
 	lMask << lBitindex;
 	lCurrByte &= lMask;
-	++ _header._freeBlocksCount;
+	++(_header->_freeBlocksCount);
 	//ändert das tatsächlich den Wert, oder ändert das nur was aufm Stack?
 	//Antwort: nur auf dem stack
 }
