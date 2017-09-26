@@ -5,12 +5,10 @@ PartitionManager::PartitionManager() : _partitions() {}
 PartitionManager::~PartitionManager(){
   // iterate over map and delete every map item (Partition)
   std::map<uint, Partition*>::iterator it;
-  for(auto it = _partitions.cbegin(); it !=_partitions.cend();) {
-    // _partitions.erase(it++);
+  for(it = _partitions.begin(); it !=_partitions.end(); ++it) {
     delete it->second;
+    _partitions.erase(it);
   }
-
-
 }
 
 // Partition* PartitionManager::createPartitionInstance(Partition* partition) {
