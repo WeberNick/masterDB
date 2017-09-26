@@ -57,9 +57,10 @@ const int Partition::removePartition()
 		std::cerr << "The partition was already removed!" << std::endl;
 		return -1;
 	}
-	std::cout << "Press any key to remove the partition!" << std::endl;
-	system("read");
 	std::string command = std::string("rm ") + std::string(_partitionPath);
+	std::cout << "The following command will be executed: '" << command << "'" << std::endl;
+	std::cout << "Press any key to continue!" << std::endl;
+	system("read");
 	std::cout << "Executing '" << command << "'" << std::endl;
 	system(command.c_str());
 	_isRemoved = true;
