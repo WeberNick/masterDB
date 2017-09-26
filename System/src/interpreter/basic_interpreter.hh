@@ -14,19 +14,28 @@
 class BasicInterpreter
 {
 	public:
-		struct basic_header_t {
+		struct basic_header_t{
 			uint64_t _LSN; 
 			uint32_t _offset; //offset from the start of the partition
 			uint8_t _PID; //partition ID
 			uint8_t _padding1;
 			uint8_t _padding2;
 			uint8_t _padding3;
-	};
+		};
+
+	public:
 		BasicInterpreter();
+		/* If CC and AO are needed, implement them correctly */
+		BasicInterpreter(const BasicInterpreter& aInterpreter) = delete;
+		BasicInterpreter& operator=(const BasicInterpreter& aInterpreter) = delete;
 		~BasicInterpreter();
+
 
 	public:
 		inline void attach(byte* aPP);
+		void detach();
+
+	public:
 		void init(byte* aPP, uint64_t aLSN, uint32_t aOffset, uint8_t aPID);
 		
 	public:

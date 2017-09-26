@@ -1,10 +1,16 @@
 #include "basic_interpreter.hh"
 
-//blocksize is fixed to 4096 bytes, headersize to 16 bytes. If it changes, it has to be changed here
 BasicInterpreter::BasicInterpreter() : _pp(NULL), _header(NULL), _blockSize(0)
 {}
 
 BasicInterpreter::~BasicInterpreter(){}
+
+void BasicInterpreter::detach()
+{
+	_pp = NULL;
+	_header = NULL;
+	_blockSize = 0;
+}
 
 void BasicInterpreter::init(byte* aPP, uint64_t aLSN, uint32_t aOffset, uint8_t aPID)
 {

@@ -16,18 +16,23 @@ class FSIPInterpreter
 {
 	//0: block is free, 1: block is occupied
 	public:
-		struct FSIP_header_t {
+		struct FSIP_header_t{
 			uint32_t _freeBlocksCount;	// number of free Blocks in the managed part (numer of 0s)
 			uint32_t _nextFreeBlock;	// index of the next 0 (indicating a free Block)
 			uint32_t _managedBlocks;	// index of the next 0 (indicating a free Block)
 			uint32_t _placeholder;	
 		};
+
+	public:
 		FSIPInterpreter();
+		/* If CC and AO are needed, implement them correctly */
+		FSIPInterpreter(const FSIPInterpreter& aInterpreter) = delete;
+		FSIPInterpreter& operator=(const FSIPInterpreter& aInterpreter) = delete;
 		~FSIPInterpreter();
 
 	public:
 		inline void  attach(byte* aPP);
-		void  detach();	//to implement
+		void  detach();
 
 	public:
 		void initNewFSIP(const byte* aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID, const uint32_t aNoBlocks);	//to implement
@@ -49,7 +54,7 @@ class FSIPInterpreter
 	private:
     	inline FSIP_header_t* get_hdr_ptr()
     	{ 
-			BasicInterpreter bi;
+			BasicInterpreter bi; //better way?
 			return (FSIP_header_t*)(_pp + _blockSize - bi.getHeaderSize() - sizeof(FSIP_header_t));
 		}
 
