@@ -12,13 +12,15 @@ void FSIPInterpreter::detach()
 	_blockSize = 0;
 }
 
-void FSIPInterpreter::initNewFSIP(const byte* aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID, const uint32_t aNoBlocks)
+void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID, const uint32_t aNoBlocks)
 {
+	attach(aPP);
 	//todo
 }
 
-const int FSIPInterpreter::getNewBlock(byte* aPP)
+const int FSIPInterpreter::getNewBlock(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
 {
+	attach(aPP);
 	BasicInterpreter lInterp;
 	uint32_t lResult = -1;
 	uint32_t lReturnValue = _header->_nextFreeBlock;

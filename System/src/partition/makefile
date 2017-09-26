@@ -8,7 +8,6 @@ HDR = \
 	\
 
 OBJ = \
-	partition_manager.o \
 	partition.o \
 
 
@@ -23,4 +22,4 @@ partition.o : partition.cc partition.hh ../infra/types.hh ../interpreter/fsip_in
 clean :
 	rm -f *.o a.out
 
-
+#	partition_manager.o \

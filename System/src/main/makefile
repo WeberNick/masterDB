@@ -8,7 +8,6 @@ HDR = \
 	../infra/types.hh \
 	../interpreter/fsip_interpreter.hh \
 	\
-	../partition/partition_manager.hh \
 	../partition/partition.hh \
 	\
 
@@ -16,7 +15,6 @@ HDR = \
 OBJ = \
 	../interpreter/basic_interpreter.o \
 	../interpreter/fsip_interpreter.o \
-	../partition/partition_manager.o \
 	../partition/partition.o \
 	\
 
@@ -34,3 +32,5 @@ clean :
 	rm -f *.o a.out $(ALL)
 
 
+#	../partition/partition_manager.hh \
+#	../partition/partition_manager.o \

@@ -35,7 +35,7 @@ class FSIPInterpreter
 		void  detach();
 
 	public:
-		void initNewFSIP(const byte* aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID, const uint32_t aNoBlocks);	//to implement
+		void initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID, const uint32_t aNoBlocks);	//to implement
 
 		/**
 		 *	@brief	looks for the next free block in the FSIP
@@ -43,7 +43,7 @@ class FSIPInterpreter
 		 *	@param	aPP  reference to the intermediate buffer to read the tuples from
 		 * 	@return either an offset to the free block or -1 if no free block was found
 		 */
-		const int getNewBlock(byte* aPP); //to implement
+		const int getNewBlock(byte* aPP, const uint64_t aLSN, const uint8_t aPID); //to implement
 		void freeBlock(uint aOffset); //to implement
 
 	public:

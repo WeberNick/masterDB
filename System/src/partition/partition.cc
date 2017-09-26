@@ -73,12 +73,14 @@ const int Partition::allocBlock()
 	byte* lPagePointer = new byte[_blockSize];
 	const uint lNumberOfTotalBlocks = totalBlocks();
 	FSIPInterpreter fsip;
+	fsip.attach(lPagePointer);
 	uint lOffsetFSIP = 0;
 	int lAllocatedOffset;
+	uint64_t lLSN = s_LSNCounter++;
 	do
 	{
 		readBlock(lPagePointer, lOffsetFSIP);				//Read FSIP into buffer
-		lAllocatedOffset = fsip.getNewBlock(lPagePointer);	//Request free block from FSIP
+		lAllocatedOffset = fsip.getNewBlock(lPagePointer, lLSN, _partitionID);	//Request free block from FSIP
 		lOffsetFSIP += (1 + fsip.noManagedBlocks());		//Prepare next offset to FSIP
 		if(lOffsetFSIP >= lNumberOfTotalBlocks)				//Next offset is bigger than the partition
 		{
