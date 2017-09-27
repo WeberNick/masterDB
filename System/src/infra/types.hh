@@ -7,11 +7,11 @@
 #ifndef INFRA_TYPES_HH
 #define INFRA_TYPES_HH
 
-#include <cstddef>
 #include <cstdint>
+#include <cstddef>
 #include <vector>
 
-typedef uint8_t byte;
+typedef std::byte byte;
 typedef std::vector<byte*> byte_vpt;
 typedef unsigned int uint;
 typedef std::vector <uint> uint_vt;

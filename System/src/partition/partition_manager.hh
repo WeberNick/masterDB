@@ -11,7 +11,7 @@
 #define PARTITION_MANAGER_HH
 
 #include "infra/types.hh"
-#include "partition.hh"
+#include "file_partition.hh"
 
 #include <map>
 
@@ -21,16 +21,17 @@ class PartitionManager {
     ~PartitionManager();
 
   public:
-    // creates instance of partition; creation of partition on disk happens in class Partition
-    // Partition* createPartitionInstance(Partition* partition);
-    Partition* createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aBlockSize, const uint aGrowthIndicator, const mode_t aAccessRights);
+    // creates instance of partition; creation of partition on disk happens in class FilePartition
+    FilePartition* createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aPageSize, const uint aGrowthIndicator);
+    void addPartitionInstance(FilePartition* partition);
   
   public:
     int getNoPartitions();
-    Partition* getPartition(const uint aID);
+    FilePartition* getPartition(const uint aID);
   
   private:
-    std::map <uint, Partition*> _partitions;
+    uint _counterPartitionID;
+    std::map <uint, FilePartition*> _partitions;
 };
 
 #endif

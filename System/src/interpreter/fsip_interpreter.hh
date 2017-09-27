@@ -43,13 +43,13 @@ class FSIPInterpreter
 		 *	@param	aPP  reference to the intermediate buffer to read the tuples from
 		 * 	@return either an offset to the free block or -1 if no free block was found
 		 */
-		const int getNewBlock(byte* aPP, const uint64_t aLSN, const uint8_t aPID); //to implement
-		void freeBlock(uint aOffset); //to implement
+		const int getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID); //to implement
+		void freePage(uint aOffset); //to implement
 
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
 		inline FSIP_header_t* 	header()	{ return _header; }
-		inline uint 			noManagedBlocks() { return header()->_managedBlocks; }
+		inline uint 			noManagedPages() { return header()->_managedBlocks; }
 
 	private:
     	inline FSIP_header_t* get_hdr_ptr()

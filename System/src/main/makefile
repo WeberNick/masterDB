@@ -1,15 +1,13 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++0x
+CXXFLAGS = -Wall -Weffc++ -std=c++17
 
 CC = g++
 
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh \
-	../interpreter/fsip_interpreter.hh \
-	\
+	config.hh \
 	../partition/partition_manager.hh \
-	../partition/partition.hh \
+	../partition/file_partition.hh \
 	\
 
 
@@ -17,7 +15,7 @@ OBJ = \
 	../interpreter/basic_interpreter.o \
 	../interpreter/fsip_interpreter.o \
 	../partition/partition_manager.o \
-	../partition/partition.o \
+	../partition/file_partition.o \
 	\
 
 ALL = main 

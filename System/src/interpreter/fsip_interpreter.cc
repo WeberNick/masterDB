@@ -18,7 +18,7 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	//todo
 }
 
-const int FSIPInterpreter::getNewBlock(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
+const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
 {
 	if(_header->_freeBlocksCount == 0){
 		return -1;
@@ -54,7 +54,7 @@ const int FSIPInterpreter::getNewBlock(byte* aPP, const uint64_t aLSN, const uin
 	return lReturnValue + lInterp.getPartitionOffset();
 }
 
-void FSIPInterpreter::freeBlock(uint aOffset)
+void FSIPInterpreter::freePage(uint aOffset)
 {
 	BasicInterpreter lInterp;
 	aOffset -= lInterp.getPartitionOffset();

@@ -1,0 +1,67 @@
+/************************************************************************************************************************************
+*	List for possible errors 	*****************************************************************************************************
+*************************************************************************************************************************************/
+
++----------------------------------------------+-----------+-------------------------------------------------------------------------+
+|                Function Call                 |  ERRNOs   |                               DESCRIPTION                               |
++----------------------------------------------+-----------+-------------------------------------------------------------------------+
+| int open( name, flag [, mode ] );            | ENOENT    | "name" was the NULL pointer                                             |
+|                                              | EACCES    | "open" was unable to open the file.                                     |
+|                                              | EEXIST    | O_CREAT and O_EXCL flags were both set.                                 |
+|                                              |           |                                                                         |
+| int close(fildes);                           | EBADF     | The fildes argument is not a valid file descriptor.                     |
+|                                              | EINTR     | The close() function was interrupted by a signal.                       |
+|                                              | EIO       | An I/O error occurred while reading from or writing to the file system. |
+|                                              |           |                                                                         |
+| ssize_t pread(fildes, buf, nbyte, offset);   | EAGAIN    | DESCRIPTION TOO LONG                                                    |
+|                                              | EBADF     | The fildes argument is not a valid file descriptor open for reading.    |
+|                                              | EBADMSG   | DESCRIPTION TOO LONG                                                    |
+|                                              | EINTR     | DESCRIPTION TOO LONG                                                    |
+|                                              | EINVAL    | DESCRIPTION TOO LONG                                                    |
+|                                              | EIO       | DESCRIPTION TOO LONG                                                    |
+|                                              | EISDIR    | DESCRIPTION TOO LONG                                                    |
+|                                              | EOVERFLOW | DESCRIPTION TOO LONG                                                    |
+|                                              |           |                                                                         |
+| ssize_t pwrite(fildes, buf, nbyte, offset);  | EAGAIN    | DESCRIPTION TOO LONG                                                    |
+|                                              | EBADF     | The fildes argument is not a valid file descriptor open for writing.    |
+|                                              | EFBIG     | DESCRIPTION TOO LONG                                                    |
+|                                              | EFBIG     | DESCRIPTION TOO LONG                                                    |
+|                                              | EINTR     | DESCRIPTION TOO LONG                                                    |
+|                                              | EIO       | DESCRIPTION TOO LONG                                                    |
+|                                              | ENOSPC    | There was no free space remaining on the device containing the file.    |
+|                                              | EPIPE     | DESCRIPTION TOO LONG                                                    |
+|                                              | ERANGE    | DESCRIPTION TOO LONG                                                    |
++----------------------------------------------+-----------+-------------------------------------------------------------------------+
+
+/************************************************************************************************************************************
+*	Input for https://ozh.github.io/ascii-tables/:	*********************************************************************************
+*************************************************************************************************************************************/
+
+
+Function Call	ERRNOs	DESCRIPTION
+int open( name, flag [, mode ] );	ENOENT	"name" was the NULL pointer
+	EACCES	"open" was unable to open the file.
+	EEXIST	O_CREAT and O_EXCL flags were both set.
+ 
+int close(fildes);	EBADF	The fildes argument is not a valid file descriptor.
+	EINTR	The close() function was interrupted by a signal.
+	EIO	An I/O error occurred while reading from or writing to the file system.
+ 
+ssize_t pread(fildes, buf, nbyte, offset);	EAGAIN	DESCRIPTION TOO LONG
+	EBADF	The fildes argument is not a valid file descriptor open for reading.
+	EBADMSG	DESCRIPTION TOO LONG
+	EINTR	DESCRIPTION TOO LONG
+	EINVAL	DESCRIPTION TOO LONG
+	EIO	DESCRIPTION TOO LONG
+	EISDIR	DESCRIPTION TOO LONG
+	EOVERFLOW	DESCRIPTION TOO LONG
+ 
+ssize_t pwrite(fildes, buf, nbyte, offset); 	EAGAIN	DESCRIPTION TOO LONG
+	EBADF	The fildes argument is not a valid file descriptor open for writing.
+	EFBIG	DESCRIPTION TOO LONG
+	EFBIG	DESCRIPTION TOO LONG
+	EINTR	DESCRIPTION TOO LONG
+	EIO	DESCRIPTION TOO LONG
+	ENOSPC	There was no free space remaining on the device containing the file.
+	EPIPE	DESCRIPTION TOO LONG
+	ERANGE	DESCRIPTION TOO LONG

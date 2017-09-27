@@ -1,10 +1,11 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++0x
+CXXFLAGS = -Wall -Weffc++ -std=c++17
 
 CC = g++
 
 INCL = -I../.. -I..
 
 HDR = \
+	../infra/types.hh
 	\
 
 OBJ = \
@@ -14,10 +15,10 @@ OBJ = \
 
 all : $(OBJ)
 
-basic_interpreter.o : basic_interpreter.cc basic_interpreter.hh ../infra/types.hh
+basic_interpreter.o : basic_interpreter.cc basic_interpreter.hh $(HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) basic_interpreter.cc
 
-fsip_interpreter.o : fsip_interpreter.cc fsip_interpreter.hh ../infra/types.hh
+fsip_interpreter.o : fsip_interpreter.cc fsip_interpreter.hh $(HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) fsip_interpreter.cc
 
 clean :
