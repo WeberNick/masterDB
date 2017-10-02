@@ -17,7 +17,7 @@ void BasicInterpreter::init(byte* aPP, uint64_t aLSN, uint32_t aPageIndex, uint8
 	header()->_LSN = aLSN;
 	header()->_pageIndex = aPageIndex;
 	header()->_PID = aPID;
-	header()->_padding1 = 0;
-	header()->_padding2 = 0;
-	header()->_padding3 = 0;
+	header()->_version = 0;
+	header()->_unused1 = 0;
+	header()->_unused2 = 0;
 }

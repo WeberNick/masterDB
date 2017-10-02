@@ -10,19 +10,11 @@
 #define FSIP_INTERPRETER_HH
 
 #include "infra/types.hh"
+#include "infra/header_structs.hh"
 #include "basic_interpreter.hh"
 
 class FSIPInterpreter
 {
-	//0: block is free, 1: block is occupied
-	public:
-		struct FSIP_header_t{
-			uint32_t _freeBlocksCount;	// number of free Blocks in the managed part (numer of 0s)
-			uint32_t _nextFreeBlock;	// index of the next 0 (indicating a free Block)
-			uint32_t _managedBlocks;	// index of the next 0 (indicating a free Block)
-			uint32_t _placeholder;	
-		};
-
 	public:
 		FSIPInterpreter();
 		/* If CC and AO are needed, implement them correctly */
@@ -48,20 +40,16 @@ class FSIPInterpreter
 
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
-		inline FSIP_header_t* 	header()	{ return _header; }
+		inline fsip_header_t* 	header()	{ return _header; }
 		inline uint 			noManagedPages() { return header()->_managedBlocks; }
 
 	private:
-    	inline FSIP_header_t* get_hdr_ptr()
-    	{ 
-			BasicInterpreter bi; //better way?
-			return (FSIP_header_t*)(_pp + _pageSize - bi.getHeaderSize() - sizeof(FSIP_header_t));
-		}
+    	inline fsip_header_t* get_hdr_ptr(){ return (fsip_header_t*)(_pp + _pageSize - sizeof(fsip_header_t)); }
 
 
 	private:
 		byte* _pp;
-		FSIP_header_t* _header;
+		fsip_header_t* _header;
 		uint16_t _pageSize; //4096 bytes
 
 };

@@ -59,6 +59,8 @@ class FilePartition
 		uint _growthIndicator;
 		/* An ID representing this partition */
 		uint _partitionID;
+		/*   */
+		uint _segmentIndexPage;
 		/* Helper flag if partition is already created */
 		bool _isCreated;
 		/* Helper flag if partition is open */

@@ -6,6 +6,7 @@ FilePartition::FilePartition(const char* aPath, const uint64_t aFilePartitionSiz
 	_pageSize(aPageSize),
 	_growthIndicator(aGrowthIndicator),
 	_partitionID(aFilePartitionID),
+	_segmentIndexPage(0),
 	_isCreated(false),
 	_isOpen(false)
 {}
@@ -62,6 +63,7 @@ const int FilePartition::createPartition(mode_t aAccessRights)
 		removePartition();
 		return -1;
 	}
+	//todo: reserve/init segment index page
 	return 0;
 }
 
