@@ -8,6 +8,28 @@
 #endif
 
 /*
+ * return the bit and set those bit to the complement
+ */
+
+ template<class Tuint>
+ inline uint32_t
+ idx_complement_bit(const Tuint* x, const Tuint y);
+ 
+ 
+ template<>
+ inline unsigned char
+ idx_complement_bit<uint32_t>(const uint32_t* x,const uint32_t y) {
+    return _bittestandcomplement(x,y);
+ }
+ 
+ template<>
+ inline unsigned char
+ idx_complement_bit<uint64_t>(const uint64_t* x,const uint64_t y) {
+    return _bittestandcomplement64(x,y);
+ }
+
+
+/*
  * return the index of the highest bit set
  */
 
