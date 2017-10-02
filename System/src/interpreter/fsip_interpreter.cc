@@ -24,7 +24,7 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 		return -1;
 	}
 	attach(aPP);
-	BasicInterpreter lInterp;
+	BasicInterpreter lPageInterp;
 	uint32_t lResult = -1;
 	uint32_t lPosFreeBlock = _header->_nextFreeBlock;
 	byte* lPP = aPP;
@@ -33,7 +33,7 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 	uint8_t lPartBits = *(uint8_t*) lPP;
 	lPartBits |= (lMask << lPosFreeBlock%8);
 
-	size_t lCondition = ((lInterp.getBlockSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize()))/8) - 1;
+	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
 	for(uint32_t j = lPosFreeBlock/64; j <= lCondition; ++j){ //looping through FSIP with step 8 Bytes
 		uint64_t lPartBytes = *(((uint64_t*) aPP)+j); //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
 		if((~lPartBytes) != 0){
@@ -44,13 +44,13 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 		}
 	}
 	--(_header->_freeBlocksCount);
-	return lPosFreeBlock + lInterp.getPartitionOffset();
+	return lPosFreeBlock + lPageInterp.getPageIndex();
 }
 
 void FSIPInterpreter::freePage(uint aPageIndex)
 {
-	BasicInterpreter lInterp;
-	aPageIndex -= lInterp.getPageIndex();
+	BasicInterpreter lPageInterp;
+	aPageIndex -= lPageInterp.getPageIndex();
 
 	if(_header->_nextFreeBlock > aPageIndex){
 		_header->_nextFreeBlock = aPageIndex;
