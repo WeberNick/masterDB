@@ -10,19 +10,10 @@
 #define BASIC_INTERPRETER_HH
 
 #include "infra/types.hh"
+#include "infra/header_structs.hh"
 
 class BasicInterpreter
 {
-	public:
-		struct basic_header_t{
-			uint64_t _LSN; 
-			uint32_t _pageIndex; //offset from the start of the partition
-			uint8_t _PID; //partition ID
-			uint8_t _padding1;
-			uint8_t _padding2;
-			uint8_t _padding3;
-		};
-
 	public:
 		BasicInterpreter();
 		/* If CC and AO are needed, implement them correctly */
@@ -41,7 +32,6 @@ class BasicInterpreter
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
 		inline basic_header_t* 	header()	{ return _header; }
-		inline size_t			getHeaderSize(){ return sizeof(basic_header_t); }
 		inline uint16_t 		getPageSize(){ return _pageSize; } //do we need this function? do clients need to call this?
 		inline uint32_t 		getPageIndex(){ return header()->_pageIndex; } //do we need this function? do clients need to call this?
 
