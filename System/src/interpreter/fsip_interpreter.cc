@@ -47,6 +47,7 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 	BasicInterpreter lPageInterp;
 	uint32_t lResult = -1;
 	uint32_t lPosFreeBlock = _header->_nextFreeBlock;
+
 	byte* lPP = aPP;
 	lPP+=lPosFreeBlock/8;
 	uint8_t lMask = 1;
@@ -54,11 +55,13 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 	lPartBits |= (lMask << lPosFreeBlock%8);
 
 	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
-	for(uint32_t j = lPosFreeBlock/64; j <= lCondition; ++j){ //looping through FSIP with step 8 Bytes
-		uint64_t lPartBytes = *(((uint64_t*) aPP)+j); //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
+	for(uint32_t j = lPosFreeBlock/64; j <= lCondition; ++j){ //looping through FSIP with step 8 
+		uint64_t* lPP = ((uint64_t*) aPP) + j;
+		uint64_t lPartBytes = *lPP; //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
 		if((~lPartBytes) != 0){
-			uint8_t lCalcFreePos = idx_lowest_bit_set<uint64_t>(~lPartBytes);
-			_header->_nextFreeBlock = (j*64) + lResult;
+			uint32_t lCalcFreePos = idx_highest_bit_set<uint64_t>(~lPartBytes); //find the first leftmost zero
+			idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
+			_header->_nextFreeBlock = (j*64) + lCalcFreePos;
 			//change LSN
 			break; 
 		}
