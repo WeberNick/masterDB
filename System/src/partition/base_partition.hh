@@ -3,50 +3,31 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief	A class implementing the base partition class
  *  @bugs	Currently no bugs known
- *  @todos	TBD
+ *  @todos	Implement the class.. Atm it is just a general overview which functionalities a partition needs to provide
  *  @section TBD
  */
-#ifndef FILE_PARTITION_HH
-#define FILE_PARTITION_HH
+#ifndef BASE_PARTITION_HH
+#define BASE_PARTITION_HH
 
 #include "infra/types.hh"
-
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <cmath>
-#include <cstring>
-#include <iostream>
-
-const uint64_t LSN = 0;
 
 class BasePartition
 {
 	public:
-		BasePartition();
+		explicit BasePartition();
 		BasePartition(const BasePartition& aPartition) = delete;
 		BasePartition& operator=(const BasePartition& aPartition) = delete;
-		~BasePartition();
+		virtual ~BasePartition() = 0;
 
 	public:
-		const int openPartition(const std::string aMode);
-		const int closePartition();
-		const int createPartition();
-		const int removePartition();
-		const int allocPage();
-		const int freePage();
-		const int readPage();
-		const int writePage();
-
-	public:
-		inline const uint getPartitionID(){ return _partitionID; }
-
-	private:
-		const uint totalPages();
-		const int init();
-		const int reserve(uint aIndex);
+		virtual const int openPartition(const std::string aMode);
+		virtual const int closePartition();
+		virtual const int createPartition();
+		virtual const int removePartition();
+		virtual const int allocPage();
+		virtual const int freePage();
+		virtual const int readPage();
+		virtual const int writePage();
 
 	private:
 		/* The current size of the partition in bytes */

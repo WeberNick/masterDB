@@ -64,7 +64,10 @@ const int FilePartition::createPartition(mode_t aAccessRights)
 		return -1;
 	}
 	//reserve page for segment index page at partition index 1
-	reserve(1);
+	if(reserve(1) != 0)
+	{
+		return -1;
+	}
 	return 0;
 }
 
@@ -183,7 +186,7 @@ const int FilePartition::init()
 }
 
 
-const int FilePartition::reserve(uint aIndex)
+const int FilePartition::reserve(const uint aIndex)
 {
 	_segmentIndexPage = aIndex;
 

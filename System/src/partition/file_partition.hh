@@ -26,7 +26,7 @@ const uint64_t LSN = 0;
 class FilePartition
 {
 	public:
-		FilePartition(const char* aPath, const uint64_t aPartitionSize, const uint aPageSize, const uint aGrowthIndicator, const uint aPartitionID);
+		explicit FilePartition(const char* aPath, const uint64_t aPartitionSize, const uint aPageSize, const uint aGrowthIndicator, const uint aPartitionID);
 		FilePartition(const FilePartition& aPartition) = delete;
 		FilePartition& operator=(const FilePartition& aPartition) = delete;
 		~FilePartition();
