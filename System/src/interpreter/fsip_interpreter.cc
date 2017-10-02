@@ -35,7 +35,7 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	//header setzten
 	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,1,0,0};
 	fsip_header_t temp = {lBTemp,aNoBlocks,0,aNoBlocks};
-	*((basic_header_t*)aPP+_pageSize-sizeof(fsip_header_t))=lBTemp;
+	*((fsip_header_t*)aPP+_pageSize-sizeof(fsip_header_t))=temp;
 }
 
 const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
