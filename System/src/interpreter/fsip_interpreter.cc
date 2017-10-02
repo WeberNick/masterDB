@@ -45,14 +45,7 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 	}
 	attach(aPP);
 	BasicInterpreter lPageInterp;
-	uint32_t lResult = -1;
 	uint32_t lPosFreeBlock = _header->_nextFreeBlock;
-
-	byte* lPP = aPP;
-	lPP+=lPosFreeBlock/8;
-	uint8_t lMask = 1;
-	uint8_t lPartBits = *(uint8_t*) lPP;
-	lPartBits |= (lMask << lPosFreeBlock%8);
 
 	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
 	for(uint32_t j = lPosFreeBlock/64; j <= lCondition; ++j){ //looping through FSIP with step 8 
