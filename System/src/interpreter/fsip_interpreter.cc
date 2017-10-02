@@ -15,7 +15,27 @@ void FSIPInterpreter::detach()
 void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoBlocks)
 {
 	attach(aPP);
-	//todo
+	uint32_t max = aNoBlocks/32 //wie weit ist Seite frei?
+	int uint32_t =0;
+	while (i<max){
+		*((uint32_t*) (aPP+i))=0; //setze 0
+		++i;
+	}
+	//nur noch die ersten bits 0, den Rest auf 1
+	uint32_t lMask = 0;
+	lMask = ~lMask;
+	lMask= lMask>> 32-(aNoBlocks%32);
+	*((uint32_t*) (aPP+i))=lMask;
+	max = _pageSize-sizeof(fsip_header_t); //neues Limit
+	lMask=0;
+	lMask= ~lMask; //lMask nur noch 1er
+	while(i<max){
+		*((uint32_t*) (aPP+i))=lMask;
+	}
+	//header setzten
+	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,1,0,0};
+	fsip_header_t temp = {lBTemp,aNoBlocks,0,aNoBlocks};
+	*((basic_header_t*)aPP+_pageSize-sizeof(fsip_header_t))=lBTemp;
 }
 
 const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
