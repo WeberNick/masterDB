@@ -44,7 +44,7 @@ class FSIPInterpreter
 		 * 	@return either an offset to the free block or -1 if no free block was found
 		 */
 		const int getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID); //to implement
-		void freePage(uint aOffset); //to implement
+		void freePage(uint aPageIndex); //to implement
 
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
@@ -55,21 +55,21 @@ class FSIPInterpreter
     	inline FSIP_header_t* get_hdr_ptr()
     	{ 
 			BasicInterpreter bi; //better way?
-			return (FSIP_header_t*)(_pp + _blockSize - bi.getHeaderSize() - sizeof(FSIP_header_t));
+			return (FSIP_header_t*)(_pp + _pageSize - bi.getHeaderSize() - sizeof(FSIP_header_t));
 		}
 
 
 	private:
 		byte* _pp;
 		FSIP_header_t* _header;
-		uint16_t _blockSize; //4096 bytes
+		uint16_t _pageSize; //4096 bytes
 
 };
 
 void FSIPInterpreter::attach(byte* aPP) 
 {
 	_pp = aPP;
-	_blockSize = 4096; //atm hard coded
+	_pageSize = 4096; //atm hard coded
 	_header = get_hdr_ptr();
 }
 

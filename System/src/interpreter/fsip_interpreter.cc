@@ -1,6 +1,6 @@
 #include "fsip_interpreter.hh"
 
-FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _blockSize(0)
+FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0)
 {}
 
 FSIPInterpreter::~FSIPInterpreter(){}
@@ -9,10 +9,10 @@ void FSIPInterpreter::detach()
 {
 	_pp = NULL;
 	_header = NULL;
-	_blockSize = 0;
+	_pageSize = 0;
 }
 
-void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID, const uint32_t aNoBlocks)
+void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoBlocks)
 {
 	attach(aPP);
 	//todo
@@ -33,7 +33,7 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 	uint8_t lPartBits = *(uint8_t*) lPP;
 	lPartBits |= (lMask << lReturnValue%8);
 
-	size_t lCondition = (lInterp.getBlockSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize())) - 1;
+	size_t lCondition = (lInterp.getPageSize() - (sizeof(FSIP_header_t) + lInterp.getHeaderSize())) - 1;
 	for(uint32_t j = lReturnValue/8; j <= lCondition; ++j){ //hier wären kommentare schön
 		uint8_t lPartBits = *(uint8_t*) aPP+j; //sieht für mich fehleranfällig aus
 		if((~lPartBits) != 0){
@@ -51,21 +51,21 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 		}
 	}
 	--(_header->_freeBlocksCount);
-	return lReturnValue + lInterp.getPartitionOffset();
+	return lReturnValue + lInterp.getPageIndex();
 }
 
-void FSIPInterpreter::freePage(uint aOffset)
+void FSIPInterpreter::freePage(uint aPageIndex)
 {
 	BasicInterpreter lInterp;
-	aOffset -= lInterp.getPartitionOffset();
+	aPageIndex -= lInterp.getPageIndex();
 
-	if(_header->_nextFreeBlock > aOffset){
-		_header->_nextFreeBlock = aOffset;
+	if(_header->_nextFreeBlock > aPageIndex){
+		_header->_nextFreeBlock = aPageIndex;
 	}
 	byte* lPP = _pp;
-	lPP += (aOffset / 8);
+	lPP += (aPageIndex / 8);
 	uint8_t lCurrByte = (uint8_t) *lPP;
-	uint8_t lBitindex = 7 - (aOffset % 8);
+	uint8_t lBitindex = 7 - (aPageIndex % 8);
 	uint8_t lMask = 1;
 	lMask << lBitindex;
 	lCurrByte &= lMask;

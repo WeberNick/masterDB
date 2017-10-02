@@ -16,7 +16,7 @@ class BasicInterpreter
 	public:
 		struct basic_header_t{
 			uint64_t _LSN; 
-			uint32_t _offset; //offset from the start of the partition
+			uint32_t _pageIndex; //offset from the start of the partition
 			uint8_t _PID; //partition ID
 			uint8_t _padding1;
 			uint8_t _padding2;
@@ -36,22 +36,22 @@ class BasicInterpreter
 		void detach();
 
 	public:
-		void init(byte* aPP, uint64_t aLSN, uint32_t aOffset, uint8_t aPID);
+		void init(byte* aPP, uint64_t aLSN, uint32_t aPageIndex, uint8_t aPID);
 		
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
 		inline basic_header_t* 	header()	{ return _header; }
 		inline size_t			getHeaderSize(){ return sizeof(basic_header_t); }
-		inline uint16_t 		getBlockSize(){ return _blockSize; } //do we need this function? do clients need to call this?
-		inline uint32_t 		getPartitionOffset(){ return header()->_offset; } //do we need this function? do clients need to call this?
+		inline uint16_t 		getPageSize(){ return _pageSize; } //do we need this function? do clients need to call this?
+		inline uint32_t 		getPageIndex(){ return header()->_pageIndex; } //do we need this function? do clients need to call this?
 
 	private:
-    	inline basic_header_t* get_hdr_ptr(){ return (basic_header_t*)(_pp + _blockSize - sizeof(basic_header_t)); }
+    	inline basic_header_t* get_hdr_ptr(){ return (basic_header_t*)(_pp + _pageSize - sizeof(basic_header_t)); }
 
 	private:
 		byte* _pp;
 		basic_header_t* _header;
-		uint16_t _blockSize; //4096 bytes
+		uint16_t _pageSize; //4096 bytes
 
 };
 
@@ -59,7 +59,7 @@ void BasicInterpreter::attach(byte* aPP)
 {
 	_pp = aPP;
 	_header = get_hdr_ptr();
-	_blockSize = 4096; //atm hard coded
+	_pageSize = 4096; //atm hard coded
 }
 
 
