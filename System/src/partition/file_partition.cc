@@ -63,7 +63,8 @@ const int FilePartition::createPartition(mode_t aAccessRights)
 		removePartition();
 		return -1;
 	}
-	//todo: reserve/init segment index page
+	//reserve page for segment index page at partition index 1
+	reserve(1);
 	return 0;
 }
 
@@ -180,3 +181,15 @@ const int FilePartition::init()
 	}
 	return 0;
 }
+
+
+const int FilePartition::reserve(uint aIndex)
+{
+	_segmentIndexPage = aIndex;
+
+	//todo
+
+	return -1;
+}
+
+

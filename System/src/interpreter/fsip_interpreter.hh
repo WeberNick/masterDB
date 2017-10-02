@@ -1,6 +1,8 @@
 /**
- *  @file    basic_interpreter.hh
- *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Jonas Thietke (jthietke@mail.uni-mannheim.de)
+ *  @file	basic_interpreter.hh
+ *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), 
+			Jonas Thietke (jthietke@mail.uni-mannheim.de),
+			Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief   A class implementing a Free Space Indicator Page (FSIP) interpreter
  *  @bugs    Currently no bugs known
  *  @todos   Write todos

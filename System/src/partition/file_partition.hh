@@ -1,5 +1,5 @@
 /**
- *  @file    partition.hh
+ *  @file    file_partition.hh
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A class implementing the interface of a partition stored on disk (currently a file)
  *  @bugs    Currently no bugs known
@@ -47,6 +47,7 @@ class FilePartition
 	private:
 		const uint totalPages();
 		const int init();
+		const int reserve(uint aIndex);
 
 	private:
 		/* A path to a partition (i.e., a file) */
