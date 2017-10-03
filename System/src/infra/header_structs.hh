@@ -37,8 +37,8 @@ struct fsip_header_t
 struct segment_index_header_t
 {
 	basic_header_t _basicHeader; //The basic header
-	uint32_t _nextIndexPage; //index to the next index page inside this partition
-	uint16_t _noSegments; //number of managed segments
+	uint32_t _nextIndexPage; //index to the next index page inside this partition, is invalid if set to 0
+	uint16_t _noSegments; //number of managed segments on this physical page only. May be larger for the segment manager
 	uint8_t _version; //Segment-index header version
 	uint8_t _unused;
 };
