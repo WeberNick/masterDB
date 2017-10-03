@@ -36,14 +36,14 @@ class SegmentManager
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
-		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex); }
+		Segment* getSegment(const uint aIndex);
 
 	private:
 		const int storeSegments();				// serialize segments? called by storeSegmentManager
 		const int loadSegments();				// deserialize segments? called by storeSegmentManager
 
 	private:
-		/* */
+		/* ID Counter for Segments */
 		uint _counterSegmentID;
 		/* Stores all managed Segments */
 		std::vector<Segment*> _segments;

@@ -22,7 +22,7 @@ Segment::~Segment()
 
 const int Segment::getNewPage()
 {
-    
+	
 }
 
 const int Segment::getPage(const uint aIndex)

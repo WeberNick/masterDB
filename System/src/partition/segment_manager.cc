@@ -17,6 +17,14 @@ SegmentManager::~SegmentManager()
     }
 }
 
+Segment* SegmentManager::getSegment(const uint aIndex) 
+{
+    if (!(aIndex < _segments.size())) {
+        return 0;
+    }
+    return _segments[aIndex];
+}
+
 Segment* SegmentManager::getNewSegment()
 {
     Segment* segment = new Segment(_counterSegmentID++, _partition);
