@@ -29,10 +29,12 @@ Segment::~Segment()
 
 const int Segment::getNewPage()
 {
-	page = _partition.allocPage();
-	if (page != -1 && _pages.size() < _maxSize) {
-		_pages.pushback(page);
-		return _pages[pages.size() - 1];
+	if (_pages.size() < _maxSize) {
+		page = _partition.allocPage();
+		if (page != -1) {
+			_pages.pushback(page);
+			return _pages[_pages.size() - 1];
+		}
 	}
 	return -1;
 }
