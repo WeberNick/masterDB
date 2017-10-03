@@ -24,7 +24,7 @@ class PartitionManager
         ~PartitionManager(); // delete all partitions
 
     public:
-        // creates instance of partition; creation of partition on disk happens in class File_Partition
+        /* creates instance of partition; creation of partition on disk happens in class File_Partition */
         FilePartition* createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aPageSize, const uint aGrowthIndicator);
         void addPartitionInstance(FilePartition* partition);
   

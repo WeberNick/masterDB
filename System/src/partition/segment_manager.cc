@@ -12,26 +12,29 @@
  */
 
 #include "segment_manager.hh"
-#include "segment.hh"
 
-SegmentManager::SegmentManager(Partition& aPartition) :
+SegmentManager::SegmentManager(FilePartition& aPartition) :
+    _counterSegmentID(0),
     _segments(),
+    _ownPages(),
+    _maxSegmentsPerPage(0),
     _partition(aPartition)
-{}
+{
+    _maxSegmentsPerPage = (aPartition.getPageSize() - sizeof(segment_index_header_t)) / 4;
+}
 
 SegmentManager::~SegmentManager()
 {
     for(int i = 0; i < _segments.size(); ++i) {
-        delete _segments.at(i);
+        delete _segments[i];
     }
-    _segments.clear();
 }
 
 Segment* SegmentManager::getNewSegment()
 {
-    Segment* segment = new Segment();
-    _segments.add(segment);
-    return _segments.at();
+    Segment* segment = new Segment(_counterSegmentID++, _partition);
+    _segments.pushback(segment);
+    return _segments[_segments.size() - 1];
 }
 
 const int SegmentManager::storeSegmentManager()
