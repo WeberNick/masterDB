@@ -3,7 +3,11 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
- *  @todos   TBD
+ *  @todos   Implement:
+ *               SegmentManager::storeSegmentManager()
+ *               SegmentManager::loadSegmentManager()
+ *               SegmentManager::storeSegments()
+ *               SegmentManager::loadSegments()
  *  @section TBD
  */
 

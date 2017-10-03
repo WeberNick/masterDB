@@ -1,16 +1,3 @@
-/**
- *  @file    segment_manager.cc
- *  @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
- *  @brief   A class for managing segments (stored on the disk?)
- *  @bugs    Currently no bugs known
- *  @todos   Implement:
- *              SegmentManager::storeSegmentManager()
- *              SegmentManager::loadSegmentManager()
- *              SegmentManager::storeSegments()
- *              SegmentManager::loadSegments()
- *  @section TBD
- */
-
 #include "segment_manager.hh"
 
 SegmentManager::SegmentManager(FilePartition& aPartition) :
