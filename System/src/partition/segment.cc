@@ -1,5 +1,5 @@
 /**
- *  @file    segment_manager.cc
+ *  @file    segment.cc
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), 
  			 Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple pages
