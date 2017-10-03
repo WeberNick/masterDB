@@ -27,7 +27,7 @@ class Segment
 	public:
 		/* getNewPage -> getPage -> loadPage */
 		const int getNewPage();                                           // alloc free page, add it to managing vector and return its index in the partition
-		const int getPage(const uint aIndex);                            // index for vector/id for map. return index where this page is in the partition
+		const int getPage(const uint aIndex);                             // index for vector/id for map. return index where this page is in the partition
 		const int loadPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		const int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 		const int storeSegment();                                         // serialization

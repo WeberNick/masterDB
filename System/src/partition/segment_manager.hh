@@ -3,7 +3,8 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
- *  @todos   Implement:
+ *  @todos   - Pass Header information to getNewSegment for creation of Segment()
+ *           - Implement:
  *               SegmentManager::storeSegmentManager()
  *               SegmentManager::loadSegmentManager()
  *               SegmentManager::storeSegments()
@@ -36,14 +37,14 @@ class SegmentManager
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
-		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex); }
+		Segment* getSegment(const uint aIndex);
 
 	private:
 		const int storeSegments();				// serialize segments? called by storeSegmentManager
 		const int loadSegments();				// deserialize segments? called by storeSegmentManager
 
 	private:
-		/* */
+		/* ID Counter for Segments */
 		uint _counterSegmentID;
 		/* Stores all managed Segments */
 		std::vector<Segment*> _segments;
