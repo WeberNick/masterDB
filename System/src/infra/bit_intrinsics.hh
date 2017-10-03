@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 #ifdef __x86_64
-#include <immintrin.h>
+#include "immintrin.h"
 #endif
 
 /*
@@ -16,23 +16,23 @@
  idx_complement_bit(const Tuint* x, const Tuint y);
  
  
- template<>
- inline unsigned char
- idx_complement_bit<uint32_t>(const uint32_t* x,const uint32_t y) {
-#if _WIN32
-  return _bittestandcomplement(x,y);
-#else
-  return 0; //HIER FEHLT CODE FÜR UNIX
-#endif
- }
+//  template<>
+//  inline unsigned char
+//  idx_complement_bit<uint32_t>(const uint32_t* x,const uint32_t y) {
+// #ifdef __ILP32__
+//   return _bittestandcomplement(x,y);
+//   #else
+//   return 0;
+// #endif
+//  }
  
  template<>
  inline unsigned char
  idx_complement_bit<uint64_t>(const uint64_t* x,const uint64_t y) {
-#if _WIN32
-  return _bittestandcomplement64(x,y);
+#ifdef _WIN32
+  return _bittestandcomplement64(x,y);  //error: '_bittestandcomplement64' was not declared in this scope
 #else
-  return 0; //HIER FEHLT CODE FÜR UNIX
+  return 0;
 #endif
  }
 

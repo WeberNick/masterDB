@@ -12,10 +12,11 @@ HDR = \
 
 
 OBJ = \
-	../interpreter/basic_interpreter.o \
 	../interpreter/fsip_interpreter.o \
 	../partition/partition_manager.o \
 	../partition/file_partition.o \
+	../partition/segment_manager.o \
+	../partition/segment.o \
 	\
 
 ALL = main 

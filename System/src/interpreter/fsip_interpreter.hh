@@ -3,9 +3,9 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), 
 			Jonas Thietke (jthietke@mail.uni-mannheim.de),
 			Aljoscha Narr (alnarr@mail.uni-mannheim.de)
- *  @brief   A class implementing a Free Space Indicator Page (FSIP) interpreter
- *  @bugs    Currently no bugs known
- *  @todos   Write todos
+ *  @brief	A class implementing a Free Space Indicator Page (FSIP) interpreter
+ *  @bugs	Currently no bugs known
+ *  @todos	Remove noManagedPages() and implement it correctly
  *  @section TBD
  */
 #ifndef FSIP_INTERPRETER_HH
@@ -14,7 +14,6 @@
 #include "infra/types.hh"
 #include "infra/header_structs.hh"
 #include "infra/bit_intrinsics.hh"
-#include "basic_interpreter.hh"
 
 class FSIPInterpreter
 {
@@ -44,7 +43,7 @@ class FSIPInterpreter
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
 		inline fsip_header_t* 	header()	{ return _header; }
-		inline uint 			noManagedPages() { return header()->_managedBlocks; }
+		inline uint 			noManagedPages() { return header()->_managedBlocks; } //Remove noManagedPages()
 
 	private:
     	inline fsip_header_t* get_hdr_ptr(){ return (fsip_header_t*)(_pp + _pageSize - sizeof(fsip_header_t)); }

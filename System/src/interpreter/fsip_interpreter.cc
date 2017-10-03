@@ -44,7 +44,6 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 		return -1;
 	}
 	attach(aPP);
-	BasicInterpreter lPageInterp;
 	uint32_t lPosFreeBlock = _header->_nextFreeBlock;
 
 	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
@@ -60,13 +59,12 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 		}
 	}
 	--(_header->_freeBlocksCount);
-	return lPosFreeBlock + lPageInterp.getPageIndex();
+	return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
 void FSIPInterpreter::freePage(uint aPageIndex)
 {
-	BasicInterpreter lPageInterp;
-	aPageIndex -= lPageInterp.getPageIndex();
+	aPageIndex -= _header->_basicHeader._pageIndex;
 
 	if(_header->_nextFreeBlock > aPageIndex){
 		_header->_nextFreeBlock = aPageIndex;

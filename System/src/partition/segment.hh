@@ -31,7 +31,7 @@ class Segment
 		const int loadPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		const int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 		const int storeSegment();                                         // serialization
-		const int loadSegment();                                          // deserialization
+		const int loadSegment(const uint32_t aPageIndex);                 // deserialization
 
 	public:
 		inline const uint getNoPages(){ return _pages.size(); }

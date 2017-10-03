@@ -21,11 +21,8 @@ FilePartition::~FilePartition()
 
 const int FilePartition::openPartition(const std::string aMode)
 {
-	if(aMode != "r" && aMode != "w" && aMode != "rw")
-	{
-		std::cerr << "Unknown mode: '" << aMode << "'" << std::endl;
-		return -1;
-	}
+	if(_isOpen || !_isCreated) return -1;
+	if(aMode != "r" && aMode != "w" && aMode != "rw") return -1;
 	int lMode;
 	if(aMode == "r") 		lMode = O_RDONLY;
 	else if(aMode == "w") 	lMode = O_WRONLY;
@@ -36,25 +33,25 @@ const int FilePartition::openPartition(const std::string aMode)
 		std::cerr << "Error opening the file: " << std::strerror(errno) << std::endl;
 		return -1;
 	}
+	_isOpen = true;
 	return lFileDescriptor;
 }
 
 const int FilePartition::closePartition(const int aFileDescriptor)
 {
+	if(!_isOpen || !_isCreated) return -1;
 	if(close(aFileDescriptor) != 0)
 	{
 		std::cerr << "Error closing the file: " << std::strerror(errno) << std::endl;
 		return -1;
 	}
+	_isOpen = false;
 	return 0;
 }
 
 const int FilePartition::createPartition(mode_t aAccessRights)
 {
-	if(_isCreated)
-	{
-		return -1;
-	}
+	if(_isCreated) return -1;
 	std::string lCommand = "dd if=/dev/zero of=" + std::string(_partitionPath) + " bs=" + std::to_string(_partitionSize) + " count=1";
 	std::cout << "The following command will be executed: '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
@@ -67,19 +64,13 @@ const int FilePartition::createPartition(mode_t aAccessRights)
 		return -1;
 	}
 	//reserve page for segment index page at partition index 1
-	if(reserve(1) != 0)
-	{
-		return -1;
-	}
+	if(reserve(1) != 0) return -1;
 	return 0;
 }
 
 const int FilePartition::removePartition()
 {
-	if(!_isCreated)
-	{
-		return -1;
-	}
+	if(!_isCreated) return -1;
 	std::string lCommand = "rm " + std::string(_partitionPath);
 	std::cout << "The following command will be executed: '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
@@ -97,16 +88,13 @@ const int FilePartition::allocPage()
 	uint lIndexOfFSIP = 0;
 	int lAllocatedPageIndex;
 	int lFileDescriptor = openPartition("read");
+	if(lFileDescriptor == -1) return -1;
 	do
 	{
 		readPage(lFileDescriptor, lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
 		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
 		lIndexOfFSIP += (1 + fsip.noManagedPages());							//Prepare next offset to FSIP
-		if(lIndexOfFSIP >= lNumberOfTotalPages)								//Next offset is bigger than the partition
-		{
-			std::cerr << "No free block available in the partition!" << std::endl;
-			return -1;
-		}
+		if(lIndexOfFSIP >= lNumberOfTotalPages) return -1;						//Next offset is bigger than the partition
 	}
 	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
 	delete[] lPagePointer;
@@ -118,11 +106,7 @@ const int FilePartition::freePage(const uint aPageNo)
 {
 	byte* lPagePointer = new byte[_pageSize];
 	int lFileDescriptor = openPartition("read");
-	if(readPage(lFileDescriptor, lPagePointer, aPageNo, _pageSize) == -1)
-	{
-		std::cerr << "An error occured while trying to free the block: " << aPageNo << std::endl;
-		return -1;
-	}
+	if(readPage(lFileDescriptor, lPagePointer, aPageNo, _pageSize) == -1) return -1;
 	FSIPInterpreter fsip;
 	fsip.attach(lPagePointer);
 	fsip.freePage(aPageNo);
@@ -165,10 +149,7 @@ const int FilePartition::init()
 	FSIPInterpreter fsip;
 	uint remainingPages = totalPages();
 	int lFileDescriptor = openPartition("write");
-	if(lFileDescriptor == -1)
-	{
-		return -1;
-	}
+	if(lFileDescriptor == -1) return -1;
 	while(remainingPages > 1)
 	{
 		--remainingPages;
@@ -181,10 +162,7 @@ const int FilePartition::init()
 		remainingPages -= (remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages;
 	}
 	delete[] lPagePointer;
-	if(closePartition(lFileDescriptor) == -1)
-	{
-		return -1;
-	}
+	if(closePartition(lFileDescriptor) == -1) return -1;
 	return 0;
 }
 
