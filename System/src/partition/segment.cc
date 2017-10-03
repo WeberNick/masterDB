@@ -1,10 +1,10 @@
 /**
  *  @file    segment_manager.cc
- *  @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
+ *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), 
+ 			 Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple pages
  *  @bugs    Currently no bugs known
- *  @todos   Implement:
- *              Segment::
+ *  @todos   Implement 
  *  @section TBD
  */
 
@@ -54,9 +54,16 @@ const int Segment::getPage(const uint aIndex)
 
 const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-    /* partition open
-       read von der _partition
-       dem read musst du den file descriptor von der open mitgeben, buffer, pageno, buffersize (von der partition die pagesize) */
+	int lFileDescriptor = _partition.openPartition("read");
+	if(lFileDescriptor == -1)
+	{
+		return -1;
+	}
+	if(readPage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
+	{
+		return -1;
+	}
+	return 0;
 }
 
 const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
