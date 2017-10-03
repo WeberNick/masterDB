@@ -47,7 +47,7 @@ class Segment
 		/* Position in Partition */
 		uint _index;
         /* Page Header of Segment */
-		segment_page_header_t& _header;
+		segment_page_header_t _header;
 };
 
 #endif

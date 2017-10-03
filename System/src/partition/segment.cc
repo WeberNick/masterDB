@@ -14,8 +14,15 @@ Segment::Segment(const uint aSegID, FilePartition& aPartition) :
     _segID(aSegID),
     _pages(),
     _partition(aPartition),
-    _header(aHeader)
-{}
+    _index(),
+    _header()
+{
+	int lPageIndex = _partition.allocPage();
+	_index = (lPageIndex > 0) ? lPageIndex : 0;
+	_header = {_basicHeader, _maxSize, 0, _version, 0, 0, 0};
+
+
+}
 
 Segment::~Segment()
 {}
@@ -36,7 +43,7 @@ const int Segment::getPage(const uint aIndex)
 
 const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-	
+
 }
 
 const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
