@@ -35,7 +35,6 @@ class Segment
 	private:
 		uint _segID;
 		uint_vt _pages;		//stores indeces to pages in the partition
-
 };
 
 #endif
