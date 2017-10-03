@@ -14,15 +14,15 @@
 #include "segment_manager.hh"
 #include "segment.hh"
 
-SegmentManager::SegmentManager() :
-    _segments()
+SegmentManager::SegmentManager(Partition& aPartition) :
+    _segments(),
+    _partition(aPartition)
 {}
 
 SegmentManager::~SegmentManager()
 {
-    std::vector<Segment*>::iterator it;
-    for(it = _segments.begin(); it != _segments.end(); ++it) {
-        delete *it;
+    for(int i = 0; i < _segments.size(); ++i) {
+        delete _segments.at(i);
     }
     _segments.clear();
 }
