@@ -21,8 +21,8 @@ class Segment
 		~Segment();
 
 	public:
-		const uint getNewPage();                                          // alloc free page, add it to managing vector and return its index in the partition
-		const int loadPage(byte*  aPageBuffer, const uint aPageNo);       // load page from the partition into main memory
+		const int getNewPage();                                           // alloc free page, add it to managing vector and return its index in the partition
+		const int loadPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		const int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 		const int storeSegment();                                         // serialization
 		const int loadSegment();                                          // deserialization
@@ -30,12 +30,16 @@ class Segment
 	public:
 		inline const uint getNoPages(){ return _pages.size() }
 		inline const uint getSegmentID(){ return _segID; }
+		// getNewPage -> getPage -> loadPage
+		const uint getPage(const uint aIndex); // index for vector/id for map. return index where this page is in the partition
 
 	private:
 		/* An ID representing this Segment */
 		uint _segID;
 		/* A vector containing indices to all pages (in the partition) of this segment */
 		uint_vt _pages;
+		/* partition the segment belongs to */
+		Partition* _partition
 };
 
 #endif

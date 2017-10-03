@@ -20,9 +20,8 @@ SegmentManager::SegmentManager() :
 
 SegmentManager::~SegmentManager()
 {
-    std::vector<Segment*>::iterator it;
-    for(it = _segments.begin(); it != _segments.end(); ++it) {
-        delete *it;
+    for(int i = 0; i < _segments.size(); ++i) {
+        delete _segments.at(i);
     }
     _segments.clear();
 }
