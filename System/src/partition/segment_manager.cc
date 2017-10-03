@@ -14,8 +14,9 @@
 #include "segment_manager.hh"
 #include "segment.hh"
 
-SegmentManager::SegmentManager() :
-    _segments()
+SegmentManager::SegmentManager(Partition& aPartition) :
+    _segments(),
+    _partition(aPartition)
 {}
 
 SegmentManager::~SegmentManager()

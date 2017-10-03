@@ -10,10 +10,11 @@
 
 #include "segment.hh"
 
-Segment::Segment(Partition& aPartition) :
+Segment::Segment(Partition& aPartition, segment_page_header_t& aHeader) :
     _segID(0),
-    _pages()
-    _partition(aPartition)
+    _pages(),
+    _partition(aPartition),
+    _header(aHeader)
 {}
 
 Segment::~Segment()
