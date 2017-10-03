@@ -6,7 +6,7 @@
  *  @todos   TBD
  *  @section TBD
  */
- 
+
 #ifndef SEGMENT_HH
 #define SEGMENT_HH
 
@@ -32,7 +32,7 @@ class Segment
 		const int loadSegment();                                          // deserialization
 
 	public:
-		inline const uint getNoPages(){ return _pages.size() }
+		inline const uint getNoPages(){ return _pages.size(); }
 		inline const uint getSegmentID(){ return _segID; }
 
 	private:

@@ -39,6 +39,9 @@ class SegmentManager
 		/* Stores all managed Segments */
 		std::vector<Segment*> _segments;
 		/* */
+		std::vector<Segment*> _segments;		//stores all managed segments
+		std::vector<uint32_t> _ownPages;		//stores, on which pages the segment manager is spread. Default is page 1
+		uint32_t _maxSegmentsPerPage;			//stores, how many pages are stored on one page
 		Partition& _partition;
 		/* list of pages where segmentmanager writes */
 		// ..
