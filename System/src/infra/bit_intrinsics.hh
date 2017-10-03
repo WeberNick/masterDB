@@ -12,22 +12,29 @@
  */
 
  template<class Tuint>
- inline uint32_t
+ inline unsigned char  //geändert von uint32_t zu unsigned char
  idx_complement_bit(const Tuint* x, const Tuint y);
  
  
  template<>
  inline unsigned char
  idx_complement_bit<uint32_t>(const uint32_t* x,const uint32_t y) {
-    return _bittestandcomplement(x,y);
+#if _WIN32
+  return _bittestandcomplement(x,y);
+#else
+  return 0; //HIER FEHLT CODE FÜR UNIX
+#endif
  }
  
  template<>
  inline unsigned char
  idx_complement_bit<uint64_t>(const uint64_t* x,const uint64_t y) {
-    return _bittestandcomplement64(x,y);
+#if _WIN32
+  return _bittestandcomplement64(x,y);
+#else
+  return 0; //HIER FEHLT CODE FÜR UNIX
+#endif
  }
-
 
 /*
  * return the index of the highest bit set

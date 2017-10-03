@@ -13,6 +13,7 @@
 
 #include "infra/types.hh"
 #include "infra/header_structs.hh"
+#include "infra/bit_intrinsics.hh"
 #include "basic_interpreter.hh"
 
 class FSIPInterpreter
