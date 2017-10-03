@@ -4,7 +4,7 @@
 			Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief	This class manages multiple pages
  *  @bugs	Currently no bugs known
- *  @todos   Implement storeSegment and loadSegment
+ *  @todos  Implement storeSegment and loadSegment
  *  @section TBD
  */
 

@@ -1,13 +1,14 @@
 #include "segment_manager.hh"
 
 SegmentManager::SegmentManager(FilePartition& aPartition) :
+    // Todo: wie wird der Speicher einer Partition zugewiesen?
     _counterSegmentID(0),
     _segments(),
     _ownPages(),
     _maxSegmentsPerPage(0),
     _partition(aPartition)
 {
-    _maxSegmentsPerPage = (aPartition.getPageSize() - sizeof(segment_index_header_t)) / 4;
+    _maxSegmentsPerPage = (aPartition.getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t);
 }
 
 SegmentManager::~SegmentManager()
@@ -27,8 +28,7 @@ Segment* SegmentManager::getSegment(const uint aIndex)
 
 Segment* SegmentManager::getNewSegment()
 {
-    Segment* segment = new Segment(_counterSegmentID++, _partition);
-    _segments.push_back(segment);
+    _segments.push_back(new Segment(_counterSegmentID++, _partition));
     return _segments[_segments.size() - 1];
 }
 
