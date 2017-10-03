@@ -4,7 +4,7 @@
 			Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief	This class manages multiple pages
  *  @bugs	Currently no bugs known
- *  @todos	 TBD
+ *  @todos   Implement storeSegment and loadSegment
  *  @section TBD
  */
 
@@ -12,8 +12,8 @@
 #define SEGMENT_HH
 
 #include "infra/types.hh"
-#include "file_partition.hh"
 #include "infra/header_structs.hh"
+#include "file_partition.hh"
 #include <vector>
 
 class Segment
@@ -41,7 +41,7 @@ class Segment
 		/* An ID representing this Segment */
 		uint _segID;
 		/* A vector containing indices to all pages (in the partition) of this segment */
-		uint_vt _pages;
+		uint32_vt _pages;
 		/* FilePartition the Segment belongs to */
 		FilePartition& _partition;
 		/* FilePartition the Segment belongs to */

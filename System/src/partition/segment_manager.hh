@@ -17,8 +17,8 @@
 
 #include "infra/types.hh"
 #include "infra/header_structs.hh"
-#include "segment.hh"
 #include "file_partition.hh"
+#include "segment.hh"
 
 #include <vector>
 

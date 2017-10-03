@@ -15,5 +15,6 @@ typedef std::byte byte;
 typedef std::vector<byte*> byte_vpt;
 typedef unsigned int uint;
 typedef std::vector <uint> uint_vt;
+typedef std::vector <uint32_t> uint32_vt;
 
 #endif

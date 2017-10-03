@@ -28,18 +28,20 @@ Segment* SegmentManager::getSegment(const uint aIndex)
 Segment* SegmentManager::getNewSegment()
 {
     Segment* segment = new Segment(_counterSegmentID++, _partition);
-    _segments.pushback(segment);
+    _segments.push_back(segment);
     return _segments[_segments.size() - 1];
 }
 
 const int SegmentManager::storeSegmentManager()
 {
     //storeSegments();
+    return -1;
 }
 
 const int SegmentManager::loadSegmentManager()
 {
     //loadSegments();
+    return -1;
 }
 
 const int SegmentManager::storeSegments()
@@ -49,9 +51,11 @@ const int SegmentManager::storeSegments()
     //for(it = _segments.begin; it != _segments.end; ++it) {
     //    it->storeSegment();
     //}
+    return -1;
 }
 
 const int SegmentManager::loadSegments()
 {
     // iterate over vector and deserialize every segment
+    return -1;
 }

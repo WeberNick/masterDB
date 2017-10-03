@@ -4,7 +4,7 @@
  			 Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple pages
  *  @bugs    Currently no bugs known
- *  @todos   Implement 
+ *  @todos   Implement storeSegment and loadSegment
  *  @section TBD
  */
 
@@ -19,11 +19,11 @@ Segment::Segment(const uint aSegID, FilePartition& aPartition) :
     _header()
 {
 	_maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
-	int lPageIndex = _partition.allocPage();
-	_index = (lPageIndex > 0) ? (uint32_t)lPageIndex : 0;
-	uint lLSN = 0;		//todo
-	uint lVersion = 0;	//todo
-	uint lUnused = 0;
+	int lSegmentIndex = _partition.allocPage();
+	_index = (lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0;
+	uint64_t lLSN = 0;		//todo
+	uint8_t lVersion = 0;	//todo
+	uint8_t lUnused = 0;
 	basic_header_t lBasicHeader = {lLSN, _index, _partition.getPartitionID(), lVersion, lUnused, lUnused};
 	_header = {lBasicHeader, _maxSize, 0, lVersion, lUnused, lUnused, lUnused};
 }
@@ -34,9 +34,9 @@ Segment::~Segment()
 const int Segment::getNewPage()
 {
 	if (_pages.size() < _maxSize) {
-		page = _partition.allocPage();
-		if (page != -1) {
-			_pages.pushback(page);
+		int lPageIndex = _partition.allocPage();
+		if (lPageIndex != -1) {
+			_pages.push_back((uint32_t)lPageIndex);
 			return _pages[_pages.size() - 1];
 		}
 	}
@@ -45,7 +45,7 @@ const int Segment::getNewPage()
 
 const int Segment::getPage(const uint aIndex)
 {
-	if(!(aIndex < _pages.size())
+	if(!(aIndex < _pages.size()))
 	{
 		return -1;
 	}
@@ -54,12 +54,12 @@ const int Segment::getPage(const uint aIndex)
 
 const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-	int lFileDescriptor = _partition.openPartition("read");
+	int lFileDescriptor = _partition.openPartition("r");
 	if(lFileDescriptor == -1)
 	{
 		return -1;
 	}
-	if(readPage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
+	if(_partition.readPage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
 	{
 		return -1;
 	}
@@ -68,12 +68,12 @@ const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 
 const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
 {
-	int lFileDescriptor = _partition.openPartition("write");
+	int lFileDescriptor = _partition.openPartition("w");
 	if(lFileDescriptor == -1)
 	{
 		return -1;
 	}
-	if(writePage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
+	if(_partition.writePage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
 	{
 		return -1;
 	}
@@ -82,10 +82,10 @@ const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
 
 const int Segment::storeSegment()
 {
-
+	return -1;
 }
 
 const int Segment::loadSegment()
 {
-
+	return -1;
 }

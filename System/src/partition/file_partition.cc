@@ -21,13 +21,16 @@ FilePartition::~FilePartition()
 
 const int FilePartition::openPartition(const std::string aMode)
 {
-	if(aMode != "read" && aMode != "write")
+	if(aMode != "r" && aMode != "w" && aMode != "rw")
 	{
 		std::cerr << "Unknown mode: '" << aMode << "'" << std::endl;
 		return -1;
 	}
-	int lFlag = (aMode == "read") ? O_RDONLY : O_WRONLY;
-	int lFileDescriptor = open(_partitionPath, lFlag);
+	int lMode;
+	if(aMode == "r") 		lMode = O_RDONLY;
+	else if(aMode == "w") 	lMode = O_WRONLY;
+	else if(aMode == "rw") 	lMode = O_RDWR;
+	int lFileDescriptor = open(_partitionPath, lMode);
 	if(lFileDescriptor == -1)
 	{
 		std::cerr << "Error opening the file: " << std::strerror(errno) << std::endl;
@@ -91,24 +94,24 @@ const int FilePartition::allocPage()
 	const uint lNumberOfTotalPages = totalPages();
 	FSIPInterpreter fsip;
 	fsip.attach(lPagePointer);
-	uint lOffsetFSIP = 0;
-	int lAllocatedOffset;
+	uint lIndexOfFSIP = 0;
+	int lAllocatedPageIndex;
 	int lFileDescriptor = openPartition("read");
 	do
 	{
-		readPage(lFileDescriptor, lPagePointer, lOffsetFSIP, _pageSize);	//Read FSIP into buffer
-		lAllocatedOffset = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
-		lOffsetFSIP += (1 + fsip.noManagedPages());							//Prepare next offset to FSIP
-		if(lOffsetFSIP >= lNumberOfTotalPages)								//Next offset is bigger than the partition
+		readPage(lFileDescriptor, lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
+		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+		lIndexOfFSIP += (1 + fsip.noManagedPages());							//Prepare next offset to FSIP
+		if(lIndexOfFSIP >= lNumberOfTotalPages)								//Next offset is bigger than the partition
 		{
 			std::cerr << "No free block available in the partition!" << std::endl;
 			return -1;
 		}
 	}
-	while(lAllocatedOffset == -1);	//if 'lAllocatedOffset != -1' a free block was found
+	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
 	delete[] lPagePointer;
 	closePartition(lFileDescriptor);
-	return lAllocatedOffset;	//return offset to free block
+	return lAllocatedPageIndex;	//return offset to free block
 }
 
 const int FilePartition::freePage(const uint aPageNo)
