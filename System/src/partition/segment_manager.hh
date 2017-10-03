@@ -1,11 +1,12 @@
 /**
  *  @file    segment_manager.hh
- *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
  *  @todos   TBD
  *  @section TBD
  */
+
 #ifndef SEGMENT_MANAGER_HH
 #define SEGMENT_MANAGER_HH
 
@@ -16,28 +17,34 @@
 class SegmentManager
 {
 	public:
-		explicit SegmentManager();
+		explicit SegmentManager(Partition& aPartition);
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
-		~SegmentManager();	//delete all segments
+		~SegmentManager();	                    // delete all segments
 
 	public:
-		Segment* getNewSegment();				//create and add new segment, return it
-		const int storeSegmentManager();		//serialization
-		const int loadSegmentManager();			//deserialization
+		Segment* getNewSegment();				// create and add new segment (persistent), return it
+		const int storeSegmentManager();		// serialization
+		const int loadSegmentManager();			// deserialization
 
 	public:
-		const uint getNoSegments();				//_segments.size()
-		Segment* getSegment(const uint aIndex);	//return segment at the specified index
+		inline const uint getNoSegments() { return _segments.size(); }				
+		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex); }
 
 	private:
-		const int storeSegments();				//serialize segments? called by storeSegmentManager
-		const int loadSegments();				//deserialize segments? called by storeSegmentManager
-
+		const int storeSegments();				// serialize segments? called by storeSegmentManager
+		const int loadSegments();				// deserialize segments? called by storeSegmentManager
 
 	private:
-		std::vector<Segment*> _segments;			//stores all managed segments
-
+		/* Stores all managed Segments */
+		std::vector<Segment*> _segments;
+		/* */
+		std::vector<Segment*> _segments;		//stores all managed segments
+		std::vector<uint32_t> _ownPages;		//stores, on which pages the segment manager is spread. Default is page 1
+		uint32_t _maxSegmentsPerPage;			//stores, how many pages are stored on one page
+		Partition& _partition;
+		/* list of pages where segmentmanager writes */
+		// ..
 };
 
 #endif
