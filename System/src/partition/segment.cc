@@ -14,12 +14,17 @@ Segment::Segment(const uint aSegID, FilePartition& aPartition) :
     _segID(aSegID),
     _pages(),
     _partition(aPartition),
-    _index(),
+    _maxSize(0),
+    _index(0),
     _header()
 {
+	_maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
 	int lPageIndex = _partition.allocPage();
 	_index = (lPageIndex > 0) ? lPageIndex : 0;
-	_header = {_basicHeader, _maxSize, 0, _version, 0, 0, 0};
+
+	uint lVersion = 0;
+	uint lUnused = 0;
+	_header = {_basicHeader, _maxSize, 0, lVersion, lUnused, lUnused, lUnused};
 
 
 }

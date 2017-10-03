@@ -44,6 +44,8 @@ class Segment
 		uint_vt _pages;
 		/* FilePartition the Segment belongs to */
 		FilePartition& _partition;
+		/* FilePartition the Segment belongs to */
+		uint32_t _maxSize;
 		/* Position in Partition */
 		uint _index;
         /* Page Header of Segment */
