@@ -1,6 +1,6 @@
 /**
  *  @file    segment.hh
- *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple pages
  *  @bugs    Currently no bugs known
  *  @todos   TBD
@@ -21,21 +21,21 @@ class Segment
 		~Segment();
 
 	public:
-		const uint getNewPage(); //alloc free page, add it to managing vector and return its index in the partition
-		const int loadPage(byte*  aPageBuffer, const uint aPageNo); //load page from the partition into main memory
-		const int storePage(const byte* aPageBuffer, const uint aPageNo); //store page from main memory into the partition
-		const int storeSegment(); //serialization
-		const int loadSegment(); //deserialization
+		const uint getNewPage();                                          // alloc free page, add it to managing vector and return its index in the partition
+		const int loadPage(byte*  aPageBuffer, const uint aPageNo);       // load page from the partition into main memory
+		const int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
+		const int storeSegment();                                         // serialization
+		const int loadSegment();                                          // deserialization
 
 	public:
-		const uint getNoPages(); //_pages.size()
-
-
+		inline const uint getNoPages(){ return _pages.size() }
+		inline const uint getSegmentID(){ return _segID; }
 
 	private:
+		/* An ID representing this Segment */
 		uint _segID;
-		uint_vt _pages;		//stores indeces to pages in the partition
-
+		/* A vector containing indices to all pages (in the partition) of this segment */
+		uint_vt _pages;
 };
 
 #endif

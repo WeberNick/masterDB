@@ -1,6 +1,6 @@
 /**
  *  @file    segment_manager.hh
- *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
  *  @todos   TBD
@@ -19,7 +19,7 @@ class SegmentManager
 		explicit SegmentManager();
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
-		~SegmentManager();	//delete all segments
+		~SegmentManager();	                    //delete all segments
 
 	public:
 		Segment* getNewSegment();				//create and add new segment, return it
@@ -27,17 +27,15 @@ class SegmentManager
 		const int loadSegmentManager();			//deserialization
 
 	public:
-		const uint getNoSegments();				//_segments.size()
-		Segment* getSegment(const uint aIndex);	//return segment at the specified index
+		inline const uint getNoSegments() { return _segments.size() }				
+		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex) }
 
 	private:
 		const int storeSegments();				//serialize segments? called by storeSegmentManager
 		const int loadSegments();				//deserialize segments? called by storeSegmentManager
 
-
 	private:
-		std::vector<Segment*> _segments;			//stores all managed segments
-
+		std::vector<Segment*> _segments;		//stores all managed segments
 };
 
 #endif
