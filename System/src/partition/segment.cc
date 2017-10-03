@@ -50,7 +50,9 @@ const int Segment::getPage(const uint aIndex)
 
 const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-
+    /* partition open
+       read von der _partition
+       dem read musst du den file descriptor von der open mitgeben, buffer, pageno, buffersize (von der partition die pagesize) */
 }
 
 const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
