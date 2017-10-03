@@ -29,7 +29,9 @@ Segment::Segment(const uint aSegID, FilePartition& aPartition) :
 }
 
 Segment::~Segment()
-{}
+{
+	_partition.freePage(_index);
+}
 
 const int Segment::getNewPage()
 {
