@@ -33,10 +33,12 @@ Segment::~Segment()
 
 const int Segment::getNewPage()
 {
-	page = _partition.allocPage();
-	if (page != -1 && _pages.size() < _maxSize) {
-		_pages.pushback(page);
-		return _pages[pages.size() - 1];
+	if (_pages.size() < _maxSize) {
+		page = _partition.allocPage();
+		if (page != -1) {
+			_pages.pushback(page);
+			return _pages[_pages.size() - 1];
+		}
 	}
 	return -1;
 }
@@ -52,7 +54,9 @@ const int Segment::getPage(const uint aIndex)
 
 const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-
+    /* partition open
+       read von der _partition
+       dem read musst du den file descriptor von der open mitgeben, buffer, pageno, buffersize (von der partition die pagesize) */
 }
 
 const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
