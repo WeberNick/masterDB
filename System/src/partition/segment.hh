@@ -15,13 +15,14 @@
 class Segment
 {
 	public:
-		explicit Segment();
+		explicit Segment(Partition& aPartition);
 		Segment(const Segment& aSegment) = delete;
 		Segment& operator=(const Segment& aSegment) = delete;
 		~Segment();
 
 	public:
 		const int getNewPage();                                           // alloc free page, add it to managing vector and return its index in the partition
+		const uint getPage(const uint aIndex);                            // index for vector/id for map. return index where this page is in the partition
 		const int loadPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		const int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 		const int storeSegment();                                         // serialization
@@ -31,7 +32,7 @@ class Segment
 		inline const uint getNoPages(){ return _pages.size() }
 		inline const uint getSegmentID(){ return _segID; }
 		// getNewPage -> getPage -> loadPage
-		const uint getPage(const uint aIndex); // index for vector/id for map. return index where this page is in the partition
+		
 
 	private:
 		/* An ID representing this Segment */
@@ -39,7 +40,7 @@ class Segment
 		/* A vector containing indices to all pages (in the partition) of this segment */
 		uint_vt _pages;
 		/* partition the segment belongs to */
-		Partition* _partition
+		Partition& _partition;
 };
 
 #endif

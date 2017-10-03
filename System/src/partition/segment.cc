@@ -10,9 +10,10 @@
 
 #include "segment.hh"
 
-Segment::Segment() :
+Segment::Segment(Partition& aPartition) :
     _segID(0),
     _pages()
+    _partition(aPartition)
 {}
 
 Segment::~Segment()
@@ -40,5 +41,5 @@ const int Segment::storeSegment()
 
 const int Segment::loadSegment()
 {
-    
+
 }
