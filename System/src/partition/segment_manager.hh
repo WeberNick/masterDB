@@ -3,7 +3,12 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
- *  @todos   TBD
+ *  @todos   - Pass Header information to getNewSegment for creation of Segment()
+ *           - Implement:
+ *               SegmentManager::storeSegmentManager()
+ *               SegmentManager::loadSegmentManager()
+ *               SegmentManager::storeSegments()
+ *               SegmentManager::loadSegments()
  *  @section TBD
  */
 
@@ -11,13 +16,16 @@
 #define SEGMENT_MANAGER_HH
 
 #include "infra/types.hh"
+#include "infra/header_structs.hh"
+#include "file_partition.hh"
 #include "segment.hh"
+
 #include <vector>
 
 class SegmentManager
 {
 	public:
-		explicit SegmentManager(Partition& aPartition);
+		explicit SegmentManager(FilePartition& aPartition);
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
 		~SegmentManager();	                    // delete all segments
@@ -29,22 +37,23 @@ class SegmentManager
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
-		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex); }
+		Segment* getSegment(const uint aIndex);
 
 	private:
 		const int storeSegments();				// serialize segments? called by storeSegmentManager
 		const int loadSegments();				// deserialize segments? called by storeSegmentManager
 
 	private:
+		/* ID Counter for Segments */
+		uint _counterSegmentID;
 		/* Stores all managed Segments */
 		std::vector<Segment*> _segments;
-		/* */
-		std::vector<Segment*> _segments;		//stores all managed segments
-		std::vector<uint32_t> _ownPages;		//stores, on which pages the segment manager is spread. Default is page 1
-		uint32_t _maxSegmentsPerPage;			//stores, how many pages are stored on one page
-		Partition& _partition;
-		/* list of pages where segmentmanager writes */
-		// ..
+		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 */
+		std::vector<uint32_t> _ownPages;		
+		/* Number of Pages that can be managed on one SegmentManager Page */
+		uint32_t _maxSegmentsPerPage;
+		/* Partition the SegmentManager belongs to */
+		FilePartition& _partition;
 };
 
 #endif

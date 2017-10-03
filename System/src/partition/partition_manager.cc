@@ -1,12 +1,3 @@
-/**
- *  @file    partition_manager.cc
- *  @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
- *  @brief   A class for managing partitions stored on the disk
- *  @bugs    Currently no bugs known
- *  @todos   -
- *  @section TBD
- */
-
 #include "partition_manager.hh"
 
 PartitionManager::PartitionManager() :
