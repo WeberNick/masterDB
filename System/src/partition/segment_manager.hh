@@ -28,16 +28,20 @@ class SegmentManager
 		const int loadSegmentManager();			// deserialization
 
 	public:
-		inline const uint getNoSegments() { return _segments.size() }				
-		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex) }
+		inline const uint getNoSegments() { return _segments.size(); }				
+		inline Segment* getSegment(const uint aIndex) { return _segments.at(aIndex); }
 
 	private:
 		const int storeSegments();				// serialize segments? called by storeSegmentManager
 		const int loadSegments();				// deserialize segments? called by storeSegmentManager
 
 	private:
-		std::vector<Segment*> _segments;		// stores all managed segments
+		/* Stores all managed Segments */
+		std::vector<Segment*> _segments;
+		/* */
 		Partition& _partition;
+		/* list of pages where segmentmanager writes */
+		// ..
 };
 
 #endif
