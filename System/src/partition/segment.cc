@@ -29,6 +29,8 @@ Segment::~Segment()
 
 const int Segment::getNewPage()
 {
+	page = 
+	_pages.pushback = _partition.allocPage();
 	
 }
 
