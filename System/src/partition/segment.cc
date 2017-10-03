@@ -10,8 +10,8 @@
 
 #include "segment.hh"
 
-Segment::Segment(Partition& aPartition, segment_page_header_t& aHeader) :
-    _segID(0),
+Segment::Segment(const uint aSegID, FilePartition& aPartition) :
+    _segID(aSegID),
     _pages(),
     _partition(aPartition),
     _header(aHeader)
@@ -20,14 +20,23 @@ Segment::Segment(Partition& aPartition, segment_page_header_t& aHeader) :
 Segment::~Segment()
 {}
 
-const uint Segment::getNewPage()
+const int Segment::getNewPage()
 {
     
 }
 
+const int Segment::getPage(const uint aIndex)
+{
+	if(!(aIndex < _pages.size())
+	{
+		return -1;
+	}
+	return _pages[aIndex];
+}
+
 const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-
+	
 }
 
 const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)

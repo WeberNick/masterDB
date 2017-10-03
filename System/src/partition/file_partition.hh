@@ -43,6 +43,7 @@ class FilePartition
 
 	public:
 		inline const uint getPartitionID(){ return _partitionID; }
+		inline const size_t getPageSize(){ return _pageSize; }
 
 	private:
 		const uint totalPages();
@@ -55,7 +56,7 @@ class FilePartition
 		/* The current size of the partition in bytes */
 		uint64_t _partitionSize;
 		/* The block size in bytes, used by the partition */
-		uint _pageSize;
+		size_t _pageSize;
 		/* An indicator how the partition will grow (indicator * block size) */			
 		uint _growthIndicator;
 		/* An ID representing this partition */
