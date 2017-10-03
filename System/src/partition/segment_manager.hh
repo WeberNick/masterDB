@@ -3,7 +3,8 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
- *  @todos   Implement:
+ *  @todos   - Pass Header information to getNewSegment for creation of Segment()
+ *           - Implement:
  *               SegmentManager::storeSegmentManager()
  *               SegmentManager::loadSegmentManager()
  *               SegmentManager::storeSegments()

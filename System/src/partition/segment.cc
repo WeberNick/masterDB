@@ -29,9 +29,12 @@ Segment::~Segment()
 
 const int Segment::getNewPage()
 {
-	page = 
-	_pages.pushback = _partition.allocPage();
-	
+	page = _partition.allocPage();
+	if (page != -1 && _pages.size() < _maxSize) {
+		_pages.pushback(page);
+		return _pages[pages.size() - 1];
+	}
+	return -1;
 }
 
 const int Segment::getPage(const uint aIndex)

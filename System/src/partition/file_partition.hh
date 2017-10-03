@@ -69,5 +69,4 @@ class FilePartition
 		bool _isOpen;
 };
 
-
 #endif
