@@ -9,29 +9,21 @@ HDR = \
 	\
 
 PM_HDR = \
-	file_partition.hh
+	partition_file.hh
 	\
 
-FP_HDR = \
+PF_HDR = \
 	../interpreter/fsip_interpreter.hh
 	\
 
-SM_HDR = \
-	../infra/header_structs.hh \
-	file_partition.hh \
-	segment.hh \
-	\
-
-S_HDR = \
-	../infra/header_structs.hh \
-	file_partition.hh \
+PR_HDR = \
 	\
 
 OBJ = \
 	partition_manager.o \
-	file_partition.o \
-	segment_manager.o \
-	segment.o \
+	partition_base.o \
+	partition_file.o \
+	partition_raw.o \
 
 
 all : $(OBJ)
@@ -39,14 +31,14 @@ all : $(OBJ)
 partition_manager.o : partition_manager.cc partition_manager.hh $(HDR) $(PM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) partition_manager.cc
 
-file_partition.o : file_partition.cc file_partition.hh $(HDR) $(FP_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) file_partition.cc
+partition_base.o : partition_base.cc partition_base.hh $(HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_base.cc
 
-segment_manager.o : segment_manager.cc segment_manager.hh $(HDR) $(SM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_manager.cc
+partition_file.o : partition_file.cc partition_file.hh $(HDR) $(PF_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_file.cc
 
-segment.o : segment.cc segment.hh $(HDR) $(S_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc
+partition_raw.o : partition_raw.cc partition_raw.hh $(HDR) $(PR_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_raw.cc
 
 clean :
 	rm -f *.o a.out

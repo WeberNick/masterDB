@@ -38,7 +38,7 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	*(fsip_header_t*)(aPP + _pageSize - sizeof(fsip_header_t)) = temp;
 }
 
-const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
+int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
 {
 	if(_header->_freeBlocksCount == 0){
 		return -1;
@@ -62,17 +62,24 @@ const int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint
 	return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
-void FSIPInterpreter::freePage(uint aPageIndex)
+int FSIPInterpreter::reservePage(const uint aPageIndex)
 {
-	aPageIndex -= _header->_basicHeader._pageIndex;
+	//pls implement this
+	return -1;
+}
 
-	if(_header->_nextFreeBlock > aPageIndex){
-		_header->_nextFreeBlock = aPageIndex;
+void FSIPInterpreter::freePage(const uint aPageIndex)
+{
+	uint lPageIndex = aPageIndex;
+	lPageIndex -= _header->_basicHeader._pageIndex;
+
+	if(_header->_nextFreeBlock > lPageIndex){
+		_header->_nextFreeBlock = lPageIndex;
 	}
 	byte* lPP = _pp;
-	lPP += (aPageIndex / 8);
+	lPP += (lPageIndex / 8);
 	uint8_t lCurrByte = (uint8_t) *lPP;
-	uint8_t lBitindex = 7 - (aPageIndex % 8);
+	uint8_t lBitindex = 7 - (lPageIndex % 8);
 	uint8_t lMask = 1;
 	lMask << lBitindex;
 	lCurrByte &= lMask;

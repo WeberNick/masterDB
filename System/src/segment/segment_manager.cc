@@ -1,6 +1,6 @@
 #include "segment_manager.hh"
 
-SegmentManager::SegmentManager(FilePartition& aPartition) :
+SegmentManager::SegmentManager(PartitionFile& aPartition) :
     // Todo: wie wird der Speicher einer Partition zugewiesen?
     _counterSegmentID(0),
     _segments(),
@@ -18,12 +18,12 @@ SegmentManager::~SegmentManager()
     }
 }
 
-Segment* SegmentManager::getSegment(const uint aIndex) 
+Segment* SegmentManager::getSegment(const uint aSegmentNo) 
 {
-    if (!(aIndex < _segments.size())) {
+    if (!(aSegmentNo < _segments.size())) {
         return 0;
     }
-    return _segments[aIndex];
+    return _segments[aSegmentNo];
 }
 
 Segment* SegmentManager::getNewSegment()
@@ -35,7 +35,7 @@ Segment* SegmentManager::getNewSegment()
 const int SegmentManager::storeSegmentManager()
 {
     // //store all segments
-    // storeSegments();
+    storeSegments();
     // //store yourself
     // uint lNoSegments = _segments.size();
     // uint lsegmentsCounter =0;
@@ -88,7 +88,7 @@ const int SegmentManager::loadSegmentManager()
 
     // //load Segments
     // uint16_t lmaxSize = (_partition.getPageSize()-sizeof(segment_page_header_t))/4;
-    // //loadSegments();
+    loadSegments();
     // //for each i in lsegmentPages
     // for(int i =0; i<lsegmentPages.size();++i){
     //     //new Segment
@@ -101,11 +101,10 @@ const int SegmentManager::loadSegmentManager()
 
 const int SegmentManager::storeSegments()
 {
-    // iterate over vector and serialize every segment first
-    //std::vector<Segment*>::iterator it;
-    //for(it = _segments.begin; it != _segments.end; ++it) {
-    //    it->storeSegment();
-    //}
+    for(size_t i = 0; i < _segments.size(); ++i)
+    {
+        _segments[i]->storeSegment();
+    }
     return 0;
 }
 

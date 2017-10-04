@@ -17,7 +17,7 @@
 
 #include "infra/types.hh"
 #include "infra/header_structs.hh"
-#include "file_partition.hh"
+#include "partition/partition_file.hh"
 #include "segment.hh"
 
 #include <vector>
@@ -25,7 +25,7 @@
 class SegmentManager
 {
 	public:
-		explicit SegmentManager(FilePartition& aPartition);
+		explicit SegmentManager(PartitionFile& aPartition);
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
 		~SegmentManager();	                    // delete all segments
@@ -37,7 +37,7 @@ class SegmentManager
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
-		Segment* getSegment(const uint aIndex);
+		Segment* getSegment(const uint aSegmentNo);
 
 	private:
 		const int storeSegments();				// serialize segments? called by storeSegmentManager
@@ -53,7 +53,7 @@ class SegmentManager
 		/* Number of Pages that can be managed on one SegmentManager Page */
 		uint32_t _maxSegmentsPerPage;
 		/* Partition the SegmentManager belongs to */
-		FilePartition& _partition;
+		PartitionFile& _partition;
 };
 
 #endif

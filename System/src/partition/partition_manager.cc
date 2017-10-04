@@ -7,24 +7,23 @@ PartitionManager::PartitionManager() :
 
 PartitionManager::~PartitionManager()
 {
-    // iterate over map and delete every map item (FilePartition)
-    std::map<uint, FilePartition*>::iterator it;
+    // iterate over map and delete every map item (PartitionFile)
+    std::map<uint, PartitionFile*>::iterator it;
     for(it = _partitions.begin(); it != _partitions.end(); ++it) {
         delete it->second;
-        _partitions.erase(it);
     }
 }
 
-FilePartition* PartitionManager::createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aPageSize, const uint aGrowthIndicator)
+PartitionFile* PartitionManager::createPartitionInstance(const char* aPath, const uint64_t aPartitionSize, const uint aPageSize, const uint aGrowthIndicator)
 {
-    FilePartition* partition = new FilePartition(aPath, aPartitionSize, aPageSize, aGrowthIndicator, _counterPartitionID++);
-    _partitions[partition->getPartitionID()] = partition;
-    return _partitions.at(partition->getPartitionID());
+    PartitionFile* partition = new PartitionFile(aPath, aPartitionSize, aPageSize, aGrowthIndicator, _counterPartitionID++);
+    _partitions[partition->getID()] = partition;
+    return _partitions.at(partition->getID());
 }
 
-void PartitionManager::addPartitionInstance(FilePartition* aPartition)
+void PartitionManager::addPartitionInstance(PartitionFile* aPartition)
 {
-    _partitions[aPartition->getPartitionID()] = aPartition;
+    _partitions[aPartition->getID()] = aPartition;
 }
 
 int PartitionManager::getNoPartitions()
@@ -32,7 +31,7 @@ int PartitionManager::getNoPartitions()
     return _partitions.size();
 }
 
-FilePartition* PartitionManager::getPartition(const uint aID)
+PartitionFile* PartitionManager::getPartition(const uint aID)
 {
     return _partitions.at(aID);
 }

@@ -1,6 +1,7 @@
 DIRECTORIES = \
-	interpreter \
 	partition \
+	segment \
+	interpreter \
 	main \
 	\
 

@@ -5,18 +5,22 @@ CC = g++
 INCL = -I../.. -I..
 
 HDR = \
-	config.hh \
+	../infra/types.hh \
 	../partition/partition_manager.hh \
-	../partition/file_partition.hh \
+	../partition/partition_file.hh \
 	\
 
 
 OBJ = \
-	../interpreter/fsip_interpreter.o \
 	../partition/partition_manager.o \
-	../partition/file_partition.o \
-	../partition/segment_manager.o \
-	../partition/segment.o \
+	../partition/partition_base.o \
+	../partition/partition_file.o \
+	../partition/partition_raw.o \
+	\
+	../segment/segment_manager.o \
+	../segment/segment.o \
+	\
+	../interpreter/fsip_interpreter.o \
 	\
 
 ALL = main 

@@ -10,7 +10,7 @@
 
 #include "segment.hh"
 
-Segment::Segment(const uint aSegID, FilePartition& aPartition) :
+Segment::Segment(const uint aSegID, PartitionFile& aPartition) :
     _segID(aSegID),
     _pages(),
     _partition(aPartition),
@@ -18,71 +18,59 @@ Segment::Segment(const uint aSegID, FilePartition& aPartition) :
     _index(0),
     _header()
 {
+	_partition.openPartition();
 	_maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
 	int lSegmentIndex = _partition.allocPage();
 	_index = (lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0;
 	uint64_t lLSN = 0;		//todo
 	uint8_t lVersion = 0;	//todo
 	uint8_t lUnused = 0;
-	basic_header_t lBasicHeader = {lLSN, _index, _partition.getPartitionID(), lVersion, lUnused, lUnused};
+	basic_header_t lBasicHeader = {lLSN, _index, _partition.getID(), lVersion, lUnused, lUnused};
 	_header = {lBasicHeader, _maxSize, 0, lVersion, lUnused, lUnused, lUnused};
+	_partition.closePartition();
 }
 
-Segment::~Segment()
-{
-	_partition.freePage(_index);
-}
+Segment::~Segment(){}
 
-const int Segment::getNewPage()
+int Segment::getNewPage()
 {
 	if (_pages.size() < _maxSize) {
 		int lPageIndex = _partition.allocPage();
 		if (lPageIndex != -1) {
 			_pages.push_back((uint32_t)lPageIndex);
-			return _pages[_pages.size() - 1];
+			return _pages.size() - 1;
 		}
 	}
 	return -1;
 }
 
-const int Segment::getPage(const uint aIndex)
+int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
 {
-	if(!(aIndex < _pages.size()))
+	if(_partition.openPartition() == -1)
 	{
 		return -1;
 	}
-	return _pages[aIndex];
-}
-
-const int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
-{
-	int lFileDescriptor = _partition.openPartition("r");
-	if(lFileDescriptor == -1)
-	{
-		return -1;
-	}
-	if(_partition.readPage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
+	if(_partition.readPage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1)
 	{
 		return -1;
 	}
 	return 0;
 }
 
-const int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
+int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
 {
-	int lFileDescriptor = _partition.openPartition("w");
-	if(lFileDescriptor == -1)
+	if(_partition.openPartition() == -1)
 	{
 		return -1;
 	}
-	if(_partition.writePage(lFileDescriptor, aPageBuffer, aPageNo, _partition.getPageSize()) == -1)
+	if(_partition.writePage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1)
 	{
 		return -1;
 	}
 	return 0;
 }
 
-const int Segment::storeSegment()
+int Segment::storeSegment()
 {
 	// //assuming header stores up to date information
 	// //segment 1 on position 1
@@ -97,7 +85,7 @@ const int Segment::storeSegment()
     return 0;
 }
 
-const int Segment::loadSegment(const uint32_t aPageIndex)
+int Segment::loadSegment(const uint32_t aPageIndex)
 {
 // 	//to be set beforehand: partition
 //     byte* lPageBuffer = new byte[_partition.getPageSize()];
