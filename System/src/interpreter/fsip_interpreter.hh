@@ -15,6 +15,8 @@
 #include "infra/header_structs.hh"
 #include "infra/bit_intrinsics.hh"
 
+ #include <iostream>
+
 class FSIPInterpreter
 {
 	public:

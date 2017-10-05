@@ -38,15 +38,17 @@ int PartitionFile::createPartition()
 {
 	if(_isCreated) return -1;
 	std::string lCommand = "dd if=/dev/zero of=" + std::string(_partitionPath) + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
+	std::cout << "\n" << std::endl;
 	std::cout << "The following command will be executed: '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
-	std::cout << "A partition with " << (_pageSize * _sizeInPages) << " Bytes was successfully created!" << std::endl;
+	std::cout << "A partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!" << std::endl;
+	std::cout << "\n" << std::endl;
 	_isCreated = true;
 	if(openPartition() == -1) return -1;
 	if(init() != 0 )
 	{
-		std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
-		removePartition();
+		// std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
+		// removePartition();
 		return -1;
 	}
 	if(closePartition() == -1) return -1;
@@ -57,9 +59,11 @@ int PartitionFile::removePartition()
 {
 	if(!_isCreated) return -1;
 	std::string lCommand = "rm " + std::string(_partitionPath);
+	std::cout << "\n" << std::endl;
 	std::cout << "The following command will be executed: '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
 	std::cout << "PartitionFile was successfully removed!" << std::endl;
+	std::cout << "\n" << std::endl;
 	_isCreated = false;
 	return 0;
 }

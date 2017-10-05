@@ -31,6 +31,7 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	lMask = ~lMask; //lMask nur noch 1er
 	while(i < max){
 		*((uint32_t*) (aPP + i)) = lMask;
+		++i; //mal hinzugefuegt da dauerschleife.
 	}
 	//header setzten
 	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,1,0,0};

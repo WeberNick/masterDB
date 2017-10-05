@@ -5,15 +5,17 @@ CC = g++
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh
+	../infra/types.hh \
 	\
 
 PM_HDR = \
-	partition_file.hh
+	partition_base.hh \
+	partition_file.hh \
+	partition_raw.hh \
 	\
 
 PF_HDR = \
-	../interpreter/fsip_interpreter.hh
+	../interpreter/fsip_interpreter.hh \
 	\
 
 PR_HDR = \
