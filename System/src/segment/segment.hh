@@ -37,6 +37,7 @@ class Segment
 	public:
 		inline uint getID(){ return _segID; }
 		inline uint getNoPages(){ return _pages.size(); }
+		uint getPageIndex(){return _header._basicHeader._pageIndex;}
 
 	private:
 		/* An ID representing this Segment */

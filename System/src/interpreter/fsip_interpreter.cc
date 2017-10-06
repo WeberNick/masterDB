@@ -31,7 +31,7 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	lMask = ~lMask; //lMask nur noch 1er
 	while(i < max){
 		*((uint32_t*) (aPP + i)) = lMask;
-		++i; //mal hinzugefuegt da dauerschleife.
+		++i;
 	}
 	//header setzten
 	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,1,0,0};
@@ -82,14 +82,18 @@ void FSIPInterpreter::freePage(const uint aPageIndex)
 	if(_header->_nextFreeBlock > lPageIndex){
 		_header->_nextFreeBlock = lPageIndex;
 	}
-	byte* lPP = _pp;
-	lPP += (lPageIndex / 8);
-	uint8_t lCurrByte = (uint8_t) *lPP;
-	uint8_t lBitindex = 7 - (lPageIndex % 8);
-	uint8_t lMask = 1;
-	lMask << lBitindex;
-	lCurrByte &= lMask;
+	
+	//uint8_t lBitindex = 7 - (lPageIndex % 8);
+	//uint8_t lMask = 1;
+	//lMask << lBitindex;
+	//lCurrByte &= lMask;
+	uint32_t* lPP = (uint32_t*) _pp;
+	lPP += (aPageIndex / 32);
+	uint32_t lBitindex = 32 - (aPageIndex % 32);
+	uint32_t lMask = 1;
+	lMask <<= lBitindex;
+	*lPP=*lPP &(~lMask);
 	++(_header->_freeBlocksCount);
+	*(fsip_header_t*) (_pp+_pageSize-sizeof(fsip_header_t))=*_header;
 	//ändert das tatsächlich den Wert, oder ändert das nur was aufm Stack?
-	//Antwort: nur auf dem stack
 }
