@@ -44,11 +44,15 @@ int PartitionFile::createPartition()
 	std::cout << "A partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!" << std::endl;
 	std::cout << "\n" << std::endl;
 	_isCreated = true;
-	if(openPartition() == -1) return -1;
+	if(openPartition() == -1) 
+	{
+				return -1;
+	}
 	if(init() != 0 )
 	{
 		// std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
 		// removePartition();
+		std::cout << "init-1" << std::endl;
 		return -1;
 	}
 	if(closePartition() == -1) return -1;
@@ -129,8 +133,10 @@ int PartitionFile::init()
 	while(remainingPages > 1)
 	{
 		--remainingPages;
-		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, remainingPages);
-		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1) return -1;
+		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages));
+		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1) {
+			return -1;
+		}
 		lCurrentPageNo += (lPagesPerFSIP + 1);
 		remainingPages -= (remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages;
 	}

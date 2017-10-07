@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+
+// pfad zur Patition beim Ausfuehren mit angeben!
 int main(const int argc, const char* argv[])
 {
 	PartitionManager lPartMngr;
@@ -22,6 +24,7 @@ int main(const int argc, const char* argv[])
 	{
 		std::cout << "Something went wrong opening the partition..." << std::endl;
 	}
+	
 	std::cout << ">>>>>Partition with path " << lPartMngr.getPartition(lPartFile->getID())->getPath() << " is open!" << std::endl;
 	
 

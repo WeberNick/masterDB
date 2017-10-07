@@ -1,4 +1,7 @@
 #include "fsip_interpreter.hh"
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
 FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0)
 {}
@@ -18,25 +21,47 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	uint32_t max = aNoBlocks / 32; //wie weit ist Seite frei?
 	uint32_t i = 0;
 	while (i < max){
-		*((uint32_t*) (aPP + i))=0; //setze 0
+		*(((uint32_t*) aPP) + i)=0; //setze 0
 		++i;
 	}
 	//nur noch die ersten bits 0, den Rest auf 1
+	max = (_pageSize - sizeof(fsip_header_t))/4; //neues Limit
 	uint32_t lMask = 0;
-	lMask = ~lMask;
-	lMask = lMask >> 32 - (aNoBlocks % 32);
-	*((uint32_t*) (aPP + i))=lMask;
-	max = _pageSize - sizeof(fsip_header_t); //neues Limit
+	if(i<max){
+		lMask = ~lMask;
+		lMask = lMask >> (32 - (aNoBlocks % 32));
+		*(((uint32_t*) aPP )+ i)=lMask;
+		++i;
+
+	}
+
 	lMask = 0;
 	lMask = ~lMask; //lMask nur noch 1er
 	while(i < max){
-		*((uint32_t*) (aPP + i)) = lMask;
+		*(((uint32_t*) aPP )+ i) = lMask;
 		++i;
 	}
 	//header setzten
 	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,1,0,0};
 	fsip_header_t temp = {lBTemp,aNoBlocks,0,aNoBlocks};
 	*(fsip_header_t*)(aPP + _pageSize - sizeof(fsip_header_t)) = temp;
+
+	/*
+	//saving fsip to extra file
+	std::ofstream myfile;
+	std::string filename = "page"+std::to_string(aPageIndex)+".txt";
+	myfile.open (filename);
+	//std::stringstream stream;
+	for(uint a=0;a<_pageSize;++a){
+		//stream << std::hex << *(uint8_t*)(aPP+a);
+		if(a%4==0){
+			myfile << *(uint32_t*)(aPP+a) << std::endl;
+		}
+	}
+	//std::string s = stream.str();
+	//myfile << s << std::endl;
+	std::cout<<sizeof(fsip_header_t)<<std::endl;
+	myfile.close();*/
 }
 
 int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
@@ -71,7 +96,7 @@ int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aP
 int FSIPInterpreter::reservePage(const uint aPageIndex)
 {
 	//pls implement this
-	return -1;
+	return 0;
 }
 
 void FSIPInterpreter::freePage(const uint aPageIndex)
