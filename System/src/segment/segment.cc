@@ -75,17 +75,20 @@ int Segment::storeSegment()
 	 //assuming header stores up to date information
 	 //segment 1 on position 1
 	 //header last
+	 //partition needs to be opened beforehand
 
     byte* lPageBuffer = new byte[_partition.getPageSize()];
      size_t lPageSize = _partition.getPageSize();
      for (uint i=0;i<_pages.size();++i){
-         *((uint32_t*) (lPageBuffer + i))=_pages.at(i);
+         *(((uint32_t*) lPageBuffer) + i)=_pages.at(i);
      }
-     *(segment_page_header_t*) (lPageBuffer + lPageSize - sizeof(segment_page_header_t) )=_header;
-    return 0;
+	 *(segment_page_header_t*) (lPageBuffer + lPageSize - sizeof(segment_page_header_t) )=_header;
+	  _partition.writePage(lPageBuffer,_header._basicHeader._pageIndex,_partition.getPageSize());
+	  delete[] lPageBuffer;  
+	  return 0;
 }
 
-int Segment::loadSegment(const uint32_t aPageIndex)
+int Segment::loadSegment(const uint32_t aPageIndex, uint aSegID)
 {
 	 //to be set beforehand: partition, and it has to be opened
 	 
@@ -94,8 +97,11 @@ int Segment::loadSegment(const uint32_t aPageIndex)
      _partition.readPage(lPageBuffer,aPageIndex,_partition.getPageSize());
      _header = *(segment_page_header_t*) (lPageBuffer + lPageSize - sizeof(segment_page_header_t));
      for (uint i=0;i<_header._currSize;++i){
-         _pages.push_back( *((uint32_t*) (lPageBuffer + i)) );
-     }
-// //some more variables to be set
+         _pages.push_back( *(((uint32_t*) lPageBuffer) + i) );
+	 }
+	 //some more variables to be set
+	 _segID = aSegID;
+	 _maxSize =_header._maxSize;
+	 _index=aPageIndex;
     return 0;
 }

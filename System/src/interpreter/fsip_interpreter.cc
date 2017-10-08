@@ -1,7 +1,7 @@
 #include "fsip_interpreter.hh"
-#include <fstream>
-#include <iostream>
-#include <iomanip>
+//#include <fstream>
+//#include <iostream>
+//#include <iomanip>
 
 FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0)
 {}
@@ -64,6 +64,23 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 	myfile.close();*/
 }
 
+uint FSIPInterpreter::getNextFreePage()
+{
+	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
+	for(uint32_t j = (_header->_nextFreeBlock)/64; j <= lCondition; ++j){ //looping through FSIP with step 8 
+		uint64_t* lPP = ((uint64_t*) _pp) + j;
+		uint64_t lPartBytes = *lPP; //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
+		if((~lPartBytes) != 0){
+			uint32_t lCalcFreePos = idx_highest_bit_set<uint64_t>(~lPartBytes); //find the first leftmost zero
+			//idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
+			return ((j*64) + lCalcFreePos);
+			//change LSN
+			break; 
+		}
+	}
+	return 0;
+}
+
 int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aPID) //added LSN and PID to param list, pls update header for allocated block
 {
 	if(_header->_freeBlocksCount == 0){
@@ -71,31 +88,37 @@ int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aP
 	}
 	attach(aPP);
 	uint32_t lPosFreeBlock = _header->_nextFreeBlock;
-		byte* lPP = aPP;
-		lPP += lPosFreeBlock/8; // set pointer lPosfreeBlocks/8 bytes forward
-		uint8_t lMask = 1;
-		uint8_t lPartBits = *(uint8_t*) lPP; //get 8 bit Int representation of the lPP byte pointer 
-		lPartBits |= (lMask << lPosFreeBlock % 8); //set complement bit at lPosFreeBlock in lPartBits
-
-	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
-	for(uint32_t j = lPosFreeBlock/64; j <= lCondition; ++j){ //looping through FSIP with step 8 
-		uint64_t* lPP = ((uint64_t*) aPP) + j;
-		uint64_t lPartBytes = *lPP; //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
-		if((~lPartBytes) != 0){
-			uint32_t lCalcFreePos = idx_highest_bit_set<uint64_t>(~lPartBytes); //find the first leftmost zero
-			//idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
-			_header->_nextFreeBlock = (j*64) + lCalcFreePos;
-			//change LSN
-			break; 
-		}
-	}
+	byte* lPP = aPP;
+	lPP += lPosFreeBlock/8; // set pointer lPosfreeBlocks/8 bytes forward
+	uint8_t lMask = 1;
+	uint8_t lPartBits = *(uint8_t*) lPP; //get 8 bit Int representation of the lPP byte pointer 
+	lPartBits |= (lMask << lPosFreeBlock % 8); //set complement bit at lPosFreeBlock in lPartBits
+	_header->_nextFreeBlock=getNextFreePage();	
 	--(_header->_freeBlocksCount);
+	*(fsip_header_t*) (_pp+_pageSize-sizeof(fsip_header_t))=*_header;
 	return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
 int FSIPInterpreter::reservePage(const uint aPageIndex)
 {
-	//pls implement this
+	uint lPageIndex = aPageIndex;
+	lPageIndex -= _header->_basicHeader._pageIndex;
+	uint32_t* lPP = (uint32_t*) _pp;
+	lPP += (lPageIndex / 32);
+	uint32_t lBitindex = 32 - (aPageIndex % 32);
+	uint32_t lMask = 1;
+	lMask <<= lBitindex;
+	//test if free
+	uint32_t test = *lPP;
+	test &= lMask;
+	if(test==0){
+		return -1;
+	}
+	//reserve if free
+	*lPP=*lPP |(lMask);
+	--(_header->_freeBlocksCount);
+	_header->_nextFreeBlock=getNextFreePage();
+	*(fsip_header_t*) (_pp+_pageSize-sizeof(fsip_header_t))=*_header;
 	return 0;
 }
 
@@ -113,7 +136,7 @@ void FSIPInterpreter::freePage(const uint aPageIndex)
 	//lMask << lBitindex;
 	//lCurrByte &= lMask;
 	uint32_t* lPP = (uint32_t*) _pp;
-	lPP += (aPageIndex / 32);
+	lPP += (lPageIndex / 32);
 	uint32_t lBitindex = 32 - (aPageIndex % 32);
 	uint32_t lMask = 1;
 	lMask <<= lBitindex;

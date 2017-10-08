@@ -32,7 +32,7 @@ class Segment
 
 	public:
 		int storeSegment();                                         // serialization
-		int loadSegment(const uint32_t aPageIndex);                 // deserialization
+		int loadSegment(const uint32_t aPageIndex,uint aSegID);     // deserialization
 
 	public:
 		inline uint getID(){ return _segID; }
