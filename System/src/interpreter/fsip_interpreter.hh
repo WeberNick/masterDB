@@ -15,7 +15,10 @@
 #include "infra/header_structs.hh"
 #include "infra/bit_intrinsics.hh"
 
- #include <iostream>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <string>
 
 class FSIPInterpreter
 {
@@ -46,7 +49,8 @@ class FSIPInterpreter
 	public:
 		inline byte* 			pagePtr()	{ return _pp; }
 		inline fsip_header_t* 	header()	{ return _header; }
-		inline uint 			noManagedPages() { return header()->_managedBlocks; } //Remove noManagedPages()
+		inline uint 			noManagedPages() { return header()->_managedPages; } //Remove noManagedPages()
+		inline uint getHeaderSize(){ return sizeof(fsip_header_t); }
 
 	private:
 		//by now not used. calculation is always explicit.

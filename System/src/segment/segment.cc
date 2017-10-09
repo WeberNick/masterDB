@@ -26,7 +26,7 @@ Segment::Segment(const uint aSegID, PartitionFile& aPartition) :
 	uint8_t lVersion = 0;	//todo
 	uint8_t lUnused = 0;
 	basic_header_t lBasicHeader = {lLSN, _index, _partition.getID(), lVersion, lUnused, lUnused};
-	_header = {lBasicHeader, _maxSize, 0, lVersion, lUnused, lUnused, lUnused};
+	_header = {_maxSize, 0, lVersion, lUnused, lUnused, lUnused, lBasicHeader};
 	_partition.closePartition();
 }
 
@@ -36,6 +36,7 @@ int Segment::getNewPage()
 {
 	if (_pages.size() < _maxSize) {
 		int lPageIndex = _partition.allocPage();
+		//todo init page
 		if (lPageIndex != -1) {
 			_pages.push_back((uint32_t)lPageIndex);
 			return _pages.size() - 1;
@@ -82,7 +83,7 @@ int Segment::storeSegment()
      for (uint i=0;i<_pages.size();++i){
          *(((uint32_t*) lPageBuffer) + i)=_pages.at(i);
      }
-	 *(segment_page_header_t*) (lPageBuffer + lPageSize - sizeof(segment_page_header_t) )=_header;
+	 *(segment_page_header_t*) (lPageBuffer + lPageSize - sizeof(segment_page_header_t) ) = _header;
 	  _partition.writePage(lPageBuffer,_header._basicHeader._pageIndex,_partition.getPageSize());
 	  delete[] lPageBuffer;  
 	  return 0;

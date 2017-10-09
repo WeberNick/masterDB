@@ -81,9 +81,17 @@ int PartitionFile::allocPage()
 	int lAllocatedPageIndex;
 	do
 	{
+
 		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
 		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
-		lIndexOfFSIP += (1 + fsip.noManagedPages());							//Prepare next offset to FSIP
+		if(lAllocatedPageIndex == -1)
+		{
+			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
+		} 
+		else
+		{
+			writePage(lPagePointer, lAllocatedPageIndex, _pageSize);
+		} 
 		if(lIndexOfFSIP >= _sizeInPages) return -1;						//Next offset is bigger than the partition
 	}
 	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
@@ -123,25 +131,41 @@ int PartitionFile::writePage(const byte* aBuffer, const uint aPageIndex, const u
 	return 0;
 }
 
+uint PartitionFile::getMaxPagesPerFSIP()
+{
+	FSIPInterpreter fsip;
+	return (_pageSize - fsip.getHeaderSize()) * 8;
+}
+
 int PartitionFile::init()
 {
 	byte* lPagePointer = new byte[_pageSize];
-	uint lPagesPerFSIP = c_PagesPerFSIP();
+	uint lPagesPerFSIP = getMaxPagesPerFSIP();
 	uint lCurrentPageNo = 0;
 	FSIPInterpreter fsip;
 	uint remainingPages = _sizeInPages;
+	uint lNumberOfPagesToManage;
 	while(remainingPages > 1)
 	{
 		--remainingPages;
-		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages));
+		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
+		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
 		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1) {
 			return -1;
 		}
 		lCurrentPageNo += (lPagesPerFSIP + 1);
-		remainingPages -= (remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages;
+		remainingPages -= lNumberOfPagesToManage;
 	}
+	fsip.detach();
+	readPage(lPagePointer, 0, _pageSize);
+	fsip.attach(lPagePointer);
+	if(fsip.reservePage(_segmentIndexPage) == -1)
+	{
+		delete[] lPagePointer;
+		return -1;
+	}
+	writePage(lPagePointer, 0, _pageSize);
 	delete[] lPagePointer;
-	if(fsip.reservePage(_segmentIndexPage) == -1) return -1;
 	return 0;
 }
 

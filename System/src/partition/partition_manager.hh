@@ -1,6 +1,7 @@
 /**
  *  @file    partition_manager.hh
- *  @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
+ *  @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de),
+             Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A class for managing partitions stored on the disk
  *  @bugs    Currently no bugs known
  *  @todos   TBD

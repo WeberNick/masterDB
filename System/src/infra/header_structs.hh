@@ -26,36 +26,36 @@ struct basic_header_t
 /* A header for the free space indicator page */
 struct fsip_header_t
 {
-	basic_header_t _basicHeader; // The basic header
 	uint32_t _freeBlocksCount;   // Number of free pages in the managed part (numer of 0s)
-	uint32_t _nextFreeBlock;     // index of the next 0 (indicating a free Block)
-	uint32_t _managedBlocks;     // index of the next 0 (indicating a free Block)
+	uint32_t _nextFreePage;     // index of the next 0 (indicating a free Block)
+	uint32_t _managedPages;     // index of the next 0 (indicating a free Block)
 	uint8_t _version;            // FSIP header version
 	uint8_t _unused1;
 	uint8_t _unused2;
 	uint8_t _unused3;
+	basic_header_t _basicHeader; // The basic header
 };
 
 /* A header for the SegmentManager */
 struct segment_index_header_t
 {
-	basic_header_t _basicHeader; // The basic header
 	uint32_t _nextIndexPage;     // index to the next index page inside this partition, is invalid if set to 0
 	uint16_t _noSegments;        // number of managed segments on this physical page only. May be larger for the segment manager
 	uint8_t _version;            // Segment-index header version
 	uint8_t _unused;
+	basic_header_t _basicHeader; // The basic header
 };
  
 /* A header for the Segment */
 struct segment_page_header_t
 {
-	basic_header_t _basicHeader; // The basic header
 	uint16_t _maxSize;           // Max number of pages managed by this segment
 	uint16_t _currSize;          // Current number of pages managed by this segment
 	uint8_t _version;            // Segment-page header version
 	uint8_t _unused1;
 	uint8_t _unused2;
 	uint8_t _unused3;
+	basic_header_t _basicHeader; // The basic header
 };
  
 /* NSM Header etc. follow */

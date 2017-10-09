@@ -46,7 +46,7 @@ const int SegmentManager::storeSegmentManager()
          //basic header: LSN, PageIndex, PartitionId, Version, unused
          basic_header_t lBH ={0,_ownPages.at(i),_partition.getID(),1,0,0};
          //segment_index_heder: basicHeader, nxtIndexPage, noSegments, version,unused
-         segment_index_header_t lSMH ={lBH,0,0,1,0};
+         segment_index_header_t lSMH ={0,0,1,0,lBH};
          if(i<_ownPages.size()-1){
              lSMH._nextIndexPage=_ownPages.at(i+1);
          }
@@ -78,7 +78,7 @@ const int SegmentManager::loadSegmentManager()
     //basic header: LSN, PageIndex, PartitionId, Version, unused
      basic_header_t lBH ={0,0,_partition.getID(),1,0,0};
     //segment_index_heder: basicHeader, nxtIndexPage, noSegments, version,unused
-     segment_index_header_t lSMH ={lBH,1,0,1,0};
+     segment_index_header_t lSMH ={1,0,1,0,lBH};
      std::vector<uint32_t> lsegmentPages;
 
      do{

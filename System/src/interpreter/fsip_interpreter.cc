@@ -1,7 +1,4 @@
 #include "fsip_interpreter.hh"
-//#include <fstream>
-//#include <iostream>
-//#include <iomanip>
 
 FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0)
 {}
@@ -42,32 +39,33 @@ void FSIPInterpreter::initNewFSIP(byte* aPP, const uint64_t aLSN, const uint32_t
 		++i;
 	}
 	//header setzten
-	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,1,0,0};
-	fsip_header_t temp = {lBTemp,aNoBlocks,0,aNoBlocks};
-	*(fsip_header_t*)(aPP + _pageSize - sizeof(fsip_header_t)) = temp;
+	uint8_t lUnused = 0;
+	uint8_t lVersion = 1;
+	basic_header_t lBTemp = {aLSN,aPageIndex,aPID,lVersion,lUnused,lUnused};
+	fsip_header_t temp = {aNoBlocks,0,aNoBlocks,lVersion, lUnused, lUnused, lUnused, lBTemp};
+	*_header = temp;
 
-	/*
+	
 	//saving fsip to extra file
-	std::ofstream myfile;
-	std::string filename = "page"+std::to_string(aPageIndex)+".txt";
-	myfile.open (filename);
-	//std::stringstream stream;
-	for(uint a=0;a<_pageSize;++a){
-		//stream << std::hex << *(uint8_t*)(aPP+a);
-		if(a%4==0){
-			myfile << *(uint32_t*)(aPP+a) << std::endl;
-		}
-	}
-	//std::string s = stream.str();
-	//myfile << s << std::endl;
-	std::cout<<sizeof(fsip_header_t)<<std::endl;
-	myfile.close();*/
+	// std::ofstream myfile;
+	// std::string filename = "page"+std::to_string(aPageIndex)+".txt";
+	// myfile.open (filename);
+	// //std::stringstream stream;
+	// uint32_t* lPP2 = (uint32_t*) aPP;
+	// for(uint a=0;a<_pageSize/4;++a){
+	// 	//stream << std::hex << *(uint8_t*)(aPP+a);
+	// 	myfile <<  std::hex << *(lPP2+a) << std::endl;
+	// }
+	// //std::string s = stream.str();
+	// //myfile << s << std::endl;
+	// std::cout<<sizeof(fsip_header_t)<<std::endl;
+	// myfile.close();
 }
 
 uint FSIPInterpreter::getNextFreePage()
 {
 	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/8) - 1;
-	for(uint32_t j = (_header->_nextFreeBlock)/64; j <= lCondition; ++j){ //looping through FSIP with step 8 
+	for(uint32_t j = (_header->_nextFreePage)/64; j <= lCondition; ++j){ //looping through FSIP with step 8 
 		uint64_t* lPP = ((uint64_t*) _pp) + j;
 		uint64_t lPartBytes = *lPP; //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
 		if((~lPartBytes) != 0){
@@ -87,22 +85,21 @@ int FSIPInterpreter::getNewPage(byte* aPP, const uint64_t aLSN, const uint8_t aP
 		return -1;
 	}
 	attach(aPP);
-	uint32_t lPosFreeBlock = _header->_nextFreeBlock;
+	uint32_t lPosFreeBlock = _header->_nextFreePage;
 	byte* lPP = aPP;
 	lPP += lPosFreeBlock/8; // set pointer lPosfreeBlocks/8 bytes forward
 	uint8_t lMask = 1;
 	uint8_t lPartBits = *(uint8_t*) lPP; //get 8 bit Int representation of the lPP byte pointer 
 	lPartBits |= (lMask << lPosFreeBlock % 8); //set complement bit at lPosFreeBlock in lPartBits
-	_header->_nextFreeBlock=getNextFreePage();	
+	_header->_nextFreePage=getNextFreePage();	
 	--(_header->_freeBlocksCount);
-	*(fsip_header_t*) (_pp+_pageSize-sizeof(fsip_header_t))=*_header;
 	return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
 int FSIPInterpreter::reservePage(const uint aPageIndex)
 {
 	uint lPageIndex = aPageIndex;
-	lPageIndex -= _header->_basicHeader._pageIndex;
+	lPageIndex -= _header->_basicHeader._pageIndex + 1;
 	uint32_t* lPP = (uint32_t*) _pp;
 	lPP += (lPageIndex / 32);
 	uint32_t lBitindex = 32 - (aPageIndex % 32);
@@ -117,18 +114,17 @@ int FSIPInterpreter::reservePage(const uint aPageIndex)
 	//reserve if free
 	*lPP=*lPP |(lMask);
 	--(_header->_freeBlocksCount);
-	_header->_nextFreeBlock=getNextFreePage();
-	*(fsip_header_t*) (_pp+_pageSize-sizeof(fsip_header_t))=*_header;
+	_header->_nextFreePage=getNextFreePage();
 	return 0;
 }
 
 void FSIPInterpreter::freePage(const uint aPageIndex)
 {
 	uint lPageIndex = aPageIndex;
-	lPageIndex -= _header->_basicHeader._pageIndex;
+	lPageIndex -= _header->_basicHeader._pageIndex + 1;
 
-	if(_header->_nextFreeBlock > lPageIndex){
-		_header->_nextFreeBlock = lPageIndex;
+	if(_header->_nextFreePage > lPageIndex){
+		_header->_nextFreePage = lPageIndex;
 	}
 	
 	//uint8_t lBitindex = 7 - (lPageIndex % 8);
@@ -142,6 +138,4 @@ void FSIPInterpreter::freePage(const uint aPageIndex)
 	lMask <<= lBitindex;
 	*lPP=*lPP &(~lMask);
 	++(_header->_freeBlocksCount);
-	*(fsip_header_t*) (_pp+_pageSize-sizeof(fsip_header_t))=*_header;
-	//ändert das tatsächlich den Wert, oder ändert das nur was aufm Stack?
 }
