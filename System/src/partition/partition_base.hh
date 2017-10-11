@@ -13,7 +13,8 @@
 
 class PartitionBase
 {
-	public:
+	protected:
+		friend class PartitionManager;
 		explicit PartitionBase(const char* aPath, const uint aNoPages, const uint aPageSize, const uint aPartitionID);
 		PartitionBase(const PartitionBase& aPartition) = delete;
 		PartitionBase& operator=(const PartitionBase& aPartition) = delete;

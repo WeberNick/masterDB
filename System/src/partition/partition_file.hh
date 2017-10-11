@@ -25,7 +25,8 @@ const uint64_t LSN = 0;
 
 class PartitionFile : public PartitionBase
 {
-	public:
+	private:
+		friend class PartitionManager;
 		explicit PartitionFile(const char* aPath, const uint aNoPages, const uint aPageSize, const uint aGrowthIndicator, const uint aPartitionID);
 		PartitionFile(const PartitionFile& aPartition) = delete;
 		PartitionFile& operator=(const PartitionFile& aPartition) = delete;

@@ -18,7 +18,8 @@
 
 class Segment
 {
-	public:
+	private:
+		friend class SegmentManager;
 		explicit Segment(const uint aSegID, PartitionFile& aPartition);
 		Segment(const Segment& aSegment) = delete;
 		Segment& operator=(const Segment& aSegment) = delete;

@@ -13,7 +13,8 @@
 
 class PartitionRaw : public PartitionBase
 {
-	public:
+	private:
+		friend class PartitionManager;
 		explicit PartitionRaw(const char* aPath, const uint aNoPages, const uint aPageSize, const uint aPartitionID);
 		PartitionRaw(const PartitionRaw& aPartition) = delete;
 		PartitionRaw& operator=(const PartitionRaw& aPartition) = delete;
