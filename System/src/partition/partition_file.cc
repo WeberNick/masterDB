@@ -161,6 +161,7 @@ int PartitionFile::init()
 	fsip.attach(lPagePointer);
 	if(fsip.reservePage(_segmentIndexPage) == -1)
 	{
+		std::cout<<"l165"<<std::endl;
 		delete[] lPagePointer;
 		return -1;
 	}
@@ -169,5 +170,19 @@ int PartitionFile::init()
 	return 0;
 }
 
-
+void PartitionFile::printPage(uint aPageIndex){
+	byte* lPagePointer = new byte[_pageSize];
+	readPage(lPagePointer, aPageIndex, _pageSize);	
+	  std::ofstream myfile;
+	  std::string filename = "page"+std::to_string(aPageIndex)+".txt";
+	  myfile.open (filename);
+	  uint32_t* lPP2 = (uint32_t*) lPagePointer;
+	  for(uint a=0;a<_pageSize/4;++a){
+	  	myfile <<  std::hex << *(lPP2+a) << std::endl;
+	  }
+	  std::cout<<"pagePrinted"<<std::endl;
+	  myfile.close();
+	  delete[] lPagePointer;
+	  
+}
 

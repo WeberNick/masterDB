@@ -1,6 +1,8 @@
 #include "infra/types.hh"
 #include "partition/partition_manager.hh"
 #include "partition/partition_file.hh"
+#include "infra/bit_intrinsics.hh"
+
 
 #include <iostream>
 
@@ -29,6 +31,16 @@ int main(const int argc, const char* argv[])
 	
 
 	//Add further tests...
+	/*std::cout<<"highest bit set in all 1 "<<idx_highest_bit_set<uint64_t>(~0)<<std::endl;
+	std::cout<<"highest bit set in 1"<<idx_highest_bit_set<uint64_t>(1)<<std::endl;
+	std::cout<<"lowest bit set in all 1 "<<idx_lowest_bit_set<uint64_t>(~0)<<std::endl;
+*/
+	uint nxFreePage = lPartMngr.getPartition(lPartFile->getID())->allocPage();
+	std::cout << "get free Page results in Page " <<	nxFreePage << std::endl;
+	lPartMngr.getPartition(lPartFile->getID())->freePage(2);
+
+	
+
 
 
 

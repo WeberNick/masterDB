@@ -90,6 +90,11 @@ class PartitionFile : public PartitionBase
 		 *	@return	0 if successful, -1 on failure
 		 */
 		int writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize);
+		/**
+		 *	@brief	prints a page into a file decoded in hex, usefull for debugging. 
+		 *	@param	aPageIndex: indicating which page to print
+		 */
+		void printPage(uint aPageIndex);
 
 	public:
 		inline uint getGrowthIndicator(){ return _growthIndicator; }

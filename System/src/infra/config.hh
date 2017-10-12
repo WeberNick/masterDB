@@ -1,6 +1,8 @@
 #ifndef CONFIG_HH
 #define CONFIG_HH
 
+//FSIP Interpreter written for little Endian. Might not work with big Endian.
+
 #include "infra/header_structs.hh"
 #include <cstdlib>
 
