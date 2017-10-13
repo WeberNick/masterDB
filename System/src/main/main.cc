@@ -45,7 +45,7 @@ int main(const int argc, const char *argv[]) {
     Segment* lFirstSeg = lSegMngr.createNewSegment();
 	Segment* lSecondSeg = lSegMngr.createNewSegment();
 	Segment* lThirdSeg = lSegMngr.createNewSegment();
-	if (lSegMngr.getNoSegments() != 2)
+	if (lSegMngr.getNoSegments() != 3)
 		std::cout << "\033[0;31m> SegmentManager handling of _segments incorrect...\033[0m" << std::endl;
 	
 	uint lSegID = lFirstSeg->getID();
@@ -61,9 +61,8 @@ int main(const int argc, const char *argv[]) {
 	std::cout << "> SegIndexFirst:    " << lSegIndexFirst << std::endl;
 	std::cout << "> SegIndexThird:   " << lSegIndexThird << std::endl;
 
-	// Whats wrong here?
-	// std::cout << "> Compare this address: " << (void*)lSecondSeg->getPartition() << std::endl;
-	// std::cout << "> with this:            " << (void*)lPartFile << std::endl;
+	std::cout << "> Compare this address: " << (void*)&lSecondSeg->getPartition() << std::endl;
+	std::cout << "> with this:            " << (void*)lPartFile << std::endl;
 
 	// lSegMngr.storeSegmentManager();
 	// lSegMngr.loadSegmentManager();
