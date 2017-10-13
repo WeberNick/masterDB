@@ -29,21 +29,21 @@ class SegmentManager
 		explicit SegmentManager(PartitionBase& aPartition);
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
-		~SegmentManager();	                    // delete all segments
+		~SegmentManager();	         // delete all segments
 
 	public:
-		Segment* createNewSegment();			// create and add new segment (persistent), return it
+		Segment* createNewSegment(); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();			
-		int storeSegmentManager();		// serialization
-		int loadSegmentManager();			// deserialization
+		int storeSegmentManager();	 // serialization
+		int loadSegmentManager();    // deserialization
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
 		SegmentBase* getSegment(const uint aSegmentID);
 
 	private:
-		int storeSegments();				// serialize segments? called by storeSegmentManager
-		int loadSegments();				// deserialize segments? called by storeSegmentManager
+		int storeSegments(); // serialize segments? called by storeSegmentManager
+		int loadSegments();	 // deserialize segments? called by storeSegmentManager
 
 	private:
 		/* ID Counter for Segments */

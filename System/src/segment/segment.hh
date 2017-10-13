@@ -33,8 +33,8 @@ class Segment : public SegmentBase
 		int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 
 	public:
-		int storeSegment();                                         // serialization
-		int loadSegment(const uint32_t aPageIndex,uint aSegID);     // deserialization
+		int storeSegment();                                          // serialization
+		int loadSegment(const uint32_t aPageIndex, uint aSegID);     // deserialization
 
 	private:
 		/* The maximum number of pages a segment can manage */

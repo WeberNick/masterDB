@@ -38,11 +38,9 @@ int PartitionFile::createPartition()
 {
 	if(_isCreated) return -1;
 	std::string lCommand = "dd if=/dev/zero of=" + std::string(_partitionPath) + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
-	std::cout << "\n" << std::endl;
-	std::cout << "The following command will be executed: '" << lCommand << "'" << std::endl;
+	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
-	std::cout << "A partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!" << std::endl;
-	std::cout << "\n" << std::endl;
+	std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
 	_isCreated = true;
 	if(openPartition() == -1) 
 	{
@@ -63,11 +61,9 @@ int PartitionFile::removePartition()
 {
 	if(!_isCreated) return -1;
 	std::string lCommand = "rm " + std::string(_partitionPath);
-	std::cout << "\n" << std::endl;
-	std::cout << "The following command will be executed: '" << lCommand << "'" << std::endl;
+	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
-	std::cout << "PartitionFile was successfully removed!" << std::endl;
-	std::cout << "\n" << std::endl;
+	std::cout << "\033[1;30mPartitionFile was successfully removed.\033[0m" << std::endl;
 	_isCreated = false;
 	return 0;
 }
@@ -81,7 +77,6 @@ int PartitionFile::allocPage()
 	int lAllocatedPageIndex;
 	do
 	{
-
 		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
 		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
 		if(lAllocatedPageIndex == -1)
@@ -161,7 +156,7 @@ int PartitionFile::init()
 	fsip.attach(lPagePointer);
 	if(fsip.reservePage(_segmentIndexPage) == -1)
 	{
-		std::cout<<"l165"<<std::endl;
+		std::cout << "l165" << std::endl;
 		delete[] lPagePointer;
 		return -1;
 	}
@@ -170,19 +165,20 @@ int PartitionFile::init()
 	return 0;
 }
 
-void PartitionFile::printPage(uint aPageIndex){
+void PartitionFile::printPage(uint aPageIndex)
+{
 	byte* lPagePointer = new byte[_pageSize];
 	readPage(lPagePointer, aPageIndex, _pageSize);	
-	  std::ofstream myfile;
-	  std::string filename = "page"+std::to_string(aPageIndex)+".txt";
-	  myfile.open (filename);
-	  uint32_t* lPP2 = (uint32_t*) lPagePointer;
-	  for(uint a=0;a<_pageSize/4;++a){
-	  	myfile <<  std::hex << *(lPP2+a) << std::endl;
-	  }
-	  std::cout<<"pagePrinted"<<std::endl;
-	  myfile.close();
-	  delete[] lPagePointer;
-	  
+	std::ofstream myfile;
+	std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+	myfile.open (filename);
+	uint32_t* lPP2 = (uint32_t*) lPagePointer;
+	for(uint a = 0; a < _pageSize/4 ; ++a)
+	{
+	    myfile <<  std::hex << *(lPP2+a) << std::endl;
+	}
+	// std::cout << "pagePrinted" <<std::endl;
+	myfile.close();
+	delete[] lPagePointer;
 }
 
