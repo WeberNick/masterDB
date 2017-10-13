@@ -17,43 +17,45 @@
 
 #include "infra/types.hh"
 #include "infra/header_structs.hh"
-#include "partition/partition_file.hh"
+#include "partition/partition_base.hh"
+#include "segment_base.hh"
 #include "segment.hh"
 
-#include <vector>
+#include <map>
 
 class SegmentManager
 {
 	public:
-		explicit SegmentManager(PartitionFile& aPartition);
+		explicit SegmentManager(PartitionBase& aPartition);
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
 		~SegmentManager();	                    // delete all segments
 
 	public:
-		Segment* getNewSegment();				// create and add new segment (persistent), return it
-		const int storeSegmentManager();		// serialization
-		const int loadSegmentManager();			// deserialization
+		Segment* createNewSegment();			// create and add new segment (persistent), return it
+		// for further segment types... SegmentA* createNewSegmentA();			
+		int storeSegmentManager();		// serialization
+		int loadSegmentManager();			// deserialization
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
-		Segment* getSegment(const uint aSegmentNo);
+		SegmentBase* getSegment(const uint aSegmentID);
 
 	private:
-		const int storeSegments();				// serialize segments? called by storeSegmentManager
-		const int loadSegments();				// deserialize segments? called by storeSegmentManager
+		int storeSegments();				// serialize segments? called by storeSegmentManager
+		int loadSegments();				// deserialize segments? called by storeSegmentManager
 
 	private:
 		/* ID Counter for Segments */
 		uint _counterSegmentID;
 		/* Stores all managed Segments */
-		std::vector<Segment*> _segments;
+		std::map<uint, SegmentBase*> _segments;
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 */
 		std::vector<uint32_t> _ownPages;		
 		/* Number of Pages that can be managed on one SegmentManager Page */
 		uint32_t _maxSegmentsPerPage;
 		/* Partition the SegmentManager belongs to */
-		PartitionFile& _partition;
+		PartitionBase& _partition;
 };
 
 #endif

@@ -8,6 +8,7 @@ HDR = \
 	../infra/types.hh \
 	../partition/partition_manager.hh \
 	../partition/partition_file.hh \
+	../segment/segment.hh \
 	\
 
 
@@ -18,6 +19,7 @@ OBJ = \
 	../partition/partition_raw.o \
 	\
 	../segment/segment_manager.o \
+	../segment/segment_base.o \
 	../segment/segment.o \
 	\
 	../interpreter/fsip_interpreter.o \

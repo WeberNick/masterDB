@@ -10,18 +10,13 @@
 
 #include "segment.hh"
 
-Segment::Segment(const uint aSegID, PartitionFile& aPartition) :
-    _segID(aSegID),
-    _pages(),
-    _partition(aPartition),
+Segment::Segment(const uint aSegID, PartitionBase& aPartition) :
+    SegmentBase(aSegID, aPartition),
     _maxSize(0),
-    _index(0),
     _header()
 {
 	_partition.openPartition();
 	_maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
-	int lSegmentIndex = _partition.allocPage();
-	_index = (lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0;
 	uint64_t lLSN = 0;		//todo
 	uint8_t lVersion = 0;	//todo
 	uint8_t lUnused = 0;

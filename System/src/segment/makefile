@@ -5,23 +5,30 @@ CC = g++
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh
+	../infra/types.hh \
 	\
 
 
 SM_HDR = \
 	../infra/header_structs.hh \
-	../partition/partition_file.hh \
+	../partition/partition_base.hh \
+	segment_base.hh \
 	segment.hh \
+	\
+
+SB_HDR = \
+	../partition/partition_base.hh \
 	\
 
 S_HDR = \
 	../infra/header_structs.hh \
+	segment_base.hh \
 	../partition/partition_file.hh \
 	\
 
 OBJ = \
 	segment_manager.o \
+	segment_base.o \
 	segment.o \
 
 
@@ -29,6 +36,9 @@ all : $(OBJ)
 
 segment_manager.o : segment_manager.cc segment_manager.hh $(HDR) $(SM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) segment_manager.cc
+
+segment_base.o : segment_base.cc segment_base.hh $(HDR) $(SB_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_base.cc
 
 segment.o : segment.cc segment.hh $(HDR) $(S_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc

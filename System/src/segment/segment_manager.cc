@@ -1,6 +1,6 @@
 #include "segment_manager.hh"
 
-SegmentManager::SegmentManager(PartitionFile& aPartition) :
+SegmentManager::SegmentManager(PartitionBase& aPartition) :
     // Todo: wie wird der Speicher einer Partition zugewiesen?
     _counterSegmentID(0),
     _segments(),
@@ -18,21 +18,14 @@ SegmentManager::~SegmentManager()
     }
 }
 
-Segment* SegmentManager::getSegment(const uint aSegmentNo) 
+Segment* SegmentManager::createNewSegment()
 {
-    if (!(aSegmentNo < _segments.size())) {
-        return 0;
-    }
-    return _segments[aSegmentNo];
+    Segment* lSegment = new Segment(_counterSegmentID++, _partition);
+    _segments[lSegment->getID()] = lSegment;
+    return (Segment*)_segments.at(lSegment->getID());
 }
 
-Segment* SegmentManager::getNewSegment()
-{
-    _segments.push_back(new Segment(_counterSegmentID++, _partition));
-    return _segments[_segments.size() - 1];
-}
-
-const int SegmentManager::storeSegmentManager()
+int SegmentManager::storeSegmentManager()
 {
     _partition.openPartition();
      //store all segments
@@ -55,7 +48,7 @@ const int SegmentManager::storeSegmentManager()
          //write data
          uint j=0;
          while (j<_maxSegmentsPerPage & lsegmentsCounter<lNoSegments){
-             *(((uint32_t*) lPageBuffer) + j)=_segments.at(lsegmentsCounter++)->getPageIndex();  //evaluate first, then increment   
+             *(((uint32_t*) lPageBuffer) + j)=_segments.at(lsegmentsCounter++)->getIndex();  //evaluate first, then increment   
              ++j;  
              ++lsegmentsCounter;
          }
@@ -68,7 +61,7 @@ const int SegmentManager::storeSegmentManager()
     return 0;
 }
 
-const int SegmentManager::loadSegmentManager()
+int SegmentManager::loadSegmentManager()
 {
      //maxSegmentsPerPage and _partition to be set in constructor
 
@@ -99,14 +92,19 @@ const int SegmentManager::loadSegmentManager()
          //new Segment
         Segment* s = new Segment(0,_partition);
          s->loadSegment(lsegmentPages.at(i),i);
-         _segments.push_back(s);
+         _segments[s->getID()] = s;
      }
      delete[] lPageBuffer;
      _partition.closePartition();
     return 0;
 }
 
-const int SegmentManager::storeSegments()
+SegmentBase* SegmentManager::getSegment(const uint aSegmentID) 
+{
+   return _segments.at(aSegmentID);
+}
+
+int SegmentManager::storeSegments()
 {
     for(size_t i = 0; i < _segments.size(); ++i)
     {
@@ -115,7 +113,7 @@ const int SegmentManager::storeSegments()
     return 0;
 }
 
-const int SegmentManager::loadSegments()
+int SegmentManager::loadSegments()
 {
     //wird derzeit nicht gebraucht, koennte entweder geloescht werden, oder funktionalitaet wird ausgelagert.
     return -1;

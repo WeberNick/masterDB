@@ -1,6 +1,9 @@
 #include "infra/types.hh"
 #include "partition/partition_manager.hh"
 #include "partition/partition_file.hh"
+#include "segment/segment_manager.hh"
+#include "segment/segment.hh"
+
 #include "infra/bit_intrinsics.hh"
 
 
@@ -12,10 +15,7 @@ int main(const int argc, const char* argv[])
 {
 	PartitionManager lPartMngr;
 	PartitionFile* lPartFile = lPartMngr.createPartitionFileInstance(argv[1], c_PartitionSizeInPages(), c_PageSize(), c_GrowthIndicator());
-
-	std::cout << "The created partition instance has address: " << (void*)lPartFile << std::endl;
-	std::cout << "This should have the same address: " << (void*)lPartMngr.getPartition(lPartFile->getID()) << std::endl;
-
+	SegmentManager lSegMngr(*lPartFile);
 
 	std::cout << ">>>>>Create the partition on disk..." << std::endl;
 	if(lPartFile->createPartition() == -1)
@@ -26,7 +26,6 @@ int main(const int argc, const char* argv[])
 	{
 		std::cout << "Something went wrong opening the partition..." << std::endl;
 	}
-	
 	std::cout << ">>>>>Partition with path " << lPartMngr.getPartition(lPartFile->getID())->getPath() << " is open!" << std::endl;
 	
 
@@ -39,7 +38,9 @@ int main(const int argc, const char* argv[])
 	std::cout << "get free Page results in Page " <<	nxFreePage << std::endl;
 	lPartMngr.getPartition(lPartFile->getID())->freePage(2);
 
-	
+
+	Segment* lSegment = lSegMngr.createNewSegment();
+	//todo
 
 
 

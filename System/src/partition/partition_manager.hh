@@ -39,7 +39,7 @@ class PartitionManager
   
     private:
         uint _counterPartitionID;
-        std::map <uint, PartitionBase*> _partitions;
+        std::map<uint, PartitionBase*> _partitions;
 };
 
 #endif
