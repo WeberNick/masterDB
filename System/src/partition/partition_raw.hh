@@ -21,8 +21,8 @@ class PartitionRaw : public PartitionBase
 		~PartitionRaw();
 
 	public:
-		int openPartition();
-		int closePartition();
+		int open();
+		int close();
 		int createPartition();
 		int removePartition();
 		int allocPage();

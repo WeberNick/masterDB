@@ -21,8 +21,8 @@ class PartitionBase
 		virtual ~PartitionBase() = 0;
 
 	public:
-		virtual int openPartition() = 0;
-		virtual int closePartition() = 0;
+		virtual int open() = 0;
+		virtual int close() = 0;
 		virtual int allocPage() = 0;
 		virtual int freePage(const uint aPageIndex) = 0;
 		virtual int readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize) = 0;

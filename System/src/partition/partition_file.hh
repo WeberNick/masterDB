@@ -37,13 +37,13 @@ class PartitionFile : public PartitionBase
 		 *	@brief	opens the file in read/write mode
 		 *	@return	an int representing a file descriptor, -1 on failure
 		 */
-		int openPartition();
+		int open();
 
 		/**
 		 *	@brief	closes the open file
 		 *	@return	0 if successful, -1 on failure
 		 */
-		int closePartition();
+		int close();
 
 		/**
 		 *	@brief	creates the partition on disk

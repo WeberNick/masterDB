@@ -8,12 +8,12 @@ PartitionRaw::PartitionRaw(const char* aPath, const uint aNoPages, const uint aP
 
 PartitionRaw::~PartitionRaw(){}
 
-int PartitionRaw::openPartition()
+int PartitionRaw::open()
 {
 	return -1;
 }
 
-int PartitionRaw::closePartition()
+int PartitionRaw::close()
 {
 	return -1;
 }

@@ -27,7 +27,7 @@ Segment* SegmentManager::createNewSegment()
 
 int SegmentManager::storeSegmentManager()
 {
-    _partition.openPartition();
+    _partition.open();
     // store all segments
     storeSegments();
     // store yourself
@@ -57,7 +57,7 @@ int SegmentManager::storeSegmentManager()
         _partition.writePage(lPageBuffer, _ownPages.at(i), _partition.getPageSize());
     }
     delete[] lPageBuffer;
-    _partition.closePartition();
+    _partition.close();
     return 0;
 }
 
@@ -67,7 +67,7 @@ int SegmentManager::loadSegmentManager()
 
     // load yourself by building a vector of pageIndexes where Segments are stored
     byte *lPageBuffer = new byte[_partition.getPageSize()];
-    _partition.openPartition();
+    _partition.open();
     // basic header: LSN, PageIndex, PartitionId, Version, unused
     basic_header_t lBH = {0, 0, _partition.getID(), 1, 0, 0};
     // segment_index_heder: nxtIndexPage, noSegments, version,unused,basicHeader
@@ -93,7 +93,7 @@ int SegmentManager::loadSegmentManager()
         _segments[s->getID()] = s;
     }
     delete[] lPageBuffer;
-    _partition.closePartition();
+    _partition.close();
     return 0;
 }
 

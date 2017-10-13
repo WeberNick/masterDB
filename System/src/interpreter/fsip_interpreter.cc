@@ -125,19 +125,19 @@ int FSIPInterpreter::reservePage(const uint aPageIndex) {
     // std::cout << "next free block after reserve " << _header->_nextFreePage << std::endl;
 
     // saving fsip to extra file
-    std::ofstream myfile;
-    std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-    myfile.open(filename);
-    // std::stringstream stream;
-    uint32_t *lPP2 = (uint32_t *)_pp;
-    for (uint a = 0; a < _pageSize / 4; ++a) {
-        // 	//stream << std::hex << *(uint8_t*)(aPP+a);
-        myfile << std::hex << *(lPP2 + a) << std::endl;
-    }
-    // //std::string s = stream.str();
-    // myfile << s << std::endl;
-    // std::cout << "pagePrinted" << std::endl;
-    myfile.close();
+    // std::ofstream myfile;
+    // std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+    // myfile.open(filename);
+    // // std::stringstream stream;
+    // uint32_t *lPP2 = (uint32_t *)_pp;
+    // for (uint a = 0; a < _pageSize / 4; ++a) {
+    //     // 	//stream << std::hex << *(uint8_t*)(aPP+a);
+    //     myfile << std::hex << *(lPP2 + a) << std::endl;
+    // }
+    // // //std::string s = stream.str();
+    // // myfile << s << std::endl;
+    // // std::cout << "pagePrinted" << std::endl;
+    // myfile.close();
 
     return 0;
 }
@@ -162,17 +162,17 @@ void FSIPInterpreter::freePage(const uint aPageIndex) {
     *lPP = *lPP & (~lMask);
     ++(_header->_freeBlocksCount);
 
-    std::ofstream myfile;
-    std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-    myfile.open(filename);
-    // std::stringstream stream;
-    uint32_t *lPP2 = (uint32_t *)_pp;
-    for (uint a = 0; a < _pageSize / 4; ++a) {
-        // stream << std::hex << *(uint8_t*)(aPP+a);
-        myfile << std::hex << *(lPP2 + a) << std::endl;
-    }
-    // std::string s = stream.str();
-    // myfile << s << std::endl;
-    // std::cout << "pagePrinted" << std::endl;
-    myfile.close();
+    // std::ofstream myfile;
+    // std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+    // myfile.open(filename);
+    // // std::stringstream stream;
+    // uint32_t *lPP2 = (uint32_t *)_pp;
+    // for (uint a = 0; a < _pageSize / 4; ++a) {
+    //     // stream << std::hex << *(uint8_t*)(aPP+a);
+    //     myfile << std::hex << *(lPP2 + a) << std::endl;
+    // }
+    // // std::string s = stream.str();
+    // // myfile << s << std::endl;
+    // // std::cout << "pagePrinted" << std::endl;
+    // myfile.close();
 }
