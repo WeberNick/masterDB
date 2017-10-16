@@ -51,10 +51,9 @@ struct segment_page_header_t
 {
 	uint16_t _maxSize;           // Max number of pages managed by this segment
 	uint16_t _currSize;          // Current number of pages managed by this segment
+	uint16_t _segID;
 	uint8_t _version;            // Segment-page header version
 	uint8_t _unused1;
-	uint8_t _unused2;
-	uint8_t _unused3;
 	basic_header_t _basicHeader; // The basic header
 };
  

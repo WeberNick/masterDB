@@ -10,7 +10,7 @@
 
 #include "segment.hh"
 
-Segment::Segment(const uint aSegID, PartitionBase& aPartition) :
+Segment::Segment(const uint16_t aSegID, PartitionBase& aPartition) :
     SegmentBase(aSegID, aPartition),
     _maxSize(0),
     _header()
@@ -21,7 +21,7 @@ Segment::Segment(const uint aSegID, PartitionBase& aPartition) :
 	uint8_t lVersion = 0;	//todo
 	uint8_t lUnused = 0;
 	basic_header_t lBasicHeader = {lLSN, _index, _partition.getID(), lVersion, lUnused, lUnused};
-	_header = {_maxSize, 0, lVersion, lUnused, lUnused, lUnused, lBasicHeader};
+	_header = {_maxSize, 0, _segID, lVersion, lUnused, lBasicHeader};
 	if(_partition.close() == -1){/*error handling*/}
 }
 
@@ -75,7 +75,7 @@ int Segment::storeSegment()
     return 0;
 }
 
-int Segment::loadSegment(const uint32_t aPageIndex, uint aSegID)
+int Segment::loadSegment(const uint32_t aPageIndex)
 {
     // to be set beforehand: partition, and it has to be opened
     byte *lPageBuffer = new byte[_partition.getPageSize()];
@@ -86,7 +86,6 @@ int Segment::loadSegment(const uint32_t aPageIndex, uint aSegID)
         _pages.push_back(*(((uint32_t *)lPageBuffer) + i));
     }
     // some more variables to be set
-    _segID = aSegID;
     _maxSize = _header._maxSize;
     _index = aPageIndex;
     return 0;

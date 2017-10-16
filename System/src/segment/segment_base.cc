@@ -1,6 +1,6 @@
 #include "segment_base.hh"
 
-SegmentBase::SegmentBase(const uint aSegID, PartitionBase& aPartition) : 
+SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition) : 
 	_segID(aSegID),
     _pages(),
     _partition(aPartition),

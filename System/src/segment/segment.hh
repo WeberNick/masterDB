@@ -21,7 +21,7 @@ class Segment : public SegmentBase
 {
 	private:
 		friend class SegmentManager;
-		explicit Segment(const uint aSegID, PartitionBase& aPartition);
+		explicit Segment(const uint16_t aSegID, PartitionBase& aPartition);
 		Segment(const Segment& aSegment) = delete;
 		Segment& operator=(const Segment& aSegment) = delete;
 		~Segment();
@@ -34,7 +34,7 @@ class Segment : public SegmentBase
 
 	public:
 		int storeSegment();                                          // serialization
-		int loadSegment(const uint32_t aPageIndex, uint aSegID);     // deserialization
+		int loadSegment(const uint32_t aPageIndex);     // deserialization
 
 	private:
 		/* The maximum number of pages a segment can manage */

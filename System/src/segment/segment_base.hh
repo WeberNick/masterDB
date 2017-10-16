@@ -16,7 +16,7 @@ class SegmentBase
 {
 	protected:
 		friend class SegmentManager;
-		explicit SegmentBase(const uint aSegID, PartitionBase& aPartition);
+		explicit SegmentBase(const uint16_t aSegID, PartitionBase& aPartition);
 		SegmentBase(const SegmentBase& aSegment) = delete;
 		SegmentBase& operator=(const SegmentBase& aSegment) = delete;
 		virtual ~SegmentBase() = 0;
@@ -27,18 +27,18 @@ class SegmentBase
 		virtual int storePage(const byte* aPageBuffer, const uint aPageNo) = 0; // store page from main memory into the partition
 
 	public:
-		inline uint getID(){ return _segID; }
+		inline uint16_t getID(){ return _segID; }
 		inline uint getNoPages(){ return _pages.size(); }
 		inline PartitionBase& getPartition() { return _partition; }
 		inline uint getIndex(){ return _index; }
 
 	protected:
 		virtual int storeSegment() = 0;                                         	// serialization
-		virtual int loadSegment(const uint32_t aPageIndex, const uint aSegID) = 0;  // deserialization
+		virtual int loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
 
 	protected:
 		/* An ID representing this Segment */
-		uint _segID;
+		uint16_t _segID;
 		/* A vector containing indices to all pages (in the partition) of this segment */
 		uint32_vt _pages;
 		/* Partition the Segment belongs to */

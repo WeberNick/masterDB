@@ -39,7 +39,7 @@ class SegmentManager
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
-		SegmentBase* getSegment(const uint aSegmentID);
+		SegmentBase* getSegment(const uint16_t aSegmentID);
 
 	private:
 		int storeSegments(); // serialize segments? called by storeSegmentManager
@@ -47,7 +47,7 @@ class SegmentManager
 
 	private:
 		/* ID Counter for Segments */
-		uint _counterSegmentID;
+		uint16_t _counterSegmentID;
 		/* Stores all managed Segments */
 		std::map<uint, SegmentBase*> _segments;
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 */

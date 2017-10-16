@@ -89,7 +89,7 @@ int SegmentManager::loadSegmentManager()
     for (uint i = 0; i < lsegmentPages.size(); ++i) {
         // new Segment
         Segment *s = new Segment(0, _partition);
-        s->loadSegment(lsegmentPages.at(i), i);
+        s->loadSegment(lsegmentPages.at(i));
         _segments[s->getID()] = s;
     }
     delete[] lPageBuffer;
@@ -97,7 +97,7 @@ int SegmentManager::loadSegmentManager()
     return 0;
 }
 
-SegmentBase* SegmentManager::getSegment(const uint aSegmentID)
+SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 {
     return _segments.at(aSegmentID);
 }
