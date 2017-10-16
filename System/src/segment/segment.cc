@@ -60,6 +60,7 @@ int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
 
 int Segment::storeSegment()
 {
+    std::cout<<"storing segment "<<_segID<<" on page "<<_header._basicHeader._pageIndex<<std::endl;
     /* assuming header stores up to date information
        segment 1 on position 1
        header last
@@ -67,9 +68,14 @@ int Segment::storeSegment()
     byte *lPageBuffer = new byte[_partition.getPageSize()];
     size_t lPageSize = _partition.getPageSize();
     for (uint i = 0; i < _pages.size(); ++i) {
+        std::cout<<_pages.at(i)<<std::endl;
         *(((uint32_t *)lPageBuffer) + i) = _pages.at(i);
     }
-    *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = _header;
+        // basic header: LSN, PageIndex, PartitionId, Version, unused
+    basic_header_t t={0,_index,_partition.getID(),1,0};
+        // _maxSize; _currSize;_segID;_version; _unused1;
+    segment_page_header_t temp = {_maxSize,_pages.size(),_segID,1,0,t};
+    *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = temp;
     _partition.writePage(lPageBuffer, _header._basicHeader._pageIndex, _partition.getPageSize());
     delete[] lPageBuffer;
     return 0;
@@ -77,6 +83,8 @@ int Segment::storeSegment()
 
 int Segment::loadSegment(const uint32_t aPageIndex)
 {
+    std::cout<<"loading segment from page "<<aPageIndex<<" isOpen "<<_partition.isOpen()<< std::endl;
+    
     // to be set beforehand: partition, and it has to be opened
     byte *lPageBuffer = new byte[_partition.getPageSize()];
     size_t lPageSize = _partition.getPageSize();
@@ -87,6 +95,7 @@ int Segment::loadSegment(const uint32_t aPageIndex)
     }
     // some more variables to be set
     _maxSize = _header._maxSize;
+    _segID = _header._segID;
     _index = aPageIndex;
     return 0;
 }

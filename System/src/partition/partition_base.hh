@@ -34,6 +34,7 @@ class PartitionBase
 		inline uint 		getPageSize(){ return _pageSize; }
 		inline uint8_t 		getID(){ return _partitionID; }
 		inline uint 		getSegmentIndexPage(){ return _segmentIndexPage; }
+		inline bool 		isOpen(){ return _isOpen; }
 
 	protected:
 		/* A path to a partition (i.e., a file) */

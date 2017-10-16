@@ -49,7 +49,7 @@ class SegmentManager
 		/* ID Counter for Segments */
 		uint16_t _counterSegmentID;
 		/* Stores all managed Segments */
-		std::map<uint, SegmentBase*> _segments;
+		std::map<uint16_t, SegmentBase*> _segments;
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 */
 		std::vector<uint32_t> _ownPages;		
 		/* Number of Pages that can be managed on one SegmentManager Page */

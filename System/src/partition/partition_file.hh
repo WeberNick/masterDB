@@ -98,7 +98,6 @@ class PartitionFile : public PartitionBase
 
 	public:
 		inline uint getGrowthIndicator(){ return _growthIndicator; }
-
 	private:
 		uint getMaxPagesPerFSIP();
 		int init();
