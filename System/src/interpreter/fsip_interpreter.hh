@@ -53,11 +53,11 @@ class FSIPInterpreter
 		inline uint getHeaderSize(){ return sizeof(fsip_header_t); }
 
 	private:
-		//by now not used. calculation is always explicit.
 		inline fsip_header_t* get_hdr_ptr(){ return (fsip_header_t*)(_pp + _pageSize - sizeof(fsip_header_t)); }
 		uint getNextFreePage();
-	
 
+	private:
+		void debug(const uint aPageIndex);
 
 	private:
 		byte* _pp;

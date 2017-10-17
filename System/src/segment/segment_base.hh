@@ -17,6 +17,7 @@ class SegmentBase
 	protected:
 		friend class SegmentManager;
 		explicit SegmentBase(const uint16_t aSegID, PartitionBase& aPartition);
+		explicit SegmentBase(PartitionBase& aPartition);
 		SegmentBase(const SegmentBase& aSegment) = delete;
 		SegmentBase& operator=(const SegmentBase& aSegment) = delete;
 		virtual ~SegmentBase() = 0;
@@ -28,12 +29,12 @@ class SegmentBase
 
 	public:
 		inline uint16_t getID(){ return _segID; }
-		inline uint getNoPages(){ return _pages.size(); }
+		inline size_t getNoPages(){ return _pages.size(); }
 		inline PartitionBase& getPartition() { return _partition; }
-		inline uint getIndex(){ return _index; }
+		inline uint32_t getIndex(){ return _index; }
 
 	protected:
-		virtual int storeSegment() = 0;                                         	// serialization
+		virtual int storeSegment() = 0;                          // serialization
 		virtual int loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
 
 	protected:

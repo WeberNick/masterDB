@@ -10,8 +10,7 @@ PartitionFile::~PartitionFile(){}
 
 int PartitionFile::open()
 {
-	if(!(!_isOpen && _isCreated)){
-		std::cout << "<<<<<<<<<<<<<<<  not opened" << std::endl; return -1;}
+	if(!(!_isOpen && _isCreated)){ return -1; }
 	_fileDescriptor = ::open(_partitionPath, O_RDWR); //call open in global namespace
 	if(_fileDescriptor == -1)
 	{
@@ -24,7 +23,7 @@ int PartitionFile::open()
 
 int PartitionFile::close()
 {
-	if(!(_isOpen && _isCreated)){std::cout << "<<<<<<<<<<<<<<<  not closed" << std::endl; return -1;}
+	if(!(_isOpen && _isCreated)){ return -1; }
 	if(::close(_fileDescriptor) != 0) //call close in global namespace
 	{
 		std::cerr << "Error closing the file: " << std::strerror(errno) << std::endl;

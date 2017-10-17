@@ -4,7 +4,7 @@
 			Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief	This class manages multiple pages
  *  @bugs	Currently no bugs known
- *  @todos  Implement storeSegment and loadSegment
+ *  @todos  in getNewPage: implement init page, e.g. NSM/PAX..
  *  @section TBD
  */
 
@@ -22,6 +22,7 @@ class Segment : public SegmentBase
 	private:
 		friend class SegmentManager;
 		explicit Segment(const uint16_t aSegID, PartitionBase& aPartition);
+		explicit Segment(PartitionBase& aPartition);
 		Segment(const Segment& aSegment) = delete;
 		Segment& operator=(const Segment& aSegment) = delete;
 		~Segment();
@@ -39,8 +40,6 @@ class Segment : public SegmentBase
 	private:
 		/* The maximum number of pages a segment can manage */
 		uint16_t _maxSize;
-        /* Page Header of Segment */
-		segment_page_header_t _header;
 };
 
 #endif

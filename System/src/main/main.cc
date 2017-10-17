@@ -88,8 +88,10 @@ int main(const int argc, const char *argv[]) {
 	** Test SegmentManager functionalities *************************************************************
 	***************************************************************************************************/
 	
-	// lSegMngr.storeSegmentManager();
-	// lSegMngr.loadSegmentManager();
+	lSegMngr.storeSegmentManager();
+	std::cout << ">SegmentManager stored" << std::endl;
+	lSegMngr.loadSegmentManager();
+	std::cout << ">SegmentManager loaded" << std::endl;
 
 	// if (lSegMngr.getNoSegments() != 3 or lSegMngr.getSegment(0) != lFirstSeg)
 	if (lSegMngr.getNoSegments() != 3)

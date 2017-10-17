@@ -1,7 +1,5 @@
 #include "fsip_interpreter.hh"
 
-//!!! funktioniert nur mit little Endian!!!!
-
 FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0) {}
 
 FSIPInterpreter::~FSIPInterpreter() {}
@@ -42,21 +40,7 @@ void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t
     basic_header_t lBTemp = {aLSN, aPageIndex, aPID, lVersion, lUnused, lUnused};
     fsip_header_t temp = {aNoBlocks, 0, aNoBlocks, lVersion, lUnused, lUnused, lUnused, lBTemp};
     *_header = temp;
-
-    // saving fsip to extra file
-    // std::ofstream myfile;
-    // std::string filename = "page"+std::to_string(aPageIndex)+".txt";
-    // myfile.open (filename);
-    // //std::stringstream stream;
-    // uint32_t* lPP2 = (uint32_t*) aPP;
-    // for(uint a=0;a<_pageSize/4;++a){
-    // 	//stream << std::hex << *(uint8_t*)(aPP+a);
-    // 	myfile <<  std::hex << *(lPP2+a) << std::endl;
-    // }
-    // //std::string s = stream.str();
-    // //myfile << s << std::endl;
-    // std::cout<<sizeof(fsip_header_t)<<std::endl;
-    // myfile.close();
+	// debug(aPageIndex);
 }
 
 uint FSIPInterpreter::getNextFreePage() {
@@ -83,13 +67,11 @@ uint FSIPInterpreter::getNextFreePage() {
 
 // added LSN and PID to param list, pls update header for allocated block
 int FSIPInterpreter::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID) {
-    // std::cout << "#####getnewPage####" << std::endl;
     if (_header->_freeBlocksCount == 0) {
         return -1;
     }
     attach(aPP);
     uint32_t lPosFreeBlock = _header->_nextFreePage;
-    // std::cout << "next free block before " << lPosFreeBlock << std::endl;
     byte *lPP = aPP;
     lPP += lPosFreeBlock / 8; // set pointer lPosfreeBlocks/8 bytes forward
     uint8_t lMask = 1;
@@ -99,7 +81,6 @@ int FSIPInterpreter::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aP
 
     _header->_nextFreePage = getNextFreePage();
     --(_header->_freeBlocksCount);
-    // std::cout << "next free page after allocating new: " << _header->_nextFreePage << " FreeBlocksCount " << _header->_freeBlocksCount << std::endl;
     return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
@@ -121,24 +102,7 @@ int FSIPInterpreter::reservePage(const uint aPageIndex) {
     *lPP = *lPP | (lMask);
     --(_header->_freeBlocksCount);
     _header->_nextFreePage = getNextFreePage();
-
-    // std::cout << "next free block after reserve " << _header->_nextFreePage << std::endl;
-
-    // saving fsip to extra file
-    // std::ofstream myfile;
-    // std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-    // myfile.open(filename);
-    // // std::stringstream stream;
-    // uint32_t *lPP2 = (uint32_t *)_pp;
-    // for (uint a = 0; a < _pageSize / 4; ++a) {
-    //     // 	//stream << std::hex << *(uint8_t*)(aPP+a);
-    //     myfile << std::hex << *(lPP2 + a) << std::endl;
-    // }
-    // // //std::string s = stream.str();
-    // // myfile << s << std::endl;
-    // // std::cout << "pagePrinted" << std::endl;
-    // myfile.close();
-
+    // debug(aPageIndex);
     return 0;
 }
 
@@ -161,18 +125,17 @@ void FSIPInterpreter::freePage(const uint aPageIndex) {
     lMask <<= lBitindex;
     *lPP = *lPP & (~lMask);
     ++(_header->_freeBlocksCount);
+    // debug(aPageIndex);
+}
 
-    // std::ofstream myfile;
-    // std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-    // myfile.open(filename);
-    // // std::stringstream stream;
-    // uint32_t *lPP2 = (uint32_t *)_pp;
-    // for (uint a = 0; a < _pageSize / 4; ++a) {
-    //     // stream << std::hex << *(uint8_t*)(aPP+a);
-    //     myfile << std::hex << *(lPP2 + a) << std::endl;
-    // }
-    // // std::string s = stream.str();
-    // // myfile << s << std::endl;
-    // // std::cout << "pagePrinted" << std::endl;
-    // myfile.close();
+void FSIPInterpreter::debug(const uint aPageIndex)
+{
+	std::ofstream myfile;
+	std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+	myfile.open(filename);
+	uint32_t *lPP2 = (uint32_t *)_pp;
+	for (uint a = 0; a < _pageSize / 4; ++a) {
+		myfile << std::hex << *(lPP2 + a) << std::endl;
+	}
+	myfile.close(); 
 }

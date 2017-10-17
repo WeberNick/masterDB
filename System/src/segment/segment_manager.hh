@@ -3,12 +3,7 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de), Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *  @brief   This class manages multiple segments
  *  @bugs    Currently no bugs known
- *  @todos   - Pass Header information to getNewSegment for creation of Segment()
- *           - Implement:
- *               SegmentManager::storeSegmentManager()
- *               SegmentManager::loadSegmentManager()
- *               SegmentManager::storeSegments()
- *               SegmentManager::loadSegments()
+ *  @todos   -
  *  @section TBD
  */
 
@@ -42,8 +37,8 @@ class SegmentManager
 		SegmentBase* getSegment(const uint16_t aSegmentID);
 
 	private:
-		int storeSegments(); // serialize segments? called by storeSegmentManager
-		int loadSegments();	 // deserialize segments? called by storeSegmentManager
+		void storeSegments();
+		void loadSegments(uint32_vt& aSegmentPages);
 
 	private:
 		/* ID Counter for Segments */

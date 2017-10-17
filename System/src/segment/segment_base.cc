@@ -6,10 +6,17 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition) :
     _partition(aPartition),
     _index(0)
 {
-	_partition.open();
+	if(_partition.open() == -1){/*error handling*/}
 	int lSegmentIndex = _partition.allocPage();
 	_index = (lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0;
-	_partition.close();
+	if(_partition.close() == -1){/*error handling*/}
 }
+
+SegmentBase::SegmentBase(PartitionBase& aPartition) : 
+	_segID(0),
+    _pages(),
+    _partition(aPartition),
+    _index(0)
+{}
 
 SegmentBase::~SegmentBase(){}
