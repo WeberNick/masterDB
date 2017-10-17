@@ -1,13 +1,21 @@
 #include "fsip_interpreter.hh"
 
+<<<<<<< HEAD
 FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0) {}
+=======
+//!!! funktioniert nur mit little Endian!!!!
 
-FSIPInterpreter::~FSIPInterpreter() {}
+FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0)
+{}
+>>>>>>> d1fe2ac2adb3e92c4e73af24d136f8850fa2342e
 
-void FSIPInterpreter::detach() {
-    _pp = NULL;
-    _header = NULL;
-    _pageSize = 0;
+FSIPInterpreter::~FSIPInterpreter(){}
+
+void FSIPInterpreter::detach()
+{
+	_pp = NULL;
+	_header = NULL;
+	_pageSize = 0;
 }
 
 void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoBlocks) {
@@ -43,26 +51,24 @@ void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t
 	// debug(aPageIndex);
 }
 
-uint FSIPInterpreter::getNextFreePage() {
-    // std::cout << "###### finding next free Page ######" << std::endl;
-    size_t lCondition = ((_pageSize - sizeof(fsip_header_t)) / 4) - 1;
-    for (uint32_t j = (_header->_nextFreePage) / 32; j <= lCondition; ++j) { // looping through FSIP with step 8
-        uint32_t *lPP = ((uint32_t *)_pp) + j;
-        uint32_t lPartBytes = *lPP; // cast to 8 Byte Int Pointer, add the next j
-                                    // 8Byte block and dereference
-        lPartBytes = ~lPartBytes;
-        if ((lPartBytes) != 0) {
-            // std::cout << "lPartBytes" << std::hex << lPartBytes << std::endl;
-            uint32_t lCalcFreePos = idx_lowest_bit_set<uint32_t>(lPartBytes); // find the first "leftmost" zero
-            // idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to
-            // 1
-            // std::cout << "sizeof(lpartb)" << sizeof(lPartBytes) << "lCalcFreePos " << lCalcFreePos << std::endl;
-            return ((j * 32) + lCalcFreePos);
-            // change LSN
-            break;
-        }
-    }
-    return 0;
+uint FSIPInterpreter::getNextFreePage()
+{
+//	std::cout<<"###### finding next free Page ######"<<std::endl;
+	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/4) - 1;
+	for(uint32_t j = (_header->_nextFreePage)/32; j <= lCondition; ++j){ //looping through FSIP with step 8 
+		uint32_t* lPP = ((uint32_t*) _pp) + j;
+		uint32_t lPartBytes = *lPP; //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
+		lPartBytes=~lPartBytes;
+		if((lPartBytes) != 0){
+			uint32_t lCalcFreePos = idx_lowest_bit_set<uint32_t>(lPartBytes); //find the first "leftmost" zero
+			//idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
+//			std::cout<<" next free page is "<< (j*32) + lCalcFreePos <<std::endl;
+			return ((j*32) + lCalcFreePos);
+			//change LSN
+			break; 
+		}
+	}
+	return 0;
 }
 
 // added LSN and PID to param list, pls update header for allocated block
@@ -138,4 +144,5 @@ void FSIPInterpreter::debug(const uint aPageIndex)
 		myfile << std::hex << *(lPP2 + a) << std::endl;
 	}
 	myfile.close(); 
+
 }

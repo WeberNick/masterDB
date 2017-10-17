@@ -79,7 +79,7 @@ int PartitionFile::allocPage()
 		} 
 		else
 		{
-			writePage(lPagePointer, lAllocatedPageIndex, _pageSize);
+			writePage(lPagePointer, lIndexOfFSIP, _pageSize);
 		} 
 		if(lIndexOfFSIP >= _sizeInPages) return -1;						//Next offset is bigger than the partition
 	}
@@ -160,18 +160,20 @@ int PartitionFile::init()
 
 void PartitionFile::printPage(uint aPageIndex)
 {
-	// byte* lPagePointer = new byte[_pageSize];
-	// readPage(lPagePointer, aPageIndex, _pageSize);	
-	// std::ofstream myfile;
-	// std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-	// myfile.open (filename);
-	// uint32_t* lPP2 = (uint32_t*) lPagePointer;
-	// for(uint a = 0; a < _pageSize/4 ; ++a)
-	// {
-	//     myfile <<  std::hex << *(lPP2+a) << std::endl;
-	// }
-	// // std::cout << "pagePrinted" <<std::endl;
-	// myfile.close();
-	// delete[] lPagePointer;
+  	open();
+	 byte* lPagePointer = new byte[_pageSize];
+	 readPage(lPagePointer, aPageIndex, _pageSize);	
+	 std::ofstream myfile;
+	 std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+	 myfile.open (filename);
+	 uint32_t* lPP2 = (uint32_t*) lPagePointer;
+	 for(uint a = 0; a < _pageSize/4 ; ++a)
+	 {
+	     myfile <<  std::hex << std::setw(8) << std::setfill('0')<< *(lPP2+a) << std::endl;
+	 }
+	 std::cout << "pagePrinted" <<std::endl;
+	 myfile.close();
+	 delete[] lPagePointer;
+	 close();
 }
 
