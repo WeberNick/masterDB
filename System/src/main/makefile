@@ -9,8 +9,14 @@ HDR = \
 	test.hh \
 	\
 
+DBIM_HDR = \
+	../infra/types.hh \
+	../partition/partition_manager.hh \
+	../segment/segment_manager.hh \
+
 
 OBJ = \
+	db_instance_manager.o \
 	../infra/args.o \
 	../partition/partition_manager.o \
 	../partition/partition_base.o \
@@ -28,11 +34,14 @@ ALL = main
 
 all : $(ALL)
 
-main: main.o $(OBJ)
+main: db_instance_manager.o main.o $(OBJ)
 	$(CC) -o main main.o $(OBJ)
 
 main.o : main.cc $(HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) main.cc
+
+db_instance_manager.o : db_instance_manager.cc $(DBIM_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc
 
 clean :
 	rm -f *.o a.out $(ALL)

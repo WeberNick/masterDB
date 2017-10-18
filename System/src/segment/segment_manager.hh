@@ -20,17 +20,29 @@
 
 class SegmentManager
 {
-	public:
-		explicit SegmentManager(PartitionBase& aPartition);
+	private:
+		explicit SegmentManager();
 		SegmentManager(const SegmentManager& aSegmentManager) = delete;
 		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
 		~SegmentManager();	         // delete all segments
 
 	public:
-		Segment* createNewSegment(); // create and add new segment (persistent), return it
+        /**
+         *  @brief  This function is the only way to get access to the SegmentManager instance
+         *
+         *  @return reference to the only SegmentManager instance
+         */
+        static SegmentManager& getInstance()
+        {
+            static SegmentManager lSegmentManagerInstance;
+            return lSegmentManagerInstance;
+        }
+
+	public:
+		Segment* createNewSegment(PartitionBase& aPartition); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();			
-		int storeSegmentManager();	 // serialization
-		int loadSegmentManager();    // deserialization
+		int storeSegmentManager(PartitionBase& aPartition);	 // serialization
+		int loadSegmentManager(PartitionBase& aPartition);    // deserialization
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }				
@@ -38,7 +50,7 @@ class SegmentManager
 
 	private:
 		void storeSegments();
-		void loadSegments(uint32_vt& aSegmentPages);
+		void loadSegments(uint32_vt& aSegmentPages, PartitionBase& aPartition);
 
 	private:
 		/* ID Counter for Segments */
@@ -49,8 +61,6 @@ class SegmentManager
 		std::vector<uint32_t> _ownPages;		
 		/* Number of Pages that can be managed on one SegmentManager Page */
 		uint32_t _maxSegmentsPerPage;
-		/* Partition the SegmentManager belongs to */
-		PartitionBase& _partition;
 };
 
 #endif

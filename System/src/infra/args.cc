@@ -13,10 +13,10 @@ void construct_arg_desc(argdesc_vt& x)
 	x.push_back( new barg_t("--help", false, &Args::help, "print this message" ));
 	x.push_back( new barg_t("--nsm", false, &Args::nsm, "use the n-ary storage model"));
 	x.push_back( new barg_t("--pax", false, &Args::pax, "use the pax storage model"));
-	x.push_back( new uarg_t("--core", 0, &Args::core, "core number to run the execution on"));
+	// x.push_back( new uarg_t("--core", 0, &Args::core, "core number to run the execution on"));
 	x.push_back( new uarg_t("--pagesize", 4096, &Args::pageSize, "memory page size to use (e.g., 4096, 8192, 16384, ...)"));
 	x.push_back( new uarg_t("--alignment", 4096, &Args::alignment, "memory page alignment to use. must be a multiple of sizeof(void*), that is also a power of two"));
-	x.push_back( new barg_t("--all", false, &Args::all, "conduct a complete DBS test (bulk-load, update, queries)"));
+	x.push_back( new barg_t("--test", false, &Args::test, "conduct a complete DBS test"));
 	x.push_back( new barg_t("--print", false, &Args::print, "sets the flag to print all test results into a file"));
 	x.push_back( new uarg_t("--runs", 1, &Args::runs, "the number how often a test is repeated"));
 	x.push_back( new sarg_t("--path", "$HOME/Partition", &Args::path, "path to partition"));
@@ -29,7 +29,7 @@ Args::Args() :
 	_help(false), 
 	_nsm(false), 
 	_pax(false),
-	_all(false),
+	_test(false),
 	_print(false),
 	_core(0),
 	_pageSize(4096),

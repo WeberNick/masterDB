@@ -1,6 +1,8 @@
 #include "infra/types.hh"
 #include "infra/args.hh"
 
+#include "db_instance_manager.hh"
+
 #include "test.hh"
 
 
@@ -50,12 +52,17 @@ int main(const int argc, const char *argv[]) {
 	/***************************************************************************************************
 	** Test call in test.hh ****************************************************************************
 	***************************************************************************************************/
-
-	// test(C_PATH, C_PARTITION_SIZE_IN_PAGES, C_PAGE_SIZE, C_SEGMENT_INDEX_PAGE, C_GROWTH_INDICATOR);
+	if(lArgs.test())
+	{
+		test(C_PATH, C_PARTITION_SIZE_IN_PAGES, C_PAGE_SIZE, C_SEGMENT_INDEX_PAGE, C_GROWTH_INDICATOR);
+	}
 
 	/***************************************************************************************************
 	** Todo... Boot Sequence ***************************************************************************
 	***************************************************************************************************/
+
+	DatabaseInstanceManager::getInstance().getPartMngr();
+	DatabaseInstanceManager::getInstance().getSegMngr();
 	
 
     return 0;

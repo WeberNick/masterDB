@@ -70,19 +70,17 @@ int Segment::storeSegment()
     }
     uint8_t lVersion = 1;
     // basic_header: LSN, PageIndex, PartitionId, Version, unused
-    basic_header_t lBasicHeader = {0, _index, _partition.getID(), lVersion, 0};
+    basic_header_t lBasicHeader = {0, _masterPageIndex, _partition.getID(), lVersion, 0};
     // segment_page_header_t: maxSize, currSize, segID, version, unused, basicHeader
     segment_page_header_t lSegmentHeader = {_maxSize, _pages.size(), _segID, lVersion, 0, lBasicHeader}; //is this correct, Jonas?
     *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = lSegmentHeader; //is this correct, Jonas?
-    _partition.writePage(lPageBuffer, _index, _partition.getPageSize());
+    _partition.writePage(lPageBuffer, _masterPageIndex, _partition.getPageSize());
     delete[] lPageBuffer;
     return 0;
 }
 
 int Segment::loadSegment(const uint32_t aPageIndex)
 {
-    std::cout<<"loading segment from page "<<aPageIndex<<" isOpen "<<_partition.isOpen()<< std::endl;
-    
     // to be set beforehand: partition, and it has to be opened
     byte *lPageBuffer = new byte[_partition.getPageSize()];
     size_t lPageSize = _partition.getPageSize();
@@ -93,7 +91,7 @@ int Segment::loadSegment(const uint32_t aPageIndex)
     }
     // some more variables to be set
     _segID = lHeader._segID;
-    _index = aPageIndex;
+    _masterPageIndex = aPageIndex;
     _maxSize = lHeader._maxSize;
     return 0;
 }

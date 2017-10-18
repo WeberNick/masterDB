@@ -31,7 +31,7 @@ class SegmentBase
 		inline uint16_t getID(){ return _segID; }
 		inline size_t getNoPages(){ return _pages.size(); }
 		inline PartitionBase& getPartition() { return _partition; }
-		inline uint32_t getIndex(){ return _index; }
+		inline uint32_t getIndex(){ return _masterPageIndex; }
 
 	protected:
 		virtual int storeSegment() = 0;                          // serialization

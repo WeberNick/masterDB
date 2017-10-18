@@ -44,8 +44,8 @@ class Args
 		inline const uint alignment(){ return _alignment;}
 		inline void alignment(const uint& x){ _alignment = x;}
 
-		inline const bool all(){ return _all;}
-		inline void all(const bool& x){ _all = x;}
+		inline const bool test(){ return _test;}
+		inline void test(const bool& x){ _test = x;}
 
 		inline const bool print(){ return _print;}
 		inline void print(const bool& x){ _print = x;}
@@ -69,7 +69,7 @@ class Args
 		bool _help;
 		bool _nsm;
 		bool _pax;
-		bool _all;
+		bool _test;
 		bool _print;
 		uint _core;
 		uint _pageSize;
