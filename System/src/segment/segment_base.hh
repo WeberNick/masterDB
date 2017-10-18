@@ -45,7 +45,7 @@ class SegmentBase
 		/* Partition the Segment belongs to */
 		PartitionBase& _partition;
 		/* Position in Partition */
-		uint32_t _index;
+		uint32_t _masterPageIndex;
 };
 
 

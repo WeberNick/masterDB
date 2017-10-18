@@ -5,7 +5,7 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition) :
 	_segID(aSegID),
     _pages(),
     _partition(aPartition),
-    _index(0)
+    _masterPageindex(0)
 {
 	if(_partition.open() == -1){/*error handling*/}
 	int lSegmentIndex = _partition.allocPage();
@@ -17,7 +17,7 @@ SegmentBase::SegmentBase(PartitionBase& aPartition) :
 	_segID(0),
     _pages(),
     _partition(aPartition),
-    _index(0)
+    _masterPageindex(0)
 {}
 
 SegmentBase::~SegmentBase(){}
