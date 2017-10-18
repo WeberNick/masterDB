@@ -15,7 +15,7 @@ class PartitionRaw : public PartitionBase
 {
 	private:
 		friend class PartitionManager;
-		explicit PartitionRaw(const char* aPath, const uint aNoPages, const uint aPageSize, const uint aPartitionID);
+		explicit PartitionRaw(const std::string aPath, const std::string aName, const uint aNoPages, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID);
 		PartitionRaw(const PartitionRaw& aPartition) = delete;
 		PartitionRaw& operator=(const PartitionRaw& aPartition) = delete;
 		~PartitionRaw();

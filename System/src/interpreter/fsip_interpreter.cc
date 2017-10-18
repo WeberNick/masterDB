@@ -1,13 +1,22 @@
 #include "fsip_interpreter.hh"
 
-<<<<<<< HEAD
-FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0) {}
-=======
-//!!! funktioniert nur mit little Endian!!!!
+bool FSIPInterpreter::_pageSizeSet = false;
+uint16_t FSIPInterpreter::_pageSize = 0;
 
-FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL), _pageSize(0)
-{}
->>>>>>> d1fe2ac2adb3e92c4e73af24d136f8850fa2342e
+void FSIPInterpreter::setPageSize(const uint16_t aPageSize)
+{
+  if(!_pageSizeSet)
+  {
+    _pageSizeSet = !_pageSizeSet;
+    _pageSize = aPageSize;
+  }
+  else
+  {
+    std::cerr << "ERROR: Page size can only be set once" << std::endl;
+  }
+}
+
+FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL) {}
 
 FSIPInterpreter::~FSIPInterpreter(){}
 
@@ -15,7 +24,6 @@ void FSIPInterpreter::detach()
 {
 	_pp = NULL;
 	_header = NULL;
-	_pageSize = 0;
 }
 
 void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoBlocks) {

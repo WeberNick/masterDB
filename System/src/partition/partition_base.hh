@@ -11,11 +11,13 @@
 
 #include "infra/types.hh"
 
+#include <string>
+
 class PartitionBase
 {
 	protected:
 		friend class PartitionManager;
-		explicit PartitionBase(const char* aPath, const uint aNoPages, const uint aPageSize, const uint aPartitionID);
+		explicit PartitionBase(const std::string aPath, const std::string aName, const uint aNoPages, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID);
 		PartitionBase(const PartitionBase& aPartition) = delete;
 		PartitionBase& operator=(const PartitionBase& aPartition) = delete;
 		virtual ~PartitionBase() = 0;
@@ -29,16 +31,19 @@ class PartitionBase
 		virtual int writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize) = 0;
 
 	public:
-		inline const char* 	getPath(){ return _partitionPath; }
+		inline std::string 	getPath(){ return _partitionPath; }
+		inline std::string 	getName(){ return _partitionName; }
 		inline uint 		getSizeInPages(){ return _sizeInPages; }
 		inline uint 		getPageSize(){ return _pageSize; }
 		inline uint8_t 		getID(){ return _partitionID; }
 		inline uint 		getSegmentIndexPage(){ return _segmentIndexPage; }
-		inline bool 		isOpen(){ return _isOpen; }
+		inline uint 		getOpenCount(){ return _openCount; }
 
 	protected:
 		/* A path to a partition (i.e., a file) */
-		const char* _partitionPath;
+		std::string _partitionPath;
+		/* Name of the partition */
+		std::string _partitionName;
 		/* The current size of the partition in number of pages */
 		uint _sizeInPages;
 		/* The block size in bytes, used by the partition */
@@ -49,8 +54,8 @@ class PartitionBase
 		uint _segmentIndexPage;
 		/* Helper flag if partition is already created */
 		bool _isCreated;
-		/* Helper flag if partition is open */
-		bool _isOpen;
+		/* Counts the number of open calls */
+		uint _openCount;
 };
 
 

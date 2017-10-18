@@ -1,9 +1,8 @@
-// #include "infra/bit_intrinsics.hh"
 #include "infra/types.hh"
-#include "partition/partition_file.hh"
-#include "partition/partition_manager.hh"
-#include "segment/segment.hh"
-#include "segment/segment_manager.hh"
+#include "infra/args.hh"
+
+#include "test.hh"
+
 
 
 #include <iostream>
@@ -15,97 +14,52 @@
    bold   indicates print from other methods
    normal indicates terminal output (e.g. output from creation of partition with linux command) */
 int main(const int argc, const char *argv[]) {
-	std::cout << "\n" << std::endl;
 	
 	/***************************************************************************************************
-	** Test construction of PartitionManager, PartitionFile and SegmentManager *************************
+	** Parse Command Line Arguments ********************************************************************
 	***************************************************************************************************/
 
-	PartitionManager lPartMngr;
-    PartitionFile *lPartFile = lPartMngr.createPartitionFileInstance(argv[1], c_PartitionSizeInPages(), c_PageSize(), c_GrowthIndicator());
-    SegmentManager lSegMngr(*lPartFile);
+	Args lArgs;
+	argdesc_vt lArgDesc;
+	construct_arg_desc(lArgDesc);
 
-
-    /***************************************************************************************************
-	** Test creation of partition on disk **************************************************************
-	***************************************************************************************************/
-
-    std::cout << "> Creating partition on disk..." << std::endl;
-    if (lPartFile->createPartition() != 0) // This could be commented out
-        std::cout << "\033[0;31m> Something went wrong while creating the partition...\033[0m" << std::endl; // will be printed as long as reservePage in fsip is not implemented
-    /* Add further tests...
-    std::cout<<"highest bit set in all 1 "<<idx_highest_bit_set<uint64_t>(~0)<<std::endl;
-    std::cout<<"highest bit set in 1"<<idx_highest_bit_set<uint64_t>(1)<<std::endl;
-    std::cout<<"lowest bit set in all 1 "<<idx_lowest_bit_set<uint64_t>(~0)<<std::endl;
-    */
-
-    /***************************************************************************************************
-	** Test PartitionManager functionalities ***********************************************************
-	***************************************************************************************************/
-    if(lPartMngr.getPartition(lPartFile->getID())->open() == -1){std::cout << "\033[0;31m> Something went wrong while opening the partition...\033[0m" << std::endl;}
-    uint nxFreePage = lPartMngr.getPartition(lPartFile->getID())->allocPage();
-	
-    std::cout << "> Get free page results in page " << nxFreePage << std::endl;
-   // if (lPartMngr.getPartition(lPartFile->getID())->freePage(2) != 0)
-	//	std::cout << "\033[0;31m> Something went wrong while freeing the page...\033[0m" << std::endl;
-
-	if(lPartMngr.getPartition(lPartFile->getID())->close() == -1){std::cout << "\033[0;31m> Something went wrong while closing the partition...\033[0m" << std::endl;}
-	
-    /***************************************************************************************************
-	** Test Segment functionalities ********************************************************************
-	***************************************************************************************************/
-	std::cout<<"### creating segments ###"<<std::endl;
-    Segment* lFirstSeg = lSegMngr.createNewSegment();
-	Segment* lSecondSeg = lSegMngr.createNewSegment();
-	Segment* lThirdSeg = lSegMngr.createNewSegment();
-	std::cout<<"###  segments created ###"<<std::endl;
-	if (lSegMngr.getNoSegments() != 3)
-		std::cout << "\033[0;31m> SegmentManager handling of _segments incorrect...\033[0m" << std::endl;
-	
-	uint lSegID = lFirstSeg->getID();
-	std::cout << "> Compare this address: " << (void*)lSegMngr.getSegment(lSegID) << std::endl;
-	std::cout << "> with this:            " << (void*)lFirstSeg << std::endl;
-	
-	uint lSegPageIndex = lFirstSeg->getNewPage();
-	uint lNoRuns = 5;
-	for(uint i = 1; i <= lNoRuns; ++i)
+	if(!parse_args<Args>(1, argc, argv, lArgDesc, lArgs)) 
 	{
-		lSegPageIndex = lFirstSeg->getNewPage();
+		std::cerr << "error while parsing arguments." << std::endl;
+		return -1;
 	}
-	std::cout << "> SegmentPageIndex: " << lSegPageIndex << "  (should be " << lNoRuns << ")" << std::endl;
-	uint lSegNoPages = lFirstSeg->getNoPages();
-	std::cout << "> SegmentNoPages:   " << lSegNoPages << std::endl;
-	uint lSegIndexFirst = lFirstSeg->getIndex();
-	uint lSegIndexThird = lThirdSeg->getIndex();
-	std::cout << "> SegIndexFirst:    " << lSegIndexFirst << std::endl;
-	std::cout << "> SegIndexThird:   " << lSegIndexThird << std::endl;
 
-	std::cout << "> Compare this address: " << (void*)&lSecondSeg->getPartition() << std::endl;
-	std::cout << "> with this:            " << (void*)lPartFile << std::endl;
+	if(lArgs.help()) 
+	{
+		print_usage(std::cout, argv[0], lArgDesc);
+		return 0;
+	}
+
+	const std::string 	C_PATH						= lArgs.path();
+	const uint 			C_PARTITION_SIZE_IN_PAGES 	= lArgs.partitionSizeInPages();
+	const uint 			C_PAGE_SIZE 				= lArgs.pageSize();
+	const uint 			C_SEGMENT_INDEX_PAGE 		= lArgs.segmentIndexPage();
+	const uint 			C_GROWTH_INDICATOR 			= lArgs.growthIndicator();
+
+	std::cout << "Path: " << C_PATH << std::endl;
+	std::cout << "PSize: " << C_PARTITION_SIZE_IN_PAGES << std::endl;
+	std::cout << "PageSize: " << C_PAGE_SIZE << std::endl;
+	std::cout << "Index: " << C_SEGMENT_INDEX_PAGE << std::endl;
+	std::cout << "Growth: " << C_GROWTH_INDICATOR << std::endl;
+
+	FSIPInterpreter::setPageSize(lArgs.pageSize());
+
 
 	/***************************************************************************************************
-	** Test SegmentManager functionalities *************************************************************
+	** Test call in test.hh ****************************************************************************
 	***************************************************************************************************/
-	((PartitionFile*)  lPartMngr.getPartition(lPartFile->getID()) )->printPage(0);
+
+	// test(C_PATH, C_PARTITION_SIZE_IN_PAGES, C_PAGE_SIZE, C_SEGMENT_INDEX_PAGE, C_GROWTH_INDICATOR);
+
+	/***************************************************************************************************
+	** Todo... Boot Sequence ***************************************************************************
+	***************************************************************************************************/
 	
-	lSegMngr.storeSegmentManager();
-	std::cout << ">SegmentManager stored" << std::endl;
-	lSegMngr.loadSegmentManager();
-	std::cout << ">SegmentManager loaded" << std::endl;
-
-	if (lSegMngr.getNoSegments() != 3 or lSegMngr.getSegment(0) != lFirstSeg)
-	if (lSegMngr.getNoSegments() != 3)
-	    std::cout << "\033[0;31m> SegmentManager handling of _segments incorrect...\033[0m" << std::endl;
-		// std::cout << "\033[0;31m> SegmentManager (de-)serialization went wrong...\033[0m" << std::endl;
-
-    std::cout << "> Remove the partition from disk...\n" << std::endl;
-
-    /***************************************************************************************************
-	** Test deletion of partition on disk **************************************************************
-	***************************************************************************************************/
-
-    if (lPartFile->removePartition() != 0) // This could be commented out
-        std::cout << "\033[0;31m> Something went wrong removing the partition...\033[0m\n" << std::endl;
 
     return 0;
 }

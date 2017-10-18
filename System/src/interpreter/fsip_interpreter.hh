@@ -30,6 +30,9 @@ class FSIPInterpreter
 		~FSIPInterpreter();
 
 	public:
+		static void setPageSize(const uint16_t aPageSize);
+
+	public:
 		inline void  attach(byte* aPP);
 		void  detach();
 
@@ -62,14 +65,14 @@ class FSIPInterpreter
 	private:
 		byte* _pp;
 		fsip_header_t* _header;
-		uint16_t _pageSize; //4096 bytes
+		static bool _pageSizeSet;
+		static uint16_t _pageSize;
 
 };
 
 void FSIPInterpreter::attach(byte* aPP) 
 {
 	_pp = aPP;
-	_pageSize = c_PageSize();
 	_header = get_hdr_ptr();
 }
 

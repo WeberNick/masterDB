@@ -58,7 +58,6 @@ int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
 
 int Segment::storeSegment()
 {
-    std::cout<<"storing segment "<<_segID<<" on page "<<_header._basicHeader._pageIndex<<std::endl;
     /* assuming header stores up to date information
        segment 1 on position 1
        header last

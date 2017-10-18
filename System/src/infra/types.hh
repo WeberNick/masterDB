@@ -7,8 +7,6 @@
 #ifndef INFRA_TYPES_HH
 #define INFRA_TYPES_HH
 
-#include "config.hh"
- 
 #include <cstdint>
 #include <cstddef>
 #include <vector>

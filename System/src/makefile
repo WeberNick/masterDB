@@ -1,4 +1,5 @@
 DIRECTORIES = \
+	infra \
 	partition \
 	segment \
 	interpreter \

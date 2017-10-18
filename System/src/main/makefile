@@ -5,14 +5,13 @@ CC = g++
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh \
-	../partition/partition_manager.hh \
-	../partition/partition_file.hh \
-	../segment/segment.hh \
+	../infra/args.hh \
+	test.hh \
 	\
 
 
 OBJ = \
+	../infra/args.o \
 	../partition/partition_manager.o \
 	../partition/partition_base.o \
 	../partition/partition_file.o \

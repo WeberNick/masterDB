@@ -1,7 +1,7 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const char* aPath, const uint aNoPages, const uint aPageSize, const uint aPartitionID, const uint aGrowthIndicator) :
-	PartitionBase(aPath, aNoPages, aPageSize, aPartitionID),
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aNoPages, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID, const uint aGrowthIndicator) :
+	PartitionBase(aPath, aName, aNoPages, aPageSize, aSegmentIndexPage, aPartitionID),
 	_growthIndicator(aGrowthIndicator),
 	_fileDescriptor(-1)
 {}
@@ -10,34 +10,43 @@ PartitionFile::~PartitionFile(){}
 
 int PartitionFile::open()
 {
-	if(!(!_isOpen && _isCreated)){ return -1; }
-	_fileDescriptor = ::open(_partitionPath, O_RDWR); //call open in global namespace
-	if(_fileDescriptor == -1)
+	if(!_isCreated){ return -1; }
+	if(_openCount == 0)
 	{
-		std::cerr << "Error opening the file: " << std::strerror(errno) << std::endl;
-		return -1;
+		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); //call open in global namespace
+		if(_fileDescriptor == -1)
+		{
+			std::cerr << "Error opening the file: " << std::strerror(errno) << std::endl;
+			return -1;
+		}
 	}
-	_isOpen = true;
+	++_openCount;
 	return 0;
 }
 
 int PartitionFile::close()
 {
-	if(!(_isOpen && _isCreated)){ return -1; }
-	if(::close(_fileDescriptor) != 0) //call close in global namespace
+	if(!_isCreated){ return -1; }
+	if(_openCount == 1)
 	{
-		std::cerr << "Error closing the file: " << std::strerror(errno) << std::endl;
-		return -1;
+		if(::close(_fileDescriptor) != 0) //call close in global namespace
+		{
+			std::cerr << "Error closing the file: " << std::strerror(errno) << std::endl;
+			return -1;
+		}
+		_fileDescriptor = -1;
 	}
-	_fileDescriptor = -1;
-	_isOpen = false;
+	else if(_openCount > 1)
+	{
+		--_openCount;
+	}
 	return 0;
 }
 
 int PartitionFile::createPartition()
 {
 	if(_isCreated){return -1;}
-	std::string lCommand = "dd if=/dev/zero of=" + std::string(_partitionPath) + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
+	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
 	std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
@@ -54,7 +63,7 @@ int PartitionFile::createPartition()
 int PartitionFile::removePartition()
 {
 	if(!_isCreated){return -1;}
-	std::string lCommand = "rm " + std::string(_partitionPath);
+	std::string lCommand = "rm " + _partitionPath;
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
 	std::cout << "\033[1;30mPartitionFile was successfully removed.\033[0m" << std::endl;
