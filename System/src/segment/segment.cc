@@ -69,7 +69,6 @@ int Segment::storeSegment()
         std::cout<<_pages.at(i)<<std::endl;
         *(((uint32_t *)lPageBuffer) + i) = _pages.at(i);
     }
-<<<<<<< HEAD
     uint8_t lVersion = 1;
     // basic_header: LSN, PageIndex, PartitionId, Version, unused
     basic_header_t lBasicHeader = {0, _index, _partition.getID(), lVersion, 0};
@@ -77,14 +76,6 @@ int Segment::storeSegment()
     segment_page_header_t lSegmentHeader = {_maxSize, _pages.size(), _segID, lVersion, 0, lBasicHeader}; //is this correct, Jonas?
     *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = lSegmentHeader; //is this correct, Jonas?
     _partition.writePage(lPageBuffer, _index, _partition.getPageSize());
-=======
-        // basic header: LSN, PageIndex, PartitionId, Version, unused
-    basic_header_t t={0,_index,_partition.getID(),1,0};
-        // _maxSize; _currSize;_segID;_version; _unused1;
-    segment_page_header_t temp = {_maxSize,_pages.size(),_segID,1,0,t};
-    *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = temp;
-    _partition.writePage(lPageBuffer, _header._basicHeader._pageIndex, _partition.getPageSize());
->>>>>>> d1fe2ac2adb3e92c4e73af24d136f8850fa2342e
     delete[] lPageBuffer;
     return 0;
 }
@@ -102,12 +93,7 @@ int Segment::loadSegment(const uint32_t aPageIndex)
         _pages.push_back(*(((uint32_t *)lPageBuffer) + i));
     }
     // some more variables to be set
-<<<<<<< HEAD
     _segID = lHeader._segID;
-=======
-    _maxSize = _header._maxSize;
-    _segID = _header._segID;
->>>>>>> d1fe2ac2adb3e92c4e73af24d136f8850fa2342e
     _index = aPageIndex;
     _maxSize = lHeader._maxSize;
     return 0;

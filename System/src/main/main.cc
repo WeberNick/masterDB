@@ -89,22 +89,9 @@ int main(const int argc, const char *argv[]) {
 	((PartitionFile*)  lPartMngr.getPartition(lPartFile->getID()) )->printPage(0);
 	
 	lSegMngr.storeSegmentManager();
-<<<<<<< HEAD
 	std::cout << ">SegmentManager stored" << std::endl;
 	lSegMngr.loadSegmentManager();
 	std::cout << ">SegmentManager loaded" << std::endl;
-=======
-	 
-	// ((PartitionFile*)  lPartMngr.getPartition(lPartFile->getID()) )->printPage(1);
-	 //((PartitionFile*)  lPartMngr.getPartition(lPartFile->getID()) )->printPage(3);
-
-	 //((PartitionFile*)  lPartMngr.getPartition(lPartFile->getID()) )->printPage(4);
-	 //((PartitionFile*)  lPartMngr.getPartition(lPartFile->getID()) )->printPage(5);
-	 
-	 
-
-	 lSegMngr.loadSegmentManager();
->>>>>>> d1fe2ac2adb3e92c4e73af24d136f8850fa2342e
 
 	if (lSegMngr.getNoSegments() != 3 or lSegMngr.getSegment(0) != lFirstSeg)
 	if (lSegMngr.getNoSegments() != 3)
