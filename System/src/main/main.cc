@@ -4,7 +4,6 @@
 #include "test.hh"
 
 
-
 #include <iostream>
 
 /* Pass path to partition as argument when executing!
@@ -13,8 +12,7 @@
    >      indicates print from main
    bold   indicates print from other methods
    normal indicates terminal output (e.g. output from creation of partition with linux command) */
-int main(const int argc, const char *argv[]) {
-	
+int main(const int argc, const char *argv[]) {	
 	/***************************************************************************************************
 	** Parse Command Line Arguments ********************************************************************
 	***************************************************************************************************/
@@ -48,7 +46,6 @@ int main(const int argc, const char *argv[]) {
 	std::cout << "Growth: " << C_GROWTH_INDICATOR << std::endl;
 
 	FSIPInterpreter::setPageSize(lArgs.pageSize());
-
 
 	/***************************************************************************************************
 	** Test call in test.hh ****************************************************************************
