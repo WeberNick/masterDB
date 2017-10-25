@@ -3,30 +3,26 @@
 bool FSIPInterpreter::_pageSizeSet = false;
 uint16_t FSIPInterpreter::_pageSize = 0;
 
-void FSIPInterpreter::setPageSize(const uint16_t aPageSize)
-{
-  if(!_pageSizeSet)
-  {
-    _pageSizeSet = !_pageSizeSet;
-    _pageSize = aPageSize;
-  }
-  else
-  {
-    std::cerr << "ERROR: Page size can only be set once" << std::endl;
-  }
+void FSIPInterpreter::setPageSize(const uint16_t aPageSize) {
+    if (!_pageSizeSet) {
+        _pageSizeSet = !_pageSizeSet;
+        _pageSize = aPageSize;
+    } else {
+        std::cerr << "ERROR: Page size can only be set once" << std::endl;
+    }
 }
 
 FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL) {}
 
-FSIPInterpreter::~FSIPInterpreter(){}
+FSIPInterpreter::~FSIPInterpreter() {}
 
-void FSIPInterpreter::detach()
-{
-	_pp = NULL;
-	_header = NULL;
+void FSIPInterpreter::detach() {
+    _pp = NULL;
+    _header = NULL;
 }
 
-void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoBlocks) {
+void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
+                                  const uint32_t aNoBlocks) {
     attach(aPP);
     uint32_t max = aNoBlocks / 32; // wie weit ist Seite frei?
     uint32_t i = 0;
@@ -56,27 +52,26 @@ void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t
     basic_header_t lBTemp = {aLSN, aPageIndex, aPID, lVersion, lUnused, lUnused};
     fsip_header_t temp = {aNoBlocks, 0, aNoBlocks, lVersion, lUnused, lUnused, lUnused, lBTemp};
     *_header = temp;
-	// debug(aPageIndex);
+    // debug(aPageIndex);
 }
 
-uint FSIPInterpreter::getNextFreePage()
-{
-//	std::cout<<"###### finding next free Page ######"<<std::endl;
-	size_t lCondition = ((_pageSize - sizeof(fsip_header_t))/4) - 1;
-	for(uint32_t j = (_header->_nextFreePage)/32; j <= lCondition; ++j){ //looping through FSIP with step 8 
-		uint32_t* lPP = ((uint32_t*) _pp) + j;
-		uint32_t lPartBytes = *lPP; //cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
-		lPartBytes=~lPartBytes;
-		if((lPartBytes) != 0){
-			uint32_t lCalcFreePos = idx_lowest_bit_set<uint32_t>(lPartBytes); //find the first "leftmost" zero
-			//idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
-//			std::cout<<" next free page is "<< (j*32) + lCalcFreePos <<std::endl;
-			return ((j*32) + lCalcFreePos);
-			//change LSN
-			break; 
-		}
-	}
-	return 0;
+uint FSIPInterpreter::getNextFreePage() {
+    //	std::cout<<"###### finding next free Page ######"<<std::endl;
+    size_t lCondition = ((_pageSize - sizeof(fsip_header_t)) / 4) - 1;
+    for (uint32_t j = (_header->_nextFreePage) / 32; j <= lCondition; ++j) { // looping through FSIP with step 8
+        uint32_t *lPP = ((uint32_t *)_pp) + j;
+        uint32_t lPartBytes = *lPP; // cast to 8 Byte Int Pointer, add the next j 8Byte block and dereference
+        lPartBytes = ~lPartBytes;
+        if ((lPartBytes) != 0) {
+            uint32_t lCalcFreePos = idx_lowest_bit_set<uint32_t>(lPartBytes); // find the first "leftmost" zero
+            // idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
+            //			std::cout<<" next free page is "<< (j*32) + lCalcFreePos <<std::endl;
+            return ((j * 32) + lCalcFreePos);
+            // change LSN
+            break;
+        }
+    }
+    return 0;
 }
 
 // added LSN and PID to param list, pls update header for allocated block
@@ -142,15 +137,13 @@ void FSIPInterpreter::freePage(const uint aPageIndex) {
     // debug(aPageIndex);
 }
 
-void FSIPInterpreter::debug(const uint aPageIndex)
-{
-	std::ofstream myfile;
-	std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-	myfile.open(filename);
-	uint32_t *lPP2 = (uint32_t *)_pp;
-	for (uint a = 0; a < _pageSize / 4; ++a) {
-		myfile << std::hex << *(lPP2 + a) << std::endl;
-	}
-	myfile.close(); 
-
+void FSIPInterpreter::debug(const uint aPageIndex) {
+    std::ofstream myfile;
+    std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+    myfile.open(filename);
+    uint32_t *lPP2 = (uint32_t *)_pp;
+    for (uint a = 0; a < _pageSize / 4; ++a) {
+        myfile << std::hex << *(lPP2 + a) << std::endl;
+    }
+    myfile.close();
 }

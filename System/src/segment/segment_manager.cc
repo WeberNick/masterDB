@@ -49,7 +49,7 @@ int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
         // write data
         uint j = 0;
         while ((j < _maxSegmentsPerPage) & (lsegmentsIterator != _segments.end())) {
-            *(((uint32_t *)lPageBuffer) + j) = lsegmentsIterator->second->getIndex(); // evaluate first, then increment
+            *(((uint32_t *)lPageBuffer) + j) = lsegmentsIterator->second->getIndexPages()[0]; // evaluate first, then increment
             ++j;
             ++lsegmentsIterator;
         }
