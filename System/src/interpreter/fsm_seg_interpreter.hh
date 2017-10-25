@@ -70,18 +70,17 @@ class FSMInterpreter
 		 *
 		 * 	@return either 0 if successful or -1 if not successful
 		 */
-		//int reservePage(const uint aPageIndex);
 
 		/**
 		 *	@brief	change the status of page at the given logical position within the segment
 		 *
 		 *	@param	aPageIndex - Page index inside the partition
 		 */
-		void changePageStatus(const uint aPageNo,SegmentPageStatus aStatus);
+		void changePageStatus(const uint aPageNo, SegmentPageStatus aStatus);
 	public:
 		/* Getters*/
         inline byte* 			pagePtr()	{ return _pp; }
-        inline uint32_t         getNextFSMPage() {return _header._nextFSM;} //0 if not existing, a physical index otherwise
+        inline uint32_t         getNextFSMPage() {return _header->_nextFSM;} //0 if not existing, a physical index otherwise
 
 	private:
 		/* Getter*/
@@ -89,7 +88,7 @@ class FSMInterpreter
 
 	private:
 		
-		SegmentPageStatus getPageStatus(uint aPageNo);
+		SegmentPageStatus getPageStatus(const uint aPageNo);
 
 	private:
 		/*	pointer to the beginning of the page */
@@ -108,17 +107,5 @@ void FSMInterpreter::attach(byte* aPP)
 	_pp = aPP;
 	_header = get_hdr_ptr();
 }
-
-enum class SegmentPageStatus {
-    //by now only 4 steps, which means 2 bits are unused.
-    full=4,
-    q75=3,
-    q50=2,
-    q25=1,
-    empty=0
-};
-
-
-
 
 #endif

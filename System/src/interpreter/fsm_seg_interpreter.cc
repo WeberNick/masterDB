@@ -26,26 +26,26 @@ void FSMInterpreter::detach()
 	_header = NULL;
 }
 
-void initNewFSM(byte* aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages){
+void FSMInterpreter::initNewFSM(byte* aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages){
 	//alles 0, header
-	uint max = (_pageSize-sizeof(fsm_header_t))/8;
-	for (uint i =0; i<max;++i){
-		*(((uint64_t*) aPP)+i)=0;
+	uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
+	for (uint i = 0; i < max; ++i){
+		*(((uint64_t*) aPP) + i)=0;
 	}
 	    // basic_header: LSN, PageIndex, PartitionId, Version, unused
-	basic_header_t lBH = {aLSN,aPageIndex,aPID,1,0};
-	fsm_header_t lHeader = {aNoPages,0,lBH};
-	*((fsm_header_t*)(aPP+(max*8)))=lHeader;
+	basic_header_t lBH = {aLSN, aPageIndex, aPID, 1, 0};
+	fsm_header_t lHeader = {aNoPages, 0, lBH};
+	*((fsm_header_t*)(aPP + (max * 8))) = lHeader;
 }
-int getFreePage(const uint64_t aLSN, const uint8_t aPageStatus){
+int FSMInterpreter::getFreePage(const uint64_t aLSN, SegmentPageStatus aPageStatus){
 	//uint max = (_pageSize-sizeof(fsm_header_t))*2;
-	uint i=0;
-	while( i<_header._noPages){
+	uint i = 0;
+	while( i<_header->_noPages){
 		SegmentPageStatus lPageStatus = getPageStatus(i);
 		//if fits on page
 		bool fits = 0;
-		if(lPageStatus+aPageStatus<=4){
-			fit =true;
+		if(lPageStatus + aPageStatus <= 4){
+			fits =true;
 		}
 		if(fits){
 			aPageStatus = static_cast<SegmentPageStatus>( aPageStatus+lPageStatus);
@@ -56,7 +56,7 @@ int getFreePage(const uint64_t aLSN, const uint8_t aPageStatus){
 	}
 	if(i<(_pageSize-sizeof(fsm_header_t))*2){//add new page to segment
 		changePageStatus(i,aPageStatus);
-		_header._noPages++;
+		_header->_noPages++;
 		return i;
 	}
 	else{
@@ -67,28 +67,29 @@ int getFreePage(const uint64_t aLSN, const uint8_t aPageStatus){
 	//change status
 }
 
-void changePageStatus(const uint aPageNo,uint8_t aStatus){
+void FSMInterpreter::changePageStatus(const uint aPageNo, SegmentPageStatus aStatus){
 	uint8_t* currByte = ((uint8_t*)_pp+aPageNo/2);
+	uint8_t lStatus = aStatus;
 	if(aPageNo % 2==0){
 		*currByte &= ~15;
-		*currByte |= aStatus;
+		*currByte |= lStatus;
 	}
 	else{
-		aStatus =<<4;
+		lStatus <<= 4;
 		*currByte &= 15;
-		*currByte |= aStatus;
+		*currByte |= lStatus;
 	}
 }
 
-uint getPageStatus(uint aPageNo){
+SegmentPageStatus FSMInterpreter::getPageStatus(const uint aPageNo){
 	uint8_t currByte = *((uint8_t*)_pp+aPageNo/2);
-	if(aPageNo % 2 ==0){
+	if(aPageNo % 2 == 0){
 		currByte &= 15;
-		return currByte;
+		return static_cast<SegmentPageStatus>(currByte);
 	}
 	else{
-		currByte=>>4;
-		return currByte;
+		currByte >>= 4;
+		return static_cast<SegmentPageStatus>(currByte);
 	}
 	//obvious
 }

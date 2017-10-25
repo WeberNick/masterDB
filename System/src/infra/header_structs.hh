@@ -41,7 +41,8 @@ struct fsm_header_t
 {
 	uint32_t _noPages; //number of Pages this FSM page handles
 	uint32_t _nextFSM; //pageIndex of the next FSM of this very segment
-}
+	basic_header_t _basicHeader; // The basic header
+};
 
 /* A header for the SegmentManager */
 struct segment_index_header_t
@@ -64,7 +65,7 @@ struct segment_page_header_t
 	basic_header_t _basicHeader; // The basic header
 };
 
-struct segment_FSM_header_t
+struct segment_fsm_header_t
 {
 	uint32_t _currSize;			// Current number of pages managed by this segment on this page only
 	uint32_t _firstFSM;			// physical index of the first FSM. Others are pointed at from there on
@@ -73,7 +74,7 @@ struct segment_FSM_header_t
 	uint8_t _version;
 	uint8_t _unused;
 	basic_header_t _basicHeader;
-}
+};
  
 /* NSM Header etc. follow */
 //struct nsm_header_t {};

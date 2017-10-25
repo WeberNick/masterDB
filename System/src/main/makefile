@@ -28,6 +28,7 @@ OBJ = \
 	../segment/segment.o \
 	\
 	../interpreter/fsip_interpreter.o \
+	../interpreter/fsm_seg_interpreter.o \
 	\
 
 ALL = main 

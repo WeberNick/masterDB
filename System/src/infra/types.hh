@@ -17,4 +17,13 @@ typedef unsigned int uint;
 typedef std::vector <uint> uint_vt;
 typedef std::vector <uint32_t> uint32_vt;
 
+enum SegmentPageStatus {
+    //by now only 4 steps, which means 2 bits are unused.
+    full=4,
+    q75=3,
+    q50=2,
+    q25=1,
+    empty=0
+};
+
 #endif
