@@ -31,7 +31,7 @@ int Segment::getNewPage()
 		if (_partition.open() == -1) { return -1; }
 		int lPageIndex = _partition.allocPage();
 		if (_partition.close() == -1) { return -1; }
-		//todo init page, e.g. NSM/PAX..
+		// todo init page, e.g. NSM/PAX..
 		if (lPageIndex != -1) {
 			_pages.push_back((uint32_t)lPageIndex);
 			return _pages.size() - 1;

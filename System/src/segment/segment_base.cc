@@ -1,5 +1,4 @@
 #include "segment_base.hh"
-#include <iostream>
 
 SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition) : 
 	_segID(aSegID),
@@ -7,10 +6,10 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition) :
     _pages(),
     _partition(aPartition)
 {
-	if (_partition.open() == -1) { /*error handling*/ }
+	if (_partition.open() == -1) { /* error handling */ }
 	int lSegmentIndex = _partition.allocPage();
 	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
-	if (_partition.close() == -1) { /*error handling*/ }
+	if (_partition.close() == -1) { /* error handling */ }
 }
 
 SegmentBase::SegmentBase(PartitionBase& aPartition) : 
@@ -23,18 +22,26 @@ SegmentBase::SegmentBase(PartitionBase& aPartition) :
 SegmentBase::~SegmentBase()
 {}
 
-int SegmentBase::loadPage(byte* aPageBuffer, const uint aPageNo)
+int SegmentBase::openSegment()
 {
   if (_partition.open() == -1) { return -1; }
+  return 0;
+}
+
+int SegmentBase::closeSegment()
+{
+  if (_partition.close() == -1) { return -1; }
+  return 0;
+}
+
+int SegmentBase::readPage(byte* aPageBuffer, const uint aPageNo)
+{
   if (_partition.readPage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1) { return -1; }
-  if (_partition.close() == -1) { return -1;} 
   return 0;
 }
 	
-int SegmentBase::storePage(const byte* aPageBuffer, const uint aPageNo)
+int SegmentBase::writePage(const byte* aPageBuffer, const uint aPageNo)
 {
-  if (_partition.open() == -1) { return -1; }
-  if (_partition.writePage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1){ return -1;}
-  if (_partition.close() == -1) { return -1; }
+  if (_partition.writePage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1) { return -1; }
   return 0;
 }

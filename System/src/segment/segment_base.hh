@@ -24,6 +24,8 @@ class SegmentBase
 
 	public:
 		virtual int getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
+		int openSegment();
+		int closeSegment();
 		int loadPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		int storePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 
@@ -40,7 +42,7 @@ class SegmentBase
 	protected:
 		/* An ID representing this Segment */
 		uint16_t _segID;
-		/* Index in the partition where the segment is stored */
+		/* Contains page addresses of pages belonging to the segment for serialization purposes. First element is considered as masterPageIndex */
 		uint32_vt _indexPages;
 		/* A vector containing indices to all pages (in the partition) of this segment */
 		uint32_vt _pages;

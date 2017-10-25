@@ -6,8 +6,8 @@
  * @todos   TBD
  */
 
-#ifndef SEGMENT_BASE_HH
-#define SEGMENT_BASE_HH
+#ifndef SEGMENT_FSM_HH
+#define SEGMENT_FSM_HH
 
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
@@ -26,15 +26,15 @@ class SegmentFSM : public SegmentBase
     ~SegmentFSM();
 
   public:
-    int getFreePage(uint8_t aSize); 
+    int getFreePage(uint aNoOfBytes); 
 
   public:
     int storeSegment();                         // serialization
     int loadSegment(const uint32_t aPageIndex); // deserialization
 
   private:
+    /* */
     uint32_vt _fsmPages;
-    uint32_vt _indexPages;
 };
 
 #endif
