@@ -36,6 +36,10 @@ class DatabaseInstanceManager
         }
 
     public:
+        void boot();
+        void shutdown();
+
+    public:
         inline PartitionManager& getPartMngr(){ return _partMngr;}
         inline SegmentManager& getSegMngr(){ return _segMngr;}
   

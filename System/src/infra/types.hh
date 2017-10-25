@@ -19,11 +19,13 @@ typedef std::vector <uint32_t> uint32_vt;
 
 enum SegmentPageStatus {
     //by now only 4 steps, which means 2 bits are unused.
-    full=4,
-    q75=3,
-    q50=2,
-    q25=1,
-    empty=0
+    kNoType = -1, 
+    kEMPTY = 0,
+    kQUANTILE25 = 1,
+    kQUANTILE50 = 2,
+    kQUANTILE75 = 3,
+    kFULL = 4,
+	kEndType = 5
 };
 
 #endif

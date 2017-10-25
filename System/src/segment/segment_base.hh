@@ -23,15 +23,15 @@ class SegmentBase
 		virtual ~SegmentBase() = 0;
 
 	public:
-		virtual int getNewPage() = 0;                                       	// alloc free page, add it to managing vector and return its index in the partition
+		virtual int getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
 		virtual int loadPage(byte* aPageBuffer, const uint aPageNo) = 0;        // load page from the partition into main memory
 		virtual int storePage(const byte* aPageBuffer, const uint aPageNo) = 0; // store page from main memory into the partition
 
 	public:
 		inline uint16_t getID(){ return _segID; }
+		inline uint32_vt getIndexPages(){ return _indexPages; }
 		inline size_t getNoPages(){ return _pages.size(); }
 		inline PartitionBase& getPartition() { return _partition; }
-		inline uint32_t getIndex(){ return _masterPageIndex; }
 
 	protected:
 		virtual int storeSegment() = 0;                          // serialization
@@ -40,12 +40,12 @@ class SegmentBase
 	protected:
 		/* An ID representing this Segment */
 		uint16_t _segID;
+		/* Index in the partition where the segment is stored */
+		uint32_vt _indexPages;
 		/* A vector containing indices to all pages (in the partition) of this segment */
 		uint32_vt _pages;
 		/* Partition the Segment belongs to */
 		PartitionBase& _partition;
-		/* Position in Partition */
-		uint32_t _masterPageIndex;
 };
 
 

@@ -3,7 +3,7 @@
 SegmentManager::SegmentManager() :
     _counterSegmentID(0),
     _segments(),
-    _ownPages(), //one element which is the first page index??
+    _indexPages(), //one element which is the first page index??
     /* REMOVE THIS MAGIC NUMBER AS SOON A SOLUTION IS FOUND */
     _maxSegmentsPerPage((4096 - sizeof(segment_index_header_t)) / sizeof(uint32_t)) //number of pages one segment page can manage
 {}
@@ -34,15 +34,15 @@ int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
     auto lsegmentsIterator = _segments.begin();
     //uint lsegmentsCounter = 0;
     byte *lPageBuffer = new byte[aPartition.getPageSize()];
-    for (uint i = 0; i < _ownPages.size(); ++i) {
+    for (uint i = 0; i < _indexPages.size(); ++i) {
         // create header
         // basic header: LSN, PageIndex, PartitionId, Version, unused
-        std::cout<< _ownPages.at(i)<<"ownpages PartId "<<aPartition.getID()<<std::endl;
-        basic_header_t lBH = {0, _ownPages.at(i), aPartition.getID(), 1, 0, 0};
+        std::cout<< _indexPages.at(i)<<"ownpages PartId "<<aPartition.getID()<<std::endl;
+        basic_header_t lBH = {0, _indexPages.at(i), aPartition.getID(), 1, 0, 0};
         // segment_index_heder: nxtIndexPage, noSegments, version,unused, basicHeader
         segment_index_header_t lSMH = {0, 0, 1, 0, lBH};
-        if (i < _ownPages.size() - 1) {
-            lSMH._nextIndexPage = _ownPages.at(i + 1);
+        if (i < _indexPages.size() - 1) {
+            lSMH._nextIndexPage = _indexPages.at(i + 1);
         }
         // else is default
 
@@ -56,7 +56,7 @@ int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
         lSMH._noSegments = j;
         std::cout<<"no Segments "<<lSMH._noSegments<<std::endl;
         *(segment_index_header_t *)(lPageBuffer + aPartition.getPageSize() - sizeof(segment_index_header_t)) = lSMH;
-        aPartition.writePage(lPageBuffer, _ownPages.at(i), aPartition.getPageSize());
+        aPartition.writePage(lPageBuffer, _indexPages.at(i), aPartition.getPageSize());
     }
     delete[] lPageBuffer;
     aPartition.close();
@@ -81,7 +81,7 @@ int SegmentManager::loadSegmentManager(PartitionBase& aPartition)
         aPartition.readPage(lPageBuffer, lSMH._nextIndexPage, aPartition.getPageSize());
         // segment_index_header_t &lSMH = *(segment_index_header_t *)(lPageBuffer + aPartition.getPageSize() - sizeof(segment_index_header_t));
         lSMH = *(segment_index_header_t *)(lPageBuffer + aPartition.getPageSize() - sizeof(segment_index_header_t)); //I guess this is what you wanted, Jonas?
-        _ownPages.push_back(lSMH._basicHeader._pageIndex);
+        _indexPages.push_back(lSMH._basicHeader._pageIndex);
         for (uint i = 0; i < lSMH._noSegments; ++i) {
             lSegmentPages.push_back(*(((uint32_t *)lPageBuffer) + i));
         }

@@ -1,9 +1,10 @@
 /**
- *  @file	basic_interpreter.hh
+ *  @file	fsm_seg_interpreter.hh
  *  @author	Jonas Thietke (jthietke@mail.uni-mannheim.de),
                         Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	A class implementing a Free Space Management via an FSIP for segments for little Endian
  *  @bugs	might not work for big Endian
+ *  @todos  change comments
  *  @section TBD
  */
 #ifndef FSM_SEG_INTERPRETER_HH
@@ -51,8 +52,7 @@ class FSMInterpreter {
      *	@param	aPID - The ID of the partition this page is stored in
      *	@param	aNoPages - Number of stored Pages in FSIP
      */
-    void initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
-                    const uint32_t aNoPages);
+    void initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages);
 
     /**
      *	@brief	looks for the next free block in the FSIP and reserves the page
@@ -66,17 +66,9 @@ class FSMInterpreter {
     int getFreePage(const uint64_t aLSN, SegmentPageStatus aPageStatus);
 
     /**
-     *	@brief	reserve the page at the given index position
-     *
-     *	@param	aPageIndex - Page index inside the partition
-     *
-     * 	@return either 0 if successful or -1 if not successful
-     */
-
-    /**
      *	@brief	change the status of page at the given logical position within the segment
      *
-     *	@param	aPageIndex - Page index inside the partition
+     *	@param	aPageNo - Page index inside the partition
      */
     void changePageStatus(const uint aPageNo, SegmentPageStatus aStatus);
 

@@ -21,8 +21,7 @@ void FSMInterpreter::detach() {
     _header = NULL;
 }
 
-void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
-                                const uint32_t aNoPages) {
+void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages) {
     // alles 0, header
     uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
     for (uint i = 0; i < max; ++i) {
@@ -33,6 +32,7 @@ void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     fsm_header_t lHeader = {aNoPages, 0, lBH};
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
+
 int FSMInterpreter::getFreePage(const uint64_t aLSN, SegmentPageStatus aPageStatus) {
     // uint max = (_pageSize-sizeof(fsm_header_t))*2;
     uint i = 0;
