@@ -3,81 +3,76 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A collection of different header types.
  *  @bugs    Currently no bugs known
- *  @todos   Change all mentions of blocks to pages. This involves further updates in the 
+ *  @todos   Change all mentions of blocks to pages. This involves further updates in the
  *  @section TBD
  */
 
 #ifndef HEADER_STRUCTS_HH
 #define HEADER_STRUCTS_HH
- 
+
 #include <cstdint>
- 
+
 /* A basic header which is part of every page */
-struct basic_header_t
-{
-	uint64_t _LSN;       // Needed for recovery
-	uint32_t _pageIndex; // Page index inside the partition
-	uint8_t _PID;        // The ID of the partition this page is stored in
-	uint8_t _version;    // Basic header version
-	uint8_t _unused1;
-	uint8_t _unused2;
+struct basic_header_t {
+    uint64_t _LSN;       // Needed for recovery
+    uint32_t _pageIndex; // Page index inside the partition
+    uint8_t _PID;        // The ID of the partition this page is stored in
+    uint8_t _version;    // Basic header version
+    uint8_t _unused1;
+    uint8_t _unused2;
 };
 
 /* A header for the free space indicator page */
-struct fsip_header_t
-{
-	uint32_t _freeBlocksCount;   // Number of free pages in the managed part (numer of 0s)
-	uint32_t _nextFreePage;     // index of the next 0 (indicating a free Block)
-	uint32_t _managedPages;     // index of the next 0 (indicating a free Block)
-	uint8_t _version;            // FSIP header version
-	uint8_t _unused1;
-	uint8_t _unused2;
-	uint8_t _unused3;
-	basic_header_t _basicHeader; // The basic header
+struct fsip_header_t {
+    uint32_t _freeBlocksCount; // Number of free pages in the managed part (numer of 0s)
+    uint32_t _nextFreePage;    // index of the next 0 (indicating a free Block)
+    uint32_t _managedPages;    // index of the next 0 (indicating a free Block)
+    uint8_t _version;          // FSIP header version
+    uint8_t _unused1;
+    uint8_t _unused2;
+    uint8_t _unused3;
+    basic_header_t _basicHeader; // The basic header
 };
 
 /*a header for the free space management page of a segment*/
-struct fsm_header_t
-{
-	uint32_t _noPages; //number of Pages this FSM page handles
-	uint32_t _nextFSM; //pageIndex of the next FSM of this very segment
-	basic_header_t _basicHeader; // The basic header
+struct fsm_header_t {
+    uint32_t _noPages;           // number of Pages this FSM page handles
+    uint32_t _nextFSM;           // pageIndex of the next FSM of this very segment
+    basic_header_t _basicHeader; // The basic header
 };
 
 /* A header for the SegmentManager */
-struct segment_index_header_t
-{
-	uint32_t _nextIndexPage;     // index to the next index page inside this partition, is invalid if set to 0
-	uint16_t _noSegments;        // number of managed segments on this physical page only. May be larger for the segment manager
-	uint8_t _version;            // Segment-index header version
-	uint8_t _unused;
-	basic_header_t _basicHeader; // The basic header
-};
- 
-/* A header for the Segment */
-struct segment_page_header_t
-{
-	uint16_t _maxSize;           // Max number of pages managed by this segment
-	uint16_t _currSize;          // Current number of pages managed by this segment
-	uint16_t _segID;
-	uint8_t _version;            // Segment-page header version
-	uint8_t _unused1;
-	basic_header_t _basicHeader; // The basic header
+struct segment_index_header_t {
+    uint32_t _nextIndexPage; // index to the next index page inside this partition, is invalid if set to 0
+    uint16_t
+        _noSegments;  // number of managed segments on this physical page only. May be larger for the segment manager
+    uint8_t _version; // Segment-index header version
+    uint8_t _unused;
+    basic_header_t _basicHeader; // The basic header
 };
 
-struct segment_fsm_header_t
-{
-	uint32_t _currSize;			// Current number of pages managed by this segment on this page only
-	uint32_t _firstFSM;			// physical index of the first FSM. Others are pointed at from there on
-	uint32_t _nextIndexPage;	//if segment has more than one index page, this is a physical index. else this is 0
-	uint16_t _segID;
-	uint8_t _version;
-	uint8_t _unused;
-	basic_header_t _basicHeader;
+/* A header for the Segment */
+struct segment_page_header_t {
+    uint16_t _maxSize;  // Max number of pages managed by this segment
+    uint16_t _currSize; // Current number of pages managed by this segment
+    uint16_t _segID;
+    uint8_t _version; // Segment-page header version
+    uint8_t _unused1;
+    basic_header_t _basicHeader; // The basic header
 };
- 
+
+struct segment_fsm_header_t {
+    uint32_t _currSize;      // Current number of pages managed by this segment on this page only
+    uint32_t _firstFSM;      // physical index of the first FSM. Others are pointed at from there on
+    uint32_t _nextIndexPage; // if segment has more than one index page, this is a physical index. else this is 0
+    uint16_t _segID;
+    uint8_t _version;
+    uint8_t _unused;
+    basic_header_t _basicHeader;
+};
+
 /* NSM Header etc. follow */
-//struct nsm_header_t {};
-//struct pax_header_t {};
- 
+// struct nsm_header_t {};
+// struct pax_header_t {};
+
 #endif

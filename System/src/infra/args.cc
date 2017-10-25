@@ -1,7 +1,6 @@
 #include "args.hh"
 
-void construct_arg_desc(argdesc_vt& x) 
-{
+void construct_arg_desc(argdesc_vt& x) {
 	// typedef argdesc_t<Args, char>        carg_t;
 	// typedef argdesc_t<Args, int>         iarg_t;
 	typedef argdesc_t<Args, uint>        uarg_t;

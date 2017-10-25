@@ -15,37 +15,35 @@
 #include "partition/partition_manager.hh"
 #include "segment/segment_manager.hh"
 
-class DatabaseInstanceManager
-{    
-    private:
-        explicit DatabaseInstanceManager();
-        DatabaseInstanceManager(const DatabaseInstanceManager& aDatabaseInstanceManager) = delete;
-        DatabaseInstanceManager& operator=(const DatabaseInstanceManager& aDatabaseInstanceManager) = delete;
-        ~DatabaseInstanceManager();
+class DatabaseInstanceManager {
+  private:
+    explicit DatabaseInstanceManager();
+    DatabaseInstanceManager(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
+    DatabaseInstanceManager &operator=(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
+    ~DatabaseInstanceManager();
 
-    public:
-        /**
-         *  @brief  This function is the only way to get access to the PartitionManager instance
-         *
-         *  @return reference to the only PartitionManager instance
-         */
-        static DatabaseInstanceManager& getInstance()
-        {
-            static DatabaseInstanceManager lDBIM_Instance;
-            return lDBIM_Instance;
-        }
+  public:
+    /**
+     *  @brief  This function is the only way to get access to the PartitionManager instance
+     *
+     *  @return reference to the only PartitionManager instance
+     */
+    static DatabaseInstanceManager &getInstance() {
+        static DatabaseInstanceManager lDBIM_Instance;
+        return lDBIM_Instance;
+    }
 
-    public:
-        void boot();
-        void shutdown();
+  public:
+    void boot();
+    void shutdown();
 
-    public:
-        inline PartitionManager& getPartMngr(){ return _partMngr;}
-        inline SegmentManager& getSegMngr(){ return _segMngr;}
-  
-    private:
-        PartitionManager& _partMngr;
-        SegmentManager& _segMngr;
+  public:
+    inline PartitionManager &getPartMngr() { return _partMngr; }
+    inline SegmentManager &getSegMngr() { return _segMngr; }
+
+  private:
+    PartitionManager &_partMngr;
+    SegmentManager &_segMngr;
 };
 
 #endif

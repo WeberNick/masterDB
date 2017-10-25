@@ -28,9 +28,9 @@ Segment::~Segment(){}
 int Segment::getNewPage()
 {
 	if (_pages.size() < _maxSize) {
-		if(_partition.open() == -1){return -1;}
+		if (_partition.open() == -1) { return -1; }
 		int lPageIndex = _partition.allocPage();
-		if(_partition.close() == -1){return -1;}
+		if (_partition.close() == -1) { return -1; }
 		//todo init page, e.g. NSM/PAX..
 		if (lPageIndex != -1) {
 			_pages.push_back((uint32_t)lPageIndex);
@@ -38,22 +38,6 @@ int Segment::getNewPage()
 		}
 	}
 	return -1;
-}
-
-int Segment::loadPage(byte* aPageBuffer, const uint aPageNo)
-{
-	if(_partition.open() == -1){return -1;}
-	if(_partition.readPage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1){return -1;}
-	if(_partition.close() == -1){return -1;}
-	return 0;
-}
-
-int Segment::storePage(const byte* aPageBuffer, const uint aPageNo)
-{
-	if(_partition.open() == -1){return -1;}
-	if(_partition.writePage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1){return -1;}
-	if(_partition.close() == -1){return -1;}
-	return 0;
 }
 
 int Segment::storeSegment()

@@ -15,12 +15,10 @@
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
 
-
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <string>
-
 
 class FSIPInterpreter {
   public:

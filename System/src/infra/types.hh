@@ -7,25 +7,24 @@
 #ifndef INFRA_TYPES_HH
 #define INFRA_TYPES_HH
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 typedef std::byte byte;
-typedef std::vector<byte*> byte_vpt;
+typedef std::vector<byte *> byte_vpt;
 typedef unsigned int uint;
-typedef std::vector <uint> uint_vt;
-typedef std::vector <uint32_t> uint32_vt;
+typedef std::vector<uint> uint_vt;
+typedef std::vector<uint32_t> uint32_vt;
 
 enum SegmentPageStatus {
-    //by now only 4 steps, which means 2 bits are unused.
-    kNoType = -1, 
+    kNoType = -1,
     kEMPTY = 0,
     kQUANTILE25 = 1,
     kQUANTILE50 = 2,
     kQUANTILE75 = 3,
     kFULL = 4,
-	kEndType = 5
+    kEndType = 5
 };
 
 #endif

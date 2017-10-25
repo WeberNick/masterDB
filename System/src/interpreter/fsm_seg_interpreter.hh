@@ -1,7 +1,7 @@
 /**
  *  @file	fsm_seg_interpreter.hh
  *  @author	Jonas Thietke (jthietke@mail.uni-mannheim.de),
-                        Aljoscha Narr (alnarr@mail.uni-mannheim.de)
+            Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	A class implementing a Free Space Management via an FSIP for segments for little Endian
  *  @bugs	might not work for big Endian
  *  @todos  change comments
@@ -14,12 +14,10 @@
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
 
-
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <string>
-
 
 class FSMInterpreter {
   public:
@@ -73,13 +71,13 @@ class FSMInterpreter {
     void changePageStatus(const uint aPageNo, SegmentPageStatus aStatus);
 
   public:
-    /* Getters*/
+    /* Getter */
     inline byte *pagePtr() { return _pp; }
     inline uint32_t getNextFSMPage() { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
 
   private:
-    /* Getter*/
-    inline fsm_header_t *get_hdr_ptr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
+    /* Getter */
+    inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
 
   private:
     SegmentPageStatus getPageStatus(const uint aPageNo);
@@ -97,7 +95,7 @@ class FSMInterpreter {
 
 void FSMInterpreter::attach(byte *aPP) {
     _pp = aPP;
-    _header = get_hdr_ptr();
+    _header = getHeaderPtr();
 }
 
 #endif
