@@ -10,23 +10,28 @@
 
 #include "segment.hh"
 
-Segment::Segment(const uint16_t aSegID, PartitionBase& aPartition) :
+Segment::Segment(const uint16_t aSegID, PartitionBase &aPartition) :
     SegmentBase(aSegID, aPartition),
     _maxSize(0)
 {
-	if(_partition.open() == -1){/*error handling*/}
+	if (_partition.open() == -1) { /* error handling */ }
 	_maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
-	if(_partition.close() == -1){/*error handling*/}
+	if (_partition.close() == -1) { /* error handling */ }
 }
 
-Segment::Segment(PartitionBase& aPartition) :
+Segment::Segment(PartitionBase &aPartition) :
     SegmentBase(aPartition),
-    _maxSize(0){}
-
-Segment::~Segment(){}
-
-int Segment::getNewPage()
+    _maxSize(0)
 {
+    if (_partition.open() == -1) { /* error handling */ }
+    _maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
+    if (_partition.close() == -1) { /* error handling */ }
+}
+
+Segment::~Segment()
+{}
+
+int Segment::getNewPage() {
 	if (_pages.size() < _maxSize) {
 		if (_partition.open() == -1) { return -1; }
 		int lPageIndex = _partition.allocPage();
@@ -40,8 +45,7 @@ int Segment::getNewPage()
 	return -1;
 }
 
-int Segment::storeSegment()
-{
+int Segment::storeSegment() {
     /* assuming header stores up to date information
        segment 1 on position 1
        header last
@@ -49,27 +53,27 @@ int Segment::storeSegment()
     byte *lPageBuffer = new byte[_partition.getPageSize()];
     size_t lPageSize = _partition.getPageSize();
     for (uint i = 0; i < _pages.size(); ++i) {
-        std::cout<<_pages.at(i)<<std::endl;
+        std::cout << _pages.at(i) << std::endl;
         *(((uint32_t *)lPageBuffer) + i) = _pages.at(i);
     }
     uint8_t lVersion = 1;
     // basic_header: LSN, PageIndex, PartitionId, Version, unused
     basic_header_t lBasicHeader = {0, _indexPages[0], _partition.getID(), lVersion, 0};
     // segment_page_header_t: maxSize, currSize, segID, version, unused, basicHeader
-    segment_page_header_t lSegmentHeader = {_maxSize, _pages.size(), _segID, lVersion, 0, lBasicHeader}; //is this correct, Jonas?
-    *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = lSegmentHeader; //is this correct, Jonas?
+    segment_page_header_t lSegmentHeader = {_maxSize, _pages.size(), _segID, lVersion, 0, lBasicHeader};  // is this correct, Jonas?
+    *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = lSegmentHeader; // is this correct, Jonas?
     _partition.writePage(lPageBuffer, _indexPages[0], _partition.getPageSize());
     delete[] lPageBuffer;
     return 0;
 }
 
-int Segment::loadSegment(const uint32_t aPageIndex)
-{
+int Segment::loadSegment(const uint32_t aPageIndex) {
     // to be set beforehand: partition, and it has to be opened
     byte *lPageBuffer = new byte[_partition.getPageSize()];
     size_t lPageSize = _partition.getPageSize();
     _partition.readPage(lPageBuffer, aPageIndex, _partition.getPageSize());
-    segment_page_header_t lHeader = *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)); //is this correct, Jonas?
+    segment_page_header_t lHeader =
+        *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)); // is this correct, Jonas?
     for (uint i = 0; i < lHeader._currSize; ++i) {
         _pages.push_back(*(((uint32_t *)lPageBuffer) + i));
     }

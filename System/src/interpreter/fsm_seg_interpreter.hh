@@ -48,7 +48,7 @@ class FSMInterpreter {
      *	@param	aLSN - Log Sequence Number
      *	@param	aPageIndex - Page index inside the partition
      *	@param	aPID - The ID of the partition this page is stored in
-     *	@param	aNoPages - Number of stored Pages in FSIP
+     *	@param	aNoPages - Number of stored Pages in FSMP
      */
     void initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages);
 

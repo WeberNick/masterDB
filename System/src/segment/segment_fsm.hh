@@ -12,6 +12,7 @@
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
 #include "partition/partition_file.hh"
+#include "interpreter/fsm_seg_interpreter.hh"
 #include "segment_base.hh"
 #include <vector>
 
@@ -26,14 +27,15 @@ class SegmentFSM : public SegmentBase
     ~SegmentFSM();
 
   public:
-    int getFreePage(uint aNoOfBytes); 
+    int getFreePage(uint aNoOfBytes);
+    // int getNewPage(); // decide on whether we need this method. If not, remove from Segment_base as well.
 
   public:
     int storeSegment();                         // serialization
     int loadSegment(const uint32_t aPageIndex); // deserialization
 
   private:
-    /* */
+    /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */
     uint32_vt _fsmPages;
 };
 

@@ -34,24 +34,23 @@ struct fsip_header_t {
     basic_header_t _basicHeader; // The basic header
 };
 
-/*a header for the free space management page of a segment*/
+/* A header for the free space management page of a segment */
 struct fsm_header_t {
     uint32_t _noPages;           // number of Pages this FSM page handles
     uint32_t _nextFSM;           // pageIndex of the next FSM of this very segment
     basic_header_t _basicHeader; // The basic header
 };
 
-/* A header for the SegmentManager */
+/* A header for the segment manager */
 struct segment_index_header_t {
     uint32_t _nextIndexPage; // index to the next index page inside this partition, is invalid if set to 0
-    uint16_t
-        _noSegments;  // number of managed segments on this physical page only. May be larger for the segment manager
-    uint8_t _version; // Segment-index header version
+    uint16_t _noSegments;    // number of managed segments on this physical page only. May be larger for the segment manager
+    uint8_t _version;        // Segment-index header version
     uint8_t _unused;
     basic_header_t _basicHeader; // The basic header
 };
 
-/* A header for the Segment */
+/* A header for the segment */
 struct segment_page_header_t {
     uint16_t _maxSize;  // Max number of pages managed by this segment
     uint16_t _currSize; // Current number of pages managed by this segment
@@ -60,6 +59,7 @@ struct segment_page_header_t {
     uint8_t _unused1;
     basic_header_t _basicHeader; // The basic header
 };
+
 
 struct segment_fsm_header_t {
     uint32_t _currSize;      // Current number of pages managed by this segment on this page only
@@ -72,7 +72,7 @@ struct segment_fsm_header_t {
 };
 
 /* NSM Header etc. follow */
-// struct nsm_header_t {};
-// struct pax_header_t {};
+// struct segment_nsm_header_t {};
+// struct segment_pax_header_t {};
 
 #endif

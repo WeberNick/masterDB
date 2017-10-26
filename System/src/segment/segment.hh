@@ -5,6 +5,7 @@
  *  @brief	This class manages multiple pages
  *  @bugs	Currently no bugs known
  *  @todos  in getNewPage: implement init page, e.g. NSM/PAX..
+ *          Class deprecated (no need anymore, store/load Segment has to be reworked, _maxSize deprecated, getNewPage may be also deprecated.)
  *  @section TBD
  */
 

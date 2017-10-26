@@ -6,7 +6,8 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 	_fileDescriptor(-1)
 {}
 
-PartitionFile::~PartitionFile(){}
+PartitionFile::~PartitionFile()
+{}
 
 int PartitionFile::open()
 {
