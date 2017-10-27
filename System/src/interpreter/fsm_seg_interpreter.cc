@@ -34,19 +34,19 @@ void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 
-int FSMInterpreter::getFreePage(const uint64_t aLSN, SegmentPageStatus aPageStatus) {
+int FSMInterpreter::getFreePage(const PageStatus aPageStatus) {
     // uint max = (_pageSize-sizeof(fsm_header_t))*2;
     uint i = 0;
     while (i < _header->_noPages) {
-        SegmentPageStatus lPageStatus = getPageStatus(i);
+        PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
         bool fits = 0;
-        if (lPageStatus + aPageStatus <= 4) {
+        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= 4) {
             fits = true;
         }
         if (fits) {
-            aPageStatus = static_cast<SegmentPageStatus>(aPageStatus + lPageStatus);
-            changePageStatus(i, aPageStatus);
+            lPageStatus = static_cast<PageStatus>(static_cast<int>(aPageStatus) + static_cast<int>(aPageStatus));
+            changePageStatus(i, lPageStatus);
             return i;
         }
         ++i;
@@ -63,9 +63,9 @@ int FSMInterpreter::getFreePage(const uint64_t aLSN, SegmentPageStatus aPageStat
     // change status
 }
 
-void FSMInterpreter::changePageStatus(const uint aPageNo, SegmentPageStatus aStatus) {
+void FSMInterpreter::changePageStatus(const uint aPageNo, const PageStatus aStatus) {
     uint8_t *currByte = ((uint8_t *)_pp + aPageNo / 2);
-    uint8_t lStatus = aStatus;
+    uint8_t lStatus = static_cast<uint8_t>(aStatus);
     if (aPageNo % 2 == 0) {
         *currByte &= ~15;
         *currByte |= lStatus;
@@ -76,13 +76,26 @@ void FSMInterpreter::changePageStatus(const uint aPageNo, SegmentPageStatus aSta
     }
 }
 
-SegmentPageStatus FSMInterpreter::getPageStatus(const uint aPageNo) {
+PageStatus FSMInterpreter::getPageStatus(const uint aPageNo) {
     uint8_t currByte = *((uint8_t *)_pp + aPageNo / 2);
     if (aPageNo % 2 == 0) {
         currByte &= 15;
-        return static_cast<SegmentPageStatus>(currByte);
+        return static_cast<PageStatus>(currByte);
     } else {
         currByte >>= 4;
-        return static_cast<SegmentPageStatus>(currByte);
+        return static_cast<PageStatus>(currByte);
     }
 }
+
+
+PageStatus FSMInterpreter::calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes)
+{
+	if(aSizeWithoutOverhead < aNoBytes)
+	{
+		return PageStatus::kNoType;
+	}
+    const uint lBucketSize = std::floor(aSizeWithoutOverhead/16.0); //remove magic number, (numb buckets)
+    const uint lBucketNo = std::ceil(aNoBytes/(double)lBucketSize);
+	return (lBucketNo < (uint)PageStatus::kEndType) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
+}
+
