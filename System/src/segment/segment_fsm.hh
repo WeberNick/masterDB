@@ -23,7 +23,7 @@ class SegmentFSM : public SegmentBase
     explicit SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition);
     explicit SegmentFSM(PartitionBase &aPartition);
     SegmentFSM(const SegmentFSM &aSegment) = delete;
-    SegmentFSM &operator=(const SegmentFSM aSegment) = delete;
+    SegmentFSM &operator=(const SegmentFSM &aSegment) = delete;
     ~SegmentFSM();
 
   public:

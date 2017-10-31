@@ -10,6 +10,7 @@
 #define PARTITION_BASE_HH
 
 #include "infra/types.hh"
+#include "infra/header_structs.hh"
 
 #include <string>
 

@@ -70,7 +70,16 @@ class FSMInterpreter {
      *	@param	aPageStatus - 
      */
     void changePageStatus(const uint aPageNo, const PageStatus aStatus);
-	PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
+    
+    /**
+     *  @brief
+     *
+     *  @param aSizeWithoutOverhead -
+     *  @param aNoOfBytes -
+     *
+     *  @return 
+     */
+    PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
 
   public:
     /* Getter */

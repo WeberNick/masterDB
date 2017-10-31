@@ -46,7 +46,7 @@ int PartitionFile::close()
 
 int PartitionFile::createPartition()
 {
-	if(_isCreated){return -1;}
+	if(_isCreated){ return -1; }
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
@@ -63,7 +63,7 @@ int PartitionFile::createPartition()
 
 int PartitionFile::removePartition()
 {
-	if(!_isCreated){return -1;}
+	if(!_isCreated){ return -1; }
 	std::string lCommand = "rm " + _partitionPath;
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
@@ -101,7 +101,7 @@ int PartitionFile::allocPage()
 int PartitionFile::freePage(const uint aPageIndex)
 {
 	byte* lPagePointer = new byte[_pageSize];
-	if(readPage(lPagePointer, aPageIndex, _pageSize) == -1){return -1;}
+	if(readPage(lPagePointer, aPageIndex, _pageSize) == -1){ return -1; }
 	FSIPInterpreter fsip;
 	fsip.attach(lPagePointer);
 	fsip.freePage(aPageIndex);
@@ -155,14 +155,14 @@ int PartitionFile::init()
 		remainingPages -= lNumberOfPagesToManage;
 	}
 	fsip.detach();
-	readPage(lPagePointer, 0, _pageSize);
+	readPage(lPagePointer, LSN, _pageSize);
 	fsip.attach(lPagePointer);
 	if(fsip.reservePage(_segmentIndexPage) == -1)
 	{
 		delete[] lPagePointer;
 		return -1;
 	}
-	writePage(lPagePointer, 0, _pageSize);
+	writePage(lPagePointer, LSN, _pageSize);
 	if(close() == -1){ return -1; }
 	delete[] lPagePointer;
 	return 0;
@@ -170,20 +170,19 @@ int PartitionFile::init()
 
 void PartitionFile::printPage(uint aPageIndex)
 {
-  	open();
-	 byte* lPagePointer = new byte[_pageSize];
-	 readPage(lPagePointer, aPageIndex, _pageSize);	
-	 std::ofstream myfile;
-	 std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
-	 myfile.open (filename);
-	 uint32_t* lPP2 = (uint32_t*) lPagePointer;
-	 for(uint a = 0; a < _pageSize/4 ; ++a)
-	 {
-	     myfile <<  std::hex << std::setw(8) << std::setfill('0')<< *(lPP2+a) << std::endl;
-	 }
-	 std::cout << "pagePrinted" <<std::endl;
-	 myfile.close();
-	 delete[] lPagePointer;
-	 close();
+    open();
+    byte *lPagePointer = new byte[_pageSize];
+    readPage(lPagePointer, aPageIndex, _pageSize);
+    std::ofstream myfile;
+    std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+    myfile.open(filename);
+    uint32_t *lPP2 = (uint32_t *)lPagePointer;
+    for (uint a = 0; a < _pageSize / 4; ++a) {
+        myfile << std::hex << std::setw(8) << std::setfill('0') << *(lPP2 + a) << std::endl;
+    }
+    std::cout << "pagePrinted" << std::endl;
+    myfile.close();
+    delete[] lPagePointer;
+    close();
 }
 

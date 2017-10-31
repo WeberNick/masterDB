@@ -31,6 +31,7 @@ Segment::Segment(PartitionBase &aPartition) :
 Segment::~Segment()
 {}
 
+
 int Segment::getNewPage() {
 	if (_pages.size() < _maxSize) {
 		if (_partition.open() == -1) { return -1; }

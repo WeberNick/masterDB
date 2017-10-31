@@ -20,6 +20,13 @@ SB_HDR = \
 	../partition/partition_base.hh \
 	\
 
+SFM_HDR = \
+        ../infra/header_structs.hh \
+        segment_base.hh \
+        ../partition/partition_file.hh \
+        ../interpreter/fsm_seg_interpreter.hh \
+        \
+
 S_HDR = \
 	../infra/header_structs.hh \
 	segment_base.hh \
@@ -28,6 +35,7 @@ S_HDR = \
 
 OBJ = \
 	segment_manager.o \
+        segment_fsm.o \
 	segment_base.o \
 	segment.o \
 
@@ -39,6 +47,9 @@ segment_manager.o : segment_manager.cc segment_manager.hh $(HDR) $(SM_HDR)
 
 segment_base.o : segment_base.cc segment_base.hh $(HDR) $(SB_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) segment_base.cc
+
+segment_fsm.o : segment_fsm.cc segment_fsm.hh $(HDR) $(SB_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm.cc
 
 segment.o : segment.cc segment.hh $(HDR) $(S_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc
