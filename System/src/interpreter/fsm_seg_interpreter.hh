@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 class FSMInterpreter {
   public:
@@ -60,7 +61,7 @@ class FSMInterpreter {
      *
      * 	@return either an offset to the free block or -1 if no free block was found
      */
-    int getFreePage(const uint64_t aLSN, SegmentPageStatus aPageStatus);
+    int getFreePage(const PageStatus aPageStatus);
 
     /**
      *	@brief	change the status of page at the given logical position within the segment
@@ -68,7 +69,8 @@ class FSMInterpreter {
      *	@param	aPageNo - Page index inside the partition
      *	@param	aPageStatus - 
      */
-    void changePageStatus(const uint aPageNo, SegmentPageStatus aStatus);
+    void changePageStatus(const uint aPageNo, const PageStatus aStatus);
+	PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
 
   public:
     /* Getter */
@@ -80,7 +82,7 @@ class FSMInterpreter {
     inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
 
   private:
-    SegmentPageStatus getPageStatus(const uint aPageNo);
+    PageStatus getPageStatus(const uint aPageNo);
 
   private:
     /*	pointer to the beginning of the page */
