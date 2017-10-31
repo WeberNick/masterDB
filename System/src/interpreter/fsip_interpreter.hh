@@ -59,7 +59,7 @@ class FSIPInterpreter {
      *
      *	@param	aPP - Pointer to the start of the page
      *	@param	aLSN - Log Sequence Number
-     *	@param	aOffset - Page index inside the partition
+     *	@param	aPID - The ID of the partition this page is stored in
      *
      * 	@return either an offset to the free block or -1 if no free block was found
      */

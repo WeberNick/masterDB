@@ -144,13 +144,13 @@ int PartitionFile::init()
 	FSIPInterpreter fsip;
 	uint remainingPages = _sizeInPages;
 	uint lNumberOfPagesToManage;
-	if(open() == -1){return -1;}
+	if(open() == -1){ return -1; }
 	while(remainingPages > 1)
 	{
 		--remainingPages;
 		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
 		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
-		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1){return -1;}
+		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1){ return -1; }
 		lCurrentPageNo += (lPagesPerFSIP + 1);
 		remainingPages -= lNumberOfPagesToManage;
 	}
@@ -163,7 +163,7 @@ int PartitionFile::init()
 		return -1;
 	}
 	writePage(lPagePointer, 0, _pageSize);
-	if(close() == -1){return -1;}
+	if(close() == -1){ return -1; }
 	delete[] lPagePointer;
 	return 0;
 }
