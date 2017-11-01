@@ -4,11 +4,11 @@
             Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	A class implementing a Free Space Management via an FSIP for segments for little Endian
  *  @bugs	might not work for big Endian
- *  @todos  change comments
+ *  @todos  change comments (+ insert description for aPageStatus)
  *  @section TBD
  */
 #ifndef FSM_SEG_INTERPRETER_HH
-#define FSIP_SEG_INTERPRETER_HH
+#define FSM_SEG_INTERPRETER_HH
 
 #include "infra/bit_intrinsics.hh"
 #include "infra/header_structs.hh"
@@ -56,9 +56,8 @@ class FSMInterpreter {
     /**
      *	@brief	looks for the next free block in the FSIP and reserves the page
      *
-     *	@param	aPP - Pointer to the start of the page
      *	@param	aLSN - Log Sequence Number
-     *	@param	aOffset - Page index inside the partition
+     *	@param	aPageStatus - 
      *
      * 	@return either an offset to the free block or -1 if no free block was found
      */
@@ -68,9 +67,19 @@ class FSMInterpreter {
      *	@brief	change the status of page at the given logical position within the segment
      *
      *	@param	aPageNo - Page index inside the partition
+     *	@param	aPageStatus - 
      */
     void changePageStatus(const uint aPageNo, const PageStatus aStatus);
-	PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
+    
+    /**
+     *  @brief
+     *
+     *  @param aSizeWithoutOverhead -
+     *  @param aNoOfBytes -
+     *
+     *  @return 
+     */
+    PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
 
   public:
     /* Getter */

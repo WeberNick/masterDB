@@ -39,8 +39,4 @@ enum class PageStatus {
     kEndType = 16
 };
 
-
-
-    
-
 #endif

@@ -25,6 +25,7 @@ OBJ = \
 	\
 	../segment/segment_manager.o \
 	../segment/segment_base.o \
+        ../segment/segment_fsm.o \
 	../segment/segment.o \
 	\
 	../interpreter/fsip_interpreter.o \

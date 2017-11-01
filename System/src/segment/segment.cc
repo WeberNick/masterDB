@@ -31,6 +31,7 @@ Segment::Segment(PartitionBase &aPartition) :
 Segment::~Segment()
 {}
 
+
 int Segment::getNewPage() {
 	if (_pages.size() < _maxSize) {
 		if (_partition.open() == -1) { return -1; }
@@ -60,7 +61,7 @@ int Segment::storeSegment() {
     // basic_header: LSN, PageIndex, PartitionId, Version, unused
     basic_header_t lBasicHeader = {0, _indexPages[0], _partition.getID(), lVersion, 0};
     // segment_page_header_t: maxSize, currSize, segID, version, unused, basicHeader
-    segment_page_header_t lSegmentHeader = {_maxSize, _pages.size(), _segID, lVersion, 0, lBasicHeader};  // is this correct, Jonas?
+    segment_page_header_t lSegmentHeader = {_maxSize, (uint16_t) _pages.size(), _segID, lVersion, 0, lBasicHeader};  // is this correct, Jonas?
     *(segment_page_header_t *)(lPageBuffer + lPageSize - sizeof(segment_page_header_t)) = lSegmentHeader; // is this correct, Jonas?
     _partition.writePage(lPageBuffer, _indexPages[0], _partition.getPageSize());
     delete[] lPageBuffer;

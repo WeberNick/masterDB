@@ -3,7 +3,7 @@
 SegmentManager::SegmentManager() :
     _counterSegmentID(0),
     _segments(),
-    _indexPages(), //one element which is the first page index??
+    _indexPages(), // one element which is the first page index??
     /* REMOVE THIS MAGIC NUMBER AS SOON A SOLUTION IS FOUND */
     _maxSegmentsPerPage((4096 - sizeof(segment_index_header_t)) / sizeof(uint32_t)) //number of pages one segment page can manage
 {}

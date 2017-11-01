@@ -90,12 +90,10 @@ PageStatus FSMInterpreter::getPageStatus(const uint aPageNo) {
 
 PageStatus FSMInterpreter::calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes)
 {
-	if(aSizeWithoutOverhead < aNoBytes)
-	{
-		return PageStatus::kNoType;
-	}
-	const uint lBucketSize = std::floor(aSizeWithoutOverhead/16.0); //remove magic number, (numb buckets)
-	const uint lBucketNo = std::ceil(aNoBytes/(double)lBucketSize);
-	return (lBucketNo < (uint)PageStatus::kEndType) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
+    if (aSizeWithoutOverhead < aNoBytes) {
+        return PageStatus::kNoType;
+    }
+    const uint lBucketSize = std::floor(aSizeWithoutOverhead / 16.0); // remove magic number, (numb buckets)
+    const uint lBucketNo = std::ceil(aNoBytes / (double)lBucketSize);
+    return (lBucketNo < (uint)PageStatus::kEndType) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
 }
-
