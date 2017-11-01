@@ -14,6 +14,9 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition) : SegmentBase(aPartition), _fs
     if (_partition.close() == -1) { /* error handling */ }
 }
 
+SegmentFSM::~SegmentFSM()
+{}
+
 int SegmentFSM::getFreePage(uint aNoOfBytes) {
     uint lPageSizeInBytes = _partition.getPageSize() - sizeof(fsm_header_t);
     /* PagesToManage * 2 because one byte manages two pages (4 bits for one page). */
