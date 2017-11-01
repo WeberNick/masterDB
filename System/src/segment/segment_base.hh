@@ -24,8 +24,8 @@ class SegmentBase
 
 	public:
 		virtual int getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
-		int openSegment();
-		int closeSegment();
+		int open();
+		int close();
 		int readPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		int writePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
 

@@ -27,13 +27,13 @@ SegmentBase::SegmentBase(PartitionBase& aPartition) :
 SegmentBase::~SegmentBase()
 {}
 
-int SegmentBase::openSegment()
+int SegmentBase::open()
 {
   if (_partition.open() == -1) { return -1; }
   return 0;
 }
 
-int SegmentBase::closeSegment()
+int SegmentBase::close()
 {
   if (_partition.close() == -1) { return -1; }
   return 0;

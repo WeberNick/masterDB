@@ -15,35 +15,43 @@
 #include "partition/partition_manager.hh"
 #include "segment/segment_manager.hh"
 
+#include <string>
+
+const std::string C_PATH_TO_MASTER_PARTITION = ""; //Location may change (member, command line arg,...)
+
 class DatabaseInstanceManager {
-  private:
-    explicit DatabaseInstanceManager();
-    DatabaseInstanceManager(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
-    DatabaseInstanceManager &operator=(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
-    ~DatabaseInstanceManager();
+	private:
+		explicit DatabaseInstanceManager();
+		DatabaseInstanceManager(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
+		DatabaseInstanceManager &operator=(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
+		~DatabaseInstanceManager();
 
-  public:
-    /**
-     *  @brief  This function is the only way to get access to the PartitionManager instance
-     *
-     *  @return reference to the only PartitionManager instance
-     */
-    static DatabaseInstanceManager &getInstance() {
-        static DatabaseInstanceManager lDBIM_Instance;
-        return lDBIM_Instance;
-    }
+	public:
+		/**
+		 *  @brief  This function is the only way to get access to the PartitionManager instance
+		 *
+		 *  @return reference to the only PartitionManager instance
+		 */
+		static DatabaseInstanceManager &getInstance() {
+			static DatabaseInstanceManager lDBIM_Instance;
+			return lDBIM_Instance;
+		}
 
-  public:
-    void boot();
-    void shutdown();
+	public:
+		void boot();
+		void shutdown();
 
-  public:
-    inline PartitionManager &getPartMngr() { return _partMngr; }
-    inline SegmentManager &getSegMngr() { return _segMngr; }
+	public:
+		inline PartitionManager &getPartMngr() { return _partMngr; }
+		inline SegmentManager &getSegMngr() { return _segMngr; }
 
-  private:
-    PartitionManager &_partMngr;
-    SegmentManager &_segMngr;
+	private:
+		void loadPartitionManager(); //called in boot, loads the PartMngr from the master part
+		void loadSegmentManager(); //called in boot, loads the SegMngr from the master part
+
+	private:
+		PartitionManager &_partMngr;
+		SegmentManager &_segMngr;
 };
 
 #endif
