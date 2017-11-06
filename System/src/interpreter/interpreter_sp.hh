@@ -39,7 +39,7 @@ class SP_Interpreter
 
 	public:
 		inline byte*     		pagePtr(){ return _pp; }
-		inline nsm_header_t* 	header(){ return _header; }
+		inline sp_header_t* 	header(){ return _header; }
 		inline uint 	 		freeSpace(){ return header()->_freeSpace; }
 		inline uint 	 		noRecords(){ return header()->_noRecords; }
 
@@ -48,12 +48,12 @@ class SP_Interpreter
 		inline size_t  	 		getPageSize(){ return _pageSize; }
 
 	private:
-		inline nsm_header_t* 	get_hdr_ptr() { return ((nsm_header_t*) (_pp + _pageSize - sizeof(nsm_header_t))); }
-		inline slot_t*   		get_slot_base_ptr() { return ((slot_t*) (_pp + _pageSize - sizeof(nsm_header_t) - sizeof(slot_t))); }
+		inline sp_header_t* 	get_hdr_ptr() { return ((sp_header_t*) (_pp + _pageSize - sizeof(sp_header_t))); }
+		inline slot_t*   		get_slot_base_ptr() { return ((slot_t*) (_pp + _pageSize - sizeof(sp_header_t) - sizeof(slot_t))); }
 
 	private:
 		byte*     _pp;
-		nsm_header_t* _header;
+		sp_header_t* _header;
 		slot_t*   _slots;  // new
 		static bool _pageSizeSet;
 		static size_t _pageSize;

@@ -41,7 +41,8 @@ struct fsm_header_t {
     basic_header_t _basicHeader; // The basic header
 };
 
-struct nsm_header_t 
+/* A header for a slotted page */
+struct sp_header_t 
 {
     uint16_t _noRecords;      // number of records stored on this page
     uint16_t _freeSpace;      // total number of free bytes
