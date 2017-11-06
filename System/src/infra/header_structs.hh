@@ -41,6 +41,16 @@ struct fsm_header_t {
     basic_header_t _basicHeader; // The basic header
 };
 
+struct nsm_header_t 
+{
+    uint16_t _noRecords;      // number of records stored on this page
+    uint16_t _freeSpace;      // total number of free bytes
+    uint16_t _nextFreeRecord; // 8 byte aligned offset to next free record
+    uint8_t _unused1;
+    uint8_t _unused2;
+    basic_header_t _basicHeader; // The basic header
+};
+
 /* A header for the segment manager */
 struct segment_index_header_t {
     uint32_t _nextIndexPage; // index to the next index page inside this partition, is invalid if set to 0
@@ -70,6 +80,8 @@ struct segment_fsm_header_t {
     uint8_t _unused;
     basic_header_t _basicHeader;
 };
+
+
 
 /* NSM Header etc. follow */
 // struct segment_nsm_header_t {};

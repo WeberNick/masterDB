@@ -14,6 +14,8 @@
 
 #include <string>
 
+const uint64_t LSN = 0;
+
 class PartitionBase {
   protected:
     friend class PartitionManager;

@@ -23,8 +23,6 @@
 #include <cstring>
 #include <iostream>
 
-const uint64_t LSN = 0;
-
 class PartitionFile : public PartitionBase {
   private:
     friend class PartitionManager;
