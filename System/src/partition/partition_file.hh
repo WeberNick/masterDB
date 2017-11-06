@@ -9,7 +9,7 @@
 #ifndef PARTITION_FILE_HH
 #define PARTITION_FILE_HH
 
-#include "interpreter/fsip_interpreter.hh"
+#include "interpreter/interpreter_fsip.hh"
 #include "partition_base.hh"
 
 

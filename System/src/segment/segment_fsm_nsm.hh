@@ -1,21 +1,21 @@
 /**
- * @file    segment_fsm.hh
- * @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
- * @brief   Class implementing Segment with Free Space Management
+ * @file    segment_fsm_nsm.hh
+ * @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ * @brief   Class implementing a Segment with Free Space Management for N-ary Storage Model (NSM)
  * @bugs    Currently no bugs known.
  * @todos   TBD
  */
 
-#ifndef SEGMENT_FSM_HH
-#define SEGMENT_FSM_HH
+#ifndef SEGMENT_FSM_NSM_HH
+#define SEGMENT_FSM_NSM_HH
 
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
-#include "segment_base.hh"
-#include "interpreter/interpreter_fsm.hh"
+#include "segment_fsm.hh"
+#include "interpreter/interpreter_sp.hh"
 #include <vector>
 
-class SegmentFSM : public SegmentBase
+class SegmentFSM_NSM : public SegmentFSM
 {
   private:
     friend class SegmentManager;
@@ -26,16 +26,14 @@ class SegmentFSM : public SegmentBase
     ~SegmentFSM();
 
   public:
-    int getFreePage(uint aNoOfBytes);
-    int getNewPage(); // decide on whether we need this method. If not, remove from Segment_base as well.
+    //todo nsm specific
 
   public:
     int storeSegment();                         // serialization
     int loadSegment(const uint32_t aPageIndex); // deserialization
 
   private:
-    /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */
-    uint32_vt _fsmPages;
+    //todo nsm specific
 };
 
 #endif

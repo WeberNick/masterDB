@@ -1,4 +1,4 @@
-#include "fsm_seg_interpreter.hh"
+#include "interpreter_fsm.hh"
 
 bool FSMInterpreter::_pageSizeSet = false;
 uint16_t FSMInterpreter::_pageSize = 0;

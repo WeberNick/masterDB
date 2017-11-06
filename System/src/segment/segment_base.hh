@@ -23,11 +23,14 @@ class SegmentBase
 		virtual ~SegmentBase() = 0;
 
 	public:
-		virtual int getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
 		int open();
 		int close();
 		int readPage(byte* aPageBuffer, const uint aPageNo);        // load page from the partition into main memory
 		int writePage(const byte* aPageBuffer, const uint aPageNo); // store page from main memory into the partition
+
+	public:
+		virtual int getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
+		inline uint32_t getPage(uint aPageNo){ return _pages[aPageNo]; }
 
 	public:
 		inline uint16_t getID(){ return _segID; }

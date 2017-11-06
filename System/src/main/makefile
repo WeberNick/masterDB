@@ -25,11 +25,12 @@ OBJ = \
 	\
 	../segment/segment_manager.o \
 	../segment/segment_base.o \
-        ../segment/segment_fsm.o \
+    ../segment/segment_fsm.o \
 	../segment/segment.o \
 	\
-	../interpreter/fsip_interpreter.o \
-	../interpreter/fsm_seg_interpreter.o \
+	../interpreter/interpreter_fsip.o \
+	../interpreter/interpreter_fsm.o \
+	../interpreter/interpreter_sp.o \
 	\
 
 ALL = main 

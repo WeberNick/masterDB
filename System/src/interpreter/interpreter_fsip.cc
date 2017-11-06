@@ -1,4 +1,4 @@
-#include "fsip_interpreter.hh"
+#include "interpreter_fsip.hh"
 
 bool FSIPInterpreter::_pageSizeSet = false;
 uint16_t FSIPInterpreter::_pageSize = 0;

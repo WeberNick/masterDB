@@ -1,5 +1,5 @@
 /**
- *  @file	fsm_seg_interpreter.hh
+ *  @file	interpreter_fsm.hh
  *  @author	Jonas Thietke (jthietke@mail.uni-mannheim.de),
             Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	A class implementing a Free Space Management via an FSIP for segments for little Endian
@@ -7,8 +7,8 @@
  *  @todos  change comments (+ insert description for aPageStatus)
  *  @section TBD
  */
-#ifndef FSM_SEG_INTERPRETER_HH
-#define FSM_SEG_INTERPRETER_HH
+#ifndef INTERPRETER_FSM_HH
+#define INTERPRETER_FSM_HH
 
 #include "infra/bit_intrinsics.hh"
 #include "infra/header_structs.hh"

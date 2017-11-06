@@ -9,17 +9,21 @@ HDR = \
 	\
 
 OBJ = \
-	fsip_interpreter.o \
-	fsm_seg_interpreter.o \
+	interpreter_fsip.o \
+	interpreter_fsm.o \
+	interpreter_sp.o \
 
 
 all : $(OBJ)
 
-fsip_interpreter.o : fsip_interpreter.cc fsip_interpreter.hh $(HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) fsip_interpreter.cc
+interpreter_fsip.o : interpreter_fsip.cc interpreter_fsip.hh $(HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) interpreter_fsip.cc
 
-fsm_seg_interpreter.o : fsm_seg_interpreter.cc fsm_seg_interpreter.hh $(HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) fsm_seg_interpreter.cc
+interpreter_fsm.o : interpreter_fsm.cc interpreter_fsm.hh $(HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) interpreter_fsm.cc
+
+interpreter_sp.o : interpreter_sp.cc interpreter_sp.hh $(HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) interpreter_sp.cc
 
 clean :
 	rm -f *.o a.out

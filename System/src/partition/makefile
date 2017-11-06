@@ -15,7 +15,7 @@ PM_HDR = \
 	\
 
 PF_HDR = \
-	../interpreter/fsip_interpreter.hh \
+	../interpreter/interpreter_fsip.hh \
 	\
 
 PR_HDR = \

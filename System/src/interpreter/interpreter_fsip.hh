@@ -1,5 +1,5 @@
 /**
- *  @file	basic_interpreter.hh
+ *  @file	interpreter_fsip.hh
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de),
                         Jonas Thietke (jthietke@mail.uni-mannheim.de),
                         Aljoscha Narr (alnarr@mail.uni-mannheim.de)
@@ -8,8 +8,8 @@
  *  @todos	Remove noManagedPages() and implement it correctly
  *  @section TBD
  */
-#ifndef FSIP_INTERPRETER_HH
-#define FSIP_INTERPRETER_HH
+#ifndef INTERPRETER_FSIP_HH
+#define INTERPRETER_FSIP_HH
 
 #include "infra/bit_intrinsics.hh"
 #include "infra/header_structs.hh"
