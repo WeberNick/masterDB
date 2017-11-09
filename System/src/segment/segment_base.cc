@@ -17,12 +17,7 @@ SegmentBase::SegmentBase(PartitionBase& aPartition) :
 	_indexPages(),
   _pages(),
   _partition(aPartition)
-{
-  if (_partition.open() == -1) { /* error handling */ }
-	int lSegmentIndex = _partition.allocPage();
-	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
-	if (_partition.close() == -1) { /* error handling */ }
-}
+{}
 
 SegmentBase::~SegmentBase()
 {}

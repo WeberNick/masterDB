@@ -1,18 +1,19 @@
 #include "segment_fsm.hh"
 
-SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition) : SegmentBase(aSegID, aPartition), _fsmPages() {
+SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition) : 
+    SegmentBase(aSegID, aPartition),
+    _fsmPages() 
+{
     if (_partition.open() == -1) { /* error handling */ }
     int lSegmentIndex = _partition.allocPage();
     _indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
     if (_partition.close() == -1) { /* error handling */ }
 }
 
-SegmentFSM::SegmentFSM(PartitionBase &aPartition) : SegmentBase(aPartition), _fsmPages() {
-    if (_partition.open() == -1) { /* error handling */ }
-    int lSegmentIndex = _partition.allocPage();
-    _indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
-    if (_partition.close() == -1) { /* error handling */ }
-}
+SegmentFSM::SegmentFSM(PartitionBase &aPartition) :
+    SegmentBase(aPartition), 
+    _fsmPages()
+{}
 
 SegmentFSM::~SegmentFSM()
 {}

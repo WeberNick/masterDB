@@ -22,15 +22,10 @@ Segment::Segment(const uint16_t aSegID, PartitionBase &aPartition) :
 Segment::Segment(PartitionBase &aPartition) :
     SegmentBase(aPartition),
     _maxSize(0)
-{
-    if (_partition.open() == -1) { /* error handling */ }
-    _maxSize = (_partition.getPageSize() - sizeof(segment_page_header_t)) / sizeof(uint32_t);
-    if (_partition.close() == -1) { /* error handling */ }
-}
+{}
 
 Segment::~Segment()
 {}
-
 
 int Segment::getNewPage() {
 	if (_pages.size() < _maxSize) {
