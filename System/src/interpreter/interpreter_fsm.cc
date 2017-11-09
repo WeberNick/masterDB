@@ -23,7 +23,7 @@ void FSMInterpreter::detach() {
 
 void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
                                 const uint32_t aNoPages) {
-    // alles 0, header
+    // alles 0, header updaten
     uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
     for (uint i = 0; i < max; ++i) {
         *(((uint64_t *)aPP) + i) = 0;

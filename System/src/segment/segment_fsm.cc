@@ -1,12 +1,22 @@
 #include "segment_fsm.hh"
 
-SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition) : 
+SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition) :
     SegmentBase(aSegID, aPartition),
-    _fsmPages() 
+    _fsmPages()
 {
     if (_partition.open() == -1) { /* error handling */ }
     int lSegmentIndex = _partition.allocPage();
     _indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
+    int lFSMIndex = _partition.allocPage();
+    _fsmPages.push_back((lFSMIndex > 0) ? (uint32_t)lFSMIndex : 0);
+
+    byte *lPagePointer = new byte[_partition.getPageSize()];
+    FSMInterpreter fsmp;
+    fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
+    _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
+    fsmp.detach();
+    _partition.readPage(lPagePointer, lFSMIndex, _partition.getPageSize());
+    fsmp.attach(lPagePointer);
     if (_partition.close() == -1) { /* error handling */ }
 }
 
@@ -15,8 +25,7 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition) :
     _fsmPages()
 {}
 
-SegmentFSM::~SegmentFSM()
-{}
+SegmentFSM::~SegmentFSM() {}
 
 int SegmentFSM::getFreePage(uint aNoOfBytes) {
     uint lPageSizeInBytes = _partition.getPageSize() - sizeof(fsm_header_t);
@@ -24,79 +33,53 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
     int lNoPagesToManage = (_partition.getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
 
     /* Check if page with enough space is available using FF algorithm. */
-    if (!_fsmPages.empty()) {
-        byte *lPagePointer = new byte[_partition.getPageSize()];
-        FSMInterpreter fsmp;
-        fsmp.detach();
-        fsmp.attach(lPagePointer);
+    byte *lPagePointer = new byte[_partition.getPageSize()];
+    FSMInterpreter fsmp;
+    fsmp.detach();
+    fsmp.attach(lPagePointer);
 
-        for (uint i = 0; i < _fsmPages.size(); ++i) {
-            int lFSMPage = _fsmPages[i];
+    for (uint i = 0; i < _fsmPages.size(); ++i) {
+        int lFSMPage = _fsmPages[i];
 
-            _partition.readPage(lPagePointer, lFSMPage, _partition.getPageSize());
-            PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
+        _partition.readPage(lPagePointer, lFSMPage, _partition.getPageSize());
+        PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
 
-            int lIndex = fsmp.getFreePage(lPageStatus);
-            if (lIndex != -1) {
-                fsmp.detach();
-                delete[] lPagePointer;
-                return _pages[(i * lNoPagesToManage) + lIndex];
-            }
+        int lIndex = fsmp.getFreePage(lPageStatus);
+        if (lIndex != -1) {
+            fsmp.detach();
+            delete[] lPagePointer;
+            // check if (lIndex > _pages.size()) {}
+            // if this is the case -> alloc new page and add to _pages and return that index. (because page does not exist yet, otherwise the page already exists)
+            return _pages[(i * lNoPagesToManage) + lIndex];
         }
-        /* No FSM page found that returns a free page, create a new one. */ 
-        // muss nicht eine normale Page auch angelegt werden in dem Fall?
-        if (_partition.open() == -1) { return -1; }
-        int lFSMIndex = _partition.allocPage();
-        // init page (PAX, NSM, ..)
-        if (lFSMIndex == -1) { return -1; }
-        _fsmPages.push_back((uint32_t)lFSMIndex);
-
-        _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
-        fsmp.detach();
-        _partition.readPage(lPagePointer, lFSMIndex, _partition.getPageSize());
-        fsmp.attach(lPagePointer);
-
-        PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
-        int lFreePageIndex = fsmp.getFreePage(lPageStatus);
-
-        fsmp.detach();
-        if (_partition.close() == -1) { return -1; }
-        delete[] lPagePointer;
-        return _pages[((_fsmPages.size() - 1) * lNoPagesToManage) + lFreePageIndex];
-    } else {
-        // the following code should be modularized and only written once (instead of twice, regarding the upper part of FSM creation).
-        if (_partition.open() == -1) { return -1; }
-        int lFSMIndex = _partition.allocPage();
-        // init page (PAX, NSM, ..)
-        if (lFSMIndex == -1) { return -1; }
-        _fsmPages.push_back((uint32_t)lFSMIndex);
-
-        byte *lPagePointer = new byte[_partition.getPageSize()];
-        FSMInterpreter fsmp;
-        fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
-        _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
-        fsmp.detach();
-        _partition.readPage(lPagePointer, lFSMIndex, _partition.getPageSize());
-        fsmp.attach(lPagePointer);
-
-        PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
-        // Assume that an index != -1 is returned because it is the first fsm page and it can't be full already. Correct?
-        int lFreePageIndex = fsmp.getFreePage(lPageStatus);
-
-        fsmp.detach();
-        if (_partition.close() == -1) { return -1; }
-        delete[] lPagePointer;
-        return _pages[lFreePageIndex];
     }
-    return -1;
+    /* No FSM page found that returns a free page, create a new one. */
+
+    // TODO: NEXT POINTER SETZEN BEI ERSTELLEN EINER NEUEN SEITE
+
+    if (_partition.open() == -1) { return -1; }
+    int lFSMIndex = _partition.allocPage();
+    if (lFSMIndex == -1) { return -1; }
+    _fsmPages.push_back((uint32_t)lFSMIndex);
+
+    _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
+    fsmp.detach();
+    _partition.readPage(lPagePointer, lFSMIndex, _partition.getPageSize());
+    fsmp.attach(lPagePointer);
+
+    PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
+    int lFreePageIndex = fsmp.getFreePage(lPageStatus);
+
+    fsmp.detach();
+    if (_partition.close() == -1) { return -1; }
+    delete[] lPagePointer;
+    return _pages[((_fsmPages.size() - 1) * lNoPagesToManage) + lFreePageIndex];
 }
 
 /*
  * @brief Unused
  */
-int SegmentFSM::getNewPage() {
-    return -1;
-}
+int SegmentFSM::getNewPage() { return -1; }
 
 int SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     // partition has to be set and opened
