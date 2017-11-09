@@ -5,6 +5,8 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition) :
     _fsmPages()
 {
     if (_partition.open() == -1) { /* error handling */ }
+    /* PagesToManage * 2 because one byte manages two pages (4 bits for one page). */
+    int lNoPagesToManage = (_partition.getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
     int lSegmentIndex = _partition.allocPage();
     _indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
     int lFSMIndex = _partition.allocPage();
@@ -48,20 +50,26 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
         if (lIndex != -1) {
             fsmp.detach();
             delete[] lPagePointer;
-            // check if (lIndex > _pages.size()) {}
-            // if this is the case -> alloc new page and add to _pages and return that index. (because page does not exist yet, otherwise the page already exists)
-            return _pages[(i * lNoPagesToManage) + lIndex];
+            /* If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet, otherwise the page already exists) */
+            if ( ((uint32_t)lIndex) > _pages.size()) {
+                if(_partition.open() == -1) { return -1; }
+                int lPageIndex = _partition.allocPage();
+                if (lPageIndex == -1) { return -1; }
+                _pages.push_back(lPageIndex);
+                if (_partition.close() == -1) { return -1; }
+                return _pages[_pages.size() - 1];
+            } else {
+                return _pages[(i * lNoPagesToManage) + lIndex];
+            }
         }
     }
     /* No FSM page found that returns a free page, create a new one. */
-
-    // TODO: NEXT POINTER SETZEN BEI ERSTELLEN EINER NEUEN SEITE
-
     if (_partition.open() == -1) { return -1; }
     int lFSMIndex = _partition.allocPage();
     if (lFSMIndex == -1) { return -1; }
     _fsmPages.push_back((uint32_t)lFSMIndex);
 
+    // TODO: NEXT FSM POINTER SETZEN BEI ERSTELLEN EINER NEUEN SEITE
     _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
     fsmp.detach();
     _partition.readPage(lPagePointer, lFSMIndex, _partition.getPageSize());
