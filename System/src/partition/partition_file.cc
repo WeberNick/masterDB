@@ -1,67 +1,44 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aNoPages, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID, const uint aGrowthIndicator) :
-	PartitionBase(aPath, aName, aNoPages, aPageSize, aSegmentIndexPage, aPartitionID),
-	_growthIndicator(aGrowthIndicator),
-	_fileDescriptor(-1)
-{}
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID, const uint aGrowthIndicator) :
+	PartitionBase(aPath, aName, aPageSize, aSegmentIndexPage, aPartitionID),
+	_growthIndicator(aGrowthIndicator)
+{
+
+}
 
 PartitionFile::~PartitionFile()
 {}
 
-int PartitionFile::open()
-{
-	if(!_isCreated){ return -1; }
-	if(_openCount == 0)
-	{
-		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); //call open in global namespace
-		if(_fileDescriptor == -1)
-		{
-			std::cerr << "Error opening the file: " << std::strerror(errno) << std::endl;
-			return -1;
-		}
-	}
-	++_openCount;
-	return 0;
-}
-
-int PartitionFile::close()
-{
-	if(!_isCreated){ return -1; }
-	if(_openCount == 1)
-	{
-		if(::close(_fileDescriptor) != 0) //call close in global namespace
-		{
-			std::cerr << "Error closing the file: " << std::strerror(errno) << std::endl;
-			return -1;
-		}
-		_fileDescriptor = -1;
-	}
-	else if(_openCount > 1)
-	{
-		--_openCount;
-	}
-	return 0;
-}
-
-int PartitionFile::createPartition()
+int PartitionFile::create()
 {
 	if(_isCreated){ return -1; }
-	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
-	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
-	system(lCommand.c_str());
-	std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
-	_isCreated = true;
-	if(init() != 0 )
+
+	if(std::filesystem::exists(_partitionPath) && std::filesystem::is_regular_file(_partitionPath))
 	{
-		std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
-		removePartition();
-		return -1;
+		_sizeInPages = std::filesystem::file_size(_partitionPath) / _pageSize;
+		_isCreated = true;
 	}
+	else if(std::filesystem::exists(_partitionPath) && std::filesystem::is_directory(_partitionPath))
+	{
+		_sizeInPages = 1000; //magic number.. default size of a file in number of pages
+		std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
+		std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
+		system(lCommand.c_str());
+		std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
+		_isCreated = true;
+		if(init() != 0 )
+		{
+			std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
+			removePartition();
+			return -1;
+		}
+	}
+
 	return 0;
 }
 
-int PartitionFile::removePartition()
+int PartitionFile::remove()
 {
 	if(!_isCreated){ return -1; }
 	std::string lCommand = "rm " + _partitionPath;
@@ -70,70 +47,6 @@ int PartitionFile::removePartition()
 	std::cout << "\033[1;30mPartitionFile was successfully removed.\033[0m" << std::endl;
 	_isCreated = false;
 	return 0;
-}
-
-int PartitionFile::allocPage()
-{
-	byte* lPagePointer = new byte[_pageSize];
-	FSIPInterpreter fsip;
-	fsip.attach(lPagePointer);
-	uint lIndexOfFSIP = 0;
-	int lAllocatedPageIndex;
-	do
-	{
-		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
-		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
-		if(lAllocatedPageIndex == -1)
-		{
-			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
-		} 
-		else
-		{
-			writePage(lPagePointer, lIndexOfFSIP, _pageSize);
-		} 
-		if(lIndexOfFSIP >= _sizeInPages) return -1;						//Next offset is bigger than the partition
-	}
-	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
-	delete[] lPagePointer;
-	return lAllocatedPageIndex;	//return offset to free block
-}
-
-int PartitionFile::freePage(const uint aPageIndex)
-{
-	byte* lPagePointer = new byte[_pageSize];
-	if(readPage(lPagePointer, aPageIndex, _pageSize) == -1){ return -1; }
-	FSIPInterpreter fsip;
-	fsip.attach(lPagePointer);
-	fsip.freePage(aPageIndex);
-	fsip.detach();
-	delete[] lPagePointer;
-	return 0;
-}
-
-int PartitionFile::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
-{
-	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1)
-	{
-		std::cerr << "Error reading the file: " << std::strerror(errno) << std::endl;
-		return -1;
-	}
-	return 0;
-}
-
-int PartitionFile::writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
-{
-	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1)
-	{
-		std::cerr << "Error writing the file: " << std::strerror(errno) << std::endl;
-		return -1;
-	}
-	return 0;
-}
-
-uint PartitionFile::getMaxPagesPerFSIP()
-{
-	FSIPInterpreter fsip;
-	return (_pageSize - fsip.getHeaderSize()) * 8;
 }
 
 int PartitionFile::init()
@@ -185,4 +98,7 @@ void PartitionFile::printPage(uint aPageIndex)
     delete[] lPagePointer;
     close();
 }
+
+// std::filesystem::resize_file(p, 1024*1024*1024); // resize to 1 G
+
 
