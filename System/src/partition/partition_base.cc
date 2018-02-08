@@ -11,8 +11,7 @@ PartitionBase::PartitionBase(const std::string aPath, const std::string aName, c
 	_openCount(0),
 	_fileDescriptor(-1)
 {
-
-
+	_sizeInPages = size();
 }
 
 PartitionBase::~PartitionBase(){}
@@ -109,6 +108,13 @@ int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const u
 		return -1;
 	}
 	return 0;
+}
+
+uint PartitionBase::size()
+{
+	struct stat lFileStats;
+	if(stat(_partitionPath.c_str(), &lFileStats) == -1){ return 0; }
+	return lFileStats.st_size;
 }
 
 uint PartitionBase::getMaxPagesPerFSIP()

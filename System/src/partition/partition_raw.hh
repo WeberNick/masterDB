@@ -27,14 +27,15 @@ class PartitionRaw : public PartitionBase
 	     */
 	    int create();
 
+		int format();
+		int init();
+
 	    /**
 	     *	@brief	does currently nothing
 	     *	@return	0 if successful, -1 on failure
 	     */
 	    int remove();
 
-	private:
-		int init();
 };
 
 

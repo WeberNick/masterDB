@@ -14,16 +14,16 @@ PartitionManager::~PartitionManager()
     }
 }
 
-PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint64_t aPartitionSize, const uint aPageSize, const uint aSegmentIndexPage, const uint aGrowthIndicator)
+PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aGrowthIndicator)
 {
-    PartitionFile* lPartition = new PartitionFile(aPath, aName, aPartitionSize, aPageSize, aSegmentIndexPage, aGrowthIndicator, _counterPartitionID++);
+    PartitionFile* lPartition = new PartitionFile(aPath, aName, aPageSize, aSegmentIndexPage, aGrowthIndicator, _counterPartitionID++);
     _partitions[lPartition->getID()] = lPartition;
     return (PartitionFile*)_partitions.at(lPartition->getID());
 }
 
-PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName, const uint64_t aPartitionSize, const uint aPageSize, const uint aSegmentIndexPage)
+PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage)
 {
-    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, aPartitionSize, aPageSize, aSegmentIndexPage, _counterPartitionID++);
+    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, aPageSize, aSegmentIndexPage, _counterPartitionID++);
     _partitions[lPartition->getID()] = lPartition;
     return (PartitionRaw*)_partitions.at(lPartition->getID());
 }

@@ -11,10 +11,7 @@
 
 #include "partition_base.hh"
 
-#include <filesystem>
-
 #include <cmath>
-#include <cstring>
 #include <iostream>
 
 class PartitionFile : public PartitionBase {
@@ -32,6 +29,9 @@ class PartitionFile : public PartitionBase {
      */
     int create();
 
+	int format();
+	int init();
+
     /**
      *	@brief	removes the file from disk
      *	@return	0 if successful, -1 on failure
@@ -42,9 +42,6 @@ class PartitionFile : public PartitionBase {
 
   public:
     inline uint getGrowthIndicator() { return _growthIndicator; }
-
-  private:
-    int init();
 
   private:
     /* An indicator how the partition will grow (indicator * block size) */

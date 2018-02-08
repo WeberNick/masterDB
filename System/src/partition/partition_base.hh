@@ -14,12 +14,14 @@
 #include "interpreter/interpreter_fsip.hh"
 
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
 #include <iostream>
 #include <string>
+#include <cstring>
 
 const uint64_t LSN = 0;
 
@@ -78,8 +80,11 @@ class PartitionBase {
      */
     int writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 
-    virtual int create() = 0;
-    virtual int remove() = 0;
+
+    
+	virtual int create() = 0;
+    virtual int format() = 0;
+	virtual int remove() = 0;
 
   public:
     inline std::string getPath() { return _partitionPath; }
@@ -91,8 +96,8 @@ class PartitionBase {
     inline uint getOpenCount() { return _openCount; }
 
   protected:
+	uint size();
     uint getMaxPagesPerFSIP();
-    virtual int init() = 0;
 
   protected:
     /* A path to a partition (i.e., a file) */

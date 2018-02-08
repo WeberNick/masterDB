@@ -14,27 +14,22 @@ int PartitionFile::create()
 {
 	if(_isCreated){ return -1; }
 
-	if(std::filesystem::exists(_partitionPath) && std::filesystem::is_regular_file(_partitionPath))
+	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
+	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
+	system(lCommand.c_str());
+	std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
+	_isCreated = true;
+	if(init() != 0 )
 	{
-		_sizeInPages = std::filesystem::file_size(_partitionPath) / _pageSize;
-		_isCreated = true;
+		std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
+		remove();
+		return -1;
 	}
-	else if(std::filesystem::exists(_partitionPath) && std::filesystem::is_directory(_partitionPath))
-	{
-		_sizeInPages = 1000; //magic number.. default size of a file in number of pages
-		std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_sizeInPages);
-		std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
-		system(lCommand.c_str());
-		std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
-		_isCreated = true;
-		if(init() != 0 )
-		{
-			std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
-			removePartition();
-			return -1;
-		}
-	}
+	return 0;
+}
 
+int PartitionFile::format()
+{
 	return 0;
 }
 

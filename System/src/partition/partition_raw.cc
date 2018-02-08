@@ -13,11 +13,17 @@ int PartitionRaw::create()
 {
 	if(_isCreated){ return -1; }
 
-	if(std::filesystem::exists(_partitionPath) && std::filesystem::is_block_file(_partitionPath))
-	{
-		_sizeInPages = std::filesystem::file_size(_partitionPath) / _pageSize;
-		_isCreated = true;
-	}
+   /* if(std::filesystem::exists(_partitionPath) && std::filesystem::is_block_file(_partitionPath))*/
+	//{
+		//_sizeInPages = std::filesystem::file_size(_partitionPath) / _pageSize;
+		//_isCreated = true;
+	/*}*/
+	return 0;
+}
+
+int PartitionRaw::format()
+{
+
 	return 0;
 }
 
