@@ -19,6 +19,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef __linux__
+#elif __APPLE__
+#else
+	//unsupported
+#endif
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -35,6 +41,7 @@ class PartitionBase {
     virtual ~PartitionBase() = 0;
 
   public:
+    int format();
     /**
      *  @brief  opens the file in read/write mode
      *  @return an int representing a file descriptor, -1 on failure
@@ -82,15 +89,14 @@ class PartitionBase {
 
 
     
-	virtual int create() = 0;
-    virtual int format() = 0;
+	virtual int create(const uint aSizeInPages) = 0;
 	virtual int remove() = 0;
 
   public:
     inline std::string getPath() { return _partitionPath; }
     inline std::string getName() { return _partitionName; }
-    inline uint getSizeInPages() { return _sizeInPages; }
     inline uint getPageSize() { return _pageSize; }
+    inline uint getSizeInPages() { return _sizeInPages; }
     inline uint8_t getID() { return _partitionID; }
     inline uint getSegmentIndexPage() { return _segmentIndexPage; }
     inline uint getOpenCount() { return _openCount; }
@@ -104,16 +110,14 @@ class PartitionBase {
     std::string _partitionPath;
     /* Name of the partition */
     std::string _partitionName;
-    /* The current size of the partition in number of pages */
-    uint _sizeInPages;
     /* The block size in bytes, used by the partition */
     uint _pageSize;
+    /* The current size of the partition in number of pages */
+    uint _sizeInPages;
     /* An ID representing this partition */
     uint8_t _partitionID;
     /* The index within the partition where the segment manager is stored */
     uint _segmentIndexPage;
-    /* Helper flag if partition is already created */
-    bool _isCreated;
     /* Counts the number of open calls */
     uint _openCount;
     /* The partitions file descriptor */

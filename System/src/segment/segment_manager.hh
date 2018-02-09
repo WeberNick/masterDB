@@ -39,6 +39,11 @@ class SegmentManager
         }
 
 	public:
+		//input: vector of tuples of segments (see types.hh)
+		//do: same as in partMngr for segments?
+		void load(const seg_vt& aSegmentTuples);
+
+	public:
 		Segment* createNewSegment(PartitionBase& aPartition); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();			
 		int storeSegmentManager(PartitionBase& aPartition);	 // serialization

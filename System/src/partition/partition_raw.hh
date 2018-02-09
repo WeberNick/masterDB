@@ -22,13 +22,10 @@ class PartitionRaw : public PartitionBase
 
 	public:
 	    /**
-	     *	@brief	checks whether raw device exists and assigns size if so
+	     *	@brief 	formats the raw partition	
 	     *	@return	0 if successful, -1 on failure
 	     */
-	    int create();
-
-		int format();
-		int init();
+	    int create(const uint aSizeInPages);
 
 	    /**
 	     *	@brief	does currently nothing

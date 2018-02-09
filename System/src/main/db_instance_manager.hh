@@ -21,8 +21,8 @@ const std::string C_PATH_TO_MASTER_PARTITION = ""; //Location may change (member
 
 class DatabaseInstanceManager {
 	private:
-		explicit DatabaseInstanceManager();
-		DatabaseInstanceManager(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
+		explicit DatabaseInstanceManager(const std::string aPathToMasterPartition);
+		DatabaseInstanceManager(const DatabaseInstanceManager& aDatabaseInstanceManager) = delete;
 		DatabaseInstanceManager &operator=(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
 		~DatabaseInstanceManager();
 
@@ -32,8 +32,8 @@ class DatabaseInstanceManager {
 		 *
 		 *  @return reference to the only PartitionManager instance
 		 */
-		static DatabaseInstanceManager &getInstance() {
-			static DatabaseInstanceManager lDBIM_Instance;
+		static DatabaseInstanceManager& getInstance(const std::string aPathToMasterPartition) {
+			static DatabaseInstanceManager lDBIM_Instance(aPathToMasterPartition);
 			return lDBIM_Instance;
 		}
 
@@ -42,16 +42,17 @@ class DatabaseInstanceManager {
 		void shutdown();
 
 	public:
-		inline PartitionManager &getPartMngr() { return _partMngr; }
-		inline SegmentManager &getSegMngr() { return _segMngr; }
+		inline PartitionManager& getPartMngr() { return _partMngr; }
+		inline SegmentManager& getSegMngr() { return _segMngr; }
 
 	private:
 		void loadPartitionManager(); //called in boot, loads the PartMngr from the master part
 		void loadSegmentManager(); //called in boot, loads the SegMngr from the master part
 
 	private:
-		PartitionManager &_partMngr;
-		SegmentManager &_segMngr;
+		std::string _pathToMasterPart;
+		PartitionManager& _partMngr;
+		SegmentManager& _segMngr;
 };
 
 #endif

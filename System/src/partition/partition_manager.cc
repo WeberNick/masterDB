@@ -14,6 +14,11 @@ PartitionManager::~PartitionManager()
     }
 }
 
+void PartitionManager::load(const part_vt& aPartitionTuples)
+{
+
+}
+
 PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aGrowthIndicator)
 {
     PartitionFile* lPartition = new PartitionFile(aPath, aName, aPageSize, aSegmentIndexPage, aGrowthIndicator, _counterPartitionID++);

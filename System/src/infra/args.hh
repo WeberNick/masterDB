@@ -49,6 +49,9 @@ class Args {
     inline const bool test() { return _test; }
     inline void test(const bool &x) { _test = x; }
 
+    inline const bool install() { return _install; }
+    inline void install(const bool &x) { _install = x; }
+
     inline const bool print() { return _print; }
     inline void print(const bool &x) { _print = x; }
 
@@ -57,6 +60,9 @@ class Args {
 
     inline const std::string path() { return _path; }
     inline void path(const std::string &x) { _path = x; }
+
+    inline const std::string masterPartition() { return _masterPartition; }
+    inline void masterPartition(const std::string &x) { _masterPartition = x; }
 
     inline const uint segmentIndexPage() { return _segmentIndexPage; }
     inline void segmentIndexPage(const uint &x) { _segmentIndexPage = x; }
@@ -72,12 +78,14 @@ class Args {
     bool _nsm;
     bool _pax;
     bool _test;
+	bool _install;
     bool _print;
     uint _core;
     uint _pageSize;
     uint _alignment;
     uint _runs;
     std::string _path;
+	std::string _masterPartition;
     uint _segmentIndexPage;
     uint _partitionSize;
     uint _growthIndicator;

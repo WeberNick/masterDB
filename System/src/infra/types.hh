@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+#include <string>
 
 typedef std::byte byte;
 typedef std::vector<byte *> byte_vpt;
@@ -38,5 +39,26 @@ enum class PageStatus {
     kBUCKET15 = 15,
     kEndType = 16
 };
+
+struct part_t
+{
+	uint _pID;
+	std::string _pName;
+	std::string _pPath;
+	int _pType;
+	bool _pGrowth;
+};
+typedef std::vector<part_t> part_vt;
+
+struct seg_t
+{
+	uint _sPID;
+	uint _sID;
+	std::string _sName;
+	int _sType;
+	uint _sFirstPage;
+};
+typedef std::vector<seg_t> seg_vt;
+
 
 #endif

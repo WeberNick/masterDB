@@ -3,23 +3,53 @@
 PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
-	_sizeInPages(0),
 	_pageSize(aPageSize),
+	_sizeInPages(size()),
 	_partitionID(aPartitionID),
 	_segmentIndexPage(aSegmentIndexPage),
-	_isCreated(false),
 	_openCount(0),
 	_fileDescriptor(-1)
 {
-	_sizeInPages = size();
 }
 
 PartitionBase::~PartitionBase(){}
 
 
+int PartitionBase::format()
+{
+	byte* lPagePointer = new byte[_pageSize];
+	uint lPagesPerFSIP = getMaxPagesPerFSIP();
+	uint lCurrentPageNo = 0;
+	FSIPInterpreter fsip;
+	uint remainingPages = _sizeInPages;
+	uint lNumberOfPagesToManage;
+	if(open() == -1){ return -1; }
+	while(remainingPages > 1)
+	{
+		--remainingPages;
+		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
+		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
+		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1){ return -1; }
+		lCurrentPageNo += (lPagesPerFSIP + 1);
+		remainingPages -= lNumberOfPagesToManage;
+	}
+	fsip.detach();
+	readPage(lPagePointer, LSN, _pageSize);
+	fsip.attach(lPagePointer);
+	if(fsip.reservePage(_segmentIndexPage) == -1)
+	{
+		delete[] lPagePointer;
+		return -1;
+	}
+	writePage(lPagePointer, LSN, _pageSize);
+	if(close() == -1){ return -1; }
+	delete[] lPagePointer;
+	return 0;
+}
+
+
 int PartitionBase::open()
 {
-	if(!_isCreated){ return -1; }
 	if(_openCount == 0)
 	{
 		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); //call open in global namespace
@@ -35,7 +65,6 @@ int PartitionBase::open()
 
 int PartitionBase::close()
 {
-	if(!_isCreated){ return -1; }
 	if(_openCount == 1)
 	{
 		if(::close(_fileDescriptor) != 0) //call close in global namespace
@@ -110,11 +139,11 @@ int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const u
 	return 0;
 }
 
-uint PartitionBase::size()
+uint PartitionBase::size() //in number of pages 
 {
 	struct stat lFileStats;
 	if(stat(_partitionPath.c_str(), &lFileStats) == -1){ return 0; }
-	return lFileStats.st_size;
+	return lFileStats.st_size / _pageSize;
 }
 
 uint PartitionBase::getMaxPagesPerFSIP()

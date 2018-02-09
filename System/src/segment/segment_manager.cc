@@ -15,6 +15,12 @@ SegmentManager::~SegmentManager()
     }
 }
 
+void SegmentManager::load(const seg_vt& aSegmentTuples)
+{
+
+
+}
+
 Segment* SegmentManager::createNewSegment(PartitionBase& aPartition)
 {
     //TODO ueberlauf von Seiten hier abfangen und neue SgmtMngr Pages allokieren
