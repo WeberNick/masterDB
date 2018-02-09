@@ -38,6 +38,7 @@ class DatabaseInstanceManager {
 		}
 
 	public:
+		void install();
 		void boot();
 		void shutdown();
 

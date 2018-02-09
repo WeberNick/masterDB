@@ -10,6 +10,11 @@ DatabaseInstanceManager::~DatabaseInstanceManager()
 {}
 
 
+void DatabaseInstanceManager::install()
+{
+	//todo
+
+}
 
 void DatabaseInstanceManager::boot()
 {
@@ -24,3 +29,12 @@ void DatabaseInstanceManager::boot()
 	_partMngr.load(lPartitionTuples);
 	_segMngr.load(lSegmentTuples);
 }
+
+void DatabaseInstanceManager::shutdown()
+{
+	//todo
+
+
+}
+
+
