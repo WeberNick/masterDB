@@ -1,4 +1,7 @@
 #include "segment_manager.hh"
+#include "segment_fsm.hh"
+#include "segment_fsm_nsm.hh"
+#include "infra/types.hh"
 
 SegmentManager::SegmentManager() :
     _counterSegmentID(0),
@@ -17,6 +20,14 @@ SegmentManager::~SegmentManager()
 
 void SegmentManager::load(const seg_vt& aSegmentTuples)
 {
+    //fill internal data structure with all relevant info
+    _segmentTuples = aSegmentTuples;
+    seg_t helo;
+    for (uint i=0;i< _segmentTuples.size(); ++i){
+        helo = _segmentTuples.at[i];
+        _segmentsByID[helo._sID]=_segmentTuples.at[i]*;
+        _segmentsByName[helo._sName]=*_segmentTuples.at[i]*;
+    }
 
 
 }
@@ -29,8 +40,10 @@ Segment* SegmentManager::createNewSegment(PartitionBase& aPartition)
     return (Segment*)_segments.at(lSegment->getID());
 }
 
+
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
 {
+    //TODO: use code that can be reused, delete rest
     std::cout<<"store Segement Manager"<<std::endl;
     aPartition.open();
     // store all segments
@@ -71,6 +84,9 @@ int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
 
 int SegmentManager::loadSegmentManager(PartitionBase& aPartition)
 {
+    //TODO: use code that can be reused, delete rest
+
+
     // maxSegmentsPerPage and aPartition to be set in constructor
 
     // load yourself by building a vector of pageIndexes where Segments are stored
@@ -101,7 +117,27 @@ int SegmentManager::loadSegmentManager(PartitionBase& aPartition)
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 {
-    return _segments.at(aSegmentID);
+    /*//if the object has not been created before, create it and store it
+    if (_segments.find(aSegmentID)==_segments.end()) {
+        //find out which type
+        seg_t lTuple = *_segmentsByID[aSegmentID];
+        switch(lTuple._sType){
+            case 1://SegmentFSM
+            SegmentFSM s = new SegmentFSM(lTuple._sPID);
+            break;
+            case 2: //segmentFSM NSM
+            SegmentFSM_NSM s = new SegmentFSM_NSM(lTuple._sPID);
+            break;
+            //more to come
+
+            default: return nullptr;
+        }
+        s.loadSegment(lTuple._sFirstPage);
+        _segments[lTuple._sID]=s;
+    }
+    //now it is created and can be retrieved
+    //else it is in the map, you can just pass it
+    return _segments[aSegmentID];*/
 }
 
 void SegmentManager::storeSegments()

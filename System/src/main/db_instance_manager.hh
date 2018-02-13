@@ -54,6 +54,8 @@ class DatabaseInstanceManager {
 		std::string _pathToMasterPart;
 		PartitionManager& _partMngr;
 		SegmentManager& _segMngr;
+		uint32_t _locationSegSeg = 12; //physical page of master partition, where "master segment for segments" is stored
+		uint32_t _locationPartSeg =11; //physical page of master partition, where "master segment for partitions" is stored
 };
 
 #endif
