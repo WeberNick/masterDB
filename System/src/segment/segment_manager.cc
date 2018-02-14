@@ -22,11 +22,9 @@ void SegmentManager::load(const seg_vt& aSegmentTuples)
 {
     //fill internal data structure with all relevant info
     _segmentTuples = aSegmentTuples;
-    seg_t helo;
-    for (uint i=0;i< _segmentTuples.size(); ++i){
-        helo = _segmentTuples.at[i];
-        _segmentsByID[helo._sID]=_segmentTuples.at[i]*;
-        _segmentsByName[helo._sName]=*_segmentTuples.at[i]*;
+    for(auto& segTuple : _segmentTuples){
+        _segmentsByID[segTuple._sID] = &segTuple;
+        _segmentsByName[segTuple._sName] = &segTuple;
     }
 
 

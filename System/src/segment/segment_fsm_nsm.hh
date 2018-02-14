@@ -19,11 +19,11 @@ class SegmentFSM_NSM : public SegmentFSM
 {
   private:
     friend class SegmentManager;
-    explicit SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition);
-    explicit SegmentFSM(PartitionBase &aPartition);
-    SegmentFSM(const SegmentFSM &aSegment) = delete;
-    SegmentFSM &operator=(const SegmentFSM &aSegment) = delete;
-    ~SegmentFSM();
+    explicit SegmentFSM_NSM(const uint16_t aSegID, PartitionBase &aPartition);
+    explicit SegmentFSM_NSM(PartitionBase &aPartition);
+    SegmentFSM_NSM(const SegmentFSM_NSM &aSegment) = delete;
+    SegmentFSM_NSM &operator=(const SegmentFSM_NSM &aSegment) = delete;
+    ~SegmentFSM_NSM();
 
   public:
     //todo nsm specific
