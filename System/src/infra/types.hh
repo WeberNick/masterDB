@@ -46,7 +46,7 @@ struct part_t
 	std::string _pName;
 	std::string _pPath;
 	int _pType;
-	bool _pGrowth;
+	int _pGrowth;
 };
 typedef std::vector<part_t> part_vt;
 

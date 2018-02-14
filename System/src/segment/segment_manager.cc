@@ -1,7 +1,10 @@
 #include "segment_manager.hh"
-#include "segment_fsm.hh"
+/*#include "segment_fsm.hh"
 #include "segment_fsm_nsm.hh"
-#include "infra/types.hh"
+#include "partition/partion_manager.hh"
+#include "infra/types.hh"*/
+
+
 
 SegmentManager::SegmentManager() :
     _counterSegmentID(0),
@@ -115,27 +118,30 @@ int SegmentManager::loadSegmentManager(PartitionBase& aPartition)
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 {
-    /*//if the object has not been created before, create it and store it
+    //if the object has not been created before, create it and store it
     if (_segments.find(aSegmentID)==_segments.end()) {
         //find out which type
         seg_t lTuple = *_segmentsByID[aSegmentID];
+        PartitionManager& partMngr = PartitionManager::getInstance();
+        PartitionBase& part = *(partMngr.getPartition(lTuple._sPID));
+        SegmentBase* s;
         switch(lTuple._sType){
             case 1://SegmentFSM
-            SegmentFSM s = new SegmentFSM(lTuple._sPID);
+            s = new SegmentFSM(part);
             break;
             case 2: //segmentFSM NSM
-            SegmentFSM_NSM s = new SegmentFSM_NSM(lTuple._sPID);
+            s = new SegmentFSM_NSM(part);
             break;
             //more to come
 
             default: return nullptr;
         }
-        s.loadSegment(lTuple._sFirstPage);
+        s->loadSegment(lTuple._sFirstPage);
         _segments[lTuple._sID]=s;
     }
     //now it is created and can be retrieved
     //else it is in the map, you can just pass it
-    return _segments[aSegmentID];*/
+    return _segments[aSegmentID];
 }
 
 void SegmentManager::storeSegments()
