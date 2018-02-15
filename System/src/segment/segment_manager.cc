@@ -1,14 +1,11 @@
 #include "segment_manager.hh"
-/*#include "segment_fsm.hh"
-#include "segment_fsm_nsm.hh"
-#include "partition/partion_manager.hh"
-#include "infra/types.hh"*/
-
-
 
 SegmentManager::SegmentManager() :
     _counterSegmentID(0),
     _segments(),
+	_segmentsByID(),
+	_segmentsByName(),
+	_segmentTuples(),
     _indexPages(), // one element which is the first page index??
     /* REMOVE THIS MAGIC NUMBER AS SOON A SOLUTION IS FOUND */
     _maxSegmentsPerPage((4096 - sizeof(segment_index_header_t)) / sizeof(uint32_t)) //number of pages one segment page can manage

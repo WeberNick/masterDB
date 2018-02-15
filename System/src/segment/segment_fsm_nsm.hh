@@ -11,6 +11,7 @@
 
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
+#include "segment_base.hh"
 #include "segment_fsm.hh"
 #include "interpreter/interpreter_sp.hh"
 #include <vector>
