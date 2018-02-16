@@ -46,8 +46,8 @@ OBJ = \
 	segment_manager.o \
 	segment_base.o \
     segment_fsm.o \
-	segment_fsm_nsm.o \
 	segment.o \
+	segment_fsm_nsm.o \
 
 
 all : $(OBJ)
