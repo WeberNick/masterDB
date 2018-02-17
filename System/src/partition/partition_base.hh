@@ -20,7 +20,9 @@
 #include <unistd.h>
 
 #ifdef __linux__
+#include <linux/fs.h>
 #elif __APPLE__
+#include <sys/disk.h>
 #else
 	//unsupported
 #endif
