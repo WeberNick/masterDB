@@ -16,7 +16,7 @@
 #include "segment_base.hh"
 #include "segment.hh"
 #include "segment_fsm.hh"
-#include "segment_fsm_nsm.hh"
+#include "segment_fsm_sp.hh"
 #include "partition/partition_manager.hh"
 
 #include <map>

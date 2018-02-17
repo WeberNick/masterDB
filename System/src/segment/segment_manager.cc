@@ -22,7 +22,8 @@ void SegmentManager::load(const seg_vt& aSegmentTuples)
 {
     //fill internal data structure with all relevant info
     _segmentTuples = aSegmentTuples;
-    for(auto& segTuple : _segmentTuples){
+    for(auto& segTuple : _segmentTuples)
+    {
         _segmentsByID[segTuple._sID] = &segTuple;
         _segmentsByName[segTuple._sName] = &segTuple;
     }

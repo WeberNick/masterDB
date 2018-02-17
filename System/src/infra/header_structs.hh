@@ -82,10 +82,16 @@ struct segment_fsm_header_t {
     basic_header_t _basicHeader;
 };
 
-/* A header for a nsm segment */
-/*struct segment_nsm_header_t {
-    
-};*/
+/* A header for a nsm segment (currently the same as segment_fsm_header_t) */
+struct segment_fsm_sp_header_t {
+    uint32_t _currSize;      // Current number of pages managed by this segment on this page only
+    uint32_t _firstFSM;      // physical index of the first FSM. Others are pointed at from there on
+    uint32_t _nextIndexPage; // if segment has more than one index page, this is a physical index. else this is 0
+    uint16_t _segID;
+    uint8_t _version;
+    uint8_t _unused;
+    basic_header_t _basicHeader;
+};
 
 // struct segment_pax_header_t {};
 
