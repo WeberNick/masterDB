@@ -19,6 +19,27 @@ typedef unsigned int uint;
 typedef std::vector<uint> uint_vt;
 typedef std::vector<uint32_t> uint32_vt;
 
+typedef std::vector<part_t> part_vt;
+typedef std::vector<seg_t> seg_vt;
+
+struct part_t
+{
+	uint _pID;
+	std::string _pName;
+	std::string _pPath;
+	int _pType;
+	int _pGrowth;
+};
+
+struct seg_t
+{
+	uint _sPID; //partition ID
+	uint _sID; //segment ID
+	std::string _sName; //segment name (unique)
+	int _sType; //segment type
+	uint _sFirstPage; //first segment header page in order to load segment into memory
+};
+
 enum class PageStatus {
     kNoType = -1,
     kBUCKET0 = 0,
@@ -39,26 +60,5 @@ enum class PageStatus {
     kBUCKET15 = 15,
     kEndType = 16
 };
-
-struct part_t
-{
-	uint _pID;
-	std::string _pName;
-	std::string _pPath;
-	int _pType;
-	int _pGrowth;
-};
-typedef std::vector<part_t> part_vt;
-
-struct seg_t
-{
-	uint _sPID; //partition ID
-	uint _sID; //segment ID
-	std::string _sName; //segment name (unique)
-	int _sType; //segment type
-	uint _sFirstPage; //first segment header page in order to load segment into memory
-};
-typedef std::vector<seg_t> seg_vt;
-
 
 #endif

@@ -47,13 +47,12 @@ class SegmentBase
 	protected:
 		/* An ID representing this Segment */
 		uint16_t _segID;
-		/* Contains page addresses of pages belonging to the segment for serialization purposes. First element is considered as masterPageIndex */
+		/* Contains index pages which contain addresses of pages belonging to the segment (for serialization purposes). First element is considered as masterPageIndex */
 		uint32_vt _indexPages;
-		/* A vector containing indices to all pages (in the partition) of this segment */
+		/* A vector containing indices to all pages of this segment */
 		uint32_vt _pages;
 		/* Partition the Segment belongs to */
 		PartitionBase& _partition;
 };
-
 
 #endif
