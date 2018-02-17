@@ -72,6 +72,7 @@ int PartitionBase::close()
 			std::cerr << "Error closing the partition: " << std::strerror(errno) << std::endl;
 			return -1;
 		}
+		--_openCount;
 		_fileDescriptor = -1;
 	}
 	else if(_openCount > 1)
