@@ -127,7 +127,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
             s = new SegmentFSM(part);
             break;
             case 2: //segmentFSM NSM
-            s = new SegmentFSM_NSM(part);
+            s = new SegmentFSM_SP(part);
             break;
             //more to come
 

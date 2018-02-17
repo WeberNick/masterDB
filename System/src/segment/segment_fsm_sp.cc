@@ -12,7 +12,12 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition) :
 
 SegmentFSM_SP::~SegmentFSM_SP() {}
 
-
+int SegmentFSM_SP::insertTuples() {
+    /* block in seitenkonforme segmente packen
+    wenn auf eine seite passt get free page speichern
+    nein auf mehrere seiten hintereinander */
+    // pointer verschieben und schreiben
+}
 
 int SegmentFSM_SP::loadSegment(const uint32_t aPageIndex) {
     /* to-do */
