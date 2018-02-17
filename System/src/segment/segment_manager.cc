@@ -41,7 +41,16 @@ void SegmentManager::load(PartitionFile& aMasterPartition, const uint aSegmentIn
         _segmentsByID[segTuple._sID] = &segTuple;
         _segmentsByName[segTuple._sName] = &segTuple;
     }
+}
 
+void SegmentManager::store()
+{
+    //get size of master segment
+    //get number of segments
+    // estimate if size is big enough, if not add new pages
+    //write all tuples that were not deleted
+    //get new tuples
+    //write everything on segment
 }
 
 Segment* SegmentManager::createNewSegment(PartitionBase& aPartition)
@@ -137,6 +146,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
         PartitionBase& part = *(partMngr.getPartition(lTuple._sPID));
         SegmentBase* s;
         switch(lTuple._sType){
+            //DOES NOT WORK BECAUSE: partition muss noch geladen werden, und zwar die, auf der Segment steht.
             case 1://SegmentFSM
             s = new SegmentFSM(part);
             break;
