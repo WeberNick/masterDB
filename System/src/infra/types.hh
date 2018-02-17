@@ -46,17 +46,17 @@ struct part_t
 	std::string _pName;
 	std::string _pPath;
 	int _pType;
-	bool _pGrowth;
+	int _pGrowth;
 };
 typedef std::vector<part_t> part_vt;
 
 struct seg_t
 {
-	uint _sPID;
-	uint _sID;
-	std::string _sName;
-	int _sType;
-	uint _sFirstPage;
+	uint _sPID; //partition ID
+	uint _sID; //segment ID
+	std::string _sName; //segment name (unique)
+	int _sType; //segment type
+	uint _sFirstPage; //first segment header page in order to load segment into memory
 };
 typedef std::vector<seg_t> seg_vt;
 

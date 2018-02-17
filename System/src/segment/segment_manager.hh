@@ -15,6 +15,9 @@
 #include "partition/partition_base.hh"
 #include "segment_base.hh"
 #include "segment.hh"
+#include "segment_fsm.hh"
+#include "segment_fsm_nsm.hh"
+#include "partition/partition_manager.hh"
 
 #include <map>
 
@@ -60,9 +63,17 @@ class SegmentManager
 	private:
 		/* ID Counter for Segments */
 		uint16_t _counterSegmentID;
-		/* Stores all managed Segments */
+		/* Stores all managed segment objects by ID */
 		std::map<uint16_t, SegmentBase*> _segments;
-		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 */
+		/* Stores pointers to all segment Tuples by ID/Name */
+		std::map<uint16_t, seg_t*> _segmentsByID;
+		std::map<std::string, seg_t*> _segmentsByName;
+		/* Stores all segment Tuples*/
+		seg_vt _segmentTuples;
+		
+
+		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 
+		TO BE DELETED*/
 		uint32_vt _indexPages;		
 		/* Number of Pages that can be managed on one SegmentManager Page */
 		uint32_t _maxSegmentsPerPage;

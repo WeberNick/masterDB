@@ -16,7 +16,8 @@ PartitionManager::~PartitionManager()
 
 void PartitionManager::load(const part_vt& aPartitionTuples)
 {
-
+ //create partition object for every entry in aPartitionTuples
+ //store in maps
 }
 
 PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aGrowthIndicator)

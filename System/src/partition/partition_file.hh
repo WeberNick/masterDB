@@ -28,6 +28,7 @@ class PartitionFile : public PartitionBase {
 	   *	@param 	aSizeInPages size with which the partition is created
      *	@return	0 if successful, -1 on failure
      */
+        //check whether path exists and references a file
     int create(const uint aSizeInPages);
 
     /**

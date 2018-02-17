@@ -17,7 +17,7 @@
 
 class SegmentFSM : public SegmentBase
 {
-  private:
+  protected:
     friend class SegmentManager;
     explicit SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition);
     explicit SegmentFSM(PartitionBase &aPartition);
@@ -33,7 +33,7 @@ class SegmentFSM : public SegmentBase
     int storeSegment();                         // serialization
     int loadSegment(const uint32_t aPageIndex); // deserialization
 
-  private:
+  protected:
     /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */
     uint32_vt _fsmPages;
 };

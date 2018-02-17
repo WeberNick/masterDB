@@ -22,11 +22,16 @@ void DatabaseInstanceManager::boot()
 	seg_vt lSegmentTuples;
 	
 	
-	//create MasterSegmentNSM, read it, fill vector with tuple
-	
-
-
+	//create NSMsegment object for partitions 
+	//read it in from page _locationPartSeg,
+	//fill vector with tuple all its tuples
+	//hand over to partMngr by
 	_partMngr.load(lPartitionTuples);
+
+	//create NSMsegment object for segments 
+	//read it in from page _locationSegSeg,
+	//fill vector with tuple all its tuples
+	//hand over to segMngr by
 	_segMngr.load(lSegmentTuples);
 }
 
