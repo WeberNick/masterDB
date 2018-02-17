@@ -20,9 +20,13 @@
 #include <unistd.h>
 
 #ifdef __linux__
-#include <linux/fs.h>
+  #include <linux/fs.h>
+  #define NO_BLOCKS BLKGETSIZE
+  #define BLOCK_SIZE BLKSSZGET
 #elif __APPLE__
-#include <sys/disk.h>
+  #include <sys/disk.h>
+  #define NO_BLOCKS DKIOCGETBLOCKCOUNT 
+  #define BLOCK_SIZE DKIOCGETBLOCKSIZE 
 #else
 	//unsupported
 #endif
@@ -36,8 +40,7 @@ const uint64_t LSN = 0;
 class PartitionBase {
   protected:
     friend class PartitionManager;
-    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize,
-                           const uint aSegmentIndexPage, const uint aPartitionID);
+    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID);
     PartitionBase(const PartitionBase &aPartition) = delete;
     PartitionBase &operator=(const PartitionBase &aPartition) = delete;
     virtual ~PartitionBase() = 0;
@@ -100,12 +103,12 @@ class PartitionBase {
     inline uint getPageSize() { return _pageSize; }
     inline uint getSizeInPages() { return _sizeInPages; }
     inline uint8_t getID() { return _partitionID; }
-    inline uint getSegmentIndexPage() { return _segmentIndexPage; }
     inline uint getOpenCount() { return _openCount; }
 
   protected:
 	uint size();
     uint getMaxPagesPerFSIP();
+
 
   protected:
     /* A path to a partition (i.e., a file) */
@@ -118,8 +121,6 @@ class PartitionBase {
     uint _sizeInPages;
     /* An ID representing this partition */
     uint8_t _partitionID;
-    /* The index within the partition where the segment manager is stored */
-    uint _segmentIndexPage;
     /* Counts the number of open calls */
     uint _openCount;
     /* The partitions file descriptor */

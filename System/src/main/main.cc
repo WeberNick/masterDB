@@ -32,20 +32,18 @@ int main(const int argc, const char *argv[]) {
 
     const std::string C_PATH = lArgs.path();
     const uint C_PAGE_SIZE = lArgs.pageSize();
-    const uint C_SEGMENT_INDEX_PAGE = lArgs.segmentIndexPage();
     const uint C_GROWTH_INDICATOR = lArgs.growthIndicator();
 	const std::string C_MASTER_PARTITION_PATH = lArgs.masterPartition();
 
     std::cout << "Path: " << C_PATH << std::endl;
     std::cout << "PageSize: " << C_PAGE_SIZE << std::endl;
-    std::cout << "Index: " << C_SEGMENT_INDEX_PAGE << std::endl;
     std::cout << "Growth: " << C_GROWTH_INDICATOR << std::endl;
 
     FSIPInterpreter::setPageSize(lArgs.pageSize());
 
 	/* Test call in test.hh */
     if (lArgs.test()) {
-        test(C_PATH, C_PAGE_SIZE, C_SEGMENT_INDEX_PAGE, C_GROWTH_INDICATOR);
+        test(C_PATH, C_PAGE_SIZE, C_GROWTH_INDICATOR);
     }
 
     /* Todo... Boot Sequence */

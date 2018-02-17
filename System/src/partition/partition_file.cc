@@ -1,7 +1,7 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID, const uint aGrowthIndicator) :
-	PartitionBase(aPath, aName, aPageSize, aSegmentIndexPage, aPartitionID),
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID, const uint aGrowthIndicator) :
+	PartitionBase(aPath, aName, aPageSize, aPartitionID),
 	_growthIndicator(aGrowthIndicator)
 {
 

@@ -51,11 +51,11 @@ class DatabaseInstanceManager {
 		void loadSegmentManager(); //called in boot, loads the SegMngr from the master part
 
 	private:
-		std::string _pathToMasterPart;
+                PartitionFile _masterPartition;
 		PartitionManager& _partMngr;
 		SegmentManager& _segMngr;
-		uint32_t _locationSegSeg = 12; //physical page of master partition, where "master segment for segments" is stored
-		uint32_t _locationPartSeg =11; //physical page of master partition, where "master segment for partitions" is stored
+                uint _partIndex; //Index of first segment storing pages with partition tuples, should be 1
+                uint _segIndex; //Index of first segment storing pages with segment tuples, should be 2
 };
 
 #endif

@@ -18,10 +18,24 @@ SegmentManager::~SegmentManager()
     }
 }
 
-void SegmentManager::load(const seg_vt& aSegmentTuples)
+void SegmentManager::load(PartitionFile& aMasterPartition, const uint aSegmentIndex)
 {
+    SegmentFSM_SP lSegments(aMasterPartition);
+    lSegments.loadSegment(aSegmentIndex);
+    byte* lPage = new byte[aMasterPartition.getPageSize()];
+    SP_Interpreter lInterpreter;
+
+    for(uint i = 0; i < lSegments.getNoPages(); ++i)
+    {
+   	  lSegments.readPage(lPage, aSegmentIndex);
+   	  lInterpreter.attach(lPage);
+   	  for(uint j = 0; j < lInterpreter.noRecords(); ++j)
+   	  {
+                _segmentTuples.push_back((*((seg_t*)lInterpreter.getRecord(j))));
+   	  }
+
+    }
     //fill internal data structure with all relevant info
-    _segmentTuples = aSegmentTuples;
     for(auto& segTuple : _segmentTuples)
     {
         _segmentsByID[segTuple._sID] = &segTuple;
@@ -93,7 +107,7 @@ int SegmentManager::loadSegmentManager(PartitionBase& aPartition)
     // basic header: LSN, PageIndex, PartitionId, Version, unused
     basic_header_t lBH = {0, 0, aPartition.getID(), 1, 0, 0};
     // segment_index_heder: nxtIndexPage, noSegments, version,unused,basicHeader
-    segment_index_header_t lSMH = {aPartition.getSegmentIndexPage(), 0, 1, 0, lBH};
+    segment_index_header_t lSMH = {/*aPartition.getSegmentIndexPage()*/0, 0, 1, 0, lBH};
     std::vector<uint32_t> lSegmentPages;
 
     do {
@@ -127,7 +141,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
             s = new SegmentFSM(part);
             break;
             case 2: //segmentFSM NSM
-            s = new SegmentFSM_NSM(part);
+            s = new SegmentFSM_SP(part);
             break;
             //more to come
 
