@@ -132,6 +132,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
         PartitionBase& part = *(partMngr.getPartition(lTuple._sPID));
         SegmentBase* s;
         switch(lTuple._sType){
+            //DOES NOT WORK BECAUSE: partition muss noch geladen werden, und zwar die, auf der Segment steht.
             case 1://SegmentFSM
             s = new SegmentFSM(part);
             break;

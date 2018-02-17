@@ -90,7 +90,28 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
 }
 
 int SegmentFSM::getNewPage() {
-
+    return (getFreePage(_partition.getPageSize()-size_of(segment_fsm_header_t)));
+   /*     //reserve new page
+    if (_partition.open() == -1) { return -1; }
+    uint lPage = _partition.allocPage();
+    if (lPage == -1) { return -1; }
+    //check for exceptions: if segmentIndexPage oder FSM is full, page has a problem, but this will be dealt with later
+    _pages.push_back(lPage);
+    //set new fsm entry to full, but should be done otherwise
+    uint lFSM = _fsmPages[_fsmPages.size()-2];
+    FSMInterpreter fsmp;
+    byte* lPP = new byte[_partition.getPageSize()];
+    _partition.readPage(lPP,lFSM,_partition.getPageSize());
+    fsmp.attach(lPP);
+    uint lPos = fsmp.getHeaderPtr()->_noPages;
+    if (lPos+1 > ((_partition.getPageSize()-size_of(fsm_header_t))/2) ){
+        //add new fsm
+    }
+    else{
+        fsmp.changePageStatus()
+    }
+    //return page
+    */
 }
 
 int SegmentFSM::loadSegment(const uint32_t aPageIndex) {

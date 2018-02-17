@@ -85,9 +85,6 @@ class FSMInterpreter {
     /* Getter */
     inline byte *pagePtr() { return _pp; }
     inline uint32_t getNextFSMPage() { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
-
-  private:
-    /* Getter */
     inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
 
   private:
