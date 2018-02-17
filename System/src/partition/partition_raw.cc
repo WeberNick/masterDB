@@ -11,6 +11,7 @@ PartitionRaw::~PartitionRaw(){}
 
 int PartitionRaw::create(const uint aSizeInPages)
 {
+        //check whether raw partition exists and if call format()
 	return format();
 }
 

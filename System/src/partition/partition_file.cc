@@ -12,6 +12,7 @@ PartitionFile::~PartitionFile()
 
 int PartitionFile::create(const uint aSizeInPages)
 {
+  //todo check if file exists etc...
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(aSizeInPages);
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
@@ -27,6 +28,7 @@ int PartitionFile::create(const uint aSizeInPages)
 
 int PartitionFile::remove()
 {
+  //do checks..
 	std::string lCommand = "rm " + _partitionPath;
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
