@@ -61,7 +61,7 @@ struct segment_index_header_t {
     basic_header_t _basicHeader; // The basic header
 };
 
-/* A header for the segment */
+/* A header for a segment */
 struct segment_page_header_t {
     uint16_t _maxSize;  // Max number of pages managed by this segment
     uint16_t _currSize; // Current number of pages managed by this segment
@@ -71,7 +71,7 @@ struct segment_page_header_t {
     basic_header_t _basicHeader; // The basic header
 };
 
-
+/* A header for a fsm segment */
 struct segment_fsm_header_t {
     uint32_t _currSize;      // Current number of pages managed by this segment on this page only
     uint32_t _firstFSM;      // physical index of the first FSM. Others are pointed at from there on
@@ -82,10 +82,11 @@ struct segment_fsm_header_t {
     basic_header_t _basicHeader;
 };
 
+/* A header for a nsm segment */
+/*struct segment_nsm_header_t {
+    
+};*/
 
-
-/* NSM Header etc. follow */
-// struct segment_nsm_header_t {};
 // struct segment_pax_header_t {};
 
 #endif

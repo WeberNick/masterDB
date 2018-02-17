@@ -27,7 +27,7 @@ class SegmentFSM : public SegmentBase
 
   public:
     int getFreePage(uint aNoOfBytes);
-    int getNewPage(); // decide on whether we need this method. If not, remove from Segment_base as well.
+    int getNewPage();
 
   public:
     int storeSegment();                         // serialization
