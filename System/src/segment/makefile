@@ -16,7 +16,7 @@ SM_HDR = \
 	segment_base.hh \
 	segment.hh \
 	segment_fsm.hh \
-	segment_fsm_nsm.hh \
+	segment_fsm_sp.hh \
 	\
 #Header needed by 'segment_base'
 SB_HDR = \
@@ -29,8 +29,8 @@ SFSM_HDR = \
         ../partition/partition_file.hh \
         ../interpreter/interpreter_fsm.hh \
         \
-#Header needed by 'segment_fsm_nsm'
-SNSM_HDR = \
+#Header needed by 'segment_fsm_sp'
+SSP_HDR = \
 		   segment_fsm.hh \
 		   ../interpreter/interpreter_sp.hh \
 		   \
@@ -47,7 +47,7 @@ OBJ = \
 	segment_base.o \
     segment_fsm.o \
 	segment.o \
-	segment_fsm_nsm.o \
+	segment_fsm_sp.o \
 
 
 all : $(OBJ)
@@ -61,8 +61,8 @@ segment_base.o : segment_base.cc segment_base.hh $(HDR) $(SB_HDR)
 segment_fsm.o : segment_fsm.cc segment_fsm.hh $(HDR) $(SB_HDR) $(SFSM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm.cc
 
-segment_fsm_nsm.o : segment_fsm_nsm.cc segment_fsm_nsm.hh $(HDR) $(SB_HDR) $(SFSM_HDR) $(SNSM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm_nsm.cc
+segment_fsm_sp.o : segment_fsm_sp.cc segment_fsm_sp.hh $(HDR) $(SB_HDR) $(SFSM_HDR) $(SSP_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm_sp.cc
 
 segment.o : segment.cc segment.hh $(HDR) $(S_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc
