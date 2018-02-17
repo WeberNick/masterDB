@@ -12,7 +12,6 @@ PartitionFile::~PartitionFile()
 
 int PartitionFile::create(const uint aSizeInPages)
 {
-	if(open() == 0){ close(); return -1; }
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(aSizeInPages);
 	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
