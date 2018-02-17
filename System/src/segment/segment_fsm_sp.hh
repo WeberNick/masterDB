@@ -28,6 +28,7 @@ class SegmentFSM_SP : public SegmentFSM
 
   public:
     //todo sp specific
+    int insertTuples();
 
   public:
     int storeSegment();                         // serialization
