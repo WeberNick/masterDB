@@ -26,8 +26,16 @@ void SegmentManager::load(const seg_vt& aSegmentTuples)
         _segmentsByID[segTuple._sID] = &segTuple;
         _segmentsByName[segTuple._sName] = &segTuple;
     }
+}
 
-
+void SegmentManager::store()
+{
+    //get size of master segment
+    //get number of segments
+    // estimate if size is big enough, if not add new pages
+    //write all tuples that were not deleted
+    //get new tuples
+    //write everything on segment
 }
 
 Segment* SegmentManager::createNewSegment(PartitionBase& aPartition)
