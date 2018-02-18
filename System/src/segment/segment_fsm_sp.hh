@@ -29,11 +29,7 @@ class SegmentFSM_SP : public SegmentFSM
 
   public:
     int insertTuple(byte* aTuple, const uint aTupleSize);
-<<<<<<< HEAD
-    int insertTuples(std::vector<byte*> aTuples, const uint aTupleSize);
-=======
-	int insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
->>>>>>> 92767a6c155ac23a4d6d1ffbead6f979e2260441
+	  int insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
 
   public:
     int storeSegment();                         // serialization
