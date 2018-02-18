@@ -36,12 +36,12 @@ int SegmentBase::close()
 
 int SegmentBase::readPage(byte* aPageBuffer, const uint aPageNo)
 {
-  if (_partition.readPage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1) { return -1; }
+  if (_partition.readPage(aPageBuffer, _pages[aPageNo], getPageSize()) == -1) { return -1; }
   return 0;
 }
 	
 int SegmentBase::writePage(const byte* aPageBuffer, const uint aPageNo)
 {
-  if (_partition.writePage(aPageBuffer, _pages[aPageNo], _partition.getPageSize()) == -1) { return -1; }
+  if (_partition.writePage(aPageBuffer, _pages[aPageNo], getPageSize()) == -1) { return -1; }
   return 0;
 }

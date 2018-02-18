@@ -15,6 +15,7 @@
 #include "segment_fsm.hh"
 #include "interpreter/interpreter_sp.hh"
 #include <vector>
+#include <cstring>
 
 class SegmentFSM_SP : public SegmentFSM
 {
@@ -27,7 +28,7 @@ class SegmentFSM_SP : public SegmentFSM
     ~SegmentFSM_SP();
 
   public:
-    int insertTuples(int aNumTumples, int aTupleSize);
+    int insertTuple(byte* aTuple, const uint aTupleSize);
 
   public:
     int storeSegment();                         // serialization

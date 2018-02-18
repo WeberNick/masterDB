@@ -56,7 +56,6 @@ class FSMInterpreter {
     /**
      *	@brief	looks for the next free block in the FSIP and reserves the page
      *
-     *	@param	aLSN - Log Sequence Number
      *	@param	aPageStatus - 
      *
      * 	@return either an offset to the free block or -1 if no free block was found

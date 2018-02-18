@@ -33,10 +33,11 @@ class SegmentBase
 		inline uint32_t getPage(uint aPageNo){ return _pages[aPageNo]; }
 
 	public:
+		inline size_t getPageSize(){ return _partition.getPageSize(); }
 		inline uint16_t getID(){ return _segID; }
 		inline uint32_vt getIndexPages(){ return _indexPages; }
 		/* Return how many pages can be handled by one indexPage. */
-		inline int getIndexPageCapacity(){ return (_partition.getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
+		inline int getIndexPageCapacity(){ return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
 		inline size_t getNoPages(){ return _pages.size(); }
 		inline PartitionBase& getPartition(){ return _partition; }
 
