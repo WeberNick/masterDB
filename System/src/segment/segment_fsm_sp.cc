@@ -32,12 +32,22 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	return 0;
 }
 
+<<<<<<< HEAD
 int SegmentFSM_SP::insertTuples(std::vector<byte*> aTuples, const uint aTupleSize) {
     int res = 0;
     for (uint i = 0; i < aTuples.size(); ++i) {
         res += insertTuple(aTuples[i], aTupleSize);
     }
     return (res != 0) ? -1 : res;
+=======
+int SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
+{
+	for(byte*  aTuple: aTuples)
+	{
+		if(insertTuple(aTuple, aTupleSize) == -1){ return -1; }
+	}
+	return 0;
+>>>>>>> 92767a6c155ac23a4d6d1ffbead6f979e2260441
 }
 
 int SegmentFSM_SP::loadSegment(const uint32_t aPageIndex) {
