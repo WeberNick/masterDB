@@ -19,8 +19,6 @@ typedef unsigned int uint;
 typedef std::vector<uint> uint_vt;
 typedef std::vector<uint32_t> uint32_vt;
 
-typedef std::vector<part_t> part_vt;
-typedef std::vector<seg_t> seg_vt;
 
 struct part_t
 {
@@ -30,6 +28,7 @@ struct part_t
 	int _pType;
 	int _pGrowth;
 };
+typedef std::vector<part_t> part_vt;
 
 struct seg_t
 {
@@ -39,6 +38,7 @@ struct seg_t
 	int _sType; //segment type
 	uint _sFirstPage; //first segment header page in order to load segment into memory
 };
+typedef std::vector<seg_t> seg_vt;
 
 enum class PageStatus {
     kNoType = -1,

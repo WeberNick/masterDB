@@ -1,10 +1,15 @@
 #include "db_instance_manager.hh"
 
 DatabaseInstanceManager::DatabaseInstanceManager(const std::string aPathToMasterPartition) :
-	_pathToMasterPart(aPathToMasterPartition),
+    _masterPartition(aPathToMasterPartition, "MasterPartition", 4096, 10, 0),
     _partMngr(PartitionManager::getInstance()),
-    _segMngr(SegmentManager::getInstance())
-{}
+    _segMngr(SegmentManager::getInstance()),
+    _partIndex(1), 
+    _segIndex(2)
+{
+  //think of reserver page.. 
+}
+
 
 DatabaseInstanceManager::~DatabaseInstanceManager()
 {}
@@ -18,21 +23,8 @@ void DatabaseInstanceManager::install()
 
 void DatabaseInstanceManager::boot()
 {
-	part_vt lPartitionTuples;
-	seg_vt lSegmentTuples;
-	
-	
-	//create NSMsegment object for partitions 
-	//read it in from page _locationPartSeg,
-	//fill vector with tuple all its tuples
-	//hand over to partMngr by
-	_partMngr.load(lPartitionTuples);
-
-	//create NSMsegment object for segments 
-	//read it in from page _locationSegSeg,
-	//fill vector with tuple all its tuples
-	//hand over to segMngr by
-	_segMngr.load(lSegmentTuples);
+//	_partMngr.load(lFile, 1);
+	_segMngr.load(_masterPartition, 2);
 }
 
 void DatabaseInstanceManager::shutdown()

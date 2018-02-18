@@ -44,16 +44,13 @@ class PartitionManager
             return lPartitionManagerInstance;
         }
 
-	public:
-		//input: vector of tuples of partitions (see types.hh)
-		//do: somehow store the tuples in a way that the partMngr 
-		//can later on create an partition Object?
-		void load(const part_vt& aPartitionTuples);
+    public:
+        void load(PartitionFile& aMasterPartition, const uint aSegmentIndex);
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile* createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aGrowthIndicator);
-        PartitionRaw* createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage);
+        PartitionFile* createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aGrowthIndicator);
+        PartitionRaw* createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize);
   
     public:
         uint getNoPartitions();

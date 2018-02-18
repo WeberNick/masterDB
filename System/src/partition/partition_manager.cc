@@ -1,7 +1,7 @@
 #include "partition_manager.hh"
 
 PartitionManager::PartitionManager() :
-    _counterPartitionID(0),
+    _counterPartitionID(1),
     _partitions()
 {}
 
@@ -14,22 +14,22 @@ PartitionManager::~PartitionManager()
     }
 }
 
-void PartitionManager::load(const part_vt& aPartitionTuples)
+void PartitionManager::load(PartitionFile& aMasterPartition, const uint aSegmentIndex)
 {
- //create partition object for every entry in aPartitionTuples
- //store in maps
+
 }
 
-PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aGrowthIndicator)
+
+PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aGrowthIndicator)
 {
-    PartitionFile* lPartition = new PartitionFile(aPath, aName, aPageSize, aSegmentIndexPage, aGrowthIndicator, _counterPartitionID++);
+    PartitionFile* lPartition = new PartitionFile(aPath, aName, aPageSize, aGrowthIndicator, _counterPartitionID++);
     _partitions[lPartition->getID()] = lPartition;
     return (PartitionFile*)_partitions.at(lPartition->getID());
 }
 
-PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage)
+PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize)
 {
-    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, aPageSize, aSegmentIndexPage, _counterPartitionID++);
+    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, aPageSize, _counterPartitionID++);
     _partitions[lPartition->getID()] = lPartition;
     return (PartitionRaw*)_partitions.at(lPartition->getID());
 }

@@ -1,15 +1,15 @@
 #include "partition_base.hh"
 
-PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize, const uint aSegmentIndexPage, const uint aPartitionID) : 
+PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
 	_pageSize(aPageSize),
 	_sizeInPages(size()),
 	_partitionID(aPartitionID),
-	_segmentIndexPage(aSegmentIndexPage),
 	_openCount(0),
 	_fileDescriptor(-1)
 {
+  std::cout << "partitionbase size in pages " << _sizeInPages << std::endl;
 }
 
 PartitionBase::~PartitionBase(){}
@@ -36,11 +36,6 @@ int PartitionBase::format()
 	fsip.detach();
 	readPage(lPagePointer, LSN, _pageSize);
 	fsip.attach(lPagePointer);
-	if(fsip.reservePage(_segmentIndexPage) == -1)
-	{
-		delete[] lPagePointer;
-		return -1;
-	}
 	writePage(lPagePointer, LSN, _pageSize);
 	if(close() == -1){ return -1; }
 	delete[] lPagePointer;
@@ -142,9 +137,47 @@ int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const u
 
 uint PartitionBase::size() //in number of pages 
 {
-	struct stat lFileStats;
-	if(stat(_partitionPath.c_str(), &lFileStats) == -1){ return 0; }
-	return lFileStats.st_size / _pageSize;
+        struct stat lFileStats;
+        if(stat(_partitionPath.c_str(), &lFileStats) == -1){ return 0; }
+        
+        uint64_t disk_size = lFileStats.st_blocks * lFileStats.st_blksize;
+
+        std::cout << "No Blocks: " << lFileStats.st_blocks << "\n"
+            << "Block Size: " << lFileStats.st_blksize << "\n"
+            << "Disk Size: " << disk_size << "\n"
+            << "Disk Size (stat): " << lFileStats.st_size << std::endl;
+
+        if(disk_size % _pageSize == 0) return disk_size / _pageSize;
+        else
+        {
+          std::cerr << "Partition size modulo page size is not equal zero" << std::endl;
+          return 0;
+        }
+     
+/*    int fd = ::open(_partitionPath.c_str(), O_RDONLY);*/
+
+    //if (fd == -1) 
+    //{
+        //std::cerr << "Error opening the partition: " << std::strerror(errno) << std::endl;  
+        //return -1;
+    //}
+
+    //uint64_t sector_count = 0;
+    //// Query the number of sectors on the disk
+    //ioctl(fd, NO_BLOCKS, &sector_count);
+
+    //uint32_t sector_size = 0;
+    //// Query the size of each sector
+    //ioctl(fd, BLOCK_SIZE, &sector_size);
+
+    //uint64_t disk_size = sector_count * sector_size; //in bytes
+
+    //if(disk_size % _pageSize == 0) return disk_size / _pageSize;  
+    //else
+    //{
+        //std::cerr << "Partition size modulo page size is not equal zero" << std::endl;
+        //return 0;
+    /*}*/
 }
 
 uint PartitionBase::getMaxPagesPerFSIP()

@@ -13,6 +13,7 @@
 #include "infra/types.hh"
 #include "infra/header_structs.hh"
 #include "partition/partition_base.hh"
+#include "partition/partition_file.hh"
 #include "segment_base.hh"
 #include "segment.hh"
 #include "segment_fsm.hh"
@@ -42,9 +43,8 @@ class SegmentManager
         }
 
 	public:
-		//input: vector of tuples of segments (see types.hh)
-		//do: same as in partMngr for segments?
-		void load(const seg_vt& aSegmentTuples);
+		void load(PartitionFile& aMasterPartition, const uint aSegmentIndex);
+		void store();
 
 	public:
 		Segment* createNewSegment(PartitionBase& aPartition); // create and add new segment (persistent), return it
