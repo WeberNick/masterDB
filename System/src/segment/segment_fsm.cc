@@ -90,7 +90,7 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
 }
 
 int SegmentFSM::getNewPage() {
-    return getFreePage( _partition.getPageSize() -sizeof(segment_fsm_header_t) );
+    return getFreePage( _partition.getPageSize() - sizeof(segment_fsm_header_t) );
    /*     //reserve new page
     if (_partition.open() == -1) { return -1; }
     uint lPage = _partition.allocPage();

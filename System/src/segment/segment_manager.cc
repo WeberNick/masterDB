@@ -25,21 +25,20 @@ void SegmentManager::load(PartitionFile& aMasterPartition, const uint aSegmentIn
     byte* lPage = new byte[aMasterPartition.getPageSize()];
     SP_Interpreter lInterpreter;
 
-    for(uint i = 0; i < lSegments.getNoPages(); ++i)
+    for (uint i = 0; i < lSegments.getNoPages(); ++i)
     {
    	  lSegments.readPage(lPage, aSegmentIndex);
    	  lInterpreter.attach(lPage);
-   	  for(uint j = 0; j < lInterpreter.noRecords(); ++j)
+   	  for (uint j = 0; j < lInterpreter.noRecords(); ++j)
    	  {
-                _segmentTuples.push_back((*((seg_t*)lInterpreter.getRecord(j))));
+        _segmentTuples.push_back((*((seg_t*)lInterpreter.getRecord(j))));
    	  }
-
     }
     //fill internal data structure with all relevant info
     for(auto& segTuple : _segmentTuples)
     {
-        _segmentsByID[segTuple._sID] = &segTuple;
-        _segmentsByName[segTuple._sName] = &segTuple;
+      _segmentsByID[segTuple._sID] = &segTuple;
+      _segmentsByName[segTuple._sName] = &segTuple;
     }
 }
 

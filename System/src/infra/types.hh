@@ -19,7 +19,6 @@ typedef unsigned int uint;
 typedef std::vector<uint> uint_vt;
 typedef std::vector<uint32_t> uint32_vt;
 
-
 struct part_t
 {
 	uint _pID;
