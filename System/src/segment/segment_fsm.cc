@@ -145,10 +145,10 @@ int SegmentFSM::storeSegment() {
             ++i;
             ++k;
         }
-        // create header
-        // basic header: LSN, PageIndex, PartitionId, Version, unused
+        // Create header
+        // Basic header: LSN, PageIndex, PartitionId, Version, Unused
         lBH = {0, _indexPages.at(j), _partition.getID(), 1, 0, 0};
-        // lcurrSize,  lfirstFSM; lnextIndexPage; lsegID; lversion=1; lunused =0;
+        // lCurrSize,  lFirstFSM; lNextIndexPage; lSegID; lVersion = 1; lUnused = 0;
         lHeader = {k, _fsmPages.at(0), _indexPages.at(j + 1), _segID, 1, 0, lBH};
         *(segment_fsm_header_t *)(lPageBuffer + _partition.getPageSize() - sizeof(segment_fsm_header_t)) = lHeader;
         _partition.writePage(lPageBuffer, _indexPages.at(j), lPageSize);
