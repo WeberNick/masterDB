@@ -36,6 +36,15 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	return 0;
 }
 
+int SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
+{
+	for(byte*  aTuple: aTuples)
+	{
+		if(insertTuple(aTuple, aTupleSize) == -1){ return -1; }
+	}
+	return 0;
+}
+
 int SegmentFSM_SP::loadSegment(const uint32_t aPageIndex) {
     /* to-do */
 
