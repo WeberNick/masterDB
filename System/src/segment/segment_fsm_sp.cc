@@ -14,10 +14,12 @@ SegmentFSM_SP::~SegmentFSM_SP() {}
 
 int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	byte* lBufferPage = new byte[_partition.getPageSize()];
-
+	//get page with enough space for the tuple and load it into memory
 	if(readPage(lBufferPage, getFreePage(aTupleSize)) == -1){ return -1; }
 	SP_Interpreter lInterpreter;
+	//attach page to sp interpreter
 	lInterpreter.attach(lBufferPage);
+	//if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
 	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTupleSize);
 	if(lFreeTuplePointer == 0) //If true, not enough free space on nsm page => getFreePage buggy
 	{
@@ -25,6 +27,8 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 		return -1;
 	}
 	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); //copy the content of aTuple to the nsm page
+	lInterpreter.detach();
+	delete[] lBufferPage;
 	return 0;
 }
 
