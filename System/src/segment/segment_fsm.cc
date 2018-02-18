@@ -29,12 +29,13 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition) :
 SegmentFSM::~SegmentFSM() {}
 
 int SegmentFSM::getFreePage(uint aNoOfBytes) {
-    uint lPageSizeInBytes = _partition.getPageSize() - sizeof(fsm_header_t);
+	//=====Nick: I changed the return of a physical page number into a return of a logical index====
+    uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
     /* PagesToManage * 2 because one byte manages two pages (4 bits for one page). */
-    int lNoPagesToManage = (_partition.getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
+    int lNoPagesToManage = (getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
 
     /* Check if page with enough space is available using FF algorithm. */
-    byte *lPagePointer = new byte[_partition.getPageSize()];
+    byte *lPagePointer = new byte[getPageSize()];
     FSMInterpreter fsmp;
     fsmp.detach();
     fsmp.attach(lPagePointer);
@@ -42,7 +43,7 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
     for (uint i = 0; i < _fsmPages.size(); ++i) {
         int lFSMPage = _fsmPages[i];
 
-        _partition.readPage(lPagePointer, lFSMPage, _partition.getPageSize());
+		if(readPage(lPagePointer, lFSMPage) == -1){ return -1; }
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
 
         int lIndex = fsmp.getFreePage(lPageStatus);
@@ -50,34 +51,34 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
             fsmp.detach();
             delete[] lPagePointer;
             /* If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet, otherwise the page already exists) */
-            if ( ((uint32_t)lIndex) > _pages.size()) {
-                if(_partition.open() == -1) { return -1; }
+            if (lIndex > _pages.size()) {
+                if(open() == -1) { return -1; }
                 int lPageIndex = _partition.allocPage();
                 if (lPageIndex == -1) { return -1; }
                 _pages.push_back(lPageIndex);
-                if (_partition.close() == -1) { return -1; }
-                return _pages[_pages.size() - 1];
+                if (close() == -1) { return -1; }
+                return _pages.size() - 1;
             } else {
-                return _pages[(i * lNoPagesToManage) + lIndex];
+                return (i * lNoPagesToManage) + lIndex;
             }
         }
     }
     /* No FSM page found that returns a free page, create a new one. */
-    if (_partition.open() == -1) { return -1; }
+    if (open() == -1) { return -1; }
     int lFSMIndex = _partition.allocPage();
     if (lFSMIndex == -1) { return -1; }
     _fsmPages.push_back((uint32_t)lFSMIndex);
 
     /* Insert NextFSM to header of current FSM. */
-    byte* lPP = new byte[_partition.getPageSize()];
-    _partition.readPage(lPP, _fsmPages[_fsmPages.size() - 2], _partition.getPageSize());
-    (*((fsm_header_t*) (lPP + _partition.getPageSize() - sizeof(fsm_header_t) )))._nextFSM = lFSMIndex;
-    _partition.writePage(lPP, _fsmPages[_fsmPages.size() - 2], _partition.getPageSize());
+    byte* lPP = new byte[getPageSize()];
+    if(readPage(lPP, _fsmPages[_fsmPages.size() - 2]) == -1){ return -1; }
+    (*((fsm_header_t*) (lPP + getPageSize() - sizeof(fsm_header_t) )))._nextFSM = lFSMIndex;
+    if(writePage(lPP, _fsmPages[_fsmPages.size() - 2]) == -1){ return -1; }
     delete[] lPP;
 
-    _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
+	if(writePage(lPagePointer, lFSMIndex) == -1){ return -1; } 
     fsmp.detach();
-    _partition.readPage(lPagePointer, lFSMIndex, _partition.getPageSize());
+    if(readPage(lPagePointer, lFSMIndex) == -1){ return -1; }
     fsmp.attach(lPagePointer);
 
     PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
@@ -85,12 +86,12 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
 
     fsmp.detach();
     delete[] lPagePointer;
-    if (_partition.close() == -1) { return -1; }
-    return _pages[((_fsmPages.size() - 1) * lNoPagesToManage) + lFreePageIndex];
+    if(close() == -1) { return -1; }
+    return ((_fsmPages.size() - 1) * lNoPagesToManage) + lFreePageIndex;
 }
 
 int SegmentFSM::getNewPage() {
-    return getFreePage( _partition.getPageSize() -sizeof(segment_fsm_header_t) );
+    return getFreePage(getPageSize() -sizeof(segment_fsm_header_t) );
    /*     //reserve new page
     if (_partition.open() == -1) { return -1; }
     uint lPage = _partition.allocPage();
@@ -116,15 +117,15 @@ int SegmentFSM::getNewPage() {
 
 int SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     // partition has to be set and opened
-    byte *lPageBuffer = new byte[_partition.getPageSize()];
-    size_t lPageSize = _partition.getPageSize();
+    size_t lPageSize = getPageSize();
+    byte *lPageBuffer = new byte[lPageSize];
     uint32_t lnxIndex = aPageIndex;
     segment_fsm_header_t lHeader;
     fsm_header_t lHeader2;
     uint32_t l1FSM;
 
     while (lnxIndex != 0) {
-        _partition.readPage(lPageBuffer, lnxIndex, _partition.getPageSize());
+        if(readPage(lPageBuffer, lnxIndex) == -1){ return -1; }
         lHeader = *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t));
         _indexPages.push_back(lnxIndex);
         l1FSM = lHeader._firstFSM;
@@ -136,7 +137,7 @@ int SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     }
     _fsmPages.push_back(l1FSM);
     while (_fsmPages.at(_fsmPages.size() -1) != 0) {
-        _partition.readPage(lPageBuffer, _fsmPages.at(_fsmPages.size() -1), _partition.getPageSize());
+        if(readPage(lPageBuffer, _fsmPages.at(_fsmPages.size() -1)) == -1){ return -1; }
         lHeader2 = *(fsm_header_t *)(lPageBuffer + lPageSize - sizeof(fsm_header_t));
         _fsmPages.push_back(lHeader2._nextFSM);
     }
@@ -146,8 +147,8 @@ int SegmentFSM::loadSegment(const uint32_t aPageIndex) {
 }
 
 int SegmentFSM::storeSegment() {
-    byte *lPageBuffer = new byte[_partition.getPageSize()];
-    size_t lPageSize = _partition.getPageSize();
+    size_t lPageSize = getPageSize();
+    byte *lPageBuffer = new byte[lPageSize];
     uint i = 0;
     uint j = 0;
     uint k;
@@ -171,8 +172,8 @@ int SegmentFSM::storeSegment() {
         lBH = {0, _indexPages.at(j), _partition.getID(), 1, 0, 0};
         // lcurrSize,  lfirstFSM; lnextIndexPage; lsegID; lversion=1; lunused =0;
         lHeader = {k, _fsmPages.at(0), _indexPages.at(j + 1), _segID, 1, 0, lBH};
-        *(segment_fsm_header_t *)(lPageBuffer + _partition.getPageSize() - sizeof(segment_fsm_header_t)) = lHeader;
-        _partition.writePage(lPageBuffer, _indexPages.at(j), lPageSize);
+        *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)) = lHeader;
+        if(writePage(lPageBuffer, _indexPages.at(j)) == -1){ return -1; }
         ++j;
     }
     delete lPageBuffer;

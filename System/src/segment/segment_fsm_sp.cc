@@ -12,11 +12,24 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition) :
 
 SegmentFSM_SP::~SegmentFSM_SP() {}
 
-int SegmentFSM_SP::insertTuples() {
+int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
     /* block in seitenkonforme segmente packen
     wenn auf eine seite passt get free page speichern
     nein auf mehrere seiten hintereinander */
     // pointer verschieben und schreiben
+	byte* lBufferPage = new byte[_partition.getPageSize()];
+
+	if(readPage(lBufferPage, getFreePage(aTupleSize)) == -1){ return -1; }
+	SP_Interpreter lInterpreter;
+	lInterpreter.attach(lBufferPage);
+	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTupleSize);
+	if(lFreeTuplePointer == 0) //If true, not enough free space on nsm page => getFreePage buggy
+	{
+		std::cerr << "If this is executed, getFreePage() does not work correctly" << std::endl;
+		return -1;
+	}
+	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); //copy the content of aTuple to the nsm page
+	return 0;
 }
 
 int SegmentFSM_SP::loadSegment(const uint32_t aPageIndex) {
