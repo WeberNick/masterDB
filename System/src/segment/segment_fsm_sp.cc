@@ -31,6 +31,8 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 		return -1;
 	}
 	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); //copy the content of aTuple to the nsm page
+	lInterpreter.detach();
+	delete[] lBufferPage;
 	return 0;
 }
 
