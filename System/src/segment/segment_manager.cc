@@ -18,23 +18,9 @@ SegmentManager::~SegmentManager()
     }
 }
 
-void SegmentManager::load(PartitionFile& aMasterPartition, const uint aSegmentIndex)
+void SegmentManager::load(seg_vt& aTuples)
 {
-    SegmentFSM_SP lSegments(aMasterPartition);
-    lSegments.loadSegment(aSegmentIndex);
-    byte* lPage = new byte[aMasterPartition.getPageSize()];
-    SP_Interpreter lInterpreter;
-
-    for (uint i = 0; i < lSegments.getNoPages(); ++i)
-    {
-   	  lSegments.readPage(lPage, aSegmentIndex);
-   	  lInterpreter.attach(lPage);
-   	  for (uint j = 0; j < lInterpreter.noRecords(); ++j)
-   	  {
-        _segmentTuples.push_back((*((seg_t*)lInterpreter.getRecord(j))));
-   	  }
-    }
-    delete[] lPage;
+    _segmentTuples = aTuples;
     //fill internal data structure with all relevant info
     for(auto& segTuple : _segmentTuples)
     {

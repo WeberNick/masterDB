@@ -43,7 +43,7 @@ class SegmentManager
         }
 
 	public:
-		void load(PartitionFile& aMasterPartition, const uint aSegmentIndex);
+		void load(seg_vt& aTuples);
 		void store(PartitionFile& aMasterPartition, const uint aSegmentIndex);
 
 	public:
@@ -54,7 +54,8 @@ class SegmentManager
 		int loadSegmentManager(PartitionBase& aPartition);    // deserialization
 
 	public:
-		inline const uint getNoSegments() { return _segments.size(); }				
+		inline const uint getNoSegments() { return _segments.size(); }	
+		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }			
 		SegmentBase* getSegment(const uint16_t aSegmentID);
 
 	private:
