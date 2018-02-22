@@ -44,10 +44,11 @@ class SegmentManager
 
 	public:
 		void load(PartitionFile& aMasterPartition, const uint aSegmentIndex);
-		void store();
+		void store(PartitionFile& aMasterPartition, const uint aSegmentIndex);
 
 	public:
-		Segment* createNewSegment(PartitionBase& aPartition); // create and add new segment (persistent), return it
+		SegmentFSM* createNewSegmentFSM(PartitionBase& aPartition,std::string name); // create and add new segment (persistent), return it
+		SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition,std::string name); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();			
 		int storeSegmentManager(PartitionBase& aPartition);	 // serialization
 		int loadSegmentManager(PartitionBase& aPartition);    // deserialization

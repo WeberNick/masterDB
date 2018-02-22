@@ -29,7 +29,8 @@ class SegmentFSM_SP : public SegmentFSM
 
   public:
     int insertTuple(byte* aTuple, const uint aTupleSize);
-	  int insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
+    int insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
+    int getMaxFreeBytes() { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
 
   public:
     int storeSegment();                         // serialization

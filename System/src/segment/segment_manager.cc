@@ -34,6 +34,7 @@ void SegmentManager::load(PartitionFile& aMasterPartition, const uint aSegmentIn
         _segmentTuples.push_back((*((seg_t*)lInterpreter.getRecord(j))));
    	  }
     }
+    delete[] lPage;
     //fill internal data structure with all relevant info
     for(auto& segTuple : _segmentTuples)
     {
@@ -42,24 +43,71 @@ void SegmentManager::load(PartitionFile& aMasterPartition, const uint aSegmentIn
     }
 }
 
-void SegmentManager::store()
+void SegmentManager::store(PartitionFile& aMasterPartition, const uint aSegmentIndex)
 {
+    SegmentFSM_SP lMasterSeg(aMasterPartition);
+    lMasterSeg.loadSegment(aSegmentIndex);
+    int lFreeBytesPerPage = lMasterSeg.getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);
     //get size of master segment
+    int lCapazIst = lMasterSeg.getNoPages() * ( lFreeBytesPerPage /sizeof(seg_t) ) ;
     //get number of segments
     // estimate if size is big enough, if not add new pages
-    //write all tuples that were not deleted
-    //get new tuples
+    int lCapazSoll = _segmentTuples.size()/sizeof(seg_t);
+    if(lCapazIst-lCapazSoll < 0){
+        //how many new pages?
+        int a =  (int) ceil(( lCapazSoll-lCapazIst) / ( lFreeBytesPerPage /sizeof(seg_t) ));
+        while(a>0){
+            //alloc new pages
+            lMasterSeg.getNewPage();
+            ++a;
+        }
+
+    }
+    //write all tuples that were not deleted (condition to be hold in delete segment method)
+    //get new tuples (tuples always up to date)
+    //delete all content of pages
     //write everything on segment
+    byte* lPage = new byte[aMasterPartition.getPageSize()];
+    SP_Interpreter lInterpreter;
+    uint lSegCounter = 0;
+    byte* lPos;
+    for (uint i = 0; i < lMasterSeg.getNoPages(); ++i)
+    {
+   	    lMasterSeg.readPage(lPage, 0);
+        lInterpreter.attach(lPage);
+        lInterpreter.initNewPage(lPage);   
+        while(true){
+           lPos = lInterpreter.addNewRecord(sizeof(seg_t));
+           if (lPos == 0){
+               break;
+           }
+            *((seg_t*) lPos ) =  _segmentTuples.at(lSegCounter);
+            ++lSegCounter;
+        }   
+    }
+
 }
 
-Segment* SegmentManager::createNewSegment(PartitionBase& aPartition)
+SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, std::string name)
 {
-    //TODO ueberlauf von Seiten hier abfangen und neue SgmtMngr Pages allokieren
-    Segment* lSegment = new Segment(_counterSegmentID++, aPartition);
+    SegmentFSM* lSegment = new SegmentFSM(_counterSegmentID++, aPartition);
     _segments[lSegment->getID()] = lSegment;
-    return (Segment*)_segments.at(lSegment->getID());
+    seg_t lSegT ={aPartition.getID(), lSegment->getID(),	name,1,  lSegment->getIndexPages().at(0) };
+    _segmentTuples.push_back(lSegT);
+    _segmentsByID[lSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
+    _segmentsByName[lSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
+    return (SegmentFSM*)_segments.at(lSegment->getID());
 }
-
+SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, std::string name)
+{
+    SegmentFSM_SP* lSegment = new SegmentFSM_SP(_counterSegmentID++, aPartition);
+    _segments[lSegment->getID()] = lSegment;
+    seg_t lSegT ={aPartition.getID(), lSegment->getID(),	name,2,  lSegment->getIndexPages().at(0)};
+    _segmentTuples.push_back(lSegT);
+    _segmentsByID[lSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
+    _segmentsByName[lSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
+    return (SegmentFSM_SP*)_segments.at(lSegment->getID());
+}
 
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
 {
