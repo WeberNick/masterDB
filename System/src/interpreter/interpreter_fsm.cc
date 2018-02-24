@@ -1,5 +1,6 @@
 #include "interpreter_fsm.hh"
 
+
 bool FSMInterpreter::_pageSizeSet = false;
 uint16_t FSMInterpreter::_pageSize = 0;
 
@@ -26,22 +27,24 @@ void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     // alles 0, header updaten
     uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
     for (uint i = 0; i < max; ++i) {
-        *(((uint64_t *)aPP) + i) = 0;
+        if(i!=0){
+            *(((uint64_t *)aPP) + i) = 0;
+        }
     }
-    // basic_header: LSN, PageIndex, PartitionId, Version, unused
-    basic_header_t lBH = {aLSN, aPageIndex, aPID, 1, 0};
-    fsm_header_t lHeader = {aNoPages, 0, lBH};
+    // basic_header: LSN, PageIndex, PartitionId, Version, unused, unused
+    basic_header_t lBH = {aLSN, aPageIndex, aPID, 1, 0, 0};
+    fsm_header_t lHeader = {aNoPages, 0, lBH};  // ######## why 0 nextSegment?
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 
 int FSMInterpreter::getFreePage(const PageStatus aPageStatus) {
-    // uint max = (_pageSize-sizeof(fsm_header_t))*2;
     uint i = 0;
     while (i < _header->_noPages) {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
         bool fits = 0;
-        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= 4) {
+        PageStatus max = PageStatus::kEndType;
+        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= static_cast<int>(max)) {
             fits = true;
         }
         if (fits) {
@@ -58,6 +61,7 @@ int FSMInterpreter::getFreePage(const PageStatus aPageStatus) {
     } else {
         return -1; // no free space on this fsm, load or create next
     }
+
     // search for page with sufficient free space
     // calculate new occupation
     // change status
