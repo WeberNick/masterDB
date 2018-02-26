@@ -34,8 +34,7 @@ void SP_Interpreter::initNewPage(byte* aPP)
 		header()->_noRecords = 0;
 		header()->_freeSpace = (_pageSize - sizeof(sp_header_t));
 		header()->_nextFreeRecord = 0;
-		header()->_unused1 = 0;
-		header()->_unused2 = 0;
+		header()->_nextFreeSpace = 0;
 	}
 }
 
@@ -50,9 +49,11 @@ byte* SP_Interpreter::addNewRecord(const uint aRecordSize)
 	if(lTotalSize <= freeSpace()) 
 	{
 		lResultRecord = pagePtr() + header()->_nextFreeRecord;
+                //wie viel platz genau da?
 		header()->_nextFreeRecord += lRecordSize;               // remember pointer to next free record
 		header()->_freeSpace -= lTotalSize;
 		slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
+                //rest des slots setzen
 		header()->_noRecords += 1;
 	}
 	return lResultRecord;

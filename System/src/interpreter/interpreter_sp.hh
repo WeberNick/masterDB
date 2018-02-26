@@ -23,6 +23,8 @@ class SP_Interpreter
 		struct slot_t 
 		{
 			uint16_t _offset; // offset to record
+                       //uint16_t _size;
+                       //uint8_t _flag;
 		};
 
 	public:
@@ -34,7 +36,7 @@ class SP_Interpreter
 		void  detach();
 
 	public:
-		void  initNewPage(byte* aPP); // combines initialization of fresh page with attach
+		void  initNewPage(byteu aPP); // combines initialization of fresh page with attach
 		byte* addNewRecord(const uint aRecordSize); // returns 0 if page is full
 
 	public:
