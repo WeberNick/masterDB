@@ -1,10 +1,10 @@
 #include "interpreter_fsm.hh"
 
 
-bool FSMInterpreter::_pageSizeSet = false;
-uint16_t FSMInterpreter::_pageSize = 0;
+bool InterpreterFSM::_pageSizeSet = false;
+uint16_t InterpreterFSM::_pageSize = 4096;
 
-void FSMInterpreter::setPageSize(const uint16_t aPageSize) {
+void InterpreterFSM::setPageSize(const uint16_t aPageSize) {
     if (!_pageSizeSet) {
         _pageSizeSet = !_pageSizeSet;
         _pageSize = aPageSize;
@@ -13,16 +13,16 @@ void FSMInterpreter::setPageSize(const uint16_t aPageSize) {
     }
 }
 
-FSMInterpreter::FSMInterpreter() : _pp(NULL), _header(NULL) {}
+InterpreterFSM::InterpreterFSM() : _pp(NULL), _header(NULL) {}
 
-FSMInterpreter::~FSMInterpreter() {}
+InterpreterFSM::~InterpreterFSM() {}
 
-void FSMInterpreter::detach() {
+void InterpreterFSM::detach() {
     _pp = NULL;
     _header = NULL;
 }
 
-void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
+void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
                                 const uint32_t aNoPages) {
     // alles 0, header updaten
     uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
@@ -37,7 +37,7 @@ void FSMInterpreter::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 
-int FSMInterpreter::getFreePage(const PageStatus aPageStatus) {
+int InterpreterFSM::getFreePage(const PageStatus aPageStatus) {
     uint i = 0;
     while (i < _header->_noPages) {
         PageStatus lPageStatus = getPageStatus(i);
@@ -67,7 +67,7 @@ int FSMInterpreter::getFreePage(const PageStatus aPageStatus) {
     // change status
 }
 
-void FSMInterpreter::changePageStatus(const uint aPageNo, const PageStatus aStatus) {
+void InterpreterFSM::changePageStatus(const uint aPageNo, const PageStatus aStatus) {
     uint8_t *currByte = ((uint8_t *)_pp + aPageNo / 2);
     uint8_t lStatus = static_cast<uint8_t>(aStatus);
     if (aPageNo % 2 == 0) {
@@ -80,7 +80,7 @@ void FSMInterpreter::changePageStatus(const uint aPageNo, const PageStatus aStat
     }
 }
 
-PageStatus FSMInterpreter::getPageStatus(const uint aPageNo) {
+PageStatus InterpreterFSM::getPageStatus(const uint aPageNo) {
     uint8_t currByte = *((uint8_t *)_pp + aPageNo / 2);
     if (aPageNo % 2 == 0) {
         currByte &= 15;
@@ -92,7 +92,7 @@ PageStatus FSMInterpreter::getPageStatus(const uint aPageNo) {
 }
 
 
-PageStatus FSMInterpreter::calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes)
+PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes)
 {
     if (aSizeWithoutOverhead < aNoBytes) {
         return PageStatus::kNoType;

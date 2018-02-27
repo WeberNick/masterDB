@@ -13,7 +13,7 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition) :
     _fsmPages.push_back((lFSMIndex > 0) ? (uint32_t)lFSMIndex : 0);
 
     byte *lPagePointer = new byte[_partition.getPageSize()];
-    FSMInterpreter fsmp;
+    InterpreterFSM fsmp;
     fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
     _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
     fsmp.detach();
@@ -36,7 +36,7 @@ int SegmentFSM::getFreePage(uint aNoOfBytes) {
 
     /* Check if page with enough space is available using FF algorithm. */
     byte *lPagePointer = new byte[getPageSize()];
-    FSMInterpreter fsmp;
+    InterpreterFSM fsmp;
     fsmp.detach();
     fsmp.attach(lPagePointer);
 
@@ -100,7 +100,7 @@ int SegmentFSM::getNewPage() {
     _pages.push_back(lPage);
     //set new fsm entry to full, but should be done otherwise
     uint lFSM = _fsmPages[_fsmPages.size()-2];
-    FSMInterpreter fsmp;
+    InterpreterFSM fsmp;
     byte* lPP = new byte[_partition.getPageSize()];
     _partition.readPage(lPP,lFSM,_partition.getPageSize());
     fsmp.attach(lPP);

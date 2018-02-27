@@ -20,16 +20,16 @@
 #include <iostream>
 #include <string>
 
-class FSIPInterpreter {
+class InterpreterFSIP {
   public:
     /* standard constructor */
-    FSIPInterpreter();
+    InterpreterFSIP();
     /* If CC and AO are needed, implement them correctly */
-    FSIPInterpreter(const FSIPInterpreter &aInterpreter) = delete;
+    InterpreterFSIP(const InterpreterFSIP &aInterpreter) = delete;
     /* specifies the assign operator of a intermediate buffer with delete */
-    FSIPInterpreter &operator=(const FSIPInterpreter &aInterpreter) = delete;
+    InterpreterFSIP &operator=(const InterpreterFSIP &aInterpreter) = delete;
     /* standard destructor */
-    ~FSIPInterpreter();
+    ~InterpreterFSIP();
 
   public:
     /*	Set page size */
@@ -114,7 +114,7 @@ class FSIPInterpreter {
     static uint16_t _pageSize;
 };
 
-void FSIPInterpreter::attach(byte *aPP) {
+void InterpreterFSIP::attach(byte *aPP) {
     _pp = aPP;
     _header = get_hdr_ptr();
 }

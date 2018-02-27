@@ -2,7 +2,10 @@
 
 PartitionManager::PartitionManager() :
     _counterPartitionID(1),
-    _partitions()
+    _partitions(),
+    _partitionsByID(),
+    _partitionsByName(),
+    _partitionTuples()
 {}
 
 PartitionManager::~PartitionManager()

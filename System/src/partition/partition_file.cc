@@ -12,14 +12,22 @@ PartitionFile::~PartitionFile()
 
 int PartitionFile::create(const uint aSizeInPages)
 {
-  //todo check if file exists etc...
+	if(exists())
+	{
+		std::cerr << "## CREATE PARTITION: The partition already exists!" << std::endl;
+		return -1;
+	}
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(aSizeInPages);
-	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
+	std::cout << "## CREATE PARTITION: The following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
-	std::cout << "\033[1;30mA partition with " << (_pageSize * _sizeInPages) << " Bytes (" << _sizeInPages << " pages) was successfully created!\033[0m" << std::endl;
+	if(assignSize(_sizeInPages) == -1)
+	{
+		std::cerr << "## CREATE PARTITION: # ERROR: Partition size could not be assigned!" << std::endl;
+	}
+	if(_sizeInPages == aSizeInPages) std::cout << "######## Perfect, it worked, _sizeInPages == aSizeInPages" << std::endl;
 	if(format() != 0 )
 	{
-		std::cerr << "The partition could not be initialized and will be removed!" << std::endl;
+		std::cerr << "## CREATE PARTITION: The partition could not be initialized and will be removed!" << std::endl;
 		remove();
 		return -1;
 	}
@@ -28,12 +36,27 @@ int PartitionFile::create(const uint aSizeInPages)
 
 int PartitionFile::remove()
 {
-  //do checks..
-	std::string lCommand = "rm " + _partitionPath;
-	std::cout << "\033[1;30mThe following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
-	system(lCommand.c_str());
-	std::cout << "\033[1;30mPartitionFile was successfully removed.\033[0m" << std::endl;
-	return 0;
+	if(exists())
+	{
+		if(isFile())
+		{
+			std::string lCommand = "rm " + _partitionPath;
+			std::cout << "## REMOVE PARTITION: The following command will be executed: '" << lCommand << "'" << std::endl;
+			system(lCommand.c_str());
+			std::cout << "## REMOVE PARTITION: PartitionFile was successfully removed." << std::endl;
+			return 0;
+		}
+		else
+		{
+			std::cerr << "## REMOVE PARTITION: # ERROR: The file at " << _partitionPath << " is no file partition." << std::endl;
+			return -1;
+		}
+	}
+	else
+	{
+		std::cerr << "## REMOVE PARTITION: # ERROR: No file exists at " << _partitionPath << std::endl;
+		return -1;
+	}
 }
 
 void PartitionFile::printPage(uint aPageIndex)

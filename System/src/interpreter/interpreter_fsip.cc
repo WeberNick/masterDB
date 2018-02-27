@@ -1,9 +1,9 @@
 #include "interpreter_fsip.hh"
 
-bool FSIPInterpreter::_pageSizeSet = false;
-uint16_t FSIPInterpreter::_pageSize = 0;
+bool InterpreterFSIP::_pageSizeSet = false;
+uint16_t InterpreterFSIP::_pageSize = 4096;
 
-void FSIPInterpreter::setPageSize(const uint16_t aPageSize) {
+void InterpreterFSIP::setPageSize(const uint16_t aPageSize) {
     if (!_pageSizeSet) {
         _pageSizeSet = !_pageSizeSet;
         _pageSize = aPageSize;
@@ -12,16 +12,16 @@ void FSIPInterpreter::setPageSize(const uint16_t aPageSize) {
     }
 }
 
-FSIPInterpreter::FSIPInterpreter() : _pp(NULL), _header(NULL) {}
+InterpreterFSIP::InterpreterFSIP() : _pp(NULL), _header(NULL) {}
 
-FSIPInterpreter::~FSIPInterpreter() {}
+InterpreterFSIP::~InterpreterFSIP() {}
 
-void FSIPInterpreter::detach() {
+void InterpreterFSIP::detach() {
     _pp = NULL;
     _header = NULL;
 }
 
-void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
+void InterpreterFSIP::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
                                   const uint32_t aNoBlocks) {
     attach(aPP);
     uint32_t max = aNoBlocks / 32; // wie weit ist Seite frei?
@@ -55,7 +55,7 @@ void FSIPInterpreter::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t
     // debug(aPageIndex);
 }
 
-uint FSIPInterpreter::getNextFreePage() {
+uint InterpreterFSIP::getNextFreePage() {
     //	std::cout<<"###### finding next free Page ######"<<std::endl;
     size_t lCondition = ((_pageSize - sizeof(fsip_header_t)) / 4) - 1;
     for (uint32_t j = (_header->_nextFreePage) / 32; j <= lCondition; ++j) { // looping through FSIP with step 8
@@ -75,7 +75,7 @@ uint FSIPInterpreter::getNextFreePage() {
 }
 
 // added LSN and PID to param list, pls update header for allocated block
-int FSIPInterpreter::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID) {
+int InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID) {
     if (_header->_freeBlocksCount == 0) {
         return -1;
     }
@@ -93,7 +93,7 @@ int FSIPInterpreter::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aP
     return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
-int FSIPInterpreter::reservePage(const uint aPageIndex) {
+int InterpreterFSIP::reservePage(const uint aPageIndex) {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
     uint32_t *lPP = (uint32_t *)_pp;
@@ -115,7 +115,7 @@ int FSIPInterpreter::reservePage(const uint aPageIndex) {
     return 0;
 }
 
-void FSIPInterpreter::freePage(const uint aPageIndex) {
+void InterpreterFSIP::freePage(const uint aPageIndex) {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
 
@@ -137,7 +137,7 @@ void FSIPInterpreter::freePage(const uint aPageIndex) {
     // debug(aPageIndex);
 }
 
-void FSIPInterpreter::debug(const uint aPageIndex) {
+void InterpreterFSIP::debug(const uint aPageIndex) {
     std::ofstream myfile;
     std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
     myfile.open(filename);

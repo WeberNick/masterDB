@@ -54,7 +54,7 @@ void SegmentManager::store(PartitionFile& aMasterPartition, const uint aSegmentI
     //delete all content of pages
     //write everything on segment
     byte* lPage = new byte[aMasterPartition.getPageSize()];
-    SP_Interpreter lInterpreter;
+    InterpreterSP lInterpreter;
     uint lSegCounter = 0;
     byte* lPos;
     for (uint i = 0; i < lMasterSeg.getNoPages(); ++i)
@@ -74,25 +74,35 @@ void SegmentManager::store(PartitionFile& aMasterPartition, const uint aSegmentI
 
 }
 
-SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, std::string name)
+SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, std::string aName)
 {
     SegmentFSM* lSegment = new SegmentFSM(_counterSegmentID++, aPartition);
     _segments[lSegment->getID()] = lSegment;
-    seg_t lSegT ={aPartition.getID(), lSegment->getID(),	name,1,  lSegment->getIndexPages().at(0) };
+    seg_t lSegT ={aPartition.getID(), lSegment->getID(),	aName,1,  lSegment->getIndexPages().at(0) };
     _segmentTuples.push_back(lSegT);
     _segmentsByID[lSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
     _segmentsByName[lSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
     return (SegmentFSM*)_segments.at(lSegment->getID());
 }
-SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, std::string name)
+SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, std::string aName)
 {
     SegmentFSM_SP* lSegment = new SegmentFSM_SP(_counterSegmentID++, aPartition);
     _segments[lSegment->getID()] = lSegment;
-    seg_t lSegT ={aPartition.getID(), lSegment->getID(),	name,2,  lSegment->getIndexPages().at(0)};
+    seg_t lSegT ={aPartition.getID(), lSegment->getID(),	aName,2,  lSegment->getIndexPages().at(0)};
     _segmentTuples.push_back(lSegT);
     _segmentsByID[lSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
     _segmentsByName[lSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
     return (SegmentFSM_SP*)_segments.at(lSegment->getID());
+}
+
+void SegmentManager::deleteSegment(const uint16_t aID)
+{
+    //todo
+}
+
+void SegmentManager::deleteSegment(const std::string aName)
+{
+    //todo
 }
 
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)

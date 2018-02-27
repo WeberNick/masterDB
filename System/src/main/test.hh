@@ -10,23 +10,27 @@ void test(const std::string aPath, const uint aPageSize, const uint aGrwothIndic
     std::cout << "\n" << std::endl;
 
     PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance(aPath, "DefaultName", aPageSize, aGrwothIndicator);
-	std::cout << "Size in Pages: " << lPartFile->getSizeInPages() << std::endl;
+	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
 
     if(lPartFile->create(1000) == -1){
-        std::cout << "open" << std::endl;
+        std::cout << "## TEST: file was not created" << std::endl;
     }
+
+    std::cout << "## TEST: Size in Pages (should be 1000): " << lPartFile->getSizeInPages() << std::endl;
+
+    return;
     
     PartitionManager::getInstance().getPartition(lPartFile->getID())->open();
 
     uint lNoFreePage = PartitionManager::getInstance().getPartition(lPartFile->getID())->allocPage();
-    std::cout << "get free Page results in Page " <<	lNoFreePage << std::endl;
+    std::cout << "## TEST: get free Page results in Page " <<	lNoFreePage << std::endl;
     uint partID = lPartFile->getID();
     uint pageSize = PartitionManager::getInstance().getPartition(lPartFile->getID())->getPageSize();
     uint managedPages = (PartitionManager::getInstance().getPartition(lPartFile->getID())->getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
-    std::cout << "pageSize " <<	pageSize << std::endl;
-    std::cout << "managed " <<	managedPages << std::endl;
-    std::cout << "partID " <<	partID << std::endl;
-    FSMInterpreter fsmp;
+    std::cout << "## TEST: pageSize " <<	pageSize << std::endl;
+    std::cout << "## TEST: managed " <<	managedPages << std::endl;
+    std::cout << "## TEST: partID " <<	partID << std::endl;
+    InterpreterFSM fsmp;
     byte *lPagePointer = new byte[pageSize];
     
     fsmp.setPageSize(pageSize);
@@ -37,7 +41,7 @@ void test(const std::string aPath, const uint aPageSize, const uint aGrwothIndic
     fsmp.attach(lPagePointer);
     
     uint lPageSizeInBytes = pageSize - sizeof(fsm_header_t);
-    std::cout << "in Bytes " <<	lPageSizeInBytes << std::endl;
+    std::cout << "## TEST: in Bytes " <<	lPageSizeInBytes << std::endl;
 
    // byte *l2PagePointer = new byte[pageSize];
    // fsmp.detach();
@@ -45,7 +49,7 @@ void test(const std::string aPath, const uint aPageSize, const uint aGrwothIndic
     //PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes,  5000);
     PageStatus lPageStatus = fsmp.getPageStatus(1);
 
-    std::cout << "status: " <<	static_cast<int>(lPageStatus) << std::endl;
+    std::cout << "## TEST: status: " <<	static_cast<int>(lPageStatus) << std::endl;
 
     fsmp.changePageStatus(1,static_cast<PageStatus>(8));
 
@@ -53,11 +57,11 @@ void test(const std::string aPath, const uint aPageSize, const uint aGrwothIndic
 
      lPageStatus = fsmp.getPageStatus(1);
 
-    std::cout << "status2: " <<	static_cast<int>(lPageStatus) << std::endl;
+    std::cout << "## TEST: status2: " <<	static_cast<int>(lPageStatus) << std::endl;
 
     int lIndex = fsmp.getFreePage(lPageStatus);
 
-    std::cout << "index: " <<	lIndex << std::endl;
+    std::cout << "## TEST: index: " <<	lIndex << std::endl;
 
     lPartFile->printPage(lNoFreePage);
     lPartFile->printPage(0);
