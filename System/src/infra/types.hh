@@ -35,7 +35,7 @@ struct seg_t
 	uint _sID; //segment ID
 	std::string _sName; //segment name (unique)
 	int _sType; //segment type
-	uint _sFirstPage; //first segment header page in order to load segment into memory
+	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
 };
 typedef std::vector<seg_t> seg_vt;
 
