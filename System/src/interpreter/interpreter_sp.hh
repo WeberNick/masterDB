@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-class SP_Interpreter 
+class InterpreterSP 
 {
 	public:
 
@@ -28,7 +28,7 @@ class SP_Interpreter
 		};
 
 	public:
-		SP_Interpreter();
+		InterpreterSP();
 		static void setPageSize(const size_t aPageSize);
 
 	public:
@@ -61,14 +61,14 @@ class SP_Interpreter
 		static size_t _pageSize;
 };
 
-void SP_Interpreter::attach(byte* aPP)
+void InterpreterSP::attach(byte* aPP)
 {
 	_pp = aPP;
 	_header = get_hdr_ptr();
 	_slots  = get_slot_base_ptr();
 }
 
-byte* SP_Interpreter::getRecord(const uint aRecordNo) 
+byte* InterpreterSP::getRecord(const uint aRecordNo) 
 { 
 	if(aRecordNo >= noRecords()) { 
 		return 0; 

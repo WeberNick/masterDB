@@ -20,16 +20,16 @@
 #include <string>
 #include <cmath>
 
-class FSMInterpreter {
+class InterpreterFSM {
   public:
     /* standard constructor */
-    FSMInterpreter();
+    InterpreterFSM();
     /* If CC and AO are needed, implement them correctly */
-    FSMInterpreter(const FSMInterpreter &aInterpreter) = delete;
+    InterpreterFSM(const InterpreterFSM &aInterpreter) = delete;
     /* specifies the assign operator of a intermediate buffer with delete */
-    FSMInterpreter &operator=(const FSMInterpreter &aInterpreter) = delete;
+    InterpreterFSM &operator=(const InterpreterFSM &aInterpreter) = delete;
     /* standard destructor */
-    ~FSMInterpreter();
+    ~InterpreterFSM();
 
   public:
     /*	Set page size */
@@ -79,15 +79,13 @@ class FSMInterpreter {
      *  @return 
      */
     PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
+    PageStatus getPageStatus(const uint aPageNo);
 
   public:
     /* Getter */
     inline byte *pagePtr() { return _pp; }
     inline uint32_t getNextFSMPage() { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
     inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
-
-  private:
-    PageStatus getPageStatus(const uint aPageNo);
 
   private:
     /*	pointer to the beginning of the page */
@@ -100,7 +98,7 @@ class FSMInterpreter {
     static uint16_t _pageSize;
 };
 
-void FSMInterpreter::attach(byte *aPP) {
+void InterpreterFSM::attach(byte *aPP) {
     _pp = aPP;
     _header = getHeaderPtr();
 }

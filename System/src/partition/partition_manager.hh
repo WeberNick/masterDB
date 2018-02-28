@@ -45,7 +45,7 @@ class PartitionManager
         }
 
     public:
-        void load(PartitionFile& aMasterPartition, const uint aSegmentIndex);
+        void load(part_vt& aTuples);
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
@@ -55,10 +55,15 @@ class PartitionManager
     public:
         uint getNoPartitions();
         PartitionBase* getPartition(const uint8_t aID);
+        	
+		inline const part_vt& getPartitionTuples(){ return _partitionTuples; }
   
     private:
         uint _counterPartitionID;
         std::map<uint, PartitionBase*> _partitions;
+        std::map<uint16_t, part_t*> _partitionsByID;
+		std::map<std::string, part_t*> _partitionsByName;
+        part_vt _partitionTuples;
 };
 
 #endif

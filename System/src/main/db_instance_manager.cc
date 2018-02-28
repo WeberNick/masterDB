@@ -23,13 +23,21 @@ void DatabaseInstanceManager::install()
 
 void DatabaseInstanceManager::boot()
 {
-//	_partMngr.load(lFile, 1);
-	_segMngr.load(_masterPartition, 2);
+  part_vt aPartitionTuples;
+  seg_vt aSegmentTuples;
+  load<part_t>(aPartitionTuples, _partIndex);
+  load<seg_t>(aSegmentTuples, _segIndex);
+
+  _partMngr.load(aPartitionTuples);
+  _segMngr.load(aSegmentTuples);
 }
 
 void DatabaseInstanceManager::shutdown()
 {
-	//todo
+	part_vt aPartitionTuples = _partMngr.getPartitionTuples();
+  seg_vt aSegmentTuples = _segMngr.getSegmentTuples();
+
+  
 
 
 }

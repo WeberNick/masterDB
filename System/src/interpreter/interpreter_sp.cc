@@ -1,9 +1,9 @@
 #include "interpreter_sp.hh"
 
-bool SP_Interpreter::_pageSizeSet = false;
-size_t SP_Interpreter::_pageSize = 0;
+bool InterpreterSP::_pageSizeSet = false;
+size_t InterpreterSP::_pageSize = 4096;
 
-void SP_Interpreter::setPageSize(const size_t aPageSize)
+void InterpreterSP::setPageSize(const size_t aPageSize)
 {
 	if(!_pageSizeSet)
 	{
@@ -16,17 +16,17 @@ void SP_Interpreter::setPageSize(const size_t aPageSize)
 	}
 }
 
-SP_Interpreter::SP_Interpreter() : _pp(NULL), _header(NULL), _slots(0) 
+InterpreterSP::InterpreterSP() : _pp(NULL), _header(NULL), _slots(0) 
 {}
 
-void SP_Interpreter::detach() 
+void InterpreterSP::detach() 
 {
 	_pp     = 0;
 	_header = 0;
 	_slots  = 0;
 }
 
-void SP_Interpreter::initNewPage(byte* aPP) 
+void InterpreterSP::initNewPage(byte* aPP) 
 {
 	if(aPP)
 	{
@@ -39,7 +39,7 @@ void SP_Interpreter::initNewPage(byte* aPP)
 }
 
 /* Give record size as parameter, determine where to write the record and return location as a pointer */
-byte* SP_Interpreter::addNewRecord(const uint aRecordSize)
+byte* InterpreterSP::addNewRecord(const uint aRecordSize)
 {
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment
 	const uint lTotalSize = lRecordSize + sizeof(slot_t);        // add space for one new slot 
