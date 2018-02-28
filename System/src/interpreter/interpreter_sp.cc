@@ -22,8 +22,8 @@ InterpreterSP::InterpreterSP() : _pp(NULL), _header(NULL), _slots(0)
 void InterpreterSP::detach() 
 {
 	_pp     = 0;
-	_header = 0;
-	_slots  = 0;
+	//_header = 0;
+	//_slots  = 0;
 }
 
 void InterpreterSP::initNewPage(byte* aPP) 
@@ -33,7 +33,7 @@ void InterpreterSP::initNewPage(byte* aPP)
 		attach(aPP);
 		header()->_noRecords = 0;
 		header()->_freeSpace = (_pageSize - sizeof(sp_header_t));
-		header()->_nextFreeRecord = 0;
+		header()->_nextFreeSpace = 0;
 		header()->_unused1 = 0;
                 header()->_unused2 = 0;
 	}
@@ -49,9 +49,9 @@ byte* InterpreterSP::addNewRecord(const uint aRecordSize)
 
 	if(lTotalSize <= freeSpace()) 
 	{
-		lResultRecord = pagePtr() + header()->_nextFreeRecord;
+		lResultRecord = pagePtr() + header()->_nextFreeSpace;
                 //wie viel platz genau da?
-		header()->_nextFreeRecord += lRecordSize;               // remember pointer to next free record
+		header()->_nextFreeSpace += lRecordSize;               // remember pointer to next free record
 		header()->_freeSpace -= lTotalSize;
 		slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
                 //rest des slots setzen

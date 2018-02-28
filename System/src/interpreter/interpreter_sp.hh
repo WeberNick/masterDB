@@ -23,8 +23,8 @@ class InterpreterSP
 		struct slot_t 
 		{
 			uint16_t _offset; // offset to record
-                       //uint16_t _size;
-                       //uint8_t _flag;
+            uint16_t _size;
+            uint8_t _flag; //1 valid, 0 deleted
 		};
 
 	public:
