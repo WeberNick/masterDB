@@ -34,9 +34,9 @@
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <experimental/filesystem>
+//#include <experimental/filesystem>
 
-namespace fs = std::experimental::filesystem;
+//namespace fs = std::experimental::filesystem;
 
 const uint64_t LSN = 0;
 
@@ -109,9 +109,9 @@ class PartitionBase {
     inline uint getOpenCount() { return _openCount; }
 
   protected:
-    inline bool exists(){ return fs::exists(_partitionPath); }
-    inline bool isFile(){ return fs::is_regular_file(_partitionPath); }
-    inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
+    inline bool exists(){ /*return fs::exists(_partitionPath);*/ return true; }
+    inline bool isFile(){ /*return fs::is_regular_file(_partitionPath);*/ return true; }
+    inline bool isRawDevice(){ /*return fs::is_block_file(_partitionPath);*/ return true;  }
 
   protected:
     int assignSize(uint& aSize);

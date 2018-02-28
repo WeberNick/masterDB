@@ -12,7 +12,7 @@ PartitionFile::~PartitionFile()
 
 int PartitionFile::create(const uint aSizeInPages)
 {
-	if(exists())
+	if(false /*exists()*/)
 	{
 		std::cerr << "## CREATE PARTITION: The partition already exists!" << std::endl;
 		return -1;
