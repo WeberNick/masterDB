@@ -2,7 +2,10 @@
 
 PartitionManager::PartitionManager() :
     _counterPartitionID(1),
-    _partitions()
+    _partitions(),
+    _partitionsByID(),
+    _partitionsByName(),
+    _partitionTuples()
 {}
 
 PartitionManager::~PartitionManager()
@@ -14,9 +17,15 @@ PartitionManager::~PartitionManager()
     }
 }
 
-void PartitionManager::load(PartitionFile& aMasterPartition, const uint aSegmentIndex)
+void PartitionManager::load(part_vt& aTuples)
 {
-
+    _partitionTuples = aTuples;
+    //fill internal data structure with all relevant info
+    for(auto& partTuple : _partitionTuples)
+    {
+      _partitionsByID[partTuple._pID] = &partTuple;
+      _partitionsByName[partTuple._pName] = &partTuple;
+    }
 }
 
 

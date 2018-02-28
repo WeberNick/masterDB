@@ -21,12 +21,12 @@
 
 #ifdef __linux__
   #include <linux/fs.h>
-  #define NO_BLOCKS BLKGETSIZE
-  #define BLOCK_SIZE BLKSSZGET
+  #define P_NO_BLOCKS BLKGETSIZE
+  #define P_BLOCK_SIZE BLKSSZGET
 #elif __APPLE__
   #include <sys/disk.h>
-  #define NO_BLOCKS DKIOCGETBLOCKCOUNT 
-  #define BLOCK_SIZE DKIOCGETBLOCKSIZE 
+  #define P_NO_BLOCKS DKIOCGETBLOCKCOUNT 
+  #define P_BLOCK_SIZE DKIOCGETBLOCKSIZE 
 #else
 	//unsupported
 #endif
@@ -34,6 +34,9 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 const uint64_t LSN = 0;
 
@@ -106,7 +109,12 @@ class PartitionBase {
     inline uint getOpenCount() { return _openCount; }
 
   protected:
-	uint size();
+    inline bool exists(){ return fs::exists(_partitionPath); }
+    inline bool isFile(){ return fs::is_regular_file(_partitionPath); }
+    inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
+
+  protected:
+    int assignSize(uint& aSize);
     uint getMaxPagesPerFSIP();
 
 

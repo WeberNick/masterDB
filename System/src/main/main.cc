@@ -39,18 +39,17 @@ int main(const int argc, const char *argv[]) {
     std::cout << "PageSize: " << C_PAGE_SIZE << std::endl;
     std::cout << "Growth: " << C_GROWTH_INDICATOR << std::endl;
 
-    FSIPInterpreter::setPageSize(lArgs.pageSize());
+    InterpreterFSIP::setPageSize(lArgs.pageSize());
 
 	/* Test call in test.hh */
     if (lArgs.test()) {
         test(C_PATH, C_PAGE_SIZE, C_GROWTH_INDICATOR);
     }
 
-    /* Todo... Boot Sequence */
+	// DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(C_MASTER_PARTITION_PATH);
+    //boot..
 
-	DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(C_MASTER_PARTITION_PATH);
-    lDBIM.getPartMngr();
-    lDBIM.getSegMngr();
+    //shutdown
 
     return 0;
 }
