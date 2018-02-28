@@ -4,7 +4,7 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 	PartitionBase(aPath, aName, aPageSize, aPartitionID),
 	_growthIndicator(aGrowthIndicator)
 {
-
+	 init();
 }
 
 PartitionFile::~PartitionFile()
@@ -12,19 +12,18 @@ PartitionFile::~PartitionFile()
 
 int PartitionFile::create(const uint aSizeInPages)
 {
-	if(false /*exists()*/)
+	if(exists())
 	{
 		std::cerr << "## CREATE PARTITION: The partition already exists!" << std::endl;
 		return -1;
 	}
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(aSizeInPages);
-	std::cout << "## CREATE PARTITION: The following command will be executed:\033[0m '" << lCommand << "'" << std::endl;
+	std::cout << "## CREATE PARTITION: The following command will be executed: '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
 	if(assignSize(_sizeInPages) == -1)
 	{
 		std::cerr << "## CREATE PARTITION: # ERROR: Partition size could not be assigned!" << std::endl;
 	}
-	if(_sizeInPages == aSizeInPages) std::cout << "######## Perfect, it worked, _sizeInPages == aSizeInPages" << std::endl;
 	if(format() != 0 )
 	{
 		std::cerr << "## CREATE PARTITION: The partition could not be initialized and will be removed!" << std::endl;

@@ -9,21 +9,6 @@ PartitionBase::PartitionBase(const std::string aPath, const std::string aName, c
 	_openCount(0),
 	_fileDescriptor(-1)
 {
-	if(exists())
-	{
-		if(assignSize(_sizeInPages) != -1)
-		{
-			std::cout << "partitionbase size in pages " << _sizeInPages << std::endl;
-		}
-		else
-		{
-			std::cerr << "# ERROR: Partition size could not be assigned!" << std::endl;
-		}
-	}
-	else
-	{
-		std::cerr << "Partition does not exist physically yet. You may call the create functionality provided by the partition object." << std::endl;
-	}
 }
 
 PartitionBase::~PartitionBase(){}
@@ -152,37 +137,69 @@ int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const u
 int PartitionBase::assignSize(uint& aSize) //in number of pages 
 {
 	aSize = 0;
-    int lFileDescriptor = ::open(_partitionPath.c_str(), O_RDONLY);
-    if(lFileDescriptor != -1) 
-    {
-    	uint64_t lSector_count = 0;
-    	uint32_t lSector_size = 0;
-        if(ioctl(lFileDescriptor, P_NO_BLOCKS, &lSector_count) != -1 && ioctl(lFileDescriptor, P_BLOCK_SIZE, &lSector_size) != -1)
-        {
-        	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
-        	if(lDisk_size % _pageSize == 0)
+
+	if(isFile())
+	{
+		aSize =	fs::file_size(_partitionPath) / _pageSize;
+	}
+	else if(isRawDevice())
+	{
+		int lFileDescriptor = ::open(_partitionPath.c_str(), O_RDONLY);
+   		if(lFileDescriptor != -1) 
+   	 	{
+    		uint64_t lSector_count = 0;
+    		uint32_t lSector_size = 0;
+       		if(ioctl(lFileDescriptor, P_NO_BLOCKS, &lSector_count) != -1 && ioctl(lFileDescriptor, P_BLOCK_SIZE, &lSector_size) != -1)
+       	 	{
+       		 	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
+        		if(lDisk_size % _pageSize == 0)
+        		{
+        			aSize = lDisk_size / _pageSize;
+        		} 
+        		else
+    			{
+		    	    std::cerr << "# ERROR: Partition size modulo page size is not equal zero" << std::endl;
+		       		 return -1;
+		   		 }
+    	    }
+       		else
         	{
-        		std::cout << "####################### IT WORKS !!!!! ########################" << std::endl;
-        		aSize = lDisk_size / _pageSize;
-        		return 0;
-        	} 
-        	else
-    		{
-		        std::cerr << "# ERROR: Partition size modulo page size is not equal zero" << std::endl;
-		        return -1;
-		    }
-        }
-        else
-        {
-        	std::cerr << "# ERROR: ioctl call failed (" << std::strerror(errno) << ")" << std::endl;  
-        	return -1;
-        }
-    }
-    else
-    {
-    	std::cerr << "# ERROR: opening the partition failed (" << std::strerror(errno) << ")" << std::endl;  
-        return -1;
-    }
+        		std::cerr << "# ERROR: ioctl call failed (" << std::strerror(errno) << ")" << std::endl;  
+        		return -1;
+        	}
+			::close(lFileDescriptor);
+    	}
+   		else
+   		{
+    		std::cerr << "# ERROR: opening the partition failed (" << std::strerror(errno) << ")" << std::endl;  
+       		return -1;
+    	}
+	}
+	else 
+	{
+		std::cerr << "# ERROR: Partition type not supported" << std::endl;
+		return -1;
+	}
+	return 0;
+}
+
+void PartitionBase::init()
+{
+	if(exists())
+	{
+		if(assignSize(_sizeInPages) != -1)
+		{
+			std::cout << "Partition size in pages " << _sizeInPages << std::endl;
+		}
+		else
+		{
+			std::cerr << "# ERROR: Partition size could not be assigned!" << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << "Partition does not exist physically yet. You may call the create functionality provided by the partition object." << std::endl;
+	}
 }
 
 uint PartitionBase::getMaxPagesPerFSIP()
