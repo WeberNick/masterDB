@@ -36,7 +36,7 @@ class InterpreterSP
 		void  detach();
 
 	public:
-		void  initNewPage(byteu aPP); // combines initialization of fresh page with attach
+		void  initNewPage(byte* aPP); // combines initialization of fresh page with attach
 		byte* addNewRecord(const uint aRecordSize); // returns 0 if page is full
 
 	public:

@@ -34,7 +34,8 @@ void InterpreterSP::initNewPage(byte* aPP)
 		header()->_noRecords = 0;
 		header()->_freeSpace = (_pageSize - sizeof(sp_header_t));
 		header()->_nextFreeRecord = 0;
-		header()->_nextFreeSpace = 0;
+		header()->_unused1 = 0;
+                header()->_unused2 = 0;
 	}
 }
 
