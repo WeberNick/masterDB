@@ -46,8 +46,9 @@ struct sp_header_t
 {
     uint16_t _noRecords;      // number of records stored on this page
     uint16_t _freeSpace;      // total number of free bytes
-    uint16_t _nextFreeRecord; // 8 byte aligned offset to next free record
     uint16_t _nextFreeSpace;  // pointer to first free space on page
+    uint8_t _unused1;
+    uint8_t _unused2;
     basic_header_t _basicHeader; // The basic header
 };
 

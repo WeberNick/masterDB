@@ -95,6 +95,18 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
     return (SegmentFSM_SP*)_segments.at(lSegment->getID());
 }
 
+SegmentFSM_SP* SegmentManager::loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex)
+{
+  SegmentFSM_SP* lSegment = new SegmentFSM_SP(aPartition);
+  lSegment->loadSegment(aIndex);
+  return lSegment;
+}
+
+void SegmentManager::deleteSegment(SegmentBase* aSegment)
+{
+  delete aSegment;
+}
+
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
     //todo

@@ -50,6 +50,8 @@ class SegmentManager
 		SegmentFSM* createNewSegmentFSM(PartitionBase& aPartition, std::string aName); // create and add new segment (persistent), return it
 		SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition, std::string aName); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();
+                SegmentFSM_SP* loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
+                void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string aName);
 		int storeSegmentManager(PartitionBase& aPartition);	 // serialization

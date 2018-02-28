@@ -68,8 +68,7 @@ class DatabaseInstanceManager {
 template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-	SegmentFSM_SP* lSegments = _segMngr.createNewSegmentFSM_SP(_masterPartition, "MasterSegment");
-    lSegments->loadSegment(aIndex);
+	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(_masterPartition, aIndex);
     byte* lPage = new byte[_masterPartition.getPageSize()];
     InterpreterSP lInterpreter;
 
@@ -83,21 +82,19 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
    	  }
     }
     delete[] lPage;
-
-    _segMngr.deleteSegment(lSegments->getID());
+    _segMngr.deleteSegment(lSegments);
 }
 
 template<typename T_TupleType>
 void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-    SegmentFSM_SP* lMasterSeg = _segMngr.createNewSegmentFSM_SP(_masterPartition, "MasterSegment");
-    lMasterSeg->loadSegment(aIndex);
+    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(_masterPartition, aIndex); 
     int lFreeBytesPerPage = lMasterSeg->getMaxFreeBytes();
     //get size of master segment
     int lCapazIst = lMasterSeg->getNoPages() * ( lFreeBytesPerPage / sizeof(T_TupleType) ) ;
     //get number of segments
     // estimate if size is big enough, if not add new pages
-    int lCapazSoll = /*_segmentTuples*/aTuples.size()/sizeof(T_TupleType);
+    int lCapazSoll = aTuples.size()/sizeof(T_TupleType);
     if(lCapazIst-lCapazSoll < 0){
         //how many new pages?
         int a =  (int) ceil(( lCapazSoll-lCapazIst) / ( lFreeBytesPerPage /sizeof(T_TupleType) ));
@@ -126,12 +123,12 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
            if (lPos == 0){
                break;
            }
-            *((T_TupleType*) lPos ) =  /*_segmentTuples*/aTuples.at(lSegCounter);
+              *((T_TupleType*) lPos ) =  aTuples.at(lSegCounter);
             ++lSegCounter;
         }   
     }
 	delete[] lPage;
-    _segMngr.deleteSegment(lMasterSeg->getID());
+        _segMngr.deleteSegment(lMasterSeg);
 }
 
 #endif
