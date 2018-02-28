@@ -41,7 +41,7 @@ int FSMInterpreter::getFreePage(const PageStatus aPageStatus) {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
         bool fits = 0;
-        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= 4) {
+        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= 15) {
             fits = true;
         }
         if (fits) {
