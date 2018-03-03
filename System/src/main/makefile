@@ -43,13 +43,13 @@ ALL = main
 all : $(ALL)
 
 main: db_instance_manager.o main.o $(OBJ)
-	$(CC) $(LINKER) main.o $(OBJ) -o main 
+	$(CC) main.o $(OBJ) -o main $(LINKER)
 
 main.o : main.cc $(HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) main.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER)
 
 db_instance_manager.o : db_instance_manager.cc $(DBIM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc $(LINKER)
 
 clean :
 	rm -f *.o a.out $(ALL)

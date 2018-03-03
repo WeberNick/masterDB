@@ -2,6 +2,8 @@ CXXFLAGS = -Wall -Weffc++ -std=c++17
 
 CC = g++
 
+LINKER = -lstdc++fs
+
 INCL = -I../.. -I..
 #Header needed by all
 HDR = \
@@ -53,19 +55,19 @@ OBJ = \
 all : $(OBJ)
 
 segment_manager.o : segment_manager.cc segment_manager.hh $(HDR) $(SM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_manager.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_manager.cc $(LINKER)
 
 segment_base.o : segment_base.cc segment_base.hh $(HDR) $(SB_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_base.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_base.cc $(LINKER)
 
 segment_fsm.o : segment_fsm.cc segment_fsm.hh $(HDR) $(SB_HDR) $(SFSM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm.cc $(LINKER)
 
 segment_fsm_sp.o : segment_fsm_sp.cc segment_fsm_sp.hh $(HDR) $(SB_HDR) $(SFSM_HDR) $(SSP_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm_sp.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm_sp.cc $(LINKER)
 
 segment.o : segment.cc segment.hh $(HDR) $(S_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc $(LINKER)
 
 clean :
 	rm -f *.o a.out
