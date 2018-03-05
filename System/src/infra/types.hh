@@ -36,6 +36,13 @@ struct seg_t
 	std::string _sName; //segment name (unique)
 	int _sType; //segment type
 	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
+    bool operator==(const seg_t& rhs) const {
+       return this->_sPID == rhs._sPID && 
+        this->_sID==rhs._sID && 
+        this->_sType == rhs._sType &&
+        this->_sFirstPage ==rhs._sFirstPage &&
+        (this->_sName.compare(rhs._sName)==0);
+    }
 };
 typedef std::vector<seg_t> seg_vt;
 

@@ -54,6 +54,7 @@ class SegmentManager
                 void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string aName);
+		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
 		int storeSegmentManager(PartitionBase& aPartition);	 // serialization
 		int loadSegmentManager(PartitionBase& aPartition);    // deserialization
 
@@ -62,9 +63,13 @@ class SegmentManager
 		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }			
 		SegmentBase* getSegment(const uint16_t aSegmentID);
 
+
 	private:
 		void storeSegments();
 		void loadSegments(uint32_vt& aSegmentPages, PartitionBase& aPartition);
+		bool deleteTypeChecker  ( byte* aRecord,uint16_t aID,uint8_t aType);
+		void createSegmentSub (seg_t aSegT);
+
 
 	private:
 		/* ID Counter for Segments */
@@ -83,6 +88,8 @@ class SegmentManager
 		uint32_vt _indexPages;		
 		/* Number of Pages that can be managed on one SegmentManager Page */
 		uint32_t _maxSegmentsPerPage;
+
+		std::string _masterSegSegs = "segmentMaster"; //name of Master segment containing all segments
 };
 
 #endif

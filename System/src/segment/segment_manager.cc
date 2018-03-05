@@ -79,9 +79,7 @@ SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, std::
     SegmentFSM* lSegment = new SegmentFSM(_counterSegmentID++, aPartition);
     _segments[lSegment->getID()] = lSegment;
     seg_t lSegT ={aPartition.getID(), lSegment->getID(),	aName,1,  lSegment->getIndexPages().at(0) };
-    _segmentTuples.push_back(lSegT);
-    _segmentsByID[lSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
-    _segmentsByName[lSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
+    createSegmentSub(lSegT);
     return (SegmentFSM*)_segments.at(lSegment->getID());
 }
 SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, std::string aName)
@@ -89,10 +87,16 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
     SegmentFSM_SP* lSegment = new SegmentFSM_SP(_counterSegmentID++, aPartition);
     _segments[lSegment->getID()] = lSegment;
     seg_t lSegT ={aPartition.getID(), lSegment->getID(),	aName,2,  lSegment->getIndexPages().at(0)};
-    _segmentTuples.push_back(lSegT);
-    _segmentsByID[lSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
-    _segmentsByName[lSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
+    createSegmentSub(lSegT);
     return (SegmentFSM_SP*)_segments.at(lSegment->getID());
+}
+void SegmentManager::createSegmentSub(seg_t aSegT){
+    _segmentTuples.push_back(aSegT);
+    _segmentsByID[aSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
+    _segmentsByName[aSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
+
+    SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_segmentsByName[_masterSegSegs]->_sID);
+    lSegments->insertTuple((byte*) &aSegT,sizeof(seg_t));
 }
 
 SegmentFSM_SP* SegmentManager::loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex)
@@ -109,12 +113,77 @@ void SegmentManager::deleteSegment(SegmentBase* aSegment)
 
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
-    //todo
+    //delete object if exists
+    auto segIter =  _segments.find(aID);
+    if( segIter !=_segments.end()){
+        delete segIter->second;
+        _segments.erase(segIter);
+    }
+    seg_t* seg = _segmentsByID[aID];
+    //delete tuple on disk
+    deleteTupelPhysically(_masterSegSegs,aID,0);
+
+    //delete tuple in memory
+    _segmentsByName.erase(seg->_sName);
+    _segmentsByID.erase(aID);
+
+    for (auto segIter2 = _segmentTuples.begin(); segIter2 <_segmentTuples.end(); ++segIter2){
+        if (   seg->_sPID == segIter2->_sPID && 
+        seg->_sID==segIter2->_sID && 
+        seg->_sType == segIter2->_sType &&
+        seg->_sFirstPage ==segIter2->_sFirstPage &&
+        (seg->_sName.compare(segIter2->_sName)==0)){
+            _segmentTuples.erase(segIter2);
+            break;
+        }
+    }
 }
 
 void SegmentManager::deleteSegment(const std::string aName)
 {
-    //todo
+    //get ID and delete by ID
+    deleteSegment(_segmentsByName[aName]->_sID);
+}
+
+int SegmentManager::deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType){
+    //open master Segment by name and load it
+    SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_segmentsByName[aMasterName]->_sID);
+    byte* lPage = new byte[lSegments->getPageSize()];
+    InterpreterSP lInterpreter;
+
+    //search all pages for tuple
+    uint j;
+    for (uint i = 0; i < lSegments->getNoPages(); ++i)
+    {
+   	  lSegments->readPage(lPage, i);
+   	  lInterpreter.attach(lPage);
+      j=0;
+   	  while( j < lInterpreter.noRecords())
+   	  {
+        if( deleteTypeChecker( lInterpreter.getRecord(j),aID,aType) ){
+            //mark deleted
+            lInterpreter.deleteRecordSoft(j);
+            break;
+        }
+        ++j;
+   	  }
+    }
+    delete[] lPage;
+    if(j==lInterpreter.noRecords()){
+        return -1;
+    }
+    return 1;
+}
+bool SegmentManager::deleteTypeChecker ( byte* aRecord,uint16_t aID,uint8_t aType){
+    if(aType==0){//segment
+       return ((seg_t*) aRecord)->_sID == aID;
+    }
+    else if (aType==1){//partitions
+       return ((part_t*) aRecord)->_pID == aID;
+    }
+    else{
+        return false;
+    }
 }
 
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)

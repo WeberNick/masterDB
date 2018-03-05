@@ -23,8 +23,12 @@ class InterpreterSP
 		struct slot_t 
 		{
 			uint16_t _offset; // offset to record
-            uint16_t _size;
-            uint8_t _flag; //1 valid, 0 deleted
+            uint16_t _size; // of record contained
+            uint8_t _status; //1 valid, 0 deleted
+		};
+		struct freeSpaceList_t{
+			uint16_t _offset; //from beginning of page to next free space, 0 if invalid
+			uint16_t _size; //size of this free space
 		};
 
 	public:
@@ -38,6 +42,10 @@ class InterpreterSP
 	public:
 		void  initNewPage(byte* aPP); // combines initialization of fresh page with attach
 		byte* addNewRecord(const uint aRecordSize); // returns 0 if page is full
+		int deleteRecordHard (uint16_t aRecordNo); //actually delete record so that it is not restorable
+		int deleteRecordSoft (uint16_t aRecordNo); //just mark as deleted
+
+
 
 	public:
 		inline byte*     		pagePtr(){ return _pp; }

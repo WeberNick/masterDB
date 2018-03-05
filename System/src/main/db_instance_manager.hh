@@ -74,7 +74,7 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
 
     for (uint i = 0; i < lSegments->getNoPages(); ++i)
     {
-   	  lSegments->readPage(lPage, aIndex);
+   	  lSegments->readPage(lPage, i);
    	  lInterpreter.attach(lPage);
    	  for (uint j = 0; j < lInterpreter.noRecords(); ++j)
    	  {
