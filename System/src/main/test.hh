@@ -12,11 +12,13 @@ void test(const std::string aPath, const uint aPageSize, const uint aGrwothIndic
     PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance(aPath, "DefaultName", aPageSize, aGrwothIndicator);
 	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
 
-    if(lPartFile->create(1000) == -1){
+	const uint lNumbPages = 1000000;
+
+    if(lPartFile->create(lNumbPages) == -1){
         std::cout << "## TEST: file was not created" << std::endl;
     }
 
-    std::cout << "## TEST: Size in Pages (should be 1000): " << lPartFile->getSizeInPages() << std::endl;
+    std::cout << "## TEST: Size in Pages (should be " << lNumbPages << " ): " << lPartFile->getSizeInPages() << std::endl;
 
     return;
     
