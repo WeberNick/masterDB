@@ -3,6 +3,7 @@ DIRECTORIES = \
 	partition \
 	segment \
 	interpreter \
+	threading \
 	main \
 	\
 

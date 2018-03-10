@@ -1,6 +1,7 @@
 /**
  * @file    queue.hh
  * @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
+ *          Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  * @brief   Class implementing a threadsafe queue for submitting jobs to the thread pool.
  * @bugs    TBD
  * @todos   TBD
@@ -12,12 +13,13 @@
 #include <atomic>
 #include <mutex>
 #include <queue>
+#include <condition_variable>
 
 template<typename T>
 class ThreadQueue
 {
-  protected:
-    explicit ThreadQueue();
+  private:
+    ThreadQueue();
     ThreadQueue(const ThreadQueue &aQueue) = delete;
     ThreadQueue &operator=(const ThreadQueue &aQueue) = delete;
     ~ThreadQueue();
@@ -32,7 +34,7 @@ class ThreadQueue
     void invalidate();
   
   private:
-    std::atomic_bool _valid(true);
+    std::atomic_bool _valid;
     mutable std::mutex _mutex;
     std::queue<T> _queue;
     std::condition_variable _condition;
