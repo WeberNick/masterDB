@@ -57,7 +57,14 @@ enum class PageStatus {
     kBUCKET13 = 13,
     kBUCKET14 = 14,
     kBUCKET15 = 15,
-    kEndType = 16
+    kNoBuckets = 16
 };
+
+enum LOCK_MODE
+{
+    kNoType = -1,
+    kSHARED = 0,
+    kEXCLUSIVE = 1
+}
 
 #endif
