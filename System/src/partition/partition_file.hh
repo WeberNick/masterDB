@@ -38,6 +38,8 @@ class PartitionFile : public PartitionBase {
      */
     int remove();
 
+    int extend(const uint aNoPages);
+
     void printPage(uint aPageIndex);
 
   public:

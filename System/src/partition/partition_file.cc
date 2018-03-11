@@ -58,6 +58,13 @@ int PartitionFile::remove()
 	}
 }
 
+int PartitionFile::extend(const uint aNoPages)
+{
+  
+
+  return -1;
+}
+
 void PartitionFile::printPage(uint aPageIndex)
 {
     open();
