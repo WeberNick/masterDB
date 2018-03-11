@@ -58,3 +58,10 @@ BufferHashTable::~BufferHashTable()
 }
 
 
+std::size_t hash(const pid aPageID)
+{
+    std::hash<uint> lHash;
+    return (lHash(aPageID._fileNo) + lHash(aPageID._pageNo)) % _size;
+}
+
+

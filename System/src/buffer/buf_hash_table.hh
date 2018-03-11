@@ -14,6 +14,7 @@
 #include "buf_cntrl_block.hh"
 
 #include <cstddef>
+#include <functional>
 
 class BufferHashTable
 {
@@ -35,7 +36,7 @@ class BufferHashTable
 
 
 	private:
-		std::size_t hash(const page_id_t aPageID);
+		std::size_t hash(const pid aPageID);
 
 
 	private:
