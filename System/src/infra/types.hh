@@ -19,6 +19,12 @@ typedef unsigned int uint;
 typedef std::vector<uint> uint_vt;
 typedef std::vector<uint32_t> uint32_vt;
 
+struct page_id_t
+{
+    uint _fileNo;
+    uint _pageNo;
+};
+
 struct part_t
 {
 	uint _pID;
@@ -65,6 +71,7 @@ enum LOCK_MODE
     kNoType = -1,
     kSHARED = 0,
     kEXCLUSIVE = 1
-}
+};
+
 
 #endif

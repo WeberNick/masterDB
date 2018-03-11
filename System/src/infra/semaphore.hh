@@ -7,7 +7,7 @@
 class Semaphore
 {
     public:
-        explicit Semaphore(std::size_t aCount = 0) : _count(aCount){}
+        explicit Semaphore(std::size_t aCount = 0) : _mtx(), _cv(), _count(aCount){}
         Semaphore(const Semaphore&) = delete;
         Semaphore(Semaphore&&) = delete;
         Semaphore& operator=(const Semaphore&) = delete;
@@ -26,12 +26,13 @@ class Semaphore
         {
             std::unique_lock<std::mutex> lock(_mtx);
 
-            while(count == 0)
+            while(_count == 0)
             {
                 _cv.wait(lock);
             }
             _count--;
         }
+
     private:
         std::mutex _mtx;
         std::condition_variable _cv;
