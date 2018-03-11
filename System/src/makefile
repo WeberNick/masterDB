@@ -4,6 +4,7 @@ DIRECTORIES = \
 	segment \
 	interpreter \
 	threading \
+	buffer \
 	main \
 	\
 

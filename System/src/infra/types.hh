@@ -24,6 +24,7 @@ struct page_id_t
     uint _fileNo;
     uint _pageNo;
 };
+typedef page_id_t pid;
 
 struct part_t
 {
