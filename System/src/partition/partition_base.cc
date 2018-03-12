@@ -160,30 +160,26 @@ int PartitionBase::assignSize(uint& aSize) //in number of pages
         		} 
         		else
     			{
-                    if(Constants::getInstance()->trace())
-                        printError("Partition size modulo page size is not equal to zero");
+                    if(Constants::getInstance()->trace()) printError("Partition size modulo page size is not equal to zero");
 		       		 return -1;
 		   		 }
     	    }
        		else
         	{
-                if(Constants::getInstance()->trace())
-                    printError("ioctl call failed", errno);
+                if(Constants::getInstance()->trace()) printError("ioctl call failed", errno);
         		return -1;
         	}
 			::close(lFileDescriptor);
     	}
    		else
    		{
-            if(Constants::getInstance()->trace())
-                printError("Opening the partition failed", errno);
+            if(Constants::getInstance()->trace()) printError("Opening the partition failed", errno);
        		return -1;
     	}
 	}
 	else 
 	{
-        if(Constants::getInstance()->trace())
-            printError("Partition type not supported");
+        if(Constants::getInstance()->trace()) printError("Partition type not supported");
 		return -1;
 	}
 	return 0;

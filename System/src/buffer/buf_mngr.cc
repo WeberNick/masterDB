@@ -37,4 +37,62 @@ BufferManager::~BufferManager()
 
 }
 
+bool BufferManager::fix(const pid aPageID, const LOCK_MODE aMode, BACB* aBufferAccCbPointer)
+{
+    size_t lHashIndex;
+    BCB* lNextBufCb;
+    int lFileHandle;
+    int lBlockNo;
+    //retry
+    lHashIndex = _bufferHash->hash(aPageID);
+    //sem_get() lock shared
 
+    lNextBufCb = _bufferHash->getBucketCb(lHashIndex);
+    while(lNextBufCb != nullptr)
+    {
+        if(lNextBufCb->getPID() == aPageID)
+        {
+            if(/*semaphore stuff*/0)
+            {
+                if(lNextBufCb->getFrameIndex() == 0) //? -1 ?
+                {
+                    //sem stuff, goto retry..
+                }
+            }
+            else
+            {
+                //sem stuff
+            }
+            //goto p_found
+        }
+        else
+        {
+            lNextBufCb = lNextBufCb->getNextInChain();
+        }
+    }
+    lNextBufCb = locatePage(aPageID, lHashIndex);
+    //p_found
+    if(aMode != kFREE)
+    {
+        if(aMode == kSHARED)
+        {
+            //sem stuff
+        }
+        else
+        {
+            //sem stuff
+            lNextBufCb->setFixCount(1);
+        }
+    }
+    if(aMode == kFREE || aMode == kSHARED)
+    {
+        lNextBufCb->incrFixCount();
+    }
+    aBufferAccCbPointer = getBufAccCb();
+    aBufferAccCbPointer->setPID(lNextBufCb->getPID());
+    aBufferAccCbPointer->setPagePtr(_bufferpool[lNextBufCb->getFrameIndex()]);
+        
+        
+
+
+}

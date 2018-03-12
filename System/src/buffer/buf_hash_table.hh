@@ -44,8 +44,13 @@ class BufferHashTable
         BufferHashTable &operator=(const BufferHashTable&) = delete;
         ~BufferHashTable();
 
+    public:
+        inline Semaphore&   getBucketSem(const size_t aHash){ return _hashTable[aHash]._bucketSem; }
+        inline BCB*         getBucketCb(const size_t aHash){ return _hashTable[aHash]._firstBufCb; }
 
-	private:
+
+
+	public:
 		size_t hash(const pid aPageID);
 
 

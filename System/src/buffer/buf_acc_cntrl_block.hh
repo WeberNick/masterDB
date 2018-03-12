@@ -23,11 +23,15 @@ class BufferAccessControlBlock
 
     public:
         inline pid          getPID(){ return _pageID; }
-        inline void         setPID(const pid aPID){ _pageID = aPID; }
+        inline void         setPID(pid aPageID){ _pageID = aPageID; }
         inline byte*        getPagePtr(){ return _pagePtr; }
+        inline void         setPagePtr(byte* aPagePtr){ _pagePtr = aPagePtr; }
         inline Semaphore*   getSemaphore(){ return _pageSem; }
+        inline void         setSemaphore(Semaphore* aSemaphore){ _pageSem = aSemaphore; }
         inline bool         getModifiedFlag(){ return _modified; }
+        inline void         setModifiedFlag(const bool aFlag){ _modified = aFlag; }
         inline bool         getInvalidFlag(){ return _invalid; }
+        inline void         setInvalidFlag(const bool aFlag){ _invalid = aFlag; }
 
 
 

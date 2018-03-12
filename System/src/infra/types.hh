@@ -24,6 +24,11 @@ struct page_id_t
 {
     uint _fileNo;
     uint _pageNo;
+
+    bool operator==(const page_id_t& aOther) 
+    {
+        return (_fileNo == aOther._fileNo && _pageNo == aOther._pageNo);
+    }
 };
 typedef page_id_t pid;
 
@@ -71,8 +76,9 @@ enum class PageStatus {
 enum LOCK_MODE
 {
     kNoType = -1,
-    kSHARED = 0,
-    kEXCLUSIVE = 1
+    kFREE = 0,
+    kSHARED = 1,
+    kEXCLUSIVE = 2
 };
 
 

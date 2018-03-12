@@ -12,6 +12,9 @@
 #include "infra/types.hh"
 #include "infra/semaphore.hh"
 
+class BufferControlBlock;
+typedef BufferControlBlock BCB;
+
 class BufferControlBlock
 {
     private:
@@ -25,9 +28,18 @@ class BufferControlBlock
 
     public:
         inline pid      getPID(){ return _pageID; }
+        inline uint     getFrameIndex(){ return _frameIndex; }
+
+        inline int      getFixCount(){ return _fixCount; }
+        inline void     setFixCount(const int aFixCount){ _fixCount = aFixCount; }
+        inline void     incrFixCount(){ ++_fixCount; }
+        inline void     decrFixCount(){ --_fixCount; }
+
+
         //...
 
 
+        inline BCB*     getNextInChain(){ return _nextInChain; }
 
     private:
         pid         _pageID;    //
@@ -41,5 +53,3 @@ class BufferControlBlock
         BufferControlBlock*    _nextInLRU;     //next page in LRU chain
         BufferControlBlock*    _nextInChain;   //hash overflow chain forward pointer
 };
-
-using BCB = BufferControlBlock;

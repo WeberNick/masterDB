@@ -34,6 +34,15 @@ class BufferManager
         /* write page to disk */
         bool flush(const BACB aBufferAccCb);
 
+    public:
+        BCB*    getBufCb();
+        void    setBufCb(BCB* aBufCb);
+        BACB*   getBufAccCb();
+        void    setBufAccCb(BACB* aBufAccCb);
+
+        BCB*    locatePage(const pid aPgeID, const size_t aHash);
+
+
 
 	private:
 		size_t      		_noFrames;

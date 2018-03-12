@@ -20,9 +20,8 @@
 
 #include <string>
 
-const std::string C_PATH_TO_MASTER_PARTITION = ""; //Location may change (member, command line arg,...)
-
-class DatabaseInstanceManager {
+class DatabaseInstanceManager 
+{
 	private:
 		explicit DatabaseInstanceManager(const std::string aPathToMasterPartition);
 		DatabaseInstanceManager(const DatabaseInstanceManager& aDatabaseInstanceManager) = delete;

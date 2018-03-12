@@ -18,7 +18,9 @@ class Constants
         Constants& operator=(Constants&&) = delete;
 
         ~Constants()
-        {}
+        {
+            delete _instance;
+        }
 
     public:
         static void create(const bool aTrace)
@@ -32,12 +34,19 @@ class Constants
             return _instance; 
         }
 
+        static void destroy()
+        {
+            if(_instance) delete _instance;
+            else printError("Can not destroy Singleton instance before creating it");
+        }
     
     public:
         inline const bool trace() const { return _trace; }
 
 
-    private:
+    public:
         static Constants*   _instance;
         bool                _trace; 
 };
+
+Constants* Constants::_instance = nullptr;
