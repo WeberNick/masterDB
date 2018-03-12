@@ -2,12 +2,10 @@
 
 BufferControlBlock::BufferControlBlock() :
     _pageID(),
-    _frameIndex(0),
-    _pageSem(0,0),
+    _frameIndex(-1),
+    _pageMutex(),
     _modified(false),
     _fixCount(0),
-    _prevInLRU(nullptr),
-    _nextInLRU(nullptr),
     _nextInChain(nullptr)
 {}
 

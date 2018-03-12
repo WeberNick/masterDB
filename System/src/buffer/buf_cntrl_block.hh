@@ -7,10 +7,14 @@
  *  @section TBD
  */
 
+#ifndef BUFFER_CONTROL_BLOCK_HH
+#define BUFFER_CONTROL_BLOCK_HH
 #pragma once
 
 #include "infra/types.hh"
-#include "infra/semaphore.hh"
+
+#include <mutex>
+#include <shared_mutex>
 
 class BufferControlBlock;
 typedef BufferControlBlock BCB;
@@ -27,9 +31,9 @@ class BufferControlBlock
 
 
     public:
-        inline pid      getPID(){ return _pageID; }
+        inline pid&     getPID(){ return _pageID; }
         inline uint     getFrameIndex(){ return _frameIndex; }
-
+        inline sMtx&    getMutex(){ return _pageMutex; }
         inline int      getFixCount(){ return _fixCount; }
         inline void     setFixCount(const int aFixCount){ _fixCount = aFixCount; }
         inline void     incrFixCount(){ ++_fixCount; }
@@ -42,14 +46,13 @@ class BufferControlBlock
         inline BCB*     getNextInChain(){ return _nextInChain; }
 
     private:
-        pid         _pageID;    //
+        pid     _pageID;    //
         //page handle?
-        uint            _frameIndex;    //buffer pool index where page now stored
-        Semaphore       _pageSem;       //semaphore to protect page
-        bool            _modified;
-        int             _fixCount;
+        uint    _frameIndex;    //buffer pool index where page now stored
+        sMtx    _pageMutex;       //semaphore to protect page
+        bool    _modified;
+        int     _fixCount;
         //LSN infos
-        BufferControlBlock*    _prevInLRU;     //prev. page in LRU chain
-        BufferControlBlock*    _nextInLRU;     //next page in LRU chain
-        BufferControlBlock*    _nextInChain;   //hash overflow chain forward pointer
+        BCB*    _nextInChain;   //hash overflow chain forward pointer
 };
+#endif

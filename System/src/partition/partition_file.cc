@@ -1,7 +1,7 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID, const uint aGrowthIndicator) :
-	PartitionBase(aPath, aName, aPageSize, aPartitionID),
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPartitionID, const uint aGrowthIndicator, const control_block_t& aControlBlock) :
+	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
 	 init();
@@ -14,19 +14,18 @@ int PartitionFile::create(const uint aSizeInPages)
 {
 	if(exists())
 	{
-		std::cerr << "## CREATE PARTITION: The partition already exists!" << std::endl;
+        if(_controlBlock.trace()) printErr("Partition already exists and cannot be created");
 		return -1;
 	}
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(aSizeInPages);
-	std::cout << "## CREATE PARTITION: The following command will be executed: '" << lCommand << "'" << std::endl;
 	system(lCommand.c_str());
-	if(assignSize(_sizeInPages) == -1)
+	if(assignSize(_sizeInPages) == -1 && _controlBlock.trace())
 	{
-		std::cerr << "## CREATE PARTITION: # ERROR: Partition size could not be assigned!" << std::endl;
+        printErr("Partition size could not be assigned!");
 	}
 	if(format() != 0 )
 	{
-		std::cerr << "## CREATE PARTITION: The partition could not be initialized and will be removed!" << std::endl;
+        if(_controlBlock.trace()) printErr("Partition could not be initialized and will be removed");
 		remove();
 		return -1;
 	}
@@ -40,20 +39,18 @@ int PartitionFile::remove()
 		if(isFile())
 		{
 			std::string lCommand = "rm " + _partitionPath;
-			std::cout << "## REMOVE PARTITION: The following command will be executed: '" << lCommand << "'" << std::endl;
 			system(lCommand.c_str());
-			std::cout << "## REMOVE PARTITION: PartitionFile was successfully removed." << std::endl;
 			return 0;
 		}
 		else
 		{
-			std::cerr << "## REMOVE PARTITION: # ERROR: The file at " << _partitionPath << " is no file partition." << std::endl;
+            if(_controlBlock.trace()) printErr("No file partition at path " + _partitionPath);
 			return -1;
 		}
 	}
 	else
 	{
-		std::cerr << "## REMOVE PARTITION: # ERROR: No file exists at " << _partitionPath << std::endl;
+        if(_controlBlock.trace()) printErr("No file exists at " + _partitionPath);
 		return -1;
 	}
 }
@@ -77,7 +74,6 @@ void PartitionFile::printPage(uint aPageIndex)
     for (uint a = 0; a < _pageSize / 4; ++a) {
         myfile << std::hex << std::setw(8) << std::setfill('0') << *(lPP2 + a) << std::endl;
     }
-    std::cout << "pagePrinted" << std::endl;
     myfile.close();
     delete[] lPagePointer;
     close();

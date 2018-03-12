@@ -3,7 +3,7 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A class implementing the interface of a partition stored on disk (currently a file)
  *  @bugs    Currently no bugs known
- *  @todos   Todos: init(): where to calc. lPagesPerFSIP?, Update LSN?
+ *  @todos   Todos:  Update LSN?
  *  @section TBD
  */
 #ifndef PARTITION_FILE_HH
@@ -11,16 +11,16 @@
 
 #include "partition_base.hh"
 
+#include <string>
 #include <cmath>
-#include <iostream>
 
 class PartitionFile : public PartitionBase {
   private:
     friend class DatabaseInstanceManager;
     friend class PartitionManager;
-    explicit PartitionFile(const std::string aPath, const std::string aName, const uint aPageSize, const uint aGrowthIndicator, const uint aPartitionID);
-    PartitionFile(const PartitionFile &aPartition) = delete;
-    PartitionFile &operator=(const PartitionFile &aPartition) = delete;
+    explicit PartitionFile(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const uint aPartitionID, const control_block_t& aControlBlock);
+    PartitionFile(const PartitionFile&) = delete;
+    PartitionFile &operator=(const PartitionFile&) = delete;
     ~PartitionFile();
 
   public:

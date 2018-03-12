@@ -2,14 +2,13 @@ CXXFLAGS = -Wall -Weffc++ -std=c++17
 
 CC = g++
 
-LINKER = -lstdc++fs -pthread
+LINKER = -lstdc++fs
 
 INCL = -I../.. -I..
 
 HDR = \
 	../infra/args.hh \
 	../infra/types.hh \
-	../infra/constants.hh \
 	test.hh \
 	\
 
@@ -37,6 +36,10 @@ OBJ = \
 	../interpreter/interpreter_fsip.o \
 	../interpreter/interpreter_fsm.o \
 	../interpreter/interpreter_sp.o \
+	\
+	../buffer/buf_mngr.o \
+	../buffer/buf_hash_table.o \
+	../buffer/buf_cntrl_block.o \
 	\
 
 ALL = main 

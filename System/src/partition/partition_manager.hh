@@ -28,8 +28,8 @@ class PartitionManager
 {    
     private:
         explicit PartitionManager();
-        PartitionManager(const PartitionManager& aPartitionManager) = delete;
-        PartitionManager& operator=(const PartitionManager& aPartitionManager) = delete;
+        PartitionManager(const PartitionManager&) = delete;
+        PartitionManager& operator=(const PartitionManager&) = delete;
         ~PartitionManager(); // delete all partitions
 
     public:
@@ -49,14 +49,13 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile* createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aGrowthIndicator);
-        PartitionRaw* createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize);
+        PartitionFile* createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const control_block_t& aControlBlock);
+        PartitionRaw* createPartitionRawInstance(const std::string aPath, const std::string aName, const control_block_t& aControlBlock);
   
     public:
-        uint getNoPartitions();
-        PartitionBase* getPartition(const uint8_t aID);
-        	
-		inline const part_vt& getPartitionTuples(){ return _partitionTuples; }
+        inline size_t           getNoPartitions(){ return _partitions.size(); }
+        inline PartitionBase*   getPartition(const uint8_t aID){ return _partitions.at(aID); }
+		inline const part_vt&   getPartitionTuples(){ return _partitionTuples; }
   
     private:
         uint _counterPartitionID;

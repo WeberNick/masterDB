@@ -1,6 +1,5 @@
 #include "infra/args.hh"
 #include "infra/types.hh"
-#include "infra/constants.hh"
 
 #include "db_instance_manager.hh"
 
@@ -30,15 +29,13 @@ int main(const int argc, const char *argv[]) {
         print_usage(std::cout, argv[0], lArgDesc);
         return 0;
     }
-
-    control_block_t lCB = {lArgs.trace()};
+    const size_t C_PAGE_SIZE = 4096;
+    const control_block_t lCB = {lArgs.masterPartition(), C_PAGE_SIZE, lArgs.trace()};
 
     const std::string C_PATH = lArgs.path();
-    const uint C_PAGE_SIZE = lArgs.pageSize();
     const uint C_GROWTH_INDICATOR = lArgs.growthIndicator();
-	const std::string C_MASTER_PARTITION_PATH = lArgs.masterPartition();
 
-    std::cout << "Path: " << C_PATH << std::endl;
+   std::cout << "Path: " << C_PATH << std::endl;
     std::cout << "PageSize: " << C_PAGE_SIZE << std::endl;
     std::cout << "Growth: " << C_GROWTH_INDICATOR << std::endl;
 
@@ -46,10 +43,10 @@ int main(const int argc, const char *argv[]) {
 
 	/* Test call in test.hh */
     if (lArgs.test()) {
-        test(C_PATH, C_PAGE_SIZE, C_GROWTH_INDICATOR);
+        test(C_PATH, C_GROWTH_INDICATOR, lCB);
     }
 
-	// DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(C_MASTER_PARTITION_PATH);
+	DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(lCB);
     //boot..
 
     //shutdown

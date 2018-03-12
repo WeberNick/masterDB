@@ -1,15 +1,18 @@
-#pragma once
+#ifndef ERROR_HH
+#define ERROR_HH
 
 #include <cerrno>
 #include <cstring>
 #include <iostream>
 
-void printError(const std::string aErrMsg)
+void printErr(const std::string aErrMsg)
 {
     std::cerr << "# ERROR: " << aErrMsg << std::endl;
 }
 
-void printError(const std::string aErrMsg, const int aErrNo)
+void printErr(const std::string aErrMsg, const int aErrNo)
 {
     std::cerr << "# ERROR: " << aErrMsg << ": " << std::strerror(aErrNo) << std::endl;
 }
+
+#endif

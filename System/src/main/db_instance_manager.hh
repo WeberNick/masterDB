@@ -23,9 +23,9 @@
 class DatabaseInstanceManager 
 {
 	private:
-		explicit DatabaseInstanceManager(const std::string aPathToMasterPartition);
-		DatabaseInstanceManager(const DatabaseInstanceManager& aDatabaseInstanceManager) = delete;
-		DatabaseInstanceManager &operator=(const DatabaseInstanceManager &aDatabaseInstanceManager) = delete;
+		explicit DatabaseInstanceManager(const control_block_t& aControlBlock);
+		DatabaseInstanceManager(const DatabaseInstanceManager&) = delete;
+		DatabaseInstanceManager &operator=(const DatabaseInstanceManager&) = delete;
 		~DatabaseInstanceManager();
 
 	public:
@@ -34,8 +34,8 @@ class DatabaseInstanceManager
 		 *
 		 *  @return reference to the only PartitionManager instance
 		 */
-		static DatabaseInstanceManager& getInstance(const std::string aPathToMasterPartition) {
-			static DatabaseInstanceManager lDBIM_Instance(aPathToMasterPartition);
+		static DatabaseInstanceManager& getInstance(const control_block_t& aControlBlock) {
+			static DatabaseInstanceManager lDBIM_Instance(aControlBlock);
 			return lDBIM_Instance;
 		}
 

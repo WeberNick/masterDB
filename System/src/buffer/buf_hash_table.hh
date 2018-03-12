@@ -7,14 +7,17 @@
  *  @section TBD
  */
 
+#ifndef BUFFER_HASH_TABLE_HH
+#define BUFFER_HASH_TABLE_HH
 #pragma once
 
 #include "infra/types.hh"
-#include "infra/semaphore.hh"
 #include "buf_cntrl_block.hh"
 
 #include <cstddef>
 #include <functional>
+#include <mutex>
+#include <shared_mutex>
 
 class BufferHashTable
 {
@@ -23,18 +26,18 @@ class BufferHashTable
         {
             public:
                 explicit HashBucket() :
-                    _bucketSem(0, 1),//mutex
+                    _bucketMutex(),
                     _firstBufCb(nullptr)
                 {}
                 HashBucket(const HashBucket&) = delete;
                 HashBucket &operator=(const HashBucket&) = delete;
-                ~HashBucket();
+                ~HashBucket(){}
 
             public:
-                //each bucket is protected by a semaphore while being used
-                Semaphore   _bucketSem;     
+                //each bucket is protected by a mutex while being used
+                sMtx    _bucketMutex;     
                 //pointer to first control block
-                BCB*        _firstBufCb;    
+                BCB*    _firstBufCb;    
         };
 
 
@@ -45,8 +48,8 @@ class BufferHashTable
         ~BufferHashTable();
 
     public:
-        inline Semaphore&   getBucketSem(const size_t aHash){ return _hashTable[aHash]._bucketSem; }
-        inline BCB*         getBucketCb(const size_t aHash){ return _hashTable[aHash]._firstBufCb; }
+        inline sMtx&    getBucketMutex(const size_t aHash){ return _hashTable[aHash]._bucketMutex; }
+        inline BCB*     getBucketCb(const size_t aHash){ return _hashTable[aHash]._firstBufCb; }
 
 
 
@@ -56,16 +59,17 @@ class BufferHashTable
 
 	private:
         //the size of the hash table
-		size_t      _size;      		
+		size_t          _size;      		
         //the hash table maintaining the control blocks
-        HashBucket* _hashTable; 
+        HashBucket*     _hashTable; 
         
         //pointer to first element in the list of free buffer control blocks
-        BCB*        _freeCbList; 
+        BCB*            _freeCbList; 
         //Semaphore protecting the list of free buffer control blocks
-        Semaphore   _freeCbSem; 
+        sMtx            _freeCbMutex; 
         //number of free buffer control blocks
-        uint        _noFreeCbs; 
+        uint            _noFreeCbs; 
 };
 
 
+#endif

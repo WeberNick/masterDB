@@ -6,10 +6,10 @@
 #include "segment/segment_fsm.hh"
 
 
-void test(const std::string aPath, const uint aPageSize, const uint aGrwothIndicator) {
+void test(const std::string aPath, const uint aGrwothIndicator, const control_block_t& aControlBlock) {
     std::cout << "\n" << std::endl;
 
-    PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance(aPath, "DefaultName", aPageSize, aGrwothIndicator);
+    PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance(aPath, "DefaultName", aGrwothIndicator, aControlBlock);
 	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
 
 	const uint lNumbPages = 1000000;

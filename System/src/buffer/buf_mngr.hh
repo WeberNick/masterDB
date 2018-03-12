@@ -7,15 +7,18 @@
  *  @section TBD
  */
 
+#ifndef BUFFER_MANAGER_HH
+#define BUFFER_MANAGER_HH
+
 #pragma once
 
 #include "infra/types.hh"
-#include "infra/semaphore.hh"
 #include "buf_hash_table.hh"
-#include "buf_acc_cntrl_block.hh"
 #include "buf_cntrl_block.hh"
 
 #include <cstddef>
+#include <mutex>
+#include <shared_mutex>
 
 class BufferManager
 {
@@ -27,21 +30,20 @@ class BufferManager
 
     public:
         /* request access to a page and fix it */
-        bool fix(const pid aPageID, const LOCK_MODE aMode, BACB* const  aBufferAccCbPointer);
-        bool emptyfix(const pid aPageID, const LOCK_MODE aMode, BACB* const  aBufferAccCbPointer);
+        bool fix(const pid aPageID, const LOCK_MODE aMode, byte*& aPagePointer);
+        bool emptyfix(const pid aPageID, const LOCK_MODE aMode, byte*& aPagePointer);
         /* unfix a page */
-        bool unfix(BACB* const aBufferAccCbPointer);
+        bool unfix(byte* aPagePointer);
         /* write page to disk */
-        bool flush(const BACB aBufferAccCb);
+        bool flush(byte* aPagePointer);
 
     public:
         BCB*    getBufCb();
         void    setBufCb(BCB* aBufCb);
-        BACB*   getBufAccCb();
-        void    setBufAccCb(BACB* aBufAccCb);
 
-        BCB*    locatePage(const pid aPgeID, const size_t aHash);
-
+    private:
+        BCB*    locatePage(const pid aPageID, const size_t aHashIndex);
+        int     getFrame();
 
 
 	private:
@@ -50,23 +52,10 @@ class BufferManager
 		BufferHashTable* 	_bufferHash;
 		byte** 				_bufferpool;
 		uint*				_freeFrameIndexes;
-		Semaphore 			_freeFrameSem;
+        sMtx                _freeFrameMutex;
 		unsigned long 		_noFreeFrames;
 
-		//pointer to control block of most recently used page
-        BCB*        		_pageMRU;   
-        //pointer to control block of last recently used page
-        BCB*        		_pageLRU;           
-        //Semaphore protecting lru  list
-        Semaphore           _LRUSem;    
-
- 	 	//pointer to the first element in the list of free buffer access control blocks
-        BACB*    			_freeAccCbList;
-        //semaphore to protect operations on the list of free access control blocks
-        Semaphore           _freeAccCbSem;
-        //current number of free access control blocks
-        uint                _noFreeAccCb;
-
-        //
-        control_block_t&    _controlBlock;
+        const control_block_t&    _controlBlock;
 };
+
+#endif

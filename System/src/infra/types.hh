@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <mutex>
+#include <shared_mutex>
 
 typedef std::size_t size_t;
 typedef std::byte byte;
@@ -19,15 +21,32 @@ typedef std::vector<byte *> byte_vpt;
 typedef unsigned int uint;
 typedef std::vector<uint> uint_vt;
 typedef std::vector<uint32_t> uint32_vt;
+typedef std::shared_mutex sMtx;
+typedef std::mutex mtx;
+
+struct control_block_t
+{
+    std::string     _masterPartition;
+    size_t          _pageSize;
+    bool            _trace;
+
+    const std::string   mstrPart() const { return _masterPartition; }
+    const size_t        pageSize() const { return _pageSize; }
+    const bool          trace() const { return _trace; }
+};
+
 
 struct page_id_t
 {
-    uint _fileNo;
-    uint _pageNo;
+    uint _fileID;
+    uint _pageID;
+
+    const uint fileID(){ return _fileID; }
+    const uint pageID(){ return _pageID; }
 
     bool operator==(const page_id_t& aOther) 
     {
-        return (_fileNo == aOther._fileNo && _pageNo == aOther._pageNo);
+        return (_fileID == aOther._fileID && _pageID == aOther._pageID);
     }
 };
 typedef page_id_t pid;
@@ -51,16 +70,6 @@ struct seg_t
 	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
 };
 typedef std::vector<seg_t> seg_vt;
-
-struct control_block_t
-{
-    size_t  _pageSize;
-    bool    _trace;
-
-
-    const size_t    pageSize(){ return _pageSize; }
-    const bool      trace(){ return _trace; }
-};
 
 enum class PageStatus {
     kNoType = -1,

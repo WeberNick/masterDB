@@ -51,7 +51,7 @@ int PartitionBase::open()
 		if(_fileDescriptor == -1)
 		{
             if(_controlBlock.trace())
-                printError("Opening the partition failed", errno);
+                printErr("Opening the partition failed", errno);
 			return -1;
 		}
 	}
@@ -66,7 +66,7 @@ int PartitionBase::close()
 		if(::close(_fileDescriptor) == -1) //call close in global namespace
 		{
             if(_controlBlock.trace())
-                printError("Closing the partition failed", errno);
+                printErr("Closing the partition failed", errno);
 			return -1;
 		}
 		--_openCount;
@@ -121,7 +121,7 @@ int PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBu
 {
 	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _controlBlock.trace())
 	{
-        printError("Reading the partition failed", errno);
+        printErr("Reading the partition failed", errno);
 		return -1;
 	}
 	return 0;
@@ -131,7 +131,7 @@ int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const u
 {
 	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _controlBlock.trace())
 	{
-        printError("Write to partition failed", errno);
+        printErr("Write to partition failed", errno);
 		return -1;
 	}
 	return 0;
@@ -161,26 +161,26 @@ int PartitionBase::assignSize(uint& aSize) //in number of pages
         		} 
         		else
     			{
-                    if(_controlBlock.trace()) printError("Partition size modulo page size is not equal to zero");
+                    if(_controlBlock.trace()) printErr("Partition size modulo page size is not equal to zero");
 		       		 return -1;
 		   		 }
     	    }
        		else
         	{
-                if(_controlBlock.trace()) printError("ioctl call failed", errno);
+                if(_controlBlock.trace()) printErr("ioctl call failed", errno);
         		return -1;
         	}
 			::close(lFileDescriptor);
     	}
    		else
    		{
-            if(_controlBlock.trace()) printError("Opening the partition failed", errno);
+            if(_controlBlock.trace()) printErr("Opening the partition failed", errno);
        		return -1;
     	}
 	}
 	else 
 	{
-        if(_controlBlock.trace()) printError("Partition type not supported");
+        if(_controlBlock.trace()) printErr("Partition type not supported");
 		return -1;
 	}
 	return 0;
@@ -192,7 +192,7 @@ void PartitionBase::init()
 	{
 		if(assignSize(_sizeInPages) == -1 && _controlBlock.trace())
 		{
-            printError("Partition size could not be assigned!");
+            printErr("Partition size could not be assigned!");
 		}
 	}
 	else

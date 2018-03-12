@@ -11,7 +11,6 @@
 
 #include "infra/types.hh"
 #include "infra/error.hh"
-#include "infra/constants.hh"
 #include "infra/header_structs.hh"
 #include "interpreter/interpreter_fsip.hh"
 
@@ -139,7 +138,7 @@ class PartitionBase {
     /* The partitions file descriptor */
     int _fileDescriptor;
 
-    control_block_t _controlBlock;
+    const control_block_t& _controlBlock;
 };
 
 #endif

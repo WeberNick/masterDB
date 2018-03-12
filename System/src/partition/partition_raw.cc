@@ -1,7 +1,7 @@
 #include "partition_raw.hh"
 
-PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID) :
-	PartitionBase(aPath, aName, aPageSize, aPartitionID)
+PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock) :
+	PartitionBase(aPath, aName, aPartitionID, aControlBlock)
 {
 	init();
 }

@@ -4,29 +4,22 @@ BufferHashTable::BufferHashTable(const size_t aHashTableSize) :
 	_size(aHashTableSize),
 	_hashTable(nullptr),
 	_freeCbList(nullptr),
-	_freeCbSem(0, 0),
-	_noFreeCbs(0)
+	_freeCbMutex(),
+	_noFreeCbs(_size)
 {
 	_hashTable = new HashBucket[_size];
-
     BCB* newCb = new BCB;
     _freeCbList = newCb;
-    uint buffersize = 0; //PLACEHOLDER
-    uint delta = 0; //PLACEHOLDER
-    _noFreeCbs = buffersize + delta;
     size_t i = 0;
     while(i < _noFreeCbs)
     {
-        //initSemaphore(newCb->_pageSem);
-        if(i < (buffersize - 1))
+        if(i < (_size - 1))
         {
             newCb->_nextInChain = new BCB;
             newCb = newCb->_nextInChain;
         }
         ++i;
     }
-    //initSemaphore(_freeCbSem);
-    //
 }
 
 BufferHashTable::~BufferHashTable()
@@ -49,7 +42,7 @@ BufferHashTable::~BufferHashTable()
 size_t BufferHashTable::hash(const pid aPageID)
 {
     std::hash<uint> lHash;
-    return (lHash(aPageID._fileNo) + lHash(aPageID._pageNo)) % _size;
+    return (lHash(aPageID._fileID) + lHash(aPageID._pageID)) % _size;
 }
 
 

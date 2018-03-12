@@ -29,26 +29,16 @@ void PartitionManager::load(part_vt& aTuples)
 }
 
 
-PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aPageSize, const uint aGrowthIndicator)
+PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const control_block_t& aControlBlock)
 {
-    PartitionFile* lPartition = new PartitionFile(aPath, aName, aPageSize, aGrowthIndicator, _counterPartitionID++);
+    PartitionFile* lPartition = new PartitionFile(aPath, aName, aGrowthIndicator, _counterPartitionID++, aControlBlock);
     _partitions[lPartition->getID()] = lPartition;
     return (PartitionFile*)_partitions.at(lPartition->getID());
 }
 
-PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName, const uint aPageSize)
+PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName, const control_block_t& aControlBlock)
 {
-    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, aPageSize, _counterPartitionID++);
+    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, aControlBlock);
     _partitions[lPartition->getID()] = lPartition;
     return (PartitionRaw*)_partitions.at(lPartition->getID());
-}
-
-uint PartitionManager::getNoPartitions()
-{
-    return _partitions.size();
-}
-
-PartitionBase* PartitionManager::getPartition(const uint8_t aID)
-{
-    return _partitions.at(aID);
 }
