@@ -8,6 +8,8 @@ INCL = -I../.. -I..
 
 HDR = \
 	../infra/types.hh \
+	../infra/error.hh \
+	../infra/constants.hh \
 	\
 
 PM_HDR = \

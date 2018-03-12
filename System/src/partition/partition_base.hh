@@ -10,6 +10,8 @@
 #define PARTITION_BASE_HH
 
 #include "infra/types.hh"
+#include "infra/error.hh"
+#include "infra/constants.hh"
 #include "infra/header_structs.hh"
 #include "interpreter/interpreter_fsip.hh"
 

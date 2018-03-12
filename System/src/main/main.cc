@@ -1,5 +1,6 @@
 #include "infra/args.hh"
 #include "infra/types.hh"
+#include "infra/constants.hh"
 
 #include "db_instance_manager.hh"
 
@@ -29,6 +30,8 @@ int main(const int argc, const char *argv[]) {
         print_usage(std::cout, argv[0], lArgDesc);
         return 0;
     }
+
+    Constants lConstants(lArgs.trace());
 
     const std::string C_PATH = lArgs.path();
     const uint C_PAGE_SIZE = lArgs.pageSize();

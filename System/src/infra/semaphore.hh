@@ -1,40 +1,67 @@
 #pragma once
 
-#include <mutex>
-#include <condition_variable>
-#include <cstddef>
+#include "types.hh"
+#include "error.hh"
+#include "constants.hh"
 
+#include <semaphore.h>
+#include <cerrno>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" /* ignore deprecated compiler warnings */
 class Semaphore
 {
     public:
-        explicit Semaphore(std::size_t aCount = 0) : _mtx(), _cv(), _count(aCount){}
+        explicit Semaphore(const int aShared, const uint aValue) : _semaphore()
+        { 
+            if(sem_init(&_semaphore, aShared, aValue) == -1 && Constants::getInstance()->trace())
+            {
+                printError("'sem_init' call failed", errno);
+            }
+        }
         Semaphore(const Semaphore&) = delete;
         Semaphore(Semaphore&&) = delete;
         Semaphore& operator=(const Semaphore&) = delete;
         Semaphore& operator=(Semaphore&&) = delete;
-        ~Semaphore();
-
-    public:
-        inline void notify()
-        {
-            std::unique_lock<std::mutex> lock(_mtx);
-            _count++;
-            _cv.notify_one();
+        ~Semaphore()
+        { 
+            if(sem_destroy(&_semaphore) == -1 && Constants::getInstance()->trace())
+            {
+                printError("'sem_destroy' call failed", errno);
+            }
         }
 
+    public:
         inline void wait()
         {
-            std::unique_lock<std::mutex> lock(_mtx);
-
-            while(_count == 0)
+            int lReturnCode;
+            do
             {
-                _cv.wait(lock);
+                lReturnCode = sem_wait(&_semaphore);
+            } while (lReturnCode == -1 && errno == EINTR);
+            if(lReturnCode == -1 && Constants::getInstance()->trace())
+            {
+                printError("'sem_wait' call failed", errno);
             }
-            _count--;
+        }
+
+        inline void try_wait()
+        {
+            if(sem_trywait(&_semaphore) == -1 && Constants::getInstance()->trace())
+            {
+                printError("'sem_trywait' call failed", errno);
+            }
+        }
+
+        inline void unlock()
+        { 
+            if(sem_post(&_semaphore) == -1 && Constants::getInstance()->trace())
+            {
+                printError("'sem_post' call failed", errno);
+            }
         }
 
     private:
-        std::mutex _mtx;
-        std::condition_variable _cv;
-        std::size_t _count;
+        sem_t _semaphore;
 };
+#pragma GCC diagnostic pop

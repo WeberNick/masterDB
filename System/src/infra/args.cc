@@ -18,6 +18,7 @@ void construct_arg_desc(argdesc_vt& x) {
 	x.push_back( new barg_t("--test", false, &Args::test, "conduct a complete DBS test"));
 	x.push_back( new barg_t("--install", false, &Args::install, "install the DBS on the defined master partition"));
 	x.push_back( new barg_t("--print", false, &Args::print, "sets the flag to print all test results into a file"));
+	x.push_back( new barg_t("--trace", false, &Args::trace, "sets the flag to trace the code and output error messages"));
 	x.push_back( new uarg_t("--runs", 1, &Args::runs, "the number how often a test is repeated"));
 	x.push_back( new sarg_t("--path", "$HOME/Partition", &Args::path, "path to partition"));
 	x.push_back( new sarg_t("--master", "no default", &Args::masterPartition, "path to master partition"));
@@ -33,6 +34,7 @@ Args::Args() :
 	_test(false),
 	_install(false),
 	_print(false),
+    _trace(false),
 	_core(0),
 	_pageSize(4096),
 	_alignment(4096),

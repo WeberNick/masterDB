@@ -55,6 +55,9 @@ class Args {
     inline const bool print() { return _print; }
     inline void print(const bool &x) { _print = x; }
 
+    inline const bool trace() { return _trace; }
+    inline void trace(const bool &x) { _trace = x; }
+
     inline const uint runs() { return _runs; }
     inline void runs(const uint &x) { _runs = x; }
 
@@ -80,6 +83,7 @@ class Args {
     bool _test;
 	bool _install;
     bool _print;
+    bool _trace;
     uint _core;
     uint _pageSize;
     uint _alignment;

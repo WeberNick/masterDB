@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 
+typedef std::size_t size_t;
 typedef std::byte byte;
 typedef std::vector<byte *> byte_vpt;
 typedef unsigned int uint;

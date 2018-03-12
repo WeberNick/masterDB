@@ -2,17 +2,18 @@ CXXFLAGS = -Wall -Weffc++ -std=c++17
 
 CC = g++
 
-LINKER = -lstdc++fs
+LINKER = -lstdc++fs -pthread
 
 INCL = -I../.. -I..
 
 HDR = \
 	../infra/args.hh \
+	../infra/types.hh \
+	../infra/constants.hh \
 	test.hh \
 	\
 
 DBIM_HDR = \
-	../infra/types.hh \
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \
 	../segment/segment_fsm_sp.hh \
@@ -48,7 +49,7 @@ main: db_instance_manager.o main.o $(OBJ)
 main.o : main.cc $(HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER)
 
-db_instance_manager.o : db_instance_manager.cc $(DBIM_HDR)
+db_instance_manager.o : db_instance_manager.cc $(HDR) $(DBIM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc $(LINKER)
 
 clean :

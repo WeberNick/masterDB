@@ -20,7 +20,7 @@
 class BufferManager
 {
     public:
-		explicit BufferManager(const std::size_t aNoFrames, const std::size_t aFrameSize = 4096);
+		explicit BufferManager(const size_t aNoFrames, const size_t aFrameSize = 4096);
         BufferManager(const BufferManager& aBufferManager) = delete;
         BufferManager &operator=(const BufferManager& aBufferManager) = delete;
         ~BufferManager();
@@ -36,8 +36,8 @@ class BufferManager
 
 
 	private:
-		std::size_t 		_noFrames;
-		std::size_t 		_frameSize;;
+		size_t      		_noFrames;
+		size_t 		        _frameSize;;
 		BufferHashTable* 	_bufferHash;
 		byte** 				_bufferpool;
 		uint*				_freeFrameIndexes;

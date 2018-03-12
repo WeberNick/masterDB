@@ -2,10 +2,10 @@
 
 BufferAccessControlBlock::BufferAccessControlBlock() :
     _pageID(),
-    _pagePtr(),
-    _pageSem(),
-    _modified(),
-    _invalid()
+    _pagePtr(nullptr),
+    _pageSem(nullptr),
+    _modified(false),
+    _invalid(false)
 {}
 
 BufferAccessControlBlock::~BufferAccessControlBlock()

@@ -18,32 +18,42 @@
 
 class BufferHashTable
 {
-    public:
-        struct bucket_t
+    private:
+        class HashBucket
         {
-            //each bucket is protected by a semaphore while being used
-            Semaphore   _bucketSem;     
-            //pointer to first control block
-            BCB*        _firstBufCb;    
+            public:
+                explicit HashBucket() :
+                    _bucketSem(0, 1),//mutex
+                    _firstBufCb(nullptr)
+                {}
+                HashBucket(const HashBucket&) = delete;
+                HashBucket &operator=(const HashBucket&) = delete;
+                ~HashBucket();
+
+            public:
+                //each bucket is protected by a semaphore while being used
+                Semaphore   _bucketSem;     
+                //pointer to first control block
+                BCB*        _firstBufCb;    
         };
 
 
 	public:
-		explicit BufferHashTable(const std::size_t aHashTableSize);
-		BufferHashTable(const BufferHashTable& aBufferHashTable) = delete;
-        BufferHashTable &operator=(const BufferHashTable& aBufferHashTable) = delete;
+		explicit BufferHashTable(const size_t aHashTableSize);
+		BufferHashTable(const BufferHashTable&) = delete;
+        BufferHashTable &operator=(const BufferHashTable&) = delete;
         ~BufferHashTable();
 
 
 	private:
-		std::size_t hash(const pid aPageID);
+		size_t hash(const pid aPageID);
 
 
 	private:
         //the size of the hash table
-		std::size_t _size;      		
+		size_t      _size;      		
         //the hash table maintaining the control blocks
-        bucket_t* 	_hashTable; 
+        HashBucket* _hashTable; 
         
         //pointer to first element in the list of free buffer control blocks
         BCB*        _freeCbList; 
