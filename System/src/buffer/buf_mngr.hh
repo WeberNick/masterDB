@@ -6,10 +6,6 @@
  *  @todos	TBD
  *  @section TBD
  */
-
-#ifndef BUFFER_MANAGER_HH
-#define BUFFER_MANAGER_HH
-
 #pragma once
 
 #include "infra/types.hh"
@@ -57,5 +53,3 @@ class BufferManager
 
         const control_block_t&    _controlBlock;
 };
-
-#endif

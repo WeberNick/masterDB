@@ -6,9 +6,6 @@
  *  @todos	TBD
  *  @section TBD
  */
-
-#ifndef BUFFER_HASH_TABLE_HH
-#define BUFFER_HASH_TABLE_HH
 #pragma once
 
 #include "infra/types.hh"
@@ -70,6 +67,3 @@ class BufferHashTable
         //number of free buffer control blocks
         uint            _noFreeCbs; 
 };
-
-
-#endif

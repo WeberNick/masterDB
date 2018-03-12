@@ -7,8 +7,6 @@
  *  @section TBD
  */
 
-#ifndef BUFFER_CONTROL_BLOCK_HH
-#define BUFFER_CONTROL_BLOCK_HH
 #pragma once
 
 #include "infra/types.hh"
@@ -55,4 +53,3 @@ class BufferControlBlock
         //LSN infos
         BCB*    _nextInChain;   //hash overflow chain forward pointer
 };
-#endif
