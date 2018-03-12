@@ -20,7 +20,7 @@
 class BufferManager
 {
     public:
-		explicit BufferManager(const size_t aNoFrames, const size_t aFrameSize = 4096);
+		explicit BufferManager(const size_t aNoFrames, const control_block_t& aControlBlock);
         BufferManager(const BufferManager& aBufferManager) = delete;
         BufferManager &operator=(const BufferManager& aBufferManager) = delete;
         ~BufferManager();
@@ -67,5 +67,6 @@ class BufferManager
         //current number of free access control blocks
         uint                _noFreeAccCb;
 
-
+        //
+        control_block_t&    _controlBlock;
 };

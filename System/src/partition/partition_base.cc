@@ -1,13 +1,14 @@
 #include "partition_base.hh"
 
-PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID) : 
+PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
-	_pageSize(aPageSize),
+	_pageSize(aControlBlock.pageSize()),
 	_sizeInPages(0),
 	_partitionID(aPartitionID),
 	_openCount(0),
-	_fileDescriptor(-1)
+	_fileDescriptor(-1),
+	_controlBlock(aControlBlock)
 {
 }
 
@@ -49,7 +50,7 @@ int PartitionBase::open()
 		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); //call open in global namespace
 		if(_fileDescriptor == -1)
 		{
-            if(Constants::getInstance()->trace())
+            if(_controlBlock.trace())
                 printError("Opening the partition failed", errno);
 			return -1;
 		}
@@ -64,7 +65,7 @@ int PartitionBase::close()
 	{
 		if(::close(_fileDescriptor) == -1) //call close in global namespace
 		{
-            if(Constants::getInstance()->trace())
+            if(_controlBlock.trace())
                 printError("Closing the partition failed", errno);
 			return -1;
 		}
@@ -118,7 +119,7 @@ int PartitionBase::freePage(const uint aPageIndex)
 
 int PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
 {
-	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && Constants::getInstance()->trace())
+	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _controlBlock.trace())
 	{
         printError("Reading the partition failed", errno);
 		return -1;
@@ -128,7 +129,7 @@ int PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBu
 
 int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
 {
-	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && Constants::getInstance()->trace())
+	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _controlBlock.trace())
 	{
         printError("Write to partition failed", errno);
 		return -1;
@@ -160,26 +161,26 @@ int PartitionBase::assignSize(uint& aSize) //in number of pages
         		} 
         		else
     			{
-                    if(Constants::getInstance()->trace()) printError("Partition size modulo page size is not equal to zero");
+                    if(_controlBlock.trace()) printError("Partition size modulo page size is not equal to zero");
 		       		 return -1;
 		   		 }
     	    }
        		else
         	{
-                if(Constants::getInstance()->trace()) printError("ioctl call failed", errno);
+                if(_controlBlock.trace()) printError("ioctl call failed", errno);
         		return -1;
         	}
 			::close(lFileDescriptor);
     	}
    		else
    		{
-            if(Constants::getInstance()->trace()) printError("Opening the partition failed", errno);
+            if(_controlBlock.trace()) printError("Opening the partition failed", errno);
        		return -1;
     	}
 	}
 	else 
 	{
-        if(Constants::getInstance()->trace()) printError("Partition type not supported");
+        if(_controlBlock.trace()) printError("Partition type not supported");
 		return -1;
 	}
 	return 0;
@@ -189,7 +190,7 @@ void PartitionBase::init()
 {
 	if(exists())
 	{
-		if(assignSize(_sizeInPages) == -1 && Constants::getInstance()->trace())
+		if(assignSize(_sizeInPages) == -1 && _controlBlock.trace())
 		{
             printError("Partition size could not be assigned!");
 		}

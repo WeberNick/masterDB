@@ -47,7 +47,7 @@ const uint64_t LSN = 0;
 class PartitionBase {
   protected:
     friend class PartitionManager;
-    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPageSize, const uint aPartitionID);
+    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock);
     PartitionBase(const PartitionBase &aPartition) = delete;
     PartitionBase &operator=(const PartitionBase &aPartition) = delete;
     virtual ~PartitionBase() = 0;
@@ -128,7 +128,7 @@ class PartitionBase {
     std::string _partitionPath;
     /* Name of the partition */
     std::string _partitionName;
-    /* The block size in bytes, used by the partition */
+    /* The page size in bytes, used by the partition */
     uint _pageSize;
     /* The current size of the partition in number of pages */
     uint _sizeInPages;
@@ -138,6 +138,8 @@ class PartitionBase {
     uint _openCount;
     /* The partitions file descriptor */
     int _fileDescriptor;
+
+    control_block_t _controlBlock;
 };
 
 #endif

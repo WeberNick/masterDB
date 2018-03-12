@@ -52,6 +52,16 @@ struct seg_t
 };
 typedef std::vector<seg_t> seg_vt;
 
+struct control_block_t
+{
+    size_t  _pageSize;
+    bool    _trace;
+
+
+    const size_t    pageSize(){ return _pageSize; }
+    const bool      trace(){ return _trace; }
+};
+
 enum class PageStatus {
     kNoType = -1,
     kBUCKET0 = 0,

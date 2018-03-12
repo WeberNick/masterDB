@@ -1,8 +1,8 @@
 #include "buf_mngr.hh"
 
-BufferManager::BufferManager(const size_t aNoFrames, const size_t aFrameSize) :
+BufferManager::BufferManager(const size_t aNoFrames, const control_block_t& aControlBlock) :
 	_noFrames(aNoFrames),
-	_frameSize(aFrameSize),
+	_frameSize(C_PAGE_SIZE),
 	_bufferHash(nullptr),
 	_bufferpool(nullptr),
 	_freeFrameIndexes(nullptr),
@@ -13,10 +13,10 @@ BufferManager::BufferManager(const size_t aNoFrames, const size_t aFrameSize) :
 	_LRUSem(0,10),//todo
 	_freeAccCbList(nullptr),
 	_freeAccCbSem(0,10),//todo
-	_noFreeAccCb(0)
+	_noFreeAccCb(0),
+    _controlBlock(aControlBlock)
 {
-	const size_t lHashTableSize = 0; 
-	_bufferHash = new BufferHashTable(lHashTableSize);
+	_bufferHash = new BufferHashTable(_noFrames);
 	_bufferpool = new byte*[_noFrames];
 	for(size_t i; i < _noFrames; ++i)
 	{

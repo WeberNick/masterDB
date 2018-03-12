@@ -31,8 +31,7 @@ int main(const int argc, const char *argv[]) {
         return 0;
     }
 
-    Constants::create(lArgs.trace());
-    Constants::getInstance();
+    control_block_t lCB = {lArgs.trace()};
 
     const std::string C_PATH = lArgs.path();
     const uint C_PAGE_SIZE = lArgs.pageSize();
