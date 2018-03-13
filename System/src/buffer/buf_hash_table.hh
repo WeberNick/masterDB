@@ -23,47 +23,48 @@ class BufferHashTable
         {
             public:
                 explicit HashBucket() :
-                    _bucketMutex(),
-                    _firstBufCb(nullptr)
+                    _bucketMtx(),
+                    _firstBCB(nullptr)
                 {}
                 HashBucket(const HashBucket&) = delete;
-                HashBucket &operator=(const HashBucket&) = delete;
+                HashBucket(HashBucket&&) = delete;
+                HashBucket& operator=(const HashBucket&) = delete;
+                HashBucket& operator=(HashBucket&&) = delete;
                 ~HashBucket(){}
 
             public:
+                inline sMtx&    getMtx(){ return _bucketMtx; }
+                inline BCB*     getBCB(){ return _firstBCB; }
+                inline void     setBCB(BCB* aBCB){ _firstBCB = aBCB; }
+
+            private:
                 //each bucket is protected by a mutex while being used
-                sMtx    _bucketMutex;     
+                sMtx    _bucketMtx;     
                 //pointer to first control block
-                BCB*    _firstBufCb;    
+                BCB*    _firstBCB;    
         };
 
 
 	public:
 		explicit BufferHashTable(const size_t aHashTableSize);
 		BufferHashTable(const BufferHashTable&) = delete;
-        BufferHashTable &operator=(const BufferHashTable&) = delete;
+        BufferHashTable(BufferHashTable&&) = delete;
+        BufferHashTable& operator=(const BufferHashTable&) = delete;
+        BufferHashTable& operator=(BufferHashTable&&) = delete;
         ~BufferHashTable();
 
     public:
-        inline sMtx&    getBucketMutex(const size_t aHash){ return _hashTable[aHash]._bucketMutex; }
-        inline BCB*     getBucketCb(const size_t aHash){ return _hashTable[aHash]._firstBufCb; }
-
-
+        inline size_t   getTableSize(){ return _size; }
+        inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
+        inline BCB*     getBucketBCB(const size_t aHash){ return _hashTable[aHash].getBCB(); }
+        inline void     setBucketBCB(const size_t aHash, BCB* aBCB){ _hashTable[aHash].setBCB(aBCB); }
 
 	public:
 		size_t hash(const pid aPageID);
-
 
 	private:
         //the size of the hash table
 		size_t          _size;      		
         //the hash table maintaining the control blocks
         HashBucket*     _hashTable; 
-        
-        //pointer to first element in the list of free buffer control blocks
-        BCB*            _freeCbList; 
-        //Semaphore protecting the list of free buffer control blocks
-        sMtx            _freeCbMutex; 
-        //number of free buffer control blocks
-        uint            _noFreeCbs; 
 };

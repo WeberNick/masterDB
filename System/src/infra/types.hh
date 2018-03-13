@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <vector>
 #include <string>
 #include <mutex>
@@ -24,29 +25,31 @@ typedef std::vector<uint32_t> uint32_vt;
 typedef std::shared_mutex sMtx;
 typedef std::mutex mtx;
 
+constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
+
 struct control_block_t
 {
     std::string     _masterPartition;
     size_t          _pageSize;
     bool            _trace;
 
-    const std::string   mstrPart() const { return _masterPartition; }
-    const size_t        pageSize() const { return _pageSize; }
-    const bool          trace() const { return _trace; }
+    std::string   mstrPart() const { return _masterPartition; }
+    size_t        pageSize() const { return _pageSize; }
+    bool          trace() const { return _trace; }
 };
 
 
 struct page_id_t
 {
-    uint _fileID;
-    uint _pageID;
+    uint8_t _fileID;
+    uint32_t _pageNo; //correct? 
 
-    const uint fileID(){ return _fileID; }
-    const uint pageID(){ return _pageID; }
+    uint8_t fileID() const { return _fileID; }
+    uint32_t pageNo() const { return _pageNo; }
 
     bool operator==(const page_id_t& aOther) 
     {
-        return (_fileID == aOther._fileID && _pageID == aOther._pageID);
+        return (_fileID == aOther._fileID && _pageNo == aOther._pageNo);
     }
 };
 typedef page_id_t pid;

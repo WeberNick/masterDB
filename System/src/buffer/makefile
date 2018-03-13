@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++17
+CXXFLAGS = -Wall -std=c++17
 
 CC = g++
 
@@ -6,6 +6,14 @@ INCL = -I../.. -I..
 
 HDR = \
 	../infra/types.hh \
+	\
+
+BUF_MNGR_HDR = \
+	buf_hash_table.hh \
+	buf_cntrl_block.hh \
+	\
+	../partition/partition_manager.hh \
+	../partition/partition_base.hh \
 	\
 
 OBJ = \
@@ -17,7 +25,7 @@ OBJ = \
 
 all : $(OBJ)
 
-buf_mngr.o : buf_mngr.cc buf_mngr.hh $(HDR) buf_hash_table.hh buf_cntrl_block.hh
+buf_mngr.o : buf_mngr.cc buf_mngr.hh $(HDR) $(BUF_MNGR_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) buf_mngr.cc
 
 buf_hash_table.o : buf_hash_table.cc buf_hash_table.hh $(HDR) buf_cntrl_block.hh
