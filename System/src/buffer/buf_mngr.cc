@@ -167,26 +167,23 @@ size_t BufferManager::getFrame()
         {//is this enough to work exclusively on hash chain?? maybe need to lock the BCB in chain??
             do
             {
-                if(lHashChainEntry->getMtx().try_lock()) //exclusively lock chain entry
-                {//chain entry also exclusively locked
-                    if(lHashChainEntry->getFixCount() == 0) //frame, represented by randomly chosen BCB, is not fixed
-                    {//victim for replacement found
-                        const size_t lVictimIndex = lHashChainEntry->getFrameIndex(); //frame index of victim
-                        if(lHashChainEntry->getModified()) //is the page in the frame modified?
-                        {//write back to disk
-                            pid lPageID = lHashChainEntry->getPID(); //page id of victim frame
-                            byte* lFramePtr = _bufferpool[lVictimIndex]; //pointer to the victim frame
-                            PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); //get partition which contains the page to replace
-                            lPart->open(); //open partition
-                            lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); //write page back to disk
-                            lPart->close(); //close partition
-                        }//else page is not modified and can be replaced
-                        _bufferHash->getBucketBCB(lRandomIndex)->getMtx().unlock(); //release lock on BCB (hash chain entry)
-                        _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release lock on hash bucket
-                        return lVictimIndex; //return frame index
-                    }//the chosen chain entry/frame is fixed, continue
-                    lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
-                }//hash chain entry is locked, go to next entry
+                /* if BCB/frame is not fixed, try to get exclusive lock */
+                if(lHashChainEntry->getFixCount() == 0 && lHashChainEntry->getMtx().try_lock())
+                {//victim for replacement found
+                    const size_t lVictimIndex = lHashChainEntry->getFrameIndex(); //frame index of victim
+                    if(lHashChainEntry->getModified()) //is the page in the frame modified?
+                    {//write back to disk
+                        pid lPageID = lHashChainEntry->getPID(); //page id of victim frame
+                        byte* lFramePtr = _bufferpool[lVictimIndex]; //pointer to the victim frame
+                        PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); //get partition which contains the page to replace
+                        lPart->open(); //open partition
+                        lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); //write page back to disk
+                        lPart->close(); //close partition
+                    }//else page is not modified and can be replaced
+                    _lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
+                    _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release lock on hash bucket
+                    return lVictimIndex; //return frame index
+                }//frame is fixed or hash chain entry is locked, go to next entry
                 lHashChainEntry = lHashChainEntry->getNextInChain(); //follow chain, get next entry
             }while(lHashChainEntry != nullptr);
             //no victim found, next in chain is nullptr, continue
