@@ -10,20 +10,12 @@ BufferManager::BufferManager(const size_t aNoFrames, const control_block_t& aCon
     _controlBlock(aControlBlock)
 {
 	_bufferHash = new BufferHashTable(_noFrames);
-	_bufferpool = new byte*[_noFrames];
-	for(size_t i; i < _noFrames; ++i)
-	{
-		_bufferpool[i] = new byte[_frameSize];
-	}
+	_bufferpool = new byte[_noFrames * _frameSize];
 }
 
 BufferManager::~BufferManager()
 {
     delete _bufferHash;
-    for(size_t i = 0; i < _noFrames; ++i)
-    {
-        delete[] _bufferpool[i];
-    }
     delete[] _bufferpool;
 }
 
@@ -81,7 +73,8 @@ bool BufferManager::fix(const pid aPageID, const LOCK_MODE aMode, byte*& aPagePo
         lNextBCB->incrFixCount(); //increase fix count on page
     }
     //pointer to buffer frame it set 
-    aPagePointer = _bufferpool[lNextBCB->getFrameIndex()];
+    aPagePointer = getFramePtr(lNextBCB->getFrameIndex());
+
     return true; //method always succeeds, todo error checking
 }
 
@@ -123,7 +116,7 @@ BCB* BufferManager::locatePage(const pid aPageID, const size_t aHashIndex)
     _bufferHash->getBucketMtx(lHashIndex).unlock(); //unlock hash bucket
     size_t lFrameNo = getFrame(); //get a free frame
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
-    byte* lFramePtr = _bufferpool[lFrameNo]; //get pointer to the free frame in the bufferpool
+    byte* lFramePtr = getFramePtr(lFrameNo); //get pointer to the free frame in the bufferpool
     lPart->open(); //open partition
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
     lPart->close(); //close partition
@@ -174,13 +167,13 @@ size_t BufferManager::getFrame()
                     if(lHashChainEntry->getModified()) //is the page in the frame modified?
                     {//write back to disk
                         pid lPageID = lHashChainEntry->getPID(); //page id of victim frame
-                        byte* lFramePtr = _bufferpool[lVictimIndex]; //pointer to the victim frame
+                        byte* lFramePtr = getFramePtr(lVictimIndex); //pointer to the victim frame
                         PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); //get partition which contains the page to replace
                         lPart->open(); //open partition
                         lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); //write page back to disk
                         lPart->close(); //close partition
                     }//else page is not modified and can be replaced
-                    _lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
+                    lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
                     _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release lock on hash bucket
                     return lVictimIndex; //return frame index
                 }//frame is fixed or hash chain entry is locked, go to next entry
