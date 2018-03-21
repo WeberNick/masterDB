@@ -110,13 +110,13 @@ class BufferManager
 
     public:
         /* request access to a page and fix it */
-        int fix(const pid aPageID, const LOCK_MODE aMode, BCB*& aBufferControlBlockPtr);
-        int emptyfix(const pid aPageID, const LOCK_MODE aMode, BCB*& aBufferControlBlockPtr);
+        BCB* fix(const pid aPageID);
+        BCB* emptyfix(const pid aPageID);
         /* unfix a page */
-        int unfix(BCB*& aBufferControlBlock);
+        void unfix(BCB*& aBufferControlBlock);
         /* write page to disk */
-        int flush(BCB*& aBufferControlBlock);
-        int flushAll();
+        void  flush(BCB*& aBufferControlBlock);
+        void flushAll();
 
     public:
         inline size_t   getNoFrames(){ return _noFrames; }
