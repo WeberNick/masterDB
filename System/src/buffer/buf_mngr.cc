@@ -20,17 +20,22 @@ BufferManager::~BufferManager()
 }
 
 //the following is not tested at all, expect major bugs
-bool BufferManager::fix(const pid aPageID, const LOCK_MODE aMode, byte*& aPagePointer)
+int BufferManager::fix(const pid aPageID, const LOCK_MODE aMode, BCB*& aBufferControlBlockPtr)
 {
-    aPagePointer = nullptr;
-    //retry: ??
-    size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
-    _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //protect by exclusive semaphor (?)
+    aBufferControlBlockPtr = nullptr;
+    bool lPageNotFound = true;
+    const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
+    _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock exclusively 
     BCB* lNextBCB = _bufferHash->getBucketBCB(lHashIndex); //initialize search in hash chain
     while(lNextBCB != nullptr) //as long as there are allocated CBs
     {
         if(lNextBCB->getPID() == aPageID) //is there a CB for the requested page
         {
+            //page found already? 
+            //lPageFound = false;
+            //aBufferControlBlockPtr = lNextBCB;
+
+            /* ========================================================================================= */
             if(lNextBCB->getMtx().try_lock_shared()) //is x-mutex on page?
             {
                 if(lNextBCB->getFrameIndex() == SIZE_T_MAX) //page is being brought in (SIZE_T_MAX defined in types.hh)
@@ -43,18 +48,21 @@ bool BufferManager::fix(const pid aPageID, const LOCK_MODE aMode, byte*& aPagePo
             {
                 lNextBCB->getMtx().unlock_shared(); //correct????
             }
-            //goto p_found ??
-        }
+            /* ========================================================================================= */
+       }
         else
         {
             lNextBCB = lNextBCB->getNextInChain(); //follow hash chain
         }
     }
-    /* page not in bufferpool. before it can be read, a free frame in the 
-     * bufferpool must be found or a page must be replaced */
-    lNextBCB = locatePage(aPageID, lHashIndex); //get page in bufferpool
+
+    if(lPageNotFound)
+    {
+        /* page not in bufferpool. before it can be read, a free frame in the 
+        * bufferpool must be found or a page must be replaced */
+        lNextBCB = locatePage(aPageID, lHashIndex); //get page in bufferpool
+    }
     /* Now the requested page is in the bufferpool and the CB for it pointed to by lNextBCB */
-    //p_found: ??
     if(aMode != kFREE) //caller wants a lock to be set
     {
         if(aMode == kSHARED) //caller wants a shared lock
@@ -73,9 +81,33 @@ bool BufferManager::fix(const pid aPageID, const LOCK_MODE aMode, byte*& aPagePo
         lNextBCB->incrFixCount(); //increase fix count on page
     }
     //pointer to buffer frame it set 
-    aPagePointer = getFramePtr(lNextBCB->getFrameIndex());
+    aBufferControlBlockPtr = lNextBCB;
+    return 0; //method always succeeds, todo error checking
+}
 
-    return true; //method always succeeds, todo error checking
+int BufferManager::emptyfix(const pid aPageID, const LOCK_MODE aMode, BCB*& aBufferControlBlockPtr)
+{
+    aBufferControlBlockPtr = nullptr;
+
+    return 0;
+}
+
+int BufferManager::unfix(BCB*& aBufferControlBlockPtr)
+{
+    aBufferControlBlockPtr->decrFixCount();
+    aBufferControlBlockPtr = nullptr;
+    return 0;
+}
+
+int BufferManager::flush(BCB*& aBufferControlBlockPtr)
+{
+    
+    return 0;
+}
+
+int BufferManager::flushAll()
+{
+    return 0;
 }
 
 
