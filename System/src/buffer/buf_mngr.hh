@@ -121,7 +121,11 @@ class BufferManager
     public:
         inline size_t   getNoFrames(){ return _noFrames; }
         inline size_t   getFrameSize(){ return _frameSize; }
-        inline byte*    getFramePtr(const size_t i){ return (i < _noFrames) ? (_bufferpool + (i * _frameSize)) : nullptr; }
+        inline byte*    getFramePtr(BCB* aBCB)
+        {
+            const size_t lFrameIndex = aBCB->getFrameIndex();   
+            return (lFrameIndex < _noFrames) ? (_bufferpool + (lFrameIndex * _frameSize)) : nullptr;
+        }
 
     private:
         BCB*                locatePage(const pid aPageID, const size_t aHashIndex);
