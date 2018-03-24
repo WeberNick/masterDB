@@ -78,8 +78,7 @@ void BufferManager::flush(BCB*& aBufferControlBlockPtr)
     if(aBufferControlBlockPtr->getModified())
     {
         const pid lPageID = aBufferControlBlockPtr->getPID(); //page id of frame
-        const size_t lFrameIndex = aBufferControlBlockPtr->getFrameIndex(); //frame index
-        byte* lFramePtr = getFramePtr(lFrameIndex); //pointer to the frame
+        byte* lFramePtr = getFramePtr(aBufferControlBlockPtr); //pointer to the frame
         PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); //get partition which contains the page to write
         lPart->open(); //open partition
         lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); //write page back to disk
@@ -122,12 +121,13 @@ BCB* BufferManager::locatePage(const pid aPageID, const size_t aHashIndex)
     }
     _bufferHash->getBucketMtx(lHashIndex).unlock(); //unlock hash bucket
     const size_t lFrameNo = getFrame(); //get a free frame
+    lFBCB->setFrameIndex(lFrameNo);     
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
-    byte* lFramePtr = getFramePtr(lFrameNo); //get pointer to the free frame in the bufferpool
+    byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
     lPart->open(); //open partition
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
     lPart->close(); //close partition
-    lFBCB->setFrameIndex(lFrameNo); //if prev. calls were successful, page is in this frame
+    //if prev. calls were successful, page is in this frame
     return lFBCB;
     /* note that the mutex on the free BCB is kept; */
 }
