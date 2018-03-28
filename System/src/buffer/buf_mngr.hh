@@ -37,7 +37,7 @@ class BufferManager
                 }
                 FreeFrames(const FreeFrames&) = delete;
                 FreeFrames(FreeFrames&&) = delete;
-                FreeFrames& operator=(const BufferManager&) = delete;
+                FreeFrames& operator=(const FreeFrames&) = delete;
                 FreeFrames& operator=(FreeFrames&&) = delete;
                 ~FreeFrames()
                 { delete[] _freeFrameList; }
@@ -77,7 +77,7 @@ class BufferManager
                 }
                 FreeBCBs(const FreeBCBs&) = delete;
                 FreeBCBs(FreeBCBs&&) = delete;
-                FreeBCBs& operator=(const BufferManager&) = delete;
+                FreeBCBs& operator=(const FreeBCBs&) = delete;
                 FreeBCBs& operator=(FreeBCBs&&) = delete;
                 ~FreeBCBs()
                 { /*TODO*/}
