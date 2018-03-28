@@ -51,7 +51,7 @@ class DatabaseInstanceManager
 	private:
 		template<typename T_TupleType>
 		void load(std::vector<T_TupleType>& aTuples, const uint aIndex);
-		template<typename T_TupleType>
+		template<typename T_TupleType> //probably of no use, physical tuples allways up to date. BufMngr.flushall should be enough
 		void store(std::vector<T_TupleType>& aTuples, const uint aIndex);
 		void loadPartitionManager(); //called in boot, loads the PartMngr from the master part
 		void loadSegmentManager(); //called in boot, loads the SegMngr from the master part
@@ -68,19 +68,21 @@ template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
 	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(_masterPartition, aIndex);
-    byte* lPage = new byte[_masterPartition.getPageSize()];
+    BCB* lBCB;
+    byte* lPage;
     InterpreterSP lInterpreter;
 
     for (uint i = 0; i < lSegments->getNoPages(); ++i)
     {
-   	  lSegments->readPage(lPage, aIndex);
-   	  lInterpreter.attach(lPage);
+      lBCB = lSegments->getPageShared(i);
+      lPage = lSegments->getFramePtr(lBCB);
+   	  lInterpreter.attach(lPage);  
    	  for (uint j = 0; j < lInterpreter.noRecords(); ++j)
    	  {
         aTuples.push_back((*((T_TupleType*)lInterpreter.getRecord(j))));
    	  }
+        lSegments->unfix(lBCB);
     }
-    delete[] lPage;
     _segMngr.deleteSegment(lSegments);
 }
 

@@ -81,6 +81,43 @@ int PartitionBase::close()
 
 int PartitionBase::allocPage()
 {
+	/*
+	byte* lPagePointer;
+	BufferManager lBufMan;
+	BCB* lBCB;
+	pid_t lPID;
+	InterpreterFSIP fsip;
+	uint lIndexOfFSIP = 0;
+	int lAllocatedPageIndex;
+	do
+	{ //does lock exclusive although not always needed.
+		lPID = {getID(),lIndexOfFSIP};
+		lBCB = lBufMan.fix(lPID);
+		lPagePointer = lBufMan.getFramePrt(lBCB);
+	//	readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
+		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+		if(lAllocatedPageIndex == -1)
+		{
+			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
+		} 
+		else
+		{
+			lBCB->setModified(true);
+			//writePage(lPagePointer, lIndexOfFSIP, _pageSize);
+		} 
+		lBCB->getMtx().unlock();
+		lBufMan.unfix(lBCB);
+		if(lIndexOfFSIP >= _sizeInPages) return -1;						//Next offset is bigger than the partition
+	}
+	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
+
+	return lAllocatedPageIndex;	//return offset to free block
+*/
+	return allocPageForce();
+}
+
+int PartitionBase::allocPageForce()
+{
 	byte* lPagePointer = new byte[_pageSize];
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);

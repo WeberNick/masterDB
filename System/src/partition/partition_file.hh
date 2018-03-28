@@ -14,7 +14,7 @@
 #include <string>
 #include <cmath>
 
-class PartitionFile : public PartitionBase {
+class PartitionFile : public PartitionBase  {
   private:
     friend class DatabaseInstanceManager;
     friend class PartitionManager;

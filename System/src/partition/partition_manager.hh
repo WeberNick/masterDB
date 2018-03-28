@@ -20,6 +20,9 @@
 #include "partition_base.hh"
 #include "partition_file.hh"
 #include "partition_raw.hh"
+//#include "segment/segment_manager.hh"
+//#include "buffer/buf_mngr.hh"
+//#include "segment/segment_fsm_sp.hh"
 
 #include <map>
 #include <string>
@@ -56,13 +59,17 @@ class PartitionManager
         inline size_t           getNoPartitions(){ return _partitions.size(); }
         inline PartitionBase*   getPartition(const uint8_t aID){ return _partitions.at(aID); }
 		inline const part_vt&   getPartitionTuples(){ return _partitionTuples; }
-  
+  private:
+  void  createPartitionSub(part_t aParT);
+
     private:
         uint _counterPartitionID;
         std::map<uint, PartitionBase*> _partitions;
         std::map<uint16_t, part_t*> _partitionsByID;
 		std::map<std::string, part_t*> _partitionsByName;
         part_vt _partitionTuples;
+
+        std::string _masterSegPart = "partitionMaster";
 };
 
 #endif

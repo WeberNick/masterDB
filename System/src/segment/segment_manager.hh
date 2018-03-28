@@ -19,6 +19,8 @@
 #include "segment_fsm.hh"
 #include "segment_fsm_sp.hh"
 #include "partition/partition_manager.hh"
+#include "buffer/buf_mngr.hh"
+#include "buffer/buf_cntrl_block.hh"
 
 #include <map>
 
@@ -44,7 +46,6 @@ class SegmentManager
 
 	public:
 		void load(seg_vt& aTuples);
-		void store(PartitionFile& aMasterPartition, const uint aSegmentIndex);
 
 	public:
 		SegmentFSM* createNewSegmentFSM(PartitionBase& aPartition, std::string aName); // create and add new segment (persistent), return it
@@ -55,18 +56,15 @@ class SegmentManager
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string aName);
 		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
-		int storeSegmentManager(PartitionBase& aPartition);	 // serialization
-		int loadSegmentManager(PartitionBase& aPartition);    // deserialization
 
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }	
 		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }			
 		SegmentBase* getSegment(const uint16_t aSegmentID);
-
+		SegmentBase* getSegment(const std::string aSegmentName);
 
 	private:
 		void storeSegments();
-		void loadSegments(uint32_vt& aSegmentPages, PartitionBase& aPartition);
 		bool deleteTypeChecker  ( byte* aRecord,uint16_t aID,uint8_t aType);
 		void createSegmentSub (seg_t aSegT);
 
@@ -88,6 +86,8 @@ class SegmentManager
 		uint32_vt _indexPages;		
 		/* Number of Pages that can be managed on one SegmentManager Page */
 		uint32_t _maxSegmentsPerPage;
+
+		BufferManager& _BufMngr;
 
 		std::string _masterSegSegs = "segmentMaster"; //name of Master segment containing all segments
 };

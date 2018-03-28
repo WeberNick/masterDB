@@ -101,7 +101,7 @@ class BufferManager
         };
 
     public:
-		explicit BufferManager(const size_t aNoFrames, const control_block_t& aControlBlock);
+        explicit BufferManager(const size_t aNoFrames, const control_block_t& aControlBlock);
         BufferManager(const BufferManager&) = delete;
         BufferManager(BufferManager&&) = delete;
         BufferManager& operator=(const BufferManager&) = delete;
@@ -109,6 +109,10 @@ class BufferManager
         ~BufferManager();
 
     public:
+        static BufferManager& getInstance(){
+            static BufferManager lBufferManagerInstance = BufferManager(10,control_block_t {"a",10,0});
+            return lBufferManagerInstance;
+        }
         /* request access to a page and fix it */
         BCB* fix(const pid aPageID);
         BCB* emptyfix(const pid aPageID);

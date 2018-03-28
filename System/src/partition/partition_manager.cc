@@ -31,8 +31,13 @@ void PartitionManager::load(part_vt& aTuples)
 
 PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const control_block_t& aControlBlock)
 {
+    int pType = 1;
     PartitionFile* lPartition = new PartitionFile(aPath, aName, aGrowthIndicator, _counterPartitionID++, aControlBlock);
     _partitions[lPartition->getID()] = lPartition;
+
+    part_t lp = {lPartition->getID(),aPath,aName,pType,aGrowthIndicator};
+    createPartitionSub(lp);
+
     return (PartitionFile*)_partitions.at(lPartition->getID());
 }
 
@@ -40,5 +45,22 @@ PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPa
 {
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, aControlBlock);
     _partitions[lPartition->getID()] = lPartition;
+
+    int pType = 0;
+
+    part_t lp = {lPartition->getID(),aPath,aName,pType,0};
+    createPartitionSub(lp);
+
     return (PartitionRaw*)_partitions.at(lPartition->getID());
+}
+
+void PartitionManager::createPartitionSub(part_t aParT){
+   /* SegmentManager& lSegMan = SegmentManager::getInstance();
+    _partitionTuples.push_back(aParT);
+    _partitionsByID[aParT._pID]=&_partitionTuples[_partitionTuples.size()-1];
+    _partitionsByName[aParT._pName]=&_partitionTuples[_partitionTuples.size()-1];
+
+
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) lSegMan.getSegment(_masterSegPart);
+    lSeg->insertTuple((byte*) &aParT,sizeof(part_t));*/
 }

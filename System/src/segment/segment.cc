@@ -10,8 +10,8 @@
 
 #include "segment.hh"
 
-Segment::Segment(const uint16_t aSegID, PartitionBase &aPartition) :
-    SegmentBase(aSegID, aPartition),
+Segment::Segment(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan) :
+    SegmentBase(aSegID, aPartition, aBufMan),
     _maxSize(0)
 {
 	if (_partition.open() == -1) { /* error handling */ }
@@ -19,8 +19,8 @@ Segment::Segment(const uint16_t aSegID, PartitionBase &aPartition) :
 	if (_partition.close() == -1) { /* error handling */ }
 }
 
-Segment::Segment(PartitionBase &aPartition) :
-    SegmentBase(aPartition),
+Segment::Segment(PartitionBase &aPartition, BufferManager& aBufMan) :
+    SegmentBase(aPartition, aBufMan),
     _maxSize(0)
 {}
 

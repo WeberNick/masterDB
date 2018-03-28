@@ -21,8 +21,8 @@
 class Segment : public SegmentBase {
   private:
     friend class SegmentManager;
-    explicit Segment(const uint16_t aSegID, PartitionBase &aPartition);
-    explicit Segment(PartitionBase &aPartition);
+    explicit Segment(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan);
+    explicit Segment(PartitionBase &aPartition, BufferManager& aBufMan);
     Segment(const Segment &aSegment) = delete;
     Segment &operator=(const Segment &aSegment) = delete;
     ~Segment();

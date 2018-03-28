@@ -13,6 +13,8 @@
 #include "infra/error.hh"
 #include "infra/header_structs.hh"
 #include "interpreter/interpreter_fsip.hh"
+//#include "buffer/buf_mngr.hh"
+//#include "buffer/buf_cntrl_block.hh"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -70,6 +72,9 @@ class PartitionBase {
      *  @return an index to the allocated page, -1 on failure
      */
     int allocPage();
+
+    //allocPage now makes use of the buffer. This is the old version not using the buffer.
+    int allocPageForce();
 
     /**
      *  @brief  removes a page

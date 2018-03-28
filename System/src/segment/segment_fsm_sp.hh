@@ -14,6 +14,8 @@
 #include "segment_base.hh"
 #include "segment_fsm.hh"
 #include "interpreter/interpreter_sp.hh"
+#include "buffer/buf_cntrl_block.hh"
+#include "buffer/buf_mngr.hh"
 #include <vector>
 #include <cstring>
 
@@ -21,8 +23,8 @@ class SegmentFSM_SP : public SegmentFSM
 {
   private:
     friend class SegmentManager;
-    explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase &aPartition);
-    explicit SegmentFSM_SP(PartitionBase &aPartition);
+    explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan);
+    explicit SegmentFSM_SP(PartitionBase &aPartition, BufferManager& aBufMan);
     SegmentFSM_SP(const SegmentFSM_SP &aSegment) = delete;
     SegmentFSM_SP &operator=(const SegmentFSM_SP &aSegment) = delete;
     ~SegmentFSM_SP();
@@ -32,10 +34,11 @@ class SegmentFSM_SP : public SegmentFSM
     int insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
     int getMaxFreeBytes() { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
 
-  public:
+ /* public:
     int storeSegment();                         // serialization
     int loadSegment(const uint32_t aPageIndex); // deserialization
-
+    to my knowledge no need for special methods here. (Jonas)
+*/
   private:
     //todo sp specific
 };
