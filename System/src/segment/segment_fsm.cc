@@ -9,16 +9,20 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, BufferM
     int lNoPagesToManage = (_partition.getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
     int lSegmentIndex = _partition.allocPage();
     _indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
+    //no need to init indexPage as pageHeader is written on store
     int lFSMIndex = _partition.allocPage();
     _fsmPages.push_back((lFSMIndex > 0) ? (uint32_t)lFSMIndex : 0);
+    _partition.close();
 
-    byte *lPagePointer = new byte[_partition.getPageSize()];
+    //initFSM
+    pid lPID={_partition.getID(),lFSMIndex};
+    BCB* lBCB = _BufMngr.emptyfix(lPID);
+    byte *lPagePointer = _BufMngr.getFramePtr(lBCB);
     InterpreterFSM fsmp;
     fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
-    _partition.writePage(lPagePointer, lFSMIndex, _partition.getPageSize());
+    lBCB->setModified(true);
+    lBCB->getMtx().unlock();
     fsmp.detach();
-    delete[] lPagePointer;
-    _partition.close();
 }
 
 SegmentFSM::SegmentFSM(PartitionBase &aPartition, BufferManager& aBufMan) :

@@ -52,6 +52,7 @@ BCB* BufferManager::fix(const pid aPageID)
         /* page not in bufferpool. before it can be read, a free frame in the 
         * bufferpool must be found or a page must be replaced */
         lNextBCB = locatePage(aPageID, lHashIndex); //get page in bufferpool
+        readPageIn(lNextBCB,aPageID);
     }
     /* Now the requested page is in the bufferpool and the CB for it is pointed to by lNextBCB */
     lNextBCB->incrFixCount(); //increase fix count on page
@@ -61,9 +62,12 @@ BCB* BufferManager::fix(const pid aPageID)
 BCB* BufferManager::emptyfix(const pid aPageID)
 {
     BCB* lNextBCB = nullptr;
-    //todo..
+    const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
+    lNextBCB = locatePage(aPageID,lHashIndex);
+    initNewPage(lNextBCB,aPageID,1);
     return lNextBCB;
 }
+  
 
 //BCB has to be locked beforehand
 void BufferManager::unfix(BCB*& aBufferControlBlockPtr)
@@ -122,15 +126,37 @@ BCB* BufferManager::locatePage(const pid aPageID, const size_t aHashIndex)
     _bufferHash->getBucketMtx(lHashIndex).unlock(); //unlock hash bucket
     const size_t lFrameNo = getFrame(); //get a free frame
     lFBCB->setFrameIndex(lFrameNo);     
+  
+   /* PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
+    byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
+    lPart->open(); //open partition
+    lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
+    lPart->close(); //close partition*/
+    //moved to own method to be called afterwards
+   
+   
+    //if prev. calls were successful, page is in this frame
+    return lFBCB;
+    /* note that the mutex on the free BCB is kept; */
+}
+
+void BufferManager::readPageIn(BCB* lFBCB,pid aPageID){
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
     byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
     lPart->open(); //open partition
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
     lPart->close(); //close partition
-    //if prev. calls were successful, page is in this frame
-    return lFBCB;
-    /* note that the mutex on the free BCB is kept; */
 }
+
+void BufferManager::initNewPage(BCB* aFBCB,pid aPageID,uint64_t aLSN){
+    byte* lFramePtr = getFramePtr(aFBCB);
+    //LSN,PageIndex,PartitionID,Version, unused,unused
+    basic_header_t lBH = {aLSN,aPageID.pageNo(),aPageID.fileID(),1,0,0};
+    lFramePtr+= getFrameSize() - sizeof(basic_header_t);
+    *((basic_header_t*) lFramePtr) = lBH;
+    aFBCB->setModified(true);
+}
+
 
 size_t BufferManager::getFrame()
 {

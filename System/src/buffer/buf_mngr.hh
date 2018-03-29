@@ -133,6 +133,8 @@ class BufferManager
 
     private:
         BCB*                locatePage(const pid aPageID, const size_t aHashIndex);
+        void                readPageIn(BCB* lFBCB,pid aPageID);
+        void                initNewPage(BCB* aFBCB,pid aPageID,uint64_t aLSN);
         size_t              getFrame();
 
     private:

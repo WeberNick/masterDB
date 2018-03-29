@@ -23,8 +23,8 @@ class SegmentFSM_SP : public SegmentFSM
 {
   private:
     friend class SegmentManager;
-    explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan);
-    explicit SegmentFSM_SP(PartitionBase &aPartition, BufferManager& aBufMan);
+    explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, BufferManager& aBufMan);
+    explicit SegmentFSM_SP(PartitionBase& aPartition, BufferManager& aBufMan);
     SegmentFSM_SP(const SegmentFSM_SP &aSegment) = delete;
     SegmentFSM_SP &operator=(const SegmentFSM_SP &aSegment) = delete;
     ~SegmentFSM_SP();

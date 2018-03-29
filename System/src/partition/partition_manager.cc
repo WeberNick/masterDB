@@ -64,3 +64,16 @@ void PartitionManager::createPartitionSub(part_t aParT){
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) lSegMan.getSegment(_masterSegPart);
     lSeg->insertTuple((byte*) &aParT,sizeof(part_t));*/
 }
+
+PartitionBase* PartitionManager::getPartition(const uint8_t aID)
+{
+    //if the object has not been created before
+    if (_partitions.find(aID)==_partitions.end()) {
+        //your screwed.
+    }
+    return _partitions.at(aID);
+}
+
+PartitionBase* PartitionManager::getPartition(const std::string aName){
+    return getPartition(_partitionsByName[aName]->_pID);
+}

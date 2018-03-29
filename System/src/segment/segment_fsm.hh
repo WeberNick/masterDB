@@ -21,8 +21,8 @@ class SegmentFSM : public SegmentBase
 {
   protected:
     friend class SegmentManager;
-    explicit SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan);
-    explicit SegmentFSM(PartitionBase &aPartition, BufferManager& aBufMan);
+    explicit SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, BufferManager& aBufMan);
+    explicit SegmentFSM(PartitionBase& aPartition, BufferManager& aBufMan);
     SegmentFSM(const SegmentFSM &aSegment) = delete;
     SegmentFSM &operator=(const SegmentFSM &aSegment) = delete;
     ~SegmentFSM();

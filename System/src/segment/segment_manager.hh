@@ -51,8 +51,12 @@ class SegmentManager
 		SegmentFSM* createNewSegmentFSM(PartitionBase& aPartition, std::string aName); // create and add new segment (persistent), return it
 		SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition, std::string aName); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();
-                SegmentFSM_SP* loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
-                void deleteSegment(SegmentBase* aSegment);
+         SegmentFSM_SP* loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
+
+		SegmentBase* getSegment(const uint16_t aSegmentID);
+		SegmentBase* getSegment(const std::string aSegmentName);
+
+        void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string aName);
 		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
@@ -60,8 +64,7 @@ class SegmentManager
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }	
 		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }			
-		SegmentBase* getSegment(const uint16_t aSegmentID);
-		SegmentBase* getSegment(const std::string aSegmentName);
+
 
 	private:
 		void storeSegments();

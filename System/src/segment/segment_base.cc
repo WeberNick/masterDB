@@ -11,6 +11,8 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, Buffe
 	int lSegmentIndex = _partition.allocPage();
 	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
 	if (_partition.close() == -1) { /* error handling */ }
+
+  //no need to init pages, will be done in store.
 }
 
 SegmentBase::SegmentBase(PartitionBase& aPartition, BufferManager& aBufMan) : 

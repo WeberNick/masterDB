@@ -33,7 +33,8 @@ void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     }
     // basic_header: LSN, PageIndex, PartitionId, Version, unused, unused
     basic_header_t lBH = {aLSN, aPageIndex, aPID, 1, 0, 0};
-    fsm_header_t lHeader = {aNoPages, 0, lBH};  // ######## why 0 nextSegment?
+    fsm_header_t lHeader = {aNoPages, 0, lBH};  
+    // ######## why 0 nextSegment? 0 is invalid, should be correct this way
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 

@@ -54,10 +54,12 @@ class PartitionManager
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
         PartitionFile* createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const control_block_t& aControlBlock);
         PartitionRaw* createPartitionRawInstance(const std::string aPath, const std::string aName, const control_block_t& aControlBlock);
-  
+        PartitionBase*   getPartition(const uint8_t aID);
+        PartitionBase*   getPartition(const std::string aName);
+
+
     public:
         inline size_t           getNoPartitions(){ return _partitions.size(); }
-        inline PartitionBase*   getPartition(const uint8_t aID){ return _partitions.at(aID); }
 		inline const part_vt&   getPartitionTuples(){ return _partitionTuples; }
   private:
   void  createPartitionSub(part_t aParT);
