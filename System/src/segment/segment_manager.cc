@@ -103,6 +103,8 @@ void SegmentManager::deleteSegment(const std::string aName)
 }
 
 int SegmentManager::deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType){
+    //type=0 if segment, type=1 if partition
+
     //open master Segment by name and load it
     SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_segmentsByName[aMasterName]->_sID);
     byte* lPage;
@@ -189,6 +191,29 @@ void SegmentManager::storeSegments()
         segmentsItr.second->storeSegment();   
     }
 }
+
+int SegmentManager::createMasterSegments(control_block_t& aControlBlock,PartitionBase* aPartition){
+    if(_installed){
+        printErr("already installed");
+        return -1;
+    }
+   //create 2 Master Segments
+   //MasterSegParts
+     SegmentFSM_SP* lPSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, _BufMngr);
+    _segments[lPSeg->getID()] = lPSeg;
+    seg_t lPSegT ={aPartition->getID(), lPSeg->getID(),	aControlBlock._masterSegmentPartitions,2,  lPSeg->getIndexPages().at(0)};
+    //MasterSegSegs
+      SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, _BufMngr);
+    _segments[lSSeg->getID()] = lSSeg;
+    seg_t lSSegT ={aPartition->getID(), lSSeg->getID(),	aControlBlock._masterSegmentSegments,2,  lSSeg->getIndexPages().at(0)};
+
+    //store them into Segment Master
+    createSegmentSub(lPSegT);
+    createSegmentSub(lSSegT);
+    return 1;
+}
+
+
 //old code
 /*
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)

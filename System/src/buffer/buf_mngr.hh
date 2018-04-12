@@ -110,7 +110,7 @@ class BufferManager
 
     public:
         static BufferManager& getInstance(){
-            static BufferManager lBufferManagerInstance = BufferManager(10,control_block_t {"a",10,0});
+            static BufferManager lBufferManagerInstance = BufferManager(10,control_block_t {"a","b","c",10,0});
             return lBufferManagerInstance;
         }
         /* request access to a page and fix it */

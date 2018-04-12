@@ -15,10 +15,12 @@ DatabaseInstanceManager::~DatabaseInstanceManager()
 {}
 
 
-void DatabaseInstanceManager::install()
+void DatabaseInstanceManager::install(std::string aPath, uint aGrowthIndicator, control_block_t& aControlBlock)
 {
-	//todo
-
+  part_t lMasterPartitionTuple;
+  PartitionBase* lMaster =   _partMngr.createMasterPartition(aPath,aGrowthIndicator,aControlBlock,lMasterPartitionTuple);
+  _segMngr.createMasterSegments(aControlBlock,lMaster);
+  _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
 }
 
 void DatabaseInstanceManager::boot()
@@ -30,15 +32,18 @@ void DatabaseInstanceManager::boot()
 
   _partMngr.load(aPartitionTuples);
   _segMngr.load(aSegmentTuples);
+
+  //set installed
+  _partMngr.setInstalled();
+  _segMngr.setInstalled();
+
 }
 
 void DatabaseInstanceManager::shutdown()
 {
-	part_vt aPartitionTuples = _partMngr.getPartitionTuples();
-  seg_vt aSegmentTuples = _segMngr.getSegmentTuples();
-
-  
-
+  //stop transactions
+  //SegMan.storeSegemnts()
+  //BufMan.flushAll()
 
 }
 

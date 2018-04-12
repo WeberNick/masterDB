@@ -6,6 +6,12 @@ PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, con
 	init();
 }
 
+PartitionRaw::PartitionRaw(part_t aTuple, control_block_t& aControlBlock):
+	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock)
+{
+	assignSize(_sizeInPages);
+}
+
 PartitionRaw::~PartitionRaw(){}
 
 

@@ -19,6 +19,7 @@ class PartitionFile : public PartitionBase  {
     friend class DatabaseInstanceManager;
     friend class PartitionManager;
     explicit PartitionFile(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const uint aPartitionID, const control_block_t& aControlBlock);
+    PartitionFile(part_t aTuple,control_block_t& aControlBlock);
     PartitionFile(const PartitionFile&) = delete;
     PartitionFile &operator=(const PartitionFile&) = delete;
     ~PartitionFile();

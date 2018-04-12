@@ -6,6 +6,12 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 {
 	 init();
 }
+PartitionFile::PartitionFile(part_t aTuple, control_block_t& aControlBlock):
+	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock),
+	_growthIndicator(aTuple._pGrowth)
+{
+	assignSize(_sizeInPages);
+}
 
 PartitionFile::~PartitionFile()
 {}

@@ -61,9 +61,14 @@ class SegmentManager
 		void deleteSegment(const std::string aName);
 		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
 
+		int createMasterSegments(control_block_t& aControlBlock,PartitionBase* aPartition);
+
+
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }	
-		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }			
+		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }	
+        inline void          setInstalled() {_installed=true;}
+		
 
 
 	private:
@@ -82,6 +87,8 @@ class SegmentManager
 		std::map<std::string, seg_t*> _segmentsByName;
 		/* Stores all segment Tuples*/
 		seg_vt _segmentTuples;
+
+		bool _installed = false; //only true, if installed.
 		
 
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 

@@ -29,8 +29,13 @@ int main(const int argc, const char *argv[]) {
         print_usage(std::cout, argv[0], lArgDesc);
         return 0;
     }
+
+    //ich habe keine Ahnung, wie das ganze Einlesen funktioniert, aber diese beiden Parameter sollten auch mit eingelesen werden.
+    std::string masterSegmentSegment = "b";
+    std::string masterSegmentPartitions = "c";
+
     const size_t C_PAGE_SIZE = 4096;
-    const control_block_t lCB = {lArgs.masterPartition(), C_PAGE_SIZE, lArgs.trace()};
+    const control_block_t lCB = {lArgs.masterPartition(),masterSegmentSegment, masterSegmentPartitions, C_PAGE_SIZE, lArgs.trace()};
 
     const std::string C_PATH = lArgs.path();
     const uint C_GROWTH_INDICATOR = lArgs.growthIndicator();

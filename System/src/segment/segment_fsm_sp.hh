@@ -7,7 +7,7 @@
  */
 
 #ifndef SEGMENT_FSM_SP_HH
-#define SEGMENT_FSM_SP_HH
+#define SEGMENT_FSM_SP_HH/
 
 #include "infra/header_structs.hh"
 #include "infra/types.hh"

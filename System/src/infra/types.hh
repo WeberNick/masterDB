@@ -30,6 +30,8 @@ constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
 struct control_block_t
 {
     std::string     _masterPartition;
+    std::string     _masterSegmentSegments;
+    std::string     _masterSegmentPartitions;
     size_t          _pageSize;
     bool            _trace;
 
@@ -59,7 +61,7 @@ struct part_t
 	uint _pID;
 	std::string _pName;
 	std::string _pPath;
-	int _pType;
+	int _pType;//1:= PartitionFile, 2:=partitionRaw
 	int _pGrowth;
 };
 typedef std::vector<part_t> part_vt;
@@ -69,7 +71,7 @@ struct seg_t
 	uint _sPID; //partition ID
 	uint _sID; //segment ID
 	std::string _sName; //segment name (unique)
-	int _sType; //segment type
+	int _sType; //segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
 	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
 };
 typedef std::vector<seg_t> seg_vt;

@@ -40,7 +40,7 @@ class DatabaseInstanceManager
 		}
 
 	public:
-		void install();
+		void install(std::string aPath, uint aGrowthIndicator, control_block_t& aControlBlock);
 		void boot();
 		void shutdown();
 
@@ -53,9 +53,7 @@ class DatabaseInstanceManager
 		void load(std::vector<T_TupleType>& aTuples, const uint aIndex);
 		template<typename T_TupleType> //probably of no use, physical tuples allways up to date. BufMngr.flushall should be enough
 		void store(std::vector<T_TupleType>& aTuples, const uint aIndex);
-		void loadPartitionManager(); //called in boot, loads the PartMngr from the master part
-		void loadSegmentManager(); //called in boot, loads the SegMngr from the master part
-
+	
 	private:
         PartitionFile _masterPartition;
 		PartitionManager& _partMngr;

@@ -52,15 +52,21 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile* createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const control_block_t& aControlBlock);
-        PartitionRaw* createPartitionRawInstance(const std::string aPath, const std::string aName, const control_block_t& aControlBlock);
+        PartitionFile*   createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const control_block_t& aControlBlock);
+        PartitionRaw*    createPartitionRawInstance(const std::string aPath, const std::string aName, const control_block_t& aControlBlock);
         PartitionBase*   getPartition(const uint8_t aID);
         PartitionBase*   getPartition(const std::string aName);
+        void             deletePartition(const uint8_t aID);
+        void             deletePartition(const std::string aName);
+
+        PartitionBase*  createMasterPartition(std::string aPath, uint aGrowthIndicator, control_block_t& aControlBlock,part_t& aMasterTuple);
+        int             insertMasterPartitionTuple(part_t aMasterTuple);
 
 
     public:
         inline size_t           getNoPartitions(){ return _partitions.size(); }
 		inline const part_vt&   getPartitionTuples(){ return _partitionTuples; }
+        inline void             setInstalled(){_installed=2;}
   private:
   void  createPartitionSub(part_t aParT);
 
@@ -72,6 +78,10 @@ class PartitionManager
         part_vt _partitionTuples;
 
         std::string _masterSegPart = "partitionMaster";
+
+        uint8_t _installed=0; //counter of installation steps, if 2 completed
+
+
 };
 
 #endif
