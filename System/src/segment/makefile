@@ -8,6 +8,8 @@ INCL = -I../.. -I..
 #Header needed by all
 HDR = \
 	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
 	\
 
 #Header needed by 'segment_manager'
@@ -16,7 +18,6 @@ SM_HDR = \
 	../partition/partition_manager.hh \
 	../partition/partition_base.hh \
 	segment_base.hh \
-	segment.hh \
 	segment_fsm.hh \
 	segment_fsm_sp.hh \
 	\
@@ -48,7 +49,6 @@ OBJ = \
 	segment_manager.o \
 	segment_base.o \
     segment_fsm.o \
-	segment.o \
 	segment_fsm_sp.o \
 
 

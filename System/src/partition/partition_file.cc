@@ -10,29 +10,21 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 PartitionFile::~PartitionFile()
 {}
 
-int PartitionFile::create(const uint aSizeInPages)
+void PartitionFile::create()
 {
 	if(exists())
 	{
-        if(_controlBlock.trace()) printErr("Partition already exists and cannot be created");
-		return -1;
-	}
-	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(aSizeInPages);
+        std::cerr << "Partition already exists and cannot be created" << std::endl;
+        return;
+    }
+
+	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_growthIndicator);
 	system(lCommand.c_str());
-	if(assignSize(_sizeInPages) == -1 && _controlBlock.trace())
-	{
-        printErr("Partition size could not be assigned!");
-	}
-	if(format() != 0 )
-	{
-        if(_controlBlock.trace()) printErr("Partition could not be initialized and will be removed");
-		remove();
-		return -1;
-	}
-	return 0;
+    _sizeInPages = retrieveSizeInPages(); //may throw
+    format(); //may throw
 }
 
-int PartitionFile::remove()
+void PartitionFile::remove()
 {
 	if(exists())
 	{
@@ -40,26 +32,23 @@ int PartitionFile::remove()
 		{
 			std::string lCommand = "rm " + _partitionPath;
 			system(lCommand.c_str());
-			return 0;
 		}
 		else
 		{
-            if(_controlBlock.trace()) printErr("No file partition at path " + _partitionPath);
-			return -1;
+            std::cerr << "No file partition at " + _partPath << std::endl;
+            return;
 		}
 	}
 	else
 	{
-        if(_controlBlock.trace()) printErr("No file exists at " + _partitionPath);
-		return -1;
+        std::cerr << "No file exists at " + _partPath << std::endl;
+        return;
 	}
 }
 
-int PartitionFile::extend(const uint aNoPages)
+void PartitionFile::extend(const uint aNoPages)
 {
-  
-
-  return -1;
+  //todo 
 }
 
 void PartitionFile::printPage(uint aPageIndex)

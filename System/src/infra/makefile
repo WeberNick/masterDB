@@ -1,23 +1,21 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++17
+CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
 
 CC = g++
 
-LINKER = -lstdc++fs
-
 INCL = -I../.. -I..
-
-HDR = \
-	types.hh \
-	argbase.hh \
-	\
 
 OBJ = \
 	args.o \
+	exception.o \
+	\
 
 all : $(OBJ)
 
-args.o : args.cc args.hh $(HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) args.cc $(LINKER)
+args.o : args.cc args.hh types.hh argbase.hh
+	$(CC) -c $(CXXFLAGS) $(INCL) args.cc
+
+exception.o : exception.cc exception.hh
+	$(CC) -c $(CXXFLAGS) $(INCL) exception.cc
 
 clean :
 	rm -f *.o a.out

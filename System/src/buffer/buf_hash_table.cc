@@ -22,7 +22,7 @@ BufferHashTable::~BufferHashTable()
 }
 
 
-size_t BufferHashTable::hash(const pid aPageID)
+size_t BufferHashTable::hash(const PID& aPageID)
 {
     std::hash<uint> lHash;
     return (lHash(aPageID.fileID()) + lHash(aPageID.pageNo())) % _size;

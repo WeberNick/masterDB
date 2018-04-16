@@ -66,7 +66,7 @@ class PartitionManager
 
     private:
         uint _counterPartitionID;
-        std::map<uint, PartitionBase*> _partitions;
+        std::map<uint8_t, PartitionBase*> _partitions;
         std::map<uint16_t, part_t*> _partitionsByID;
 		std::map<std::string, part_t*> _partitionsByName;
         part_vt _partitionTuples;

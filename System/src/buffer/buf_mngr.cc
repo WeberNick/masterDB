@@ -1,17 +1,45 @@
 #include "buf_mngr.hh"
 
-BufferManager::BufferManager(const size_t aNoFrames, const control_block_t& aControlBlock) :
-	_noFrames(aNoFrames),
-	_frameSize(aControlBlock.pageSize()),
+void BufferManager::FreeFrames::init(const size_t aNoFreeFrames)
+{
+    _freeFrameList = new size_t[aNoFreeFrames];
+    _noFreeFrames = aNoFreeFrames;
+    for(size_t i = 0; i < _noFreeFrames; ++i)
+    {
+        _freeFrameList[i] = i;
+    }
+}
+
+void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
+{
+    _noFreeBCBs = aNoFreeBCBs;
+    _BCBs.resize(_noFreeBCBs, nullptr);
+    for(size_t i = 0; i < _noFreeBCBs; ++i)
+    {
+        _BCBs[i] = new BCB;
+    }
+    BCB* newBCB = _BCBs[0];
+    _freeBCBList = newBCB;
+    //create the initial list of free BCBs
+    for(size_t i = 1; i < _noFreeBCBs; ++i)
+    {
+        newBCB->_nextInChain = _BCBs[i];
+        newBCB = newBCB->_nextInChain;
+    }
+}
+
+
+
+BufferManager::BufferManager() :
+	_noFrames(0),
+	_frameSize(0),
 	_bufferHash(nullptr),
 	_bufferpool(nullptr),
-	_freeFrames(_noFrames),
-    _freeBCBs(_noFrames),
-    _controlBlock(aControlBlock)
-{
-	_bufferHash = new BufferHashTable(_noFrames);
-	_bufferpool = new byte[_noFrames * _frameSize];
-}
+	_freeFrames(),
+    _freeBCBs(),
+    _cb(nullptr),
+    _init(false)
+{}
 
 BufferManager::~BufferManager()
 {
@@ -19,8 +47,36 @@ BufferManager::~BufferManager()
     delete[] _bufferpool;
 }
 
+void BufferManager::init(const CB& aCB)
+{
+    if(!_init)
+    {
+        _noFrames = aCB.frames();
+        _frameSize = aCB.pageSize();
+        try
+        {
+            _bufferHash = new BufferHashTable(_noFrames);
+            _bufferpool = new byte[_noFrames * _frameSize];
+        }
+        catch(std::bad_alloc& ba)
+        {
+            if(aCB.trace())
+            {
+                const std::string lErrMsg = std::string("bad_alloc caught: ") + std::string(ba.what()); 
+                Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+            }
+            throw ReturnException(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+        }
+        _freeFrames.init(_noFrames);
+        _freeBCBs.init(_noFrames);
+        _cb = &aCB;
+        BufferControlBlock::setCB(_cb);
+        _init = true;
+    }
+}
+
 //the following is not tested at all, expect major bugs
-BCB* BufferManager::fix(const pid aPageID)
+BCB* BufferManager::fix(const PID aPageID, LOCK_MODE aMode)
 {
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
@@ -31,7 +87,6 @@ BCB* BufferManager::fix(const pid aPageID)
         if(lNextBCB->getPID() == aPageID) //is there a CB for the requested page
         {
             //page found
-            lNextBCB->getMtx().lock();
             lPageNotFound = false;
 
             while(lNextBCB->getFrameIndex() == SIZE_T_MAX) //page is being brought in
@@ -54,20 +109,46 @@ BCB* BufferManager::fix(const pid aPageID)
         lNextBCB = locatePage(aPageID, lHashIndex); //get page in bufferpool
         readPageIn(lNextBCB,aPageID);
     }
-    /* Now the requested page is in the bufferpool and the CB for it is pointed to by lNextBCB */
-    lNextBCB->incrFixCount(); //increase fix count on page
-    return lNextBCB; //method always succeeds, todo error checking, return nullptr on error
+
+    if(aMode == kNOLOCK)
+    {
+        lNextBCB->setLockMode(aMode);
+        lNextBCB->incrFixCount();
+    }
+    else //some lock requested
+    {
+        if(aMode == kSHARED) // shared lock requested
+        {
+            lNextBCB->getMtx().lock_shared();
+            lNextBCB->setLockMode(aMode);  
+            lNextBCB->incrFixCount();
+        }
+        else if(aMode == kEXCLUSIVE) //exclusive lock requested
+        {
+            lNextBCB->getMtx().lock();
+            lNextBCB->setLockMode(aMode);
+            lNextBCB->setFixCount(1);
+            lNextBCB->setModified(true);
+        }
+        else std::cerr << "Lock type not supported." << std::endl;
+    }
+
+    /* Now the requested page is in the bufferpool and the CB for it is pointed to by lNextBCB. It has the requested lock type applied */
+    return lNextBCB;
 }
 
-BCB* BufferManager::emptyfix(const pid aPageID)
+BCB* BufferManager::emptyfix(const PID aPageID) //assumed to always request in X lock mode
 {
     BCB* lNextBCB = nullptr;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
     lNextBCB = locatePage(aPageID,lHashIndex);
+    lNextBCB->getMtx().lock();
+    lNextBCB->setLockMode(kEXCLUSIVE);
+    lNextBCB->setFixCount(1);
+    lNextBCB->setModified(true);
     initNewPage(lNextBCB,aPageID,1);
     return lNextBCB;
 }
-  
 
 //BCB has to be locked beforehand
 void BufferManager::unfix(BCB*& aBufferControlBlockPtr)
@@ -81,7 +162,7 @@ void BufferManager::flush(BCB*& aBufferControlBlockPtr)
 {
     if(aBufferControlBlockPtr->getModified())
     {
-        const pid lPageID = aBufferControlBlockPtr->getPID(); //page id of frame
+        const PID lPageID = aBufferControlBlockPtr->getPID(); //page id of frame
         byte* lFramePtr = getFramePtr(aBufferControlBlockPtr); //pointer to the frame
         PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); //get partition which contains the page to write
         lPart->open(); //open partition
@@ -95,8 +176,23 @@ void BufferManager::flushAll()
 
 }
 
+byte* BufferManager::getFramePtr(BCB* aBCB)
+{
+    const size_t lFrameIndex = aBCB->getFrameIndex();   
+    if(lFrameIndex >= _noFrames)
+    {
+        const std::string lErrMsg = std::string("Invalid BCB provided: frame index is not in buffer pool"); 
+        if(_cb->trace())
+        {
+            Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+        }
+        throw InvalidArgumentException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+        return nullptr;
+    }
+    return _bufferpool + (lFrameIndex * _frameSize);
+}
 
-BCB* BufferManager::locatePage(const pid aPageID, const size_t aHashIndex)
+BCB* BufferManager::locatePage(const PID aPageID, const size_t aHashIndex)
 {
     //BCB = Buffer Control Block
     getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
@@ -106,6 +202,7 @@ BCB* BufferManager::locatePage(const pid aPageID, const size_t aHashIndex)
     getFreeBCBs().getFreeBCBListMtx().unlock(); //unlock mutex of free BCB list
     /* init BCB */
     lFBCB->getMtx().lock(); //lock mutex of free BCB
+    lFBCB->setLockMode(kNoType); //indicate mutex has no lock type yet 
     lFBCB->setFrameIndex(SIZE_T_MAX); //SIZE_T_MAX defined in types.hh
     lFBCB->setPID(aPageID); //store requested page
     lFBCB->setModified(false); //page is not modified
@@ -126,36 +223,31 @@ BCB* BufferManager::locatePage(const pid aPageID, const size_t aHashIndex)
     _bufferHash->getBucketMtx(lHashIndex).unlock(); //unlock hash bucket
     const size_t lFrameNo = getFrame(); //get a free frame
     lFBCB->setFrameIndex(lFrameNo);     
-  
-   /* PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
-    byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
-    lPart->open(); //open partition
-    lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
-    lPart->close(); //close partition*/
-    //moved to own method to be called afterwards
-   
-   
-    //if prev. calls were successful, page is in this frame
+    lFBCB->getMtx().unlock(); //lock mutex of free BCB
     return lFBCB;
-    /* note that the mutex on the free BCB is kept; */
 }
 
-void BufferManager::readPageIn(BCB* lFBCB,pid aPageID){
+void BufferManager::readPageIn(BCB* lFBCB, PID aPageID){
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
-    byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
-    lPart->open(); //open partition
-    lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
-    lPart->close(); //close partition
+    lFBCB->getMtx().lock_shared();
+    try
+    {
+        byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
+        lPart->open(); //open partition
+        lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
+        lPart->close(); //close partition
+    }
+    catch(const InvalidArgumentException& ex) //BCB had an invalid frame index
+    {
+        std::cerr << ex.what() << std::endl;
+    }
+    catch(const FileException& ex) //something wnt wrong opening/closing/reading the partition
+    {
+        std::cerr << ex.what() << std::endl;
+    }
+    lFBCB->getMtx().unlock_shared();
 }
 
-void BufferManager::initNewPage(BCB* aFBCB,pid aPageID,uint64_t aLSN){
-    byte* lFramePtr = getFramePtr(aFBCB);
-    //LSN,PageIndex,PartitionID,Version, unused,unused
-    basic_header_t lBH = {aLSN,aPageID.pageNo(),aPageID.fileID(),1,0,0};
-    lFramePtr+= getFrameSize() - sizeof(basic_header_t);
-    *((basic_header_t*) lFramePtr) = lBH;
-    aFBCB->setModified(true);
-}
 
 
 size_t BufferManager::getFrame()
@@ -213,5 +305,14 @@ size_t BufferManager::getFrame()
     return SIZE_T_MAX; //in theory, this can not be returned. always check for max value return
 }
 
+void BufferManager::initNewPage(BCB* aFBCB,PID aPageID, uint64_t aLSN){
+    byte* lFramePtr = getFramePtr(aFBCB);
+    //LSN,PageIndex,PartitionID,Version, unused,unused
+    basic_header_t lBH = {aLSN, aPageID.pageNo(), aPageID.fileID(), 1, 0, 0};
+    lFramePtr += getFrameSize() - sizeof(basic_header_t);
+    *((basic_header_t*) lFramePtr) = lBH;
+}
+
+  
 
 

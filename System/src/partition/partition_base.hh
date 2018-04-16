@@ -10,7 +10,8 @@
 #define PARTITION_BASE_HH
 
 #include "infra/types.hh"
-#include "infra/error.hh"
+#include "infra/exception.hh"
+#include "infra/trace.hh"
 #include "infra/header_structs.hh"
 #include "interpreter/interpreter_fsip.hh"
 //#include "buffer/buf_mngr.hh"
@@ -38,6 +39,7 @@
 
 #include <iostream>
 #include <string>
+#include <cerrno>
 #include <cstring>
 #include <experimental/filesystem>
 
@@ -48,24 +50,27 @@ const uint64_t LSN = 0;
 class PartitionBase {
   protected:
     friend class PartitionManager;
-    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock);
-    PartitionBase(const PartitionBase &aPartition) = delete;
-    PartitionBase &operator=(const PartitionBase &aPartition) = delete;
+    explicit PartitionBase() = delete;
+    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock);
+    explicit PartitionBase(const PartitionBase&) = delete;
+    explicit PartitionBase(PartitionBase&&) = delete;
+    PartitionBase& operator=(const PartitionBase&) = delete;
+    PartitionBase& operator=(PartitionBase&&) = delete;
     virtual ~PartitionBase() = 0;
 
   public:
-    int format();
+    void format();
     /**
      *  @brief  opens the file in read/write mode
      *  @return an int representing a file descriptor, -1 on failure
      */
-    int open();
+    void open();
 
     /**
      *  @brief  closes the open file
      *  @return 0 if successful, -1 on failure
      */
-    int close();
+    void close();
 
     /**
      *  @brief  allocates a free page
@@ -91,7 +96,7 @@ class PartitionBase {
      *  @param  aBufferSize: size of the page
      *  @return 0 if successful, -1 on failure
      */
-    int readPage(byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
+    void readPage(byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 
     /**
      *  @brief  writes a page
@@ -101,12 +106,12 @@ class PartitionBase {
      *  @param  aBufferSize: size of the page
      *  @return 0 if successful, -1 on failure
      */
-    int writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
+    void writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 
 
     
-	virtual int create(const uint aSizeInPages) = 0;
-	virtual int remove() = 0;
+	virtual void create() = 0;
+	virtual void remove() = 0;
 
   public:
     inline std::string getPath() { return _partitionPath; }
@@ -122,7 +127,7 @@ class PartitionBase {
     inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
 
   protected:
-    int assignSize(uint& aSize);
+    uint retrieveSizeInPages();
 	void init();
     uint getMaxPagesPerFSIP();
 
@@ -143,7 +148,7 @@ class PartitionBase {
     /* The partitions file descriptor */
     int _fileDescriptor;
 
-    const control_block_t& _controlBlock;
+    const CB& _cb;
 };
 
 #endif

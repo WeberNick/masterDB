@@ -26,8 +26,8 @@ class BufferHashTable
                     _bucketMtx(),
                     _firstBCB(nullptr)
                 {}
-                HashBucket(const HashBucket&) = delete;
-                HashBucket(HashBucket&&) = delete;
+                explicit HashBucket(const HashBucket&) = delete;
+                explicit HashBucket(HashBucket&&) = delete;
                 HashBucket& operator=(const HashBucket&) = delete;
                 HashBucket& operator=(HashBucket&&) = delete;
                 ~HashBucket(){}
@@ -46,9 +46,10 @@ class BufferHashTable
 
 
 	public:
+        explicit BufferHashTable() = delete;
 		explicit BufferHashTable(const size_t aHashTableSize);
-		BufferHashTable(const BufferHashTable&) = delete;
-        BufferHashTable(BufferHashTable&&) = delete;
+		explicit BufferHashTable(const BufferHashTable&) = delete;
+        explicit BufferHashTable(BufferHashTable&&) = delete;
         BufferHashTable& operator=(const BufferHashTable&) = delete;
         BufferHashTable& operator=(BufferHashTable&&) = delete;
         ~BufferHashTable();
@@ -60,7 +61,7 @@ class BufferHashTable
         inline void     setBucketBCB(const size_t aHash, BCB* aBCB){ _hashTable[aHash].setBCB(aBCB); }
 
 	public:
-		size_t hash(const pid aPageID);
+		size_t hash(const PID& aPageID);
 
 	private:
         //the size of the hash table

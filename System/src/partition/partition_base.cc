@@ -1,6 +1,6 @@
 #include "partition_base.hh"
 
-PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock) : 
+PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
 	_pageSize(aControlBlock.pageSize()),
@@ -8,14 +8,16 @@ PartitionBase::PartitionBase(const std::string aPath, const std::string aName, c
 	_partitionID(aPartitionID),
 	_openCount(0),
 	_fileDescriptor(-1),
-	_controlBlock(aControlBlock)
+	_cb(aControlBlock)
 {
 }
+
+    catch(const OpenFileException& ex){}
 
 PartitionBase::~PartitionBase(){}
 
 
-int PartitionBase::format()
+void PartitionBase::format()
 {
 	byte* lPagePointer = new byte[_pageSize];
 	uint lPagesPerFSIP = getMaxPagesPerFSIP();
@@ -23,13 +25,13 @@ int PartitionBase::format()
 	InterpreterFSIP fsip;
 	uint remainingPages = _sizeInPages;
 	uint lNumberOfPagesToManage;
-	if(open() == -1){ return -1; }
+    open();
 	while(remainingPages > 1)
 	{
 		--remainingPages;
 		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
 		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
-		if(writePage(lPagePointer, lCurrentPageNo, _pageSize) == -1){ return -1; }
+		writePage(lPagePointer, lCurrentPageNo, _pageSize);
 		lCurrentPageNo += (lPagesPerFSIP + 1);
 		remainingPages -= lNumberOfPagesToManage;
 	}
@@ -37,37 +39,35 @@ int PartitionBase::format()
 	readPage(lPagePointer, LSN, _pageSize);
 	fsip.attach(lPagePointer);
 	writePage(lPagePointer, LSN, _pageSize);
-	if(close() == -1){ return -1; }
+	close();
 	delete[] lPagePointer;
-	return 0;
 }
 
 
-int PartitionBase::open()
+void PartitionBase::open()
 {
 	if(_openCount == 0)
 	{
 		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); //call open in global namespace
 		if(_fileDescriptor == -1)
 		{
-            if(_controlBlock.trace())
-                printErr("Opening the partition failed", errno);
-			return -1;
+            const std::string lErrMsg = std::string("An error occured while opening the file: '") + std::string(std::strerror(errno));
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
 		}
 	}
 	++_openCount;
-	return 0;
 }
 
-int PartitionBase::close()
+void PartitionBase::close()
 {
 	if(_openCount == 1)
 	{
 		if(::close(_fileDescriptor) == -1) //call close in global namespace
 		{
-            if(_controlBlock.trace())
-                printErr("Closing the partition failed", errno);
-			return -1;
+            const std::string lErrMsg = std::string("An error occured while closing the file: '") + std::string(std::strerror(errno));
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
 		}
 		--_openCount;
 		_fileDescriptor = -1;
@@ -76,7 +76,6 @@ int PartitionBase::close()
 	{
 		--_openCount;
 	}
-	return 0;
 }
 
 int PartitionBase::allocPage()
@@ -154,87 +153,84 @@ int PartitionBase::freePage(const uint aPageIndex)
 	return 0;
 }
 
-int PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
+void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
 {
-	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _controlBlock.trace())
+	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1)
 	{
-        printErr("Reading the partition failed", errno);
-		return -1;
+        const std::string lErrMsg = std::string("An error occured while reading the file: '") + std::string(std::strerror(errno));
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
 	}
-	return 0;
 }
 
-int PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
+void PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
 {
-	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _controlBlock.trace())
+	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _cb.trace())
 	{
-        printErr("Write to partition failed", errno);
-		return -1;
+        const std::string lErrMsg = std::string("An error occured while writing the file: '") + std::string(std::strerror(errno));
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
 	}
-	return 0;
 }
 
-int PartitionBase::assignSize(uint& aSize) //in number of pages 
+uint PartitionBase::retrieveSizeInPages() //in number of pages 
 {
-	aSize = 0;
-
+    uint lSize = 0;
 	if(isFile())
 	{
-		aSize =	fs::file_size(_partitionPath) / _pageSize;
+		lSize = fs::file_size(_partitionPath) / _pageSize;
 	}
 	else if(isRawDevice())
 	{
 		int lFileDescriptor = ::open(_partitionPath.c_str(), O_RDONLY);
-   		if(lFileDescriptor != -1) 
+   		if(lFileDescriptor == -1) 
    	 	{
-    		uint64_t lSector_count = 0;
-    		uint32_t lSector_size = 0;
-       		if(ioctl(lFileDescriptor, P_NO_BLOCKS, &lSector_count) != -1 && ioctl(lFileDescriptor, P_BLOCK_SIZE, &lSector_size) != -1)
-       	 	{
-       		 	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
-        		if(lDisk_size % _pageSize == 0)
-        		{
-        			aSize = lDisk_size / _pageSize;
-        		} 
-        		else
-    			{
-                    if(_controlBlock.trace()) printErr("Partition size modulo page size is not equal to zero");
-		       		 return -1;
-		   		 }
-    	    }
-       		else
-        	{
-                if(_controlBlock.trace()) printErr("ioctl call failed", errno);
-        		return -1;
-        	}
-			::close(lFileDescriptor);
+            const std::string lErrMsg = std::string("An error occured while opening the file: ") + std::string(std::strerror(errno));
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+        }
+    	uint64_t lSector_count = 0;
+    	uint32_t lSector_size = 0;
+       	if(ioctl(lFileDescriptor, P_NO_BLOCKS, &lSector_count) == -1 || ioctl(lFileDescriptor, P_BLOCK_SIZE, &lSector_size) == -1)
+       	{
+            const std::string lErrMsg = std::string("An error occurred while using ioctl: ") + std::string(std::strerror(errno));
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
     	}
-   		else
-   		{
-            if(_controlBlock.trace()) printErr("Opening the partition failed", errno);
-       		return -1;
-    	}
-	}
+       	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
+        if(lDisk_size % _pageSize != 0)
+        {
+            const std::string lErrMsg = std::string("Partition size modulo page size is not equal to zero");
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+        } 
+        lSize = lDisk_size / _pageSize;
+        if(::close(lFileDescriptor) == -1) //call close in global namespace
+		{
+            const std::string lErrMsg = std::string("An error occured while closing the file: ") + std::string(std::strerror(errno));
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+		}
+    }
 	else 
 	{
-        if(_controlBlock.trace()) printErr("Partition type not supported");
-		return -1;
+        const std::string lErrMsg = std::string("Partition type is not supported");
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
 	}
-	return 0;
+    return lSize;
 }
 
 void PartitionBase::init()
 {
 	if(exists())
 	{
-		if(assignSize(_sizeInPages) == -1 && _controlBlock.trace())
-		{
-            printErr("Partition size could not be assigned!");
-		}
+        try{ _sizeInPages = retrieveSizeInPages(); }
+        catch(const FileException& ex){ std::cerr << ex.what << std::endl; }
 	}
 	else
 	{
-		std::cout << "Partition does not exist physically yet. You may call the create functionality provided by the partition object." << std::endl;
+		std::cerr << "Partition does not exist physically yet. You may call the create functionality provided by the partition object." << std::endl;
 	}
 }
 

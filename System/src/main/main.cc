@@ -1,11 +1,14 @@
 #include "infra/args.hh"
 #include "infra/types.hh"
+#include "infra/exception.hh"
+#include "infra/trace.hh"
 
 #include "db_instance_manager.hh"
 
 #include "test.hh"
 
 #include <iostream>
+#include <cstdlib>
 
 /* Pass path to partition as argument when executing!
    
@@ -14,7 +17,6 @@
    bold   indicates print from other methods
    normal indicates terminal output (e.g. output from creation of partition with linux command) */
 int main(const int argc, const char *argv[]) {
-
     /* Parse Command Line Arguments */
     Args lArgs;
     argdesc_vt lArgDesc;
@@ -26,30 +28,50 @@ int main(const int argc, const char *argv[]) {
     }
 
     if (lArgs.help()) {
-        print_usage(std::cout, argv[0], lArgDesc);
-        return 0;
+       print_usage(std::cout, argv[0], lArgDesc);
+       return 0;
     }
-    const size_t C_PAGE_SIZE = 4096;
-    const control_block_t lCB = {lArgs.masterPartition(), C_PAGE_SIZE, lArgs.trace()};
+    
+    //Actual programm starts here.     
+    try
+    {
 
-    const std::string C_PATH = lArgs.path();
-    const uint C_GROWTH_INDICATOR = lArgs.growthIndicator();
+        const size_t C_PAGE_SIZE = 4096;
 
-   std::cout << "Path: " << C_PATH << std::endl;
-    std::cout << "PageSize: " << C_PAGE_SIZE << std::endl;
-    std::cout << "Growth: " << C_GROWTH_INDICATOR << std::endl;
+        const control_block_t lCB = {
+            lArgs.masterPartition(), 
+            lArgs.tracePath(),
+            C_PAGE_SIZE,
+            lArgs.bufferFrames(),
+            lArgs.trace()
+        };
 
-    InterpreterFSIP::setPageSize(lArgs.pageSize());
+        //init all global singletons
+        Trace::getInstance().init(lCB);
 
-	/* Test call in test.hh */
-    if (lArgs.test()) {
-        test(C_PATH, C_GROWTH_INDICATOR, lCB);
+
+        const std::string C_PATH = lArgs.path();
+        const uint C_GROWTH_INDICATOR = lArgs.growthIndicator();
+
+        InterpreterFSIP::setPageSize(C_PAGE_SIZE);
+
+	    /* Test call in test.hh */
+        if (lArgs.test()) {
+            test(C_PATH, C_GROWTH_INDICATOR, lCB);
+        }
+
+	    DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(lCB);
+        //boot..
+
+        //shutdown
+
+
+    
+    } //Any exceptions from which there is no recover possible, are catched here 
+    catch(const ReturnException& ex)
+    {
+        std::cerr << ex.what() << std::endl;
+        return EXIT_FAILURE;
     }
-
-	DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(lCB);
-    //boot..
-
-    //shutdown
-
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -9,20 +9,18 @@ PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, con
 PartitionRaw::~PartitionRaw(){}
 
 
-int PartitionRaw::create(const uint aSizeInPages)
+void PartitionRaw::create()
 {
 	if(exists())
 	{
 		if(isRawDevice())
 		{
-			return format();
+			format();
 		}
 	}
-	return -1;
 }
 
-int PartitionRaw::remove()
+void PartitionRaw::remove()
 {
 	//write zeros?
-	return -1;
 }

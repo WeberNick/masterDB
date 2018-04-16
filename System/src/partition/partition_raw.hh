@@ -25,13 +25,13 @@ class PartitionRaw : public PartitionBase
 	     *	@brief 	formats the raw partition	
 	     *	@return	0 if successful, -1 on failure
 	     */
-	    int create(const uint aSizeInPages);
+	    void create();
 
 	    /**
 	     *	@brief	does currently nothing
 	     *	@return	0 if successful, -1 on failure
 	     */
-	    int remove();
+	    void remove();
 
 };
 

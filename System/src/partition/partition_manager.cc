@@ -11,8 +11,7 @@ PartitionManager::PartitionManager() :
 PartitionManager::~PartitionManager()
 {
     // iterate over map and delete every map item (PartitionBase)
-    std::map<uint, PartitionBase*>::iterator it;
-    for(it = _partitions.begin(); it != _partitions.end(); ++it) {
+    for(auto it = _partitions.begin(); it != _partitions.end(); ++it) {
         delete it->second;
     }
 }

@@ -6,6 +6,8 @@ INCL = -I../.. -I..
 
 HDR = \
 	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
 	\
 
 BUF_MNGR_HDR = \

@@ -9,6 +9,8 @@ INCL = -I../.. -I..
 HDR = \
 	../infra/args.hh \
 	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
 	test.hh \
 	\
 

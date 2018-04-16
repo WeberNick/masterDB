@@ -4,9 +4,7 @@
  *           Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *
  */
-
-#ifndef INFRA_TYPES_HH
-#define INFRA_TYPES_HH
+#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -29,15 +27,22 @@ constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
 
 struct control_block_t
 {
-    std::string     _masterPartition;
-    size_t          _pageSize;
-    bool            _trace;
+    const std::string   _masterPartition;
+    const std::string   _tracePath;
+    const size_t        _pageSize;
+    const size_t        _noBufFrames;
+    const bool          _print;
+    const bool          _trace;
 
-    std::string   mstrPart() const { return _masterPartition; }
-    size_t        pageSize() const { return _pageSize; }
-    bool          trace() const { return _trace; }
+
+    const std::string&  mstrPart() const { return _masterPartition; }
+    const std::string&  tracePath() const { return _tracePath; }
+    size_t              pageSize() const { return _pageSize; }
+    size_t              frames() const { return _noBufFrames; }
+    bool                print() const { return _print; }
+    bool                trace() const { return _trace; }
 };
-
+using CB = control_block_t;
 
 struct page_id_t
 {
@@ -52,7 +57,8 @@ struct page_id_t
         return (_fileID == aOther._fileID && _pageNo == aOther._pageNo);
     }
 };
-typedef page_id_t pid;
+using PID = page_id_t;
+using pid_vt = std::vector<PID>;
 
 struct part_t
 {
@@ -60,9 +66,9 @@ struct part_t
 	std::string _pName;
 	std::string _pPath;
 	int _pType;
-	int _pGrowth;
+	uint _pGrowth;
 };
-typedef std::vector<part_t> part_vt;
+using part_vt = std::vector<part_t>;
 
 struct seg_t
 {
@@ -72,9 +78,10 @@ struct seg_t
 	int _sType; //segment type
 	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
 };
-typedef std::vector<seg_t> seg_vt;
+using seg_vt = std::vector<seg_t>;
 
-enum class PageStatus {
+enum class PageStatus 
+{
     kNoType = -1,
     kBUCKET0 = 0,
     kBUCKET1 = 1,
@@ -92,16 +99,14 @@ enum class PageStatus {
     kBUCKET13 = 13,
     kBUCKET14 = 14,
     kBUCKET15 = 15,
-    kNoBuckets = 16
+    kPageStatusSize = 16
 };
 
 enum LOCK_MODE
 {
     kNoType = -1,
-    kFREE = 0,
+    kNOLOCK = 0,
     kSHARED = 1,
-    kEXCLUSIVE = 2
+    kEXCLUSIVE = 2,
+    kLockModeSize = 3
 };
-
-
-#endif

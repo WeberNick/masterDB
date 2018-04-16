@@ -13,6 +13,7 @@
 
 #include <string>
 #include <cmath>
+#include <cstdlib>
 
 class PartitionFile : public PartitionBase  {
   private:
@@ -24,21 +25,9 @@ class PartitionFile : public PartitionBase  {
     ~PartitionFile();
 
   public:
-    /**
-     *	@brief 	if file does not exist, create it
-	   *	@param 	aSizeInPages size with which the partition is created
-     *	@return	0 if successful, -1 on failure
-     */
-        //check whether path exists and references a file
-    int create(const uint aSizeInPages);
-
-    /**
-     *	@brief	removes the file from disk
-     *	@return	0 if successful, -1 on failure
-     */
-    int remove();
-
-    int extend(const uint aNoPages);
+    void create();
+    void remove();
+    void extend(const uint aNoPages);
 
     void printPage(uint aPageIndex);
 

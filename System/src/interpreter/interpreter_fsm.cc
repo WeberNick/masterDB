@@ -44,7 +44,7 @@ int InterpreterFSM::getFreePage(const PageStatus aPageStatus) {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
         bool fits = 0;
-        PageStatus max = PageStatus::kNoBuckets;
+        PageStatus max = PageStatus::kPageStatusSize;
         if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= static_cast<int>(max)) {
             fits = true;
         }
@@ -100,5 +100,5 @@ PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const
     }
     const uint lBucketSize = std::floor(aSizeWithoutOverhead / 16.0); // remove magic number, (numb buckets)
     const uint lBucketNo = std::ceil(aNoBytes / (double)lBucketSize);
-    return (lBucketNo < (uint)PageStatus::kNoBuckets) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
+    return (lBucketNo < (uint)PageStatus::kPageStatusSize) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
 }
