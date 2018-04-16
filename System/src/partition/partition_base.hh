@@ -3,19 +3,16 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief	A abstract class implementing the interface for every partition
  *  @bugs	Currently no bugs known
- *  @todos	TBD
+ *  @todos	-add exceptions to free/alloc page and think generally about their functionality with buffer manager
  *  @section TBD
  */
-#ifndef PARTITION_BASE_HH
-#define PARTITION_BASE_HH
+#pragma once
 
 #include "infra/types.hh"
 #include "infra/exception.hh"
 #include "infra/trace.hh"
 #include "infra/header_structs.hh"
 #include "interpreter/interpreter_fsip.hh"
-//#include "buffer/buf_mngr.hh"
-//#include "buffer/buf_cntrl_block.hh"
 
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -76,17 +73,17 @@ class PartitionBase {
      *  @brief  allocates a free page
      *  @return an index to the allocated page, -1 on failure
      */
-    int allocPage();
+    uint allocPage();
 
     //allocPage now makes use of the buffer. This is the old version not using the buffer.
-    int allocPageForce();
+    uint allocPageForce();
 
     /**
      *  @brief  removes a page
      *  @param  aPageIndex: an index indicating which page to remove
      *  @return 0 if successful, -1 on failure
      */
-    int freePage(const uint aPageIndex);
+    void freePage(const uint aPageIndex);
 
     /**
      *  @brief  reads a page
@@ -150,5 +147,3 @@ class PartitionBase {
 
     const CB& _cb;
 };
-
-#endif

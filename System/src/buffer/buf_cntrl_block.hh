@@ -55,7 +55,7 @@ class BufferControlBlock
         void upgradeLock(LOCK_MODE aMode);
 
     private:
-        static CB*  _cb;
+        static const CB*  _cb;
         static void setCB(const CB* aControlBlock);
 
     private:

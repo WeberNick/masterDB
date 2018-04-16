@@ -1,21 +1,13 @@
 #include "interpreter_fsm.hh"
 
 
-bool InterpreterFSM::_pageSizeSet = false;
-uint16_t InterpreterFSM::_pageSize = 4096;
+size_t InterpreterFSM::_pageSize = 4096;
 
-void InterpreterFSM::setPageSize(const uint16_t aPageSize) {
-    if (!_pageSizeSet) {
-        _pageSizeSet = !_pageSizeSet;
-        _pageSize = aPageSize;
-    } else {
-        std::cerr << "ERROR: Page size can only be set once" << std::endl;
-    }
+void InterpreterFSM::setPageSize(const size_t aPageSize) {
+    _pageSize = aPageSize;
 }
 
 InterpreterFSM::InterpreterFSM() : _pp(NULL), _header(NULL) {}
-
-InterpreterFSM::~InterpreterFSM() {}
 
 void InterpreterFSM::detach() {
     _pp = NULL;

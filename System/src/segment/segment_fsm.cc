@@ -1,7 +1,7 @@
 #include "segment_fsm.hh"
 
-SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan) :
-    SegmentBase(aSegID, aPartition, aBufMan),
+SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const CB& aControlBlock) :
+    SegmentBase(aSegID, aPartition, aControlBlock),
     _fsmPages()
 {
     _partition.open();
@@ -15,18 +15,19 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, BufferM
     _partition.close();
 
     //initFSM
-    pid lPID={_partition.getID(),lFSMIndex};
-    BCB* lBCB = _BufMngr.emptyfix(lPID);
-    byte *lPagePointer = _BufMngr.getFramePtr(lBCB);
+    PID lPID={_partition.getID(),lFSMIndex};
+    BCB* lBCB = BufferManager::getInstance().emptyfix(lPID);
+    byte *lPagePointer = BufferManager::getInstance().getFramePtr(lBCB);
     InterpreterFSM fsmp;
     fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
     lBCB->setModified(true);
     lBCB->getMtx().unlock();
     fsmp.detach();
+    InterpreterFSM::setPageSize(_cb.pageSize());
 }
 
-SegmentFSM::SegmentFSM(PartitionBase &aPartition, BufferManager& aBufMan) :
-    SegmentBase(aPartition,aBufMan), 
+SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
+    SegmentBase(aPartition, aControlBlock), 
     _fsmPages()
 {}
 
@@ -34,7 +35,7 @@ SegmentFSM::~SegmentFSM() {}
 
 
 //returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
-int SegmentFSM::getFreePage(uint aNoOfBytes, bool& emptyfix) {
+PID SegmentFSM::getFreePage(uint aNoOfBytes, bool& emptyfix) {
 	//=====Nick: I changed the return of a physical page number into a return of a logical index====
     uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
     /* PagesToManage * 2 because one byte manages two pages (4 bits for one page). */
@@ -44,14 +45,14 @@ int SegmentFSM::getFreePage(uint aNoOfBytes, bool& emptyfix) {
     byte *lPagePointer;
     InterpreterFSM fsmp;
     emptyfix=false;
-    pid lPID;
+    PID lPID;
     BCB* lBcb;
     
     for (uint i = 0; i < _fsmPages.size(); ++i) {
         int lFSMPage = _fsmPages[i];
         lPID = {_partition.getID(),lFSMPage};
-        lBcb = _BufMngr.fix(lPID);
-        lPagePointer = _BufMngr.getFramePtr(lBcb);
+        lBcb = BufferManager::getInstance().fix(lPID, kNOLOCK); //CORRECT LOCK MODE?
+        lPagePointer = BufferManager::getInstance().getFramePtr(lBcb);
         fsmp.attach(lPagePointer);
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
 
@@ -61,39 +62,42 @@ int SegmentFSM::getFreePage(uint aNoOfBytes, bool& emptyfix) {
             /* If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet, otherwise the page already exists) */
             if (lIndex > _pages.size()) {
                 int lPageIndex = _partition.allocPage();
-                _pages.push_back(lPageIndex);
+                //_pages.push_back(lPageIndex);
+                //fix this for new data structure
                 emptyfix=true;
                 lBcb->setModified(true);
                 lBcb->getMtx().unlock();
-                _BufMngr.unfix(lBcb);
-                return _pages.size() - 1;
+                BufferManager::getInstance().unfix(lBcb);
+                //return _pages.size() - 1;
+                return PID{0,0}; //fix this
             } else {
                 lBcb->setModified(true);
                 lBcb->getMtx().unlock();
-                _BufMngr.unfix(lBcb);
-                return (i * lNoPagesToManage) + lIndex;
+                BufferManager::getInstance().unfix(lBcb);
+                //return (i * lNoPagesToManage) + lIndex;
+                return PID{0,0}; //fix this
             }
         }
         //if lIndex == -1
     }
     /* No FSM page found that returns a free page, create a new one. */
     int lFSMIndex = _partition.allocPage();
-    if (lFSMIndex == -1) { return -1; }
+    if (lFSMIndex == -1) { return /*-1*/ PID{0,0}; } //fix this. -1 for invalid value? throw error
     _fsmPages.push_back((uint32_t)lFSMIndex);
 
     /* Insert NextFSM to header of current FSM, which is still loaded and locked. */
-   // pid lPID = {_partition.getID(),_fsmPages[_fsmPages.size() - 2]};
+   // PID lPID = {_partition.getID(),_fsmPages[_fsmPages.size() - 2]};
     //BCB* lBcb = _bufMngr.fix(lPID);
-    //byte* lPP = _BufMngr.getFramePtr(lBcb);
+    //byte* lPP = BufferManager::getInstance().getFramePtr(lBcb);
     (*((fsm_header_t*) (lPagePointer + getPageSize() - sizeof(fsm_header_t) )))._nextFSM = lFSMIndex;
     lBcb->setModified(true);
     lBcb->getMtx().unlock();
-    _BufMngr.unfix(lBcb);
+    BufferManager::getInstance().unfix(lBcb);
     fsmp.detach();
     
     lPID._pageNo=lFSMIndex;
-    lBcb = _BufMngr.emptyfix(lPID);
-    lPagePointer = _BufMngr.getFramePtr(lBcb);
+    lBcb = BufferManager::getInstance().emptyfix(lPID);
+    lPagePointer = BufferManager::getInstance().getFramePtr(lBcb);
     fsmp.attach(lPagePointer);
 
     PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
@@ -102,15 +106,17 @@ int SegmentFSM::getFreePage(uint aNoOfBytes, bool& emptyfix) {
     fsmp.detach();
     lBcb->setModified(true);
     lBcb->getMtx().unlock();
-    _BufMngr.unfix(lBcb);
+    BufferManager::getInstance().unfix(lBcb);
     emptyfix=true;
-    return ((_fsmPages.size() - 1) * lNoPagesToManage) + lFreePageIndex;
+//    return ((_fsmPages.size() - 1) * lNoPagesToManage) + lFreePageIndex;
+    return PID{0,0}; //fix this
 }
 
-int SegmentFSM::getNewPage() {
+PID SegmentFSM::getNewPage() {
     bool a = true;
     bool& emptyfix = a;
-    return getFreePage(getPageSize() - sizeof(segment_fsm_header_t) ,emptyfix);
+    //return getFreePage(getPageSize() - sizeof(segment_fsm_header_t) ,emptyfix);
+    return PID{0,0}; //INVALID: CHANGE CORRECTLY
    /*     //reserve new page
     if (_partition.open() == -1) { return -1; }
     uint lPage = _partition.allocPage();
@@ -142,37 +148,38 @@ int SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     segment_fsm_header_t lHeader;
     fsm_header_t lHeader2;
     uint32_t l1FSM;
-    pid lPID;
+    PID lPID;
     BCB* lBCB;
 
     while (lnxIndex != 0) {
         lPID =  {_partition.getID(),lnxIndex};
-        lBCB = _BufMngr.fix(lPID);
+        lBCB = BufferManager::getInstance().fix(lPID, kNOLOCK); //IS THIS CORRECT LOCK MODE??
         lBCB->getMtx().unlock();
         lBCB->getMtx().lock_shared();
-        lPageBuffer = _BufMngr.getFramePtr(lBCB);
+        lPageBuffer = BufferManager::getInstance().getFramePtr(lBCB);
         lHeader = *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t));
         _indexPages.push_back(lnxIndex);
         l1FSM = lHeader._firstFSM;
         _segID = lHeader._segID;
         for (uint i = 0; i < lHeader._currSize; ++i) {
-            _pages.push_back(*(((uint32_t *)lPageBuffer) + i));
+            //_pages.push_back(*(((uint32_t *)lPageBuffer) + i));
+            //fix this for new data structure
         }
         lnxIndex = lHeader._nextIndexPage;
         lBCB->getMtx().unlock_shared();
-        _BufMngr.unfix(lBCB);
+        BufferManager::getInstance().unfix(lBCB);
     }
     _fsmPages.push_back(l1FSM);
     while (_fsmPages.at(_fsmPages.size() -1) != 0) {
         lPID._pageNo = _fsmPages.at(_fsmPages.size() -1);
-        lBCB = _BufMngr.fix(lPID);
+        lBCB = BufferManager::getInstance().fix(lPID, kNOLOCK); //IS THIS CORRECT LOCK MODE?
         lBCB->getMtx().unlock();
         lBCB->getMtx().lock_shared();
-        lPageBuffer = _BufMngr.getFramePtr(lBCB);
+        lPageBuffer = BufferManager::getInstance().getFramePtr(lBCB);
         lHeader2 = *(fsm_header_t *)(lPageBuffer + lPageSize - sizeof(fsm_header_t));
         _fsmPages.push_back(lHeader2._nextFSM);
         lBCB->getMtx().unlock_shared();
-        _BufMngr.unfix(lBCB);
+        BufferManager::getInstance().unfix(lBCB);
     }
 
     return 0;
@@ -188,7 +195,7 @@ int SegmentFSM::storeSegment() {
     uint maxPerPage = lPageSize - sizeof(segment_fsm_header_t);
     segment_fsm_header_t lHeader;
     basic_header_t lBH;
-    pid lPID;
+    PID lPID;
     BCB* lBCB;
     // create last invalid index page:
     _indexPages.push_back(0);
@@ -196,11 +203,12 @@ int SegmentFSM::storeSegment() {
     // for all index pages
     while (j < _indexPages.size() - 1) {
         lPID={_partition.getID(),_indexPages.at(j)};
-        lBCB = _BufMngr.fix(lPID);
-        lPageBuffer = _BufMngr.getFramePtr(lBCB);
+        lBCB = BufferManager::getInstance().fix(lPID, kNOLOCK); //CORRECT LOCK MODE??
+        lPageBuffer = BufferManager::getInstance().getFramePtr(lBCB);
         k = 0;
         while ((i < managedPages) & (k < maxPerPage)) {
-            *(((uint32_t *)lPageBuffer) + k) = _pages.at(i);
+            //*(((uint32_t *)lPageBuffer) + k) = _pages.at(i);
+            //fix for new data structure
             ++i;
             ++k;
         }
@@ -212,7 +220,7 @@ int SegmentFSM::storeSegment() {
         *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)) = lHeader;
         lBCB->setModified(true);
         lBCB->getMtx().unlock();
-        _BufMngr.unfix(lBCB);
+        BufferManager::getInstance().unfix(lBCB);
         ++j;
     }
     return 0;

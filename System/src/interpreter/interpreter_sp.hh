@@ -8,18 +8,17 @@
  *  @section DESCRIPTION
  *  TODO
  */
-#ifndef INTERPRETER_SP_HH
-#define INTERPRETER_SP_HH
-
-#include "infra/header_structs.hh"
+#pragma once
 #include "infra/types.hh"
+#include "infra/exception.hh"
+#include "infra/trace.hh"
+#include "infra/header_structs.hh"
 
 #include <iostream>
 
 class InterpreterSP 
 {
 	public:
-
 		struct slot_t 
 		{
 			uint16_t _offset; // offset to record
@@ -32,8 +31,11 @@ class InterpreterSP
 		};
 
 	public:
-		InterpreterSP();
-		static void setPageSize(const size_t aPageSize);
+		explicit InterpreterSP();
+        explicit InterpreterSP(const InterpreterSP&) = delete;
+        explicit InterpreterSP(InterpreterSP&&) = delete;
+        InterpreterSP& operator=(const InterpreterSP&) = delete;
+        InterpreterSP& operator=(InterpreterSP&&) = delete;
 
 	public:
 		inline void  attach(byte* aPP);
@@ -61,12 +63,18 @@ class InterpreterSP
 		inline sp_header_t* 	get_hdr_ptr() { return ((sp_header_t*) (_pp + _pageSize - sizeof(sp_header_t))); }
 		inline slot_t*   		get_slot_base_ptr() { return ((slot_t*) (_pp + _pageSize - sizeof(sp_header_t) - sizeof(slot_t))); }
 
+    private:
+        friend class SegmentFSM_SP;
+        /*	size of the page */
+        static size_t _pageSize;
+        /*	Set page size */
+        static void setPageSize(const size_t aPageSize);
+
+
 	private:
 		byte*     _pp;
 		sp_header_t* _header;
 		slot_t*   _slots;  // new
-		static bool _pageSizeSet;
-		static size_t _pageSize;
 };
 
 void InterpreterSP::attach(byte* aPP)
@@ -83,5 +91,3 @@ byte* InterpreterSP::getRecord(const uint aRecordNo)
 	}
 	return (_pp + slot(aRecordNo)._offset); 
 }
-
-#endif

@@ -3,15 +3,15 @@
  *  @author Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief  Singleton class managing everything needed for the DB instance to boot
  *  @bugs   Currently no bugs known
- *  @todos  Currently no todos
+ *  @todos  Changes correct? Fix reworks
  *
  *  @section TBD
  */
-
-#ifndef DB_INSTANCE_MANAGER_HH
-#define DB_INSTANCE_MANAGER_HH
+#pragma once
 
 #include "infra/types.hh"
+#include "infra/exception.hh"
+#include "infra/trace.hh"
 #include "partition/partition_manager.hh"
 #include "segment/segment_manager.hh"
 
@@ -23,9 +23,11 @@
 class DatabaseInstanceManager 
 {
 	private:
-		explicit DatabaseInstanceManager(const control_block_t& aControlBlock);
-		DatabaseInstanceManager(const DatabaseInstanceManager&) = delete;
+		explicit DatabaseInstanceManager();
+        explicit DatabaseInstanceManager(const DatabaseInstanceManager&) = delete;
+        explicit DatabaseInstanceManager(DatabaseInstanceManager&&) = delete;
 		DatabaseInstanceManager &operator=(const DatabaseInstanceManager&) = delete;
+		DatabaseInstanceManager &operator=(DatabaseInstanceManager&&) = delete;
 		~DatabaseInstanceManager();
 
 	public:
@@ -34,13 +36,15 @@ class DatabaseInstanceManager
 		 *
 		 *  @return reference to the only PartitionManager instance
 		 */
-		static DatabaseInstanceManager& getInstance(const control_block_t& aControlBlock) {
-			static DatabaseInstanceManager lDBIM_Instance(aControlBlock);
+		static DatabaseInstanceManager& getInstance() {
+			static DatabaseInstanceManager lDBIM_Instance;
 			return lDBIM_Instance;
 		}
 
+        void init(const bool aInstall, const CB& aControlBlock);
+
 	public:
-		void install();
+		void install(std::string aPath, uint aGrowthIndicator);
 		void boot();
 		void shutdown();
 
@@ -53,35 +57,41 @@ class DatabaseInstanceManager
 		void load(std::vector<T_TupleType>& aTuples, const uint aIndex);
 		template<typename T_TupleType> //probably of no use, physical tuples allways up to date. BufMngr.flushall should be enough
 		void store(std::vector<T_TupleType>& aTuples, const uint aIndex);
-		void loadPartitionManager(); //called in boot, loads the PartMngr from the master part
-		void loadSegmentManager(); //called in boot, loads the SegMngr from the master part
-
+	
 	private:
-        PartitionFile _masterPartition;
+        PartitionFile* _masterPartition;
 		PartitionManager& _partMngr;
 		SegmentManager& _segMngr;
         uint _partIndex; //Index of first segment storing pages with partition tuples, should be 1
         uint _segIndex; //Index of first segment storing pages with segment tuples, should be 2
+        const CB* _cb;
+        bool _init;
 };
 
 template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(_masterPartition, aIndex);
+	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex);
     BCB* lBCB;
     byte* lPage;
     InterpreterSP lInterpreter;
 
     for (uint i = 0; i < lSegments->getNoPages(); ++i)
     {
-      lBCB = lSegments->getPageShared(i);
-      lPage = lSegments->getFramePtr(lBCB);
+        /**#################################################*/
+      //lBCB = lSegments->getPageShared(i);
+      //lPage = lSegments->getFramePtr(lBCB);
+      /**#################################################*/
+
    	  lInterpreter.attach(lPage);  
    	  for (uint j = 0; j < lInterpreter.noRecords(); ++j)
    	  {
         aTuples.push_back((*((T_TupleType*)lInterpreter.getRecord(j))));
    	  }
-        lSegments->unfix(lBCB);
+        /**#################################################*/
+        //lSegments->unfix(lBCB);
+        /**#################################################*/
+
     }
     _segMngr.deleteSegment(lSegments);
 }
@@ -89,7 +99,7 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
 template<typename T_TupleType>
 void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(_masterPartition, aIndex); 
+    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex); 
     int lFreeBytesPerPage = lMasterSeg->getMaxFreeBytes();
     //get size of master segment
     int lCapazIst = lMasterSeg->getNoPages() * ( lFreeBytesPerPage / sizeof(T_TupleType) ) ;
@@ -110,13 +120,13 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
     //get new tuples (tuples always up to date)
     //delete all content of pages
     //write everything on segment
-    byte* lPage = new byte[_masterPartition.getPageSize()];
+    byte* lPage = new byte[_masterPartition->getPageSize()];
     InterpreterSP lInterpreter;
     uint lSegCounter = 0;
     byte* lPos;
     for (uint i = 0; i < lMasterSeg->getNoPages(); ++i)
     {
-   	    lMasterSeg->readPage(lPage, 0);
+           //lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
         lInterpreter.attach(lPage);
         lInterpreter.initNewPage(lPage);   
         while(true){
@@ -131,5 +141,3 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
 	delete[] lPage;
         _segMngr.deleteSegment(lMasterSeg);
 }
-
-#endif

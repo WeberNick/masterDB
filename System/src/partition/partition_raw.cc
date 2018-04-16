@@ -1,9 +1,15 @@
 #include "partition_raw.hh"
 
-PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock) :
+PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock)
 {
 	init();
+}
+
+PartitionRaw::PartitionRaw(part_t aTuple, const CB& aControlBlock):
+	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock)
+{
+	_sizeInPages = retrieveSizeInPages(); 
 }
 
 PartitionRaw::~PartitionRaw(){}

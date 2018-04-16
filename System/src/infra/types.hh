@@ -14,14 +14,14 @@
 #include <mutex>
 #include <shared_mutex>
 
-typedef std::size_t size_t;
-typedef std::byte byte;
-typedef std::vector<byte *> byte_vpt;
-typedef unsigned int uint;
-typedef std::vector<uint> uint_vt;
-typedef std::vector<uint32_t> uint32_vt;
-typedef std::shared_mutex sMtx;
-typedef std::mutex mtx;
+using size_t = std::size_t;
+using byte = std::byte;
+using byte_vpt = std::vector<byte *>;
+using uint = unsigned int;
+using uint_vt = std::vector<uint>;
+using uint32_vt = std::vector<uint32_t>;
+using sMtx = std::shared_mutex;
+using mtx = std::mutex;
 
 constexpr size_t SIZE_T_MAX = std::numeric_limits<size_t>::max();
 
@@ -33,7 +33,6 @@ struct control_block_t
     const size_t        _noBufFrames;
     const bool          _print;
     const bool          _trace;
-
 
     const std::string&  mstrPart() const { return _masterPartition; }
     const std::string&  tracePath() const { return _tracePath; }
@@ -65,7 +64,7 @@ struct part_t
 	uint _pID;
 	std::string _pName;
 	std::string _pPath;
-	int _pType;
+	int _pType;//1:= PartitionFile, 2:=partitionRaw
 	uint _pGrowth;
 };
 using part_vt = std::vector<part_t>;
@@ -75,7 +74,7 @@ struct seg_t
 	uint _sPID; //partition ID
 	uint _sID; //segment ID
 	std::string _sName; //segment name (unique)
-	int _sType; //segment type
+	int _sType; //segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
 	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
 };
 using seg_vt = std::vector<seg_t>;

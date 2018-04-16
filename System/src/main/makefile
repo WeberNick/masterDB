@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++17
+CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
 
 CC = g++
 
@@ -11,6 +11,7 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	db_instance_manager.hh \
 	test.hh \
 	\
 
@@ -22,8 +23,9 @@ DBIM_HDR = \
 
 
 OBJ = \
-	db_instance_manager.o \
 	../infra/args.o \
+	../infra/exception.o \
+	../infra/trace.o \
 	../partition/partition_manager.o \
 	../partition/partition_base.o \
 	../partition/partition_file.o \
@@ -33,7 +35,6 @@ OBJ = \
 	../segment/segment_base.o \
     ../segment/segment_fsm.o \
 	../segment/segment_fsm_sp.o \
-	../segment/segment.o \
 	\
 	../interpreter/interpreter_fsip.o \
 	../interpreter/interpreter_fsm.o \
@@ -43,19 +44,21 @@ OBJ = \
 	../buffer/buf_hash_table.o \
 	../buffer/buf_cntrl_block.o \
 	\
+	db_instance_manager.o \
+	\
 
 ALL = main 
 
 all : $(ALL)
 
-main: db_instance_manager.o main.o $(OBJ)
+main: db_instance_manager.o main.o
 	$(CC) main.o $(OBJ) -o main $(LINKER)
 
 main.o : main.cc $(HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER)
 
 db_instance_manager.o : db_instance_manager.cc $(HDR) $(DBIM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc
 
 clean :
 	rm -f *.o a.out $(ALL)

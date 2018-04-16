@@ -23,13 +23,13 @@
 class InterpreterFSIP {
   public:
     /* standard constructor */
-    InterpreterFSIP();
+    explicit InterpreterFSIP();
     /* If CC and AO are needed, implement them correctly */
-    InterpreterFSIP(const InterpreterFSIP &aInterpreter) = delete;
+    explicit InterpreterFSIP(const InterpreterFSIP&) = delete;
+    explicit InterpreterFSIP(InterpreterFSIP&&) = delete;
     /* specifies the assign operator of a intermediate buffer with delete */
-    InterpreterFSIP &operator=(const InterpreterFSIP &aInterpreter) = delete;
-    /* standard destructor */
-    ~InterpreterFSIP();
+    InterpreterFSIP& operator=(const InterpreterFSIP&) = delete;
+    InterpreterFSIP& operator=(InterpreterFSIP&&) = delete;
 
   public:
     /*	Set page size */
@@ -104,14 +104,17 @@ class InterpreterFSIP {
     void debug(const uint aPageIndex);
 
   private:
+        friend class PartitionBase;
+        /*	size of the page */
+        static size_t _pageSize;
+        /*	Set page size */
+        static void setPageSize(const size_t aPageSize);
+
+  private:
     /*	pointer to the beginning of the page */
     byte *_pp;
     /*	FSIP Header */
     fsip_header_t *_header;
-    /*	if page size is set or not */
-    static bool _pageSizeSet;
-    /*	full size of the page */
-    static uint16_t _pageSize;
 };
 
 void InterpreterFSIP::attach(byte *aPP) {

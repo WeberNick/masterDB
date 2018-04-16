@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -std=c++17
+CXXFLAGS =-O3  -Wall -std=c++17
 
 CC = g++
 

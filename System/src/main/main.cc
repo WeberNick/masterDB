@@ -31,10 +31,13 @@ int main(const int argc, const char *argv[]) {
        print_usage(std::cout, argv[0], lArgDesc);
        return 0;
     }
-    
+
     //Actual programm starts here.     
     try
     {
+        //ich habe keine Ahnung, wie das ganze Einlesen funktioniert, aber diese beiden Parameter sollten auch mit eingelesen werden.
+        std::string masterSegmentSegment = "b";
+        std::string masterSegmentPartitions = "c";
 
         const size_t C_PAGE_SIZE = 4096;
 
@@ -48,19 +51,16 @@ int main(const int argc, const char *argv[]) {
 
         //init all global singletons
         Trace::getInstance().init(lCB);
-
-
-        const std::string C_PATH = lArgs.path();
-        const uint C_GROWTH_INDICATOR = lArgs.growthIndicator();
-
-        InterpreterFSIP::setPageSize(C_PAGE_SIZE);
+        PartitionManager::getInstance().init(lCB);
+        SegmentManager::getInstance().init(lCB);
+        BufferManager::getInstance().init(lCB);
+        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB);
 
 	    /* Test call in test.hh */
         if (lArgs.test()) {
-            test(C_PATH, C_GROWTH_INDICATOR, lCB);
+            test(lCB);
         }
 
-	    DatabaseInstanceManager& lDBIM = DatabaseInstanceManager::getInstance(lCB);
         //boot..
 
         //shutdown

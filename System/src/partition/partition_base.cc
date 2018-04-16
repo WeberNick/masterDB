@@ -10,9 +10,8 @@ PartitionBase::PartitionBase(const std::string aPath, const std::string aName, c
 	_fileDescriptor(-1),
 	_cb(aControlBlock)
 {
+    InterpreterFSIP::setPageSize(aControlBlock.pageSize());
 }
-
-    catch(const OpenFileException& ex){}
 
 PartitionBase::~PartitionBase(){}
 
@@ -78,7 +77,7 @@ void PartitionBase::close()
 	}
 }
 
-int PartitionBase::allocPage()
+uint PartitionBase::allocPage()
 {
 	/*
 	byte* lPagePointer;
@@ -112,10 +111,10 @@ int PartitionBase::allocPage()
 
 	return lAllocatedPageIndex;	//return offset to free block
 */
-	return allocPageForce();
+    return allocPageForce();
 }
 
-int PartitionBase::allocPageForce()
+uint PartitionBase::allocPageForce()
 {
 	byte* lPagePointer = new byte[_pageSize];
 	InterpreterFSIP fsip;
@@ -134,23 +133,27 @@ int PartitionBase::allocPageForce()
 		{
 			writePage(lPagePointer, lIndexOfFSIP, _pageSize);
 		} 
-		if(lIndexOfFSIP >= _sizeInPages) return -1;						//Next offset is bigger than the partition
+		if(lIndexOfFSIP >= _sizeInPages) //Next offset is bigger than the partition
+        {
+            const std::string lErrMsg("Error Message"); //change to appropriate msg
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            throw BaseException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); //achnge to approp exc
+        }
 	}
 	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
 	delete[] lPagePointer;
 	return lAllocatedPageIndex;	//return offset to free block
 }
 
-int PartitionBase::freePage(const uint aPageIndex)
+void PartitionBase::freePage(const uint aPageIndex)
 {
 	byte* lPagePointer = new byte[_pageSize];
-	if(readPage(lPagePointer, aPageIndex, _pageSize) == -1){ return -1; }
+	readPage(lPagePointer, aPageIndex, _pageSize);
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);
 	fsip.freePage(aPageIndex);
 	fsip.detach();
 	delete[] lPagePointer;
-	return 0;
 }
 
 void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
@@ -226,7 +229,7 @@ void PartitionBase::init()
 	if(exists())
 	{
         try{ _sizeInPages = retrieveSizeInPages(); }
-        catch(const FileException& ex){ std::cerr << ex.what << std::endl; }
+        catch(const FileException& ex){ std::cerr << ex.what() << std::endl; }
 	}
 	else
 	{

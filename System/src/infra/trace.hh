@@ -11,7 +11,8 @@
  */
 #pragma once
 
-#include "infra/types.hh"
+#include "types.hh"
+#include "exception.hh"
 #include <string>
 #include <fstream>
 #include <ctime>

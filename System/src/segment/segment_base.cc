@@ -7,10 +7,10 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const
     _partition(aPartition),
     _cb(aControlBlock)
 {
-	if (_partition.open() == -1) { /* error handling */ }
+	_partition.open();
 	int lSegmentIndex = _partition.allocPage();
 	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
-	if (_partition.close() == -1) { /* error handling */ }
+	_partition.close();
 
   //no need to init pages, will be done in store.
 }
@@ -33,7 +33,7 @@ byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
     else if(aMode == kSHARED)
         return getPageS(aPageNo);
     else if(aMode == kEXCLUSIVE)
-        return getPageX($`aPageNo`);
+        return getPageX(aPageNo);
     else 
         return nullptr;
 }
@@ -64,7 +64,7 @@ void SegmentBase::releasePage(const uint aPageNo)
                 break;
             default:
                 const std::string lErrMsg("Lock type not supported");
- 55             if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
                 throw SwitchException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
                 break;    
         }

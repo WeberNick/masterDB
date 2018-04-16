@@ -16,7 +16,7 @@ void construct_arg_desc(argdesc_vt& x) {
 	x.push_back( new uarg_t("--segment-index-page", 1, &Args::segmentIndexPage, "the page index where to store the segment manager"));
 	x.push_back( new uarg_t("--frames", 100000, &Args::bufferFrames, "the size of the buffer pool (frames = no pages managed by buffer manager)"));
 	x.push_back( new sarg_t("--master", "no default", &Args::masterPartition, "path to master partition"));
-	x.push_back( new sarg_t("--trace-path", "../logs/", &Args::tracePath, "path to log files"));
+    x.push_back( new sarg_t("--trace-path", "../logs/", &Args::tracePath, "path to log files"));
 }
 
 Args::Args() : 	

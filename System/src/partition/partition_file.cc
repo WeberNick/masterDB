@@ -1,10 +1,16 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPartitionID, const uint aGrowthIndicator, const control_block_t& aControlBlock) :
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPartitionID, const uint aGrowthIndicator, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
 	 init();
+}
+PartitionFile::PartitionFile(part_t aTuple, const CB& aControlBlock):
+	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock),
+	_growthIndicator(aTuple._pGrowth)
+{
+    _sizeInPages = retrieveSizeInPages();
 }
 
 PartitionFile::~PartitionFile()
@@ -35,13 +41,13 @@ void PartitionFile::remove()
 		}
 		else
 		{
-            std::cerr << "No file partition at " + _partPath << std::endl;
+            std::cerr << "No file partition at " + _partitionPath << std::endl;
             return;
 		}
 	}
 	else
 	{
-        std::cerr << "No file exists at " + _partPath << std::endl;
+        std::cerr << "No file exists at " + _partitionPath << std::endl;
         return;
 	}
 }

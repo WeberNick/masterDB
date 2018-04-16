@@ -46,17 +46,11 @@ class Args {
     inline const uint bufferFrames() { return _noBufFrames; }
     inline void bufferFrames(const uint &x) { _noBufFrames = x; }
 
-    inline const uint partitionSizeInPages() { return _partitionSize; }
-    inline void partitionSizeInPages(const uint &x) { _partitionSize = x; }
-
-    inline const uint growthIndicator() { return _growthIndicator; }
-    inline void growthIndicator(const uint &x) { _growthIndicator = x; }
-
     inline const std::string masterPartition() { return _masterPartition; }
     inline void masterPartition(const std::string &x) { _masterPartition = x; }
     
     inline const std::string tracePath() { return _tracePath; }
-    inline void path(const std::string &x) { _tracePath = x; }
+    inline void tracePath(const std::string &x) { _tracePath = x; }
 
 
   private:

@@ -6,8 +6,7 @@
  *  @todos	Implement all functionalities
  *  @section TBD
  */
-#ifndef PARTITION_RAW_HH
-#define PARTITION_RAW_HH
+#pragma once
 
 #include "partition_base.hh"
 
@@ -15,25 +14,24 @@ class PartitionRaw : public PartitionBase
 {
 	private:
 		friend class PartitionManager;
-		explicit PartitionRaw(const std::string aPath, const std::string aName, const uint aPartitionID, const control_block_t& aControlBlock);
-		PartitionRaw(const PartitionRaw& aPartition) = delete;
-		PartitionRaw& operator=(const PartitionRaw& aPartition) = delete;
+        explicit PartitionRaw() = delete;
+		explicit PartitionRaw(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock);
+		explicit PartitionRaw(part_t aTuple, const CB& aControlBlock);
+		explicit PartitionRaw(const PartitionRaw&) = delete;
+        explicit PartitionRaw(PartitionRaw&&) = delete;
+		PartitionRaw& operator=(const PartitionRaw&) = delete;
+        PartitionRaw& operator=(PartitionRaw&&) = delete;
 		~PartitionRaw();
 
 	public:
 	    /**
 	     *	@brief 	formats the raw partition	
-	     *	@return	0 if successful, -1 on failure
 	     */
 	    void create();
 
 	    /**
 	     *	@brief	does currently nothing
-	     *	@return	0 if successful, -1 on failure
 	     */
 	    void remove();
 
 };
-
-
-#endif

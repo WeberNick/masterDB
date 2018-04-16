@@ -7,18 +7,18 @@
  *  @section TBD
  */
 
-#ifndef SEGMENT_MANAGER_HH
-#define SEGMENT_MANAGER_HH
+#pragma once
 
 #include "infra/types.hh"
+#include "infra/exception.hh"
+#include "infra/trace.hh"
 #include "infra/header_structs.hh"
+#include "partition/partition_manager.hh"
 #include "partition/partition_base.hh"
 #include "partition/partition_file.hh"
 #include "segment_base.hh"
-#include "segment.hh"
 #include "segment_fsm.hh"
 #include "segment_fsm_sp.hh"
-#include "partition/partition_manager.hh"
 #include "buffer/buf_mngr.hh"
 #include "buffer/buf_cntrl_block.hh"
 
@@ -28,8 +28,10 @@ class SegmentManager
 {
 	private:
 		explicit SegmentManager();
-		SegmentManager(const SegmentManager& aSegmentManager) = delete;
-		SegmentManager& operator=(const SegmentManager& aSegmentManager) = delete;
+		explicit SegmentManager(const SegmentManager&) = delete;
+        explicit SegmentManager(SegmentManager&&) = delete;
+		SegmentManager& operator=(const SegmentManager&) = delete;
+        SegmentManager& operator=(SegmentManager&&) = delete;
 		~SegmentManager();	         // delete all segments
 
 	public:
@@ -43,6 +45,8 @@ class SegmentManager
             static SegmentManager lSegmentManagerInstance;
             return lSegmentManagerInstance;
         }
+
+        void init(const CB& aControlBlock);
 
 	public:
 		void load(seg_vt& aTuples);
@@ -61,9 +65,14 @@ class SegmentManager
 		void deleteSegment(const std::string aName);
 		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
 
+		int createMasterSegments(PartitionBase* aPartition);
+
+
 	public:
 		inline const uint getNoSegments() { return _segments.size(); }	
-		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }			
+		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }	
+        inline void          setInstalled() {_installed=true;}
+		
 
 
 	private:
@@ -82,6 +91,8 @@ class SegmentManager
 		std::map<std::string, seg_t*> _segmentsByName;
 		/* Stores all segment Tuples*/
 		seg_vt _segmentTuples;
+
+		bool _installed = false; //only true, if installed.
 		
 
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 
@@ -93,6 +104,8 @@ class SegmentManager
 		BufferManager& _BufMngr;
 
 		std::string _masterSegSegs = "segmentMaster"; //name of Master segment containing all segments
-};
 
-#endif
+        const CB*   _cb;
+        bool        _init;
+
+};

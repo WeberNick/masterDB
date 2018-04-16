@@ -1,13 +1,13 @@
 #include "segment_fsm_sp.hh"
 
-SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase &aPartition, BufferManager& aBufMan) :
-    SegmentFSM(aSegID, aPartition, aBufMan)
+SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock) :
+    SegmentFSM(aSegID, aPartition, aControlBlock)
 {
-    
+    InterpreterSP::setPageSize(aControlBlock.pageSize());    
 }
 
-SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, BufferManager& aBufMan) :
-    SegmentFSM(aPartition,aBufMan)
+SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock) :
+    SegmentFSM(aPartition, aControlBlock)
 {}
 
 SegmentFSM_SP::~SegmentFSM_SP() {}
@@ -16,15 +16,15 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	// get page with enough space for the tuple and load it into memory
 	bool a = false;
 	bool& emptyfix = a;
-	pid lPID ={_partition.getID(), getFreePage(aTupleSize,emptyfix)};
+	PID lPID = getFreePage(aTupleSize,emptyfix);
 	BCB* lBCB;
 	if(emptyfix){//the page is new, use different command on buffer
-		lBCB = _BufMngr.emptyfix(lPID);
+		lBCB = BufferManager::getInstance().emptyfix(lPID);
 	}
 	else{
-		lBCB = _BufMngr.fix(lPID);
+		lBCB = BufferManager::getInstance().fix(lPID, kNOLOCK); //correct lock mode?
 	}
-	byte* lBufferPage = _BufMngr.getFramePtr(lBCB);
+	byte* lBufferPage = BufferManager::getInstance().getFramePtr(lBCB);
 
 
 	InterpreterSP lInterpreter;
@@ -47,7 +47,7 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	lInterpreter.detach();
 	lBCB->setModified(true);
 	lBCB->getMtx().unlock();
-	_BufMngr.unfix(lBCB);
+	BufferManager::getInstance().unfix(lBCB);
 
 	return 0;
 }

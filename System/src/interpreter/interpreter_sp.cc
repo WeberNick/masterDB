@@ -1,19 +1,9 @@
 #include "interpreter_sp.hh"
 
-bool InterpreterSP::_pageSizeSet = false;
 size_t InterpreterSP::_pageSize = 4096;
 
-void InterpreterSP::setPageSize(const size_t aPageSize)
-{
-	if(!_pageSizeSet)
-	{
-		_pageSizeSet = !_pageSizeSet;
-		_pageSize = aPageSize;
-	}
-	else
-	{
-		std::cerr << "ERROR: Page size can only be set once" << std::endl;
-	}
+void InterpreterSP::setPageSize(const size_t aPageSize) {
+    _pageSize = aPageSize;
 }
 
 InterpreterSP::InterpreterSP() : _pp(NULL), _header(NULL), _slots(0) 

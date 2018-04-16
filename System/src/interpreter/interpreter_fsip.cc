@@ -1,20 +1,12 @@
 #include "interpreter_fsip.hh"
 
-bool InterpreterFSIP::_pageSizeSet = false;
-uint16_t InterpreterFSIP::_pageSize = 4096;
+size_t InterpreterFSIP::_pageSize = 4096;
 
-void InterpreterFSIP::setPageSize(const uint16_t aPageSize) {
-    if (!_pageSizeSet) {
-        _pageSizeSet = !_pageSizeSet;
-        _pageSize = aPageSize;
-    } else {
-        std::cerr << "ERROR: Page size can only be set once" << std::endl;
-    }
+void InterpreterFSIP::setPageSize(const size_t aPageSize) {
+    _pageSize = aPageSize;
 }
 
 InterpreterFSIP::InterpreterFSIP() : _pp(NULL), _header(NULL) {}
-
-InterpreterFSIP::~InterpreterFSIP() {}
 
 void InterpreterFSIP::detach() {
     _pp = NULL;

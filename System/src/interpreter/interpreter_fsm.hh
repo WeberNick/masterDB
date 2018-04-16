@@ -7,12 +7,12 @@
  *  @todos  change comments (+ insert description for aPageStatus)
  *  @section TBD
  */
-#ifndef INTERPRETER_FSM_HH
-#define INTERPRETER_FSM_HH
-
+#pragma once
+#include "infra/types.hh"
+#include "infra/exception.hh"
+#include "infra/trace.hh"
 #include "infra/bit_intrinsics.hh"
 #include "infra/header_structs.hh"
-#include "infra/types.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -21,19 +21,16 @@
 #include <cmath>
 
 class InterpreterFSM {
-  public:
-    /* standard constructor */
-    InterpreterFSM();
-    /* If CC and AO are needed, implement them correctly */
-    InterpreterFSM(const InterpreterFSM &aInterpreter) = delete;
-    /* specifies the assign operator of a intermediate buffer with delete */
-    InterpreterFSM &operator=(const InterpreterFSM &aInterpreter) = delete;
-    /* standard destructor */
-    ~InterpreterFSM();
 
   public:
-    /*	Set page size */
-    static void setPageSize(const uint16_t aPageSize);
+    /* standard constructor */
+    explicit InterpreterFSM();
+    /* If CC and AO are needed, implement them correctly */
+    explicit InterpreterFSM(const InterpreterFSM&) = delete;
+    explicit InterpreterFSM(InterpreterFSM&&) = delete;
+    /* specifies the assign operator of a intermediate buffer with delete */
+    InterpreterFSM& operator=(const InterpreterFSM&) = delete;
+    InterpreterFSM& operator=(InterpreterFSM&&) = delete;
 
   public:
     /*	set the page pointer and header */
@@ -87,20 +84,22 @@ class InterpreterFSM {
     inline uint32_t getNextFSMPage() { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
     inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
 
+    private:
+        friend class SegmentFSM;
+        /*	size of the page */
+        static size_t _pageSize;
+        /*	Set page size */
+        static void setPageSize(const size_t aPageSize);
+
+
   private:
     /*	pointer to the beginning of the page */
     byte *_pp;
     /*	FSIP Header */
     fsm_header_t *_header;
-    /*	if page size is set or not */
-    static bool _pageSizeSet;
-    /*	full size of the page */
-    static uint16_t _pageSize;
 };
 
 void InterpreterFSM::attach(byte *aPP) {
     _pp = aPP;
     _header = getHeaderPtr();
 }
-
-#endif

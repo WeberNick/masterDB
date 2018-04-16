@@ -28,8 +28,6 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
     }
 }
 
-
-
 BufferManager::BufferManager() :
 	_noFrames(0),
 	_frameSize(0),

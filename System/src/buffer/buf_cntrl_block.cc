@@ -1,6 +1,7 @@
 #include "buf_cntrl_block.hh"
 
-BufferControlBlock::_cb = nullptr;
+const CB* BufferControlBlock::_cb = nullptr;
+
 void BufferControlBlock::setCB(const CB* aControlBlock)
 {
     _cb = aControlBlock;
@@ -35,14 +36,14 @@ void BufferControlBlock::upgradeLock(LOCK_MODE aMode)
                 setLockMode(aMode);  
                 break;
             case kEXCLUSIVE:
-                getMtx().lock;
+                getMtx().lock();
                 setLockMode(aMode);
                 setFixCount(1);
                 setModified(true);
                 break;
             default:
                 const std::string lErrMsg("Lock type not supported");
- 55             if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+                if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
                 throw SwitchException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
                 break;
         }

@@ -21,7 +21,7 @@
 class SegmentBase
 {
     protected:
-        using pages_mt = std::map<uint, std::pair<PID, BCB*>>
+        using pages_mt = std::map<uint, std::pair<PID, BCB*>>;
 
 	protected:
 		friend class SegmentManager;
@@ -60,7 +60,7 @@ class SegmentBase
 
 	public:
 		virtual PID getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
-		inline PID getPageID(uint aPageNo);
+		inline const PID& getPageID(uint aPageNo){ return _pages.at(aPageNo).first; }
 
 	public:
 		inline size_t           getPageSize(){ return _partition.getPageSize(); }

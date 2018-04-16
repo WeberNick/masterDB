@@ -1,8 +1,6 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++17
+CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
 
 CC = g++
-
-LINKER = -lstdc++fs
 
 INCL = -I../.. -I..
 #Header needed by all
@@ -17,6 +15,7 @@ SM_HDR = \
 	../infra/header_structs.hh \
 	../partition/partition_manager.hh \
 	../partition/partition_base.hh \
+	../partition/partition_file.hh \
 	segment_base.hh \
 	segment_fsm.hh \
 	segment_fsm_sp.hh \
@@ -55,19 +54,16 @@ OBJ = \
 all : $(OBJ)
 
 segment_manager.o : segment_manager.cc segment_manager.hh $(HDR) $(SM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_manager.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_manager.cc
 
 segment_base.o : segment_base.cc segment_base.hh $(HDR) $(SB_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_base.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_base.cc
 
 segment_fsm.o : segment_fsm.cc segment_fsm.hh $(HDR) $(SB_HDR) $(SFSM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm.cc
 
 segment_fsm_sp.o : segment_fsm_sp.cc segment_fsm_sp.hh $(HDR) $(SB_HDR) $(SFSM_HDR) $(SSP_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm_sp.cc $(LINKER)
-
-segment.o : segment.cc segment.hh $(HDR) $(S_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) segment.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_fsm_sp.cc
 
 clean :
 	rm -f *.o a.out
