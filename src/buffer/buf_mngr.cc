@@ -126,7 +126,6 @@ BCB* BufferManager::fix(const PID aPageID, LOCK_MODE aMode)
             lNextBCB->getMtx().lock();
             lNextBCB->setLockMode(aMode);
             lNextBCB->setFixCount(1);
-            lNextBCB->setModified(true);
         }
         else std::cerr << "Lock type not supported." << std::endl;
     }

@@ -18,6 +18,7 @@ MAIN_HDR = \
 	\
 
 DBIM_HDR = \
+	../buffer/buf_mngr.hh \
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \
 	../segment/segment_fsm_sp.hh \

@@ -12,6 +12,7 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../buffer/buf_mngr.hh"
 #include "../partition/partition_manager.hh"
 #include "../segment/segment_manager.hh"
 #include "../segment/segment_fsm_sp.hh"
@@ -42,8 +43,8 @@ class DatabaseInstanceManager
 
         void init(const bool aInstall, const CB& aControlBlock);
 
-	public:
-		void install(std::string aPath, uint aGrowthIndicator);
+	private:
+		void install();
 		void boot();
 		void shutdown();
 
@@ -70,29 +71,27 @@ class DatabaseInstanceManager
 template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex);
+    part_t lMasterPartitionTuple = {0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20};
+    PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
+	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
     BCB* lBCB;
     byte* lPage;
     InterpreterSP lInterpreter;
 
     for (uint i = 0; i < lSegments->getNoPages(); ++i)
     {
-        /**#################################################*/
-      //lBCB = lSegments->getPageShared(i);
-      //lPage = lSegments->getFramePtr(lBCB);
-      /**#################################################*/
+        lPage = lSegments->getPage(i, kSHARED);
 
-   	  lInterpreter.attach(lPage);  
-   	  for (uint j = 0; j < lInterpreter.noRecords(); ++j)
-   	  {
-        aTuples.push_back((*((T_TupleType*)lInterpreter.getRecord(j))));
-   	  }
-        /**#################################################*/
-        //lSegments->unfix(lBCB);
-        /**#################################################*/
-
+   	    lInterpreter.attach(lPage);  
+   	    for (uint j = 0; j < lInterpreter.noRecords(); ++j)
+   	    {
+            aTuples.push_back((*((T_TupleType*)lInterpreter.getRecord(j))));
+   	    }
+        
+        lSegments->releasePage(i);
     }
     _segMngr.deleteSegment(lSegments);
+    delete lMasterPart;
 }
 
 template<typename T_TupleType>

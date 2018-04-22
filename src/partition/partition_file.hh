@@ -20,20 +20,17 @@ class PartitionFile : public PartitionBase  {
   private:
     friend class PartitionManager;
     explicit PartitionFile(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const uint aPartitionID, const CB& aControlBlock);
-    PartitionFile(part_t aTuple, const CB& aControlBlock);
+    PartitionFile(const part_t& aTuple, const CB& aControlBlock);
     PartitionFile(const PartitionFile&) = delete;
     PartitionFile &operator=(const PartitionFile&) = delete;
+  public:
     ~PartitionFile();
 
-  public:
+  private:
     void create();
-    void remove();
     void extend(const uint aNoPages);
-
+    void remove();
     void printPage(uint aPageIndex);
-
-  public:
-    inline uint getGrowthIndicator() { return _growthIndicator; }
 
   private:
     /* An indicator how the partition will grow (indicator * block size) */

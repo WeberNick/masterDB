@@ -30,8 +30,8 @@ void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 
-int InterpreterFSM::getFreePage(const PageStatus aPageStatus) {
-    uint i = 0;
+uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) {
+    uint32_t i = 0;
     while (i < _header->_noPages) {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
@@ -52,7 +52,7 @@ int InterpreterFSM::getFreePage(const PageStatus aPageStatus) {
         _header->_noPages++;
         return i;
     } else {
-        return -1; // no free space on this fsm, load or create next
+        return MAX32; // no free space on this fsm, load or create next
     }
 
     // search for page with sufficient free space

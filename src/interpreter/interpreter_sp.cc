@@ -38,7 +38,7 @@ byte* InterpreterSP::addNewRecord(const uint aRecordSize)
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment
 	const uint lTotalSize = lRecordSize + sizeof(slot_t);        // add space for one new slot 
 
-	byte* lResultRecord = 0;
+	byte* lResultRecord = nullptr;
 
 	if(lTotalSize <= freeSpace()) 
 	{

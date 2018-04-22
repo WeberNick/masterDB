@@ -76,7 +76,7 @@ void PartitionBase::close()
 	}
 }
 
-uint PartitionBase::allocPage()
+uint32_t PartitionBase::allocPage()
 {
 	/*
 	byte* lPagePointer;
@@ -113,7 +113,7 @@ uint PartitionBase::allocPage()
     return allocPageForce();
 }
 
-uint PartitionBase::allocPageForce()
+uint32_t PartitionBase::allocPageForce()
 {
 	byte* lPagePointer = new byte[_pageSize];
 	InterpreterFSIP fsip;
@@ -134,7 +134,7 @@ uint PartitionBase::allocPageForce()
 		} 
 		if(lIndexOfFSIP >= _sizeInPages) //Next offset is bigger than the partition
         {
-            const std::string lErrMsg("Error Message"); //change to appropriate msg
+            const std::string lErrMsg("The partition is full. Not able to allocate a new free page"); //change to appropriate msg
             if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
             throw BaseException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); //achnge to approp exc
         }

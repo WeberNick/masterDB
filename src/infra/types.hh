@@ -24,6 +24,8 @@ using sMtx = std::shared_mutex;
 using mtx = std::mutex;
 
 constexpr size_t INVALID = std::numeric_limits<size_t>::max();
+constexpr uint32_t MAX32 =  std::numeric_limits<uint32_t>::max();
+
 
 struct control_block_t
 {

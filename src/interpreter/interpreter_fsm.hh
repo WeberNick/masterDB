@@ -8,11 +8,11 @@
  *  @section TBD
  */
 #pragma once
-#include "infra/types.hh"
-#include "infra/exception.hh"
-#include "infra/trace.hh"
-#include "infra/bit_intrinsics.hh"
-#include "infra/header_structs.hh"
+#include "../infra/types.hh"
+#include "../infra/exception.hh"
+#include "../infra/trace.hh"
+#include "../infra/bit_intrinsics.hh"
+#include "../infra/header_structs.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -57,7 +57,7 @@ class InterpreterFSM {
      *
      * 	@return either an offset to the free block or -1 if no free block was found
      */
-    int getFreePage(const PageStatus aPageStatus);
+    uint32_t getFreePage(const PageStatus aPageStatus);
 
     /**
      *	@brief	change the status of page at the given logical position within the segment
@@ -83,6 +83,7 @@ class InterpreterFSM {
     inline byte *pagePtr() { return _pp; }
     inline uint32_t getNextFSMPage() { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
     inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
+    inline uint getMaxPagesPerFSM(){ return (_pageSize - sizeof(fsm_header_t)) * 2; }
 
     private:
         friend class SegmentFSM;

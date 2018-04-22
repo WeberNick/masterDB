@@ -21,7 +21,8 @@
 class SegmentBase
 {
     protected:
-        using pages_mt = std::map<uint, std::pair<PID, BCB*>>;
+        using page_t = std::pair<PID, BCB*>;
+        using pages_vt = std::vector<page_t>;
 
 	protected:
 		friend class SegmentManager;
@@ -56,7 +57,7 @@ class SegmentBase
          * @param   aPageNo: the (logical) page number to release
          * @see     buf_mngr.hh
          */
-        void releasePage(const uint aPageNo);
+        void releasePage(const uint aPageNo, const bool aModified = false);
 
 	public:
 		virtual PID getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
@@ -73,8 +74,8 @@ class SegmentBase
 		
 
 	protected:
-		virtual int storeSegment() = 0;                          // serialization
-		virtual int loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
+		virtual void storeSegment() = 0;                          // serialization
+		virtual void loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
 
     private:
         byte* getPageF(const uint aPageNo);
@@ -87,8 +88,9 @@ class SegmentBase
 		/* Contains index pages which contain addresses of pages belonging to the segment (for serialization purposes). First element is considered as masterPageIndex */
 		uint32_vt       _indexPages;
 		/* A map containing all page ID's and their corresponding buffer control block */
-        pages_mt        _pages;
+        pages_vt        _pages;
 		/* Partition the Segment belongs to */
 		PartitionBase&  _partition;
+        BufferManager&  _bufMan;
         const CB&       _cb;
 };

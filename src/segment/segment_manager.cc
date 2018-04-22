@@ -10,6 +10,7 @@ SegmentManager::SegmentManager() :
     /* REMOVE THIS MAGIC NUMBER AS SOON A SOLUTION IS FOUND */
     _maxSegmentsPerPage((4096 - sizeof(segment_index_header_t)) / sizeof(uint32_t)), //number of pages one segment page can manage
     _BufMngr( BufferManager::getInstance()),
+    _masterSegSegName("SegmentMasterSegment"),
     _cb(nullptr),
     _init(false)
 {   }
@@ -63,7 +64,7 @@ void SegmentManager::createSegmentSub(seg_t aSegT){
     _segmentsByID[aSegT._sID]=&_segmentTuples[_segmentTuples.size()-1];
     _segmentsByName[aSegT._sName]=&_segmentTuples[_segmentTuples.size()-1];
 
-    SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_segmentsByName[_masterSegSegs]->_sID);
+    SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_segmentsByName[_masterSegSegName]->_sID);
     lSegments->insertTuple((byte*) &aSegT,sizeof(seg_t));
 }
 
@@ -90,7 +91,7 @@ void SegmentManager::deleteSegment(const uint16_t aID)
     }
     seg_t* seg = _segmentsByID[aID];
     //delete tuple on disk
-    deleteTupelPhysically(_masterSegSegs,aID,0);
+    deleteTupelPhysically(_masterSegSegName,aID,0);
 
     //delete tuple in memory
     _segmentsByName.erase(seg->_sName);
@@ -211,26 +212,20 @@ void SegmentManager::storeSegments()
     }
 }
 
-int SegmentManager::createMasterSegments(PartitionBase* aPartition){
-    if(_installed){
-        //printErr("already installed");
-        //use tracing
-        return -1;
-    }
+void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::string& aName){
    //create 2 Master Segments
    //MasterSegParts
      SegmentFSM_SP* lPSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lPSeg->getID()] = lPSeg;
-    seg_t lPSegT ={aPartition->getID(), lPSeg->getID(),	_masterSegSegs,2,  lPSeg->getIndexPages().at(0)};
+    seg_t lPSegT ={aPartition->getID(), lPSeg->getID(),	aName, 2,  lPSeg->getIndexPages().at(0)};
     //MasterSegSegs
       SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lSSeg->getID()] = lSSeg;
-    seg_t lSSegT ={aPartition->getID(), lSSeg->getID(),	_masterSegSegs,2,  lSSeg->getIndexPages().at(0)};
+    seg_t lSSegT ={aPartition->getID(), lSSeg->getID(),	_masterSegSegName, 2,  lSSeg->getIndexPages().at(0)};
 
     //store them into Segment Master
     createSegmentSub(lPSegT);
     createSegmentSub(lSSegT);
-    return 1;
 }
 
 

@@ -14,28 +14,33 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
 
 
 DatabaseInstanceManager::~DatabaseInstanceManager()
-{}
+{
+    shutdown();
+}
 
 void DatabaseInstanceManager::init(const bool aInstall, const CB& aControlBlock)
 {
     if(!_init)
     {
+        _cb = &aControlBlock;
         if(aInstall)
         {
-            //install...
+            install();
         }
-        _masterPartition = nullptr; //change to actual master partition file
-        _cb = &aControlBlock;
+        else
+        {
+            boot();
+        }
         _init = true;
     }
 }
 
 
-void DatabaseInstanceManager::install(std::string aPath, uint aGrowthIndicator)
+void DatabaseInstanceManager::install()
 {
   part_t lMasterPartitionTuple;
-  PartitionBase* lMaster =   _partMngr.createMasterPartition(aPath,aGrowthIndicator,lMasterPartitionTuple);
-  _segMngr.createMasterSegments(lMaster);
+  _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 20,lMasterPartitionTuple);
+  _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
   _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
 }
 
@@ -45,22 +50,17 @@ void DatabaseInstanceManager::boot()
   seg_vt aSegmentTuples;
   load<part_t>(aPartitionTuples, _partIndex);
   load<seg_t>(aSegmentTuples, _segIndex);
-
+    
   _partMngr.load(aPartitionTuples);
   _segMngr.load(aSegmentTuples);
-
-  //set installed
-  _partMngr.setInstalled();
-  _segMngr.setInstalled();
-
+  _masterPartition = (PartitionFile*)_partMngr.getPartition(_partMngr._masterPartName);
 }
 
 void DatabaseInstanceManager::shutdown()
 {
   //stop transactions
-  //SegMan.storeSegemnts()
-  //BufMan.flushAll()
-
+    _segMngr.storeSegments();
+    BufferManager::getInstance().flushAll();
 }
 
 

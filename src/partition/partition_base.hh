@@ -45,15 +45,17 @@ namespace fs = std::experimental::filesystem;
 const uint64_t LSN = 0;
 
 class PartitionBase {
-  protected:
-    friend class PartitionManager;
-    explicit PartitionBase() = delete;
-    explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock);
-    explicit PartitionBase(const PartitionBase&) = delete;
-    explicit PartitionBase(PartitionBase&&) = delete;
-    PartitionBase& operator=(const PartitionBase&) = delete;
-    PartitionBase& operator=(PartitionBase&&) = delete;
-    virtual ~PartitionBase() = 0;
+    protected:
+        friend class PartitionManager;
+        explicit PartitionBase() = delete;
+        explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock);
+        explicit PartitionBase(const PartitionBase&) = delete;
+        explicit PartitionBase(PartitionBase&&) = delete;
+        PartitionBase& operator=(const PartitionBase&) = delete;
+        PartitionBase& operator=(PartitionBase&&) = delete;
+
+    public:
+        virtual ~PartitionBase() = 0;
 
   public:
     void format();
@@ -71,17 +73,16 @@ class PartitionBase {
 
     /**
      *  @brief  allocates a free page
-     *  @return an index to the allocated page, -1 on failure
+     *  @return an index to the allocated page
      */
-    uint allocPage();
+    uint32_t allocPage();
 
     //allocPage now makes use of the buffer. This is the old version not using the buffer.
-    uint allocPageForce();
+    uint32_t allocPageForce();
 
     /**
      *  @brief  removes a page
      *  @param  aPageIndex: an index indicating which page to remove
-     *  @return 0 if successful, -1 on failure
      */
     void freePage(const uint aPageIndex);
 
@@ -91,7 +92,6 @@ class PartitionBase {
      *  @param  aBuffer: where to read into
      *  @param  aPageIndex: an index indicating which page to read
      *  @param  aBufferSize: size of the page
-     *  @return 0 if successful, -1 on failure
      */
     void readPage(byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 
@@ -101,7 +101,6 @@ class PartitionBase {
      *  @param  aBuffer: where to write from
      *  @param  aPageIndex: an index indicating which page to write
      *  @param  aBufferSize: size of the page
-     *  @return 0 if successful, -1 on failure
      */
     void writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 

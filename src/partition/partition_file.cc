@@ -4,9 +4,10 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
-	 init();
+    create();
+	init();
 }
-PartitionFile::PartitionFile(part_t aTuple, const CB& aControlBlock):
+PartitionFile::PartitionFile(const part_t& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock),
 	_growthIndicator(aTuple._pGrowth)
 {
