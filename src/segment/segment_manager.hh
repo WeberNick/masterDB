@@ -27,6 +27,7 @@
 class SegmentManager
 {
 	private:
+        friend class DatabaseInstanceManager;
 		explicit SegmentManager();
 		explicit SegmentManager(const SegmentManager&) = delete;
         explicit SegmentManager(SegmentManager&&) = delete;
@@ -63,15 +64,14 @@ class SegmentManager
         void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string aName);
-		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
+		void deleteTupelPhysically (const std::string& aMasterName, uint16_t aID, uint8_t aType);
 
-		int createMasterSegments(PartitionBase* aPartition);
+		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
 
 	public:
-		inline const uint getNoSegments() { return _segments.size(); }	
+		inline uint getNoSegments() { return _segments.size(); }	
 		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }	
-        inline void          setInstalled() {_installed=true;}
 		
 
 
@@ -103,7 +103,7 @@ class SegmentManager
 
 		BufferManager& _BufMngr;
 
-		std::string _masterSegSegs = "segmentMaster"; //name of Master segment containing all segments
+		std::string _masterSegSegName; //name of Master segment containing all segments
 
         const CB*   _cb;
         bool        _init;

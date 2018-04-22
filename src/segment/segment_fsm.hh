@@ -36,8 +36,8 @@ class SegmentFSM : public SegmentBase
     PID getNewPage();
 
   public:
-    int storeSegment();                         // serialization
-    int loadSegment(const uint32_t aPageIndex); // deserialization
+    void storeSegment();                         // serialization
+    void loadSegment(const uint32_t aPageIndex); // deserialization
 
   protected:
     /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */

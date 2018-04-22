@@ -9,10 +9,10 @@
  *  TODO
  */
 #pragma once
-#include "infra/types.hh"
-#include "infra/exception.hh"
-#include "infra/trace.hh"
-#include "infra/header_structs.hh"
+#include "../infra/types.hh"
+#include "../infra/exception.hh"
+#include "../infra/trace.hh"
+#include "../infra/header_structs.hh"
 
 #include <iostream>
 

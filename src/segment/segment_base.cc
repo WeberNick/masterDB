@@ -5,6 +5,7 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const
 	_indexPages(),
     _pages(),
     _partition(aPartition),
+    _bufMan(BufferManager::getInstance()),
     _cb(aControlBlock)
 {
 	_partition.open();
@@ -20,6 +21,7 @@ SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) :
 	_indexPages(),
     _pages(),
     _partition(aPartition),
+    _bufMan(BufferManager::getInstance()),
     _cb(aControlBlock)
 {}
 
@@ -43,11 +45,12 @@ void SegmentBase::writePage(const uint aPageNo)
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
-        BufferManager::getInstance().flush(lBCB);    
+        lBCB->setModified(true);
+        _bufMan.flush(lBCB);    
     }
 }
 
-void SegmentBase::releasePage(const uint aPageNo)
+void SegmentBase::releasePage(const uint aPageNo, const bool aModified)
 {
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
@@ -60,6 +63,7 @@ void SegmentBase::releasePage(const uint aPageNo)
                 lBCB->getMtx().unlock_shared();
                 break;
             case kEXCLUSIVE:
+                lBCB->setModified(aModified);
                 lBCB->getMtx().unlock();
                 break;
             default:
@@ -68,7 +72,7 @@ void SegmentBase::releasePage(const uint aPageNo)
                 throw SwitchException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
                 break;    
         }
-        BufferManager::getInstance().unfix(lBCB);
+        _bufMan.unfix(lBCB);
     }
     lBCB = nullptr;
 }
@@ -80,14 +84,14 @@ byte* SegmentBase::getPageF(const uint aPageNo)
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
-        lBCB = BufferManager::getInstance().fix(lPID, kNOLOCK);
+        lBCB = _bufMan.fix(lPID, kNOLOCK);
     }
     else if(lBCB->getLockMode() < kNOLOCK) //should never occur
     {
         std::cerr << "BCB has lock type 'kNoType', this should not occur!" << std::endl;
         return nullptr;
     }
-    return BufferManager::getInstance().getFramePtr(lBCB);
+    return _bufMan.getFramePtr(lBCB);
 }
 
 byte* SegmentBase::getPageS(const uint aPageNo)
@@ -97,14 +101,14 @@ byte* SegmentBase::getPageS(const uint aPageNo)
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
-        lBCB = BufferManager::getInstance().fix(lPID, kSHARED);
+        lBCB = _bufMan.fix(lPID, kSHARED);
     }
     else
     {
         if(!(kNOLOCK < lBCB->getLockMode())) //check if we have at least a shared lock on BCB
             lBCB->upgradeLock(kSHARED);
     }
-    return BufferManager::getInstance().getFramePtr(lBCB);
+    return _bufMan.getFramePtr(lBCB);
 }
 
 byte* SegmentBase::getPageX(const uint aPageNo)
@@ -114,12 +118,12 @@ byte* SegmentBase::getPageX(const uint aPageNo)
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
-        lBCB = BufferManager::getInstance().fix(lPID, kEXCLUSIVE);
+        lBCB = _bufMan.fix(lPID, kEXCLUSIVE);
     }
     else
     {
         if(lBCB->getLockMode() != kEXCLUSIVE) //check if we have at least a shared lock on BCB
             lBCB->upgradeLock(kEXCLUSIVE);
     }
-    return BufferManager::getInstance().getFramePtr(lBCB);
+    return _bufMan.getFramePtr(lBCB);
 }

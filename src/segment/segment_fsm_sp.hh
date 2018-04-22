@@ -35,15 +35,7 @@ class SegmentFSM_SP : public SegmentFSM
     ~SegmentFSM_SP();
 
   public:
-    int insertTuple(byte* aTuple, const uint aTupleSize);
-    int insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
+    void insertTuple(byte* aTuple, const uint aTupleSize);
+    void insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
     int getMaxFreeBytes() { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
-
- /* public:
-    int storeSegment();                         // serialization
-    int loadSegment(const uint32_t aPageIndex); // deserialization
-    to my knowledge no need for special methods here. (Jonas)
-*/
-  private:
-    //todo sp specific
 };

@@ -10,6 +10,12 @@
 #include <iostream>
 #include <cstdlib>
 
+
+/***********************************************************************
+*  todo: test install, boot, (shutdown), buf manager, and everything  *
+***********************************************************************/
+
+
 /* Pass path to partition as argument when executing!
    
    Print Overview:
@@ -36,11 +42,8 @@ int main(const int argc, const char* argv[]) {
     }
 
     //Actual programm starts here.     
-    try {
-        //ich habe keine Ahnung, wie das ganze Einlesen funktioniert, aber diese beiden Parameter sollten auch mit eingelesen werden.
-        std::string masterSegmentSegment = "b";
-        std::string masterSegmentPartitions = "c";
-
+    try
+    {
         const size_t C_PAGE_SIZE = 4096;
 
         const control_block_t lCB = {
@@ -56,16 +59,20 @@ int main(const int argc, const char* argv[]) {
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
-        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB);
+        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
 
 	    // Test call in test.hh
         if (lArgs.test()) {
+            std::cout << "test." << std::endl;
             test(lCB);
         }
+<<<<<<< HEAD
 
         //boot..
 
         //shutdown..
+=======
+>>>>>>> d4969aaa2c96ff341d504181b212a8886162daab
     
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;

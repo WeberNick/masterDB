@@ -27,8 +27,12 @@ void InterpreterSP::initNewPage(byte* aPP)
 		header()->_unused1 = 0;
 		header()->_unused2 = 0;
 		
-		aPP+=header()->_nextFreeSpace;
-		*((freeSpaceList_t*) aPP)=freeSpaceList_t{0, (uint16_t) _pageSize - sizeof(sp_header_t)-sizeof(freeSpaceList_t)};
+		aPP += header()->_nextFreeSpace;
+        /*********************************
+        *  Nick: Check this conversion  *
+        *********************************/
+       
+		*((freeSpaceList_t*) aPP) = freeSpaceList_t{0, static_cast<uint16_t>(_pageSize - sizeof(sp_header_t) - sizeof(freeSpaceList_t)) };
 	}
 }
 
@@ -38,7 +42,7 @@ byte* InterpreterSP::addNewRecord(const uint aRecordSize)
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment
 	const uint lTotalSize = lRecordSize + sizeof(slot_t);        // add space for one new slot 
 
-	byte* lResultRecord = 0;
+	byte* lResultRecord = nullptr;
 
 	if(lTotalSize <= freeSpace()) 
 	{

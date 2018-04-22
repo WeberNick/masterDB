@@ -12,20 +12,18 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock)
 
 SegmentFSM_SP::~SegmentFSM_SP() {}
 
-int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
+void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	// get page with enough space for the tuple and load it into memory
-	bool a = false;
-	bool& emptyfix = a;
-	PID lPID = getFreePage(aTupleSize,emptyfix);
+	bool emptyfix = false;
+	PID lPID = getFreePage(aTupleSize, emptyfix);
 	BCB* lBCB;
 	if(emptyfix){//the page is new, use different command on buffer
-		lBCB = BufferManager::getInstance().emptyfix(lPID);
+		lBCB = _bufMan.emptyfix(lPID);
 	}
 	else{
-		lBCB = BufferManager::getInstance().fix(lPID, kNOLOCK); //correct lock mode?
+		lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
 	}
-	byte* lBufferPage = BufferManager::getInstance().getFramePtr(lBCB);
-
+	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
 	//if the page is new, it has to be initialised first.
@@ -38,38 +36,26 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	// if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
 	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTupleSize);
 	
-	if(lFreeTuplePointer == 0) // If true, not enough free space on nsm page => getFreePage buggy
+	if(lFreeTuplePointer == nullptr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
-		std::cerr << "If this is executed, getFreePage() does not work correctly" << std::endl;
-		return -1;
+		const std::string lErrMsg("Not enough free space on nsm page.");
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        throw BaseException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
 	}
 	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); // copy the content of aTuple to the nsm page
 	lInterpreter.detach();
 	lBCB->setModified(true);
 	lBCB->getMtx().unlock();
-	BufferManager::getInstance().unfix(lBCB);
-
-	return 0;
+	_bufMan.unfix(lBCB);
+	const std::string lErrMsg("Inserted tuple successfully.");
+    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
 }
 
-int SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
+void SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
 {
 	for(byte* aTuple: aTuples)
 	{
-		if(insertTuple(aTuple, aTupleSize) == -1) { return -1; }
+		insertTuple(aTuple, aTupleSize);
 	}
-	return 0;
 }
 
-/*int SegmentFSM_SP::loadSegment(const uint32_t aPageIndex) {
-    
-
-    return -1;
-}
-
-int SegmentFSM_SP::storeSegment() {
-    
-
-    return -1;
-}
-*/
