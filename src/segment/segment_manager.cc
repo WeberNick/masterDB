@@ -120,54 +120,42 @@ void SegmentManager::deleteSegment(const std::string aName)
     deleteSegment(_segmentsByName[aName]->_sID);
 }
 
-int SegmentManager::deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType){
+void SegmentManager::deleteTupelPhysically(const std::string& aMasterName, uint16_t aID, uint8_t aType){
     //type=0 if segment, type=1 if partition
 
     //open master Segment by name and load it
     SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_segmentsByName[aMasterName]->_sID);
     byte* lPage;
     InterpreterSP lInterpreter;
-    BCB* lBCB;
 
     //search all pages for tuple
     uint j;
-    for (uint i = 0; i < lSegments->getNoPages(); ++i)
+    for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
-    /*####################################################################*/
-      //lBCB = lSegments->getPageShared(i); //now only call to getPage with lock mode
-      //lPage = lSegments->getFramePtr(lBCB);
-    /*####################################################################*/
+      lPage = lSegments->getPage(i, kSHARED);
 
    	  lInterpreter.attach(lPage);
-      j=0;
+      j = 0;
    	  while( j < lInterpreter.noRecords())
    	  {
         if( deleteTypeChecker( lInterpreter.getRecord(j),aID,aType) ){
             //mark deleted
-            lBCB->getMtx().unlock_shared();
-            lBCB->getMtx().lock();
+            lSegments->getPage(i, kEXCLUSIVE);
             lInterpreter.deleteRecordSoft(j);
-            lBCB->setModified(true);
-            lBCB->getMtx().unlock();
-    /*####################################################################*/
-    //lSegments->unfix(lBCB);
-    /*####################################################################*/
+            lSegments->releasePage(i, true);
             const std::string lErrMsg("Tuple deleted successfully.");
             if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }  
-            return 1;
+            return;
         }
         ++j;
    	  }
-    lBCB->getMtx().unlock_shared();
-    /*####################################################################*/
-    //lSegments->unfix(lBCB);
-    /*####################################################################*/
+    lSegments->releasePage(i);
     }
-    //tuple not found, rtn -1
     const std::string lErrMsg("Deletion of tuple went wrong - tuple not found.");
     if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-    return -1;
+    throw BaseException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
 }
+
 bool SegmentManager::deleteTypeChecker ( byte* aRecord,uint16_t aID,uint8_t aType){
     if(aType==0){//segment
        return ((seg_t*) aRecord)->_sID == aID;

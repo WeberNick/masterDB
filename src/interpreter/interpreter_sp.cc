@@ -27,8 +27,12 @@ void InterpreterSP::initNewPage(byte* aPP)
 		header()->_unused1 = 0;
 		header()->_unused2 = 0;
 		
-		aPP+=header()->_nextFreeSpace;
-		*((freeSpaceList_t*) aPP)=freeSpaceList_t{0, (uint16_t) _pageSize - sizeof(sp_header_t)-sizeof(freeSpaceList_t)};
+		aPP += header()->_nextFreeSpace;
+        /*********************************
+        *  Nick: Check this conversion  *
+        *********************************/
+       
+		*((freeSpaceList_t*) aPP) = freeSpaceList_t{0, static_cast<uint16_t>(_pageSize - sizeof(sp_header_t) - sizeof(freeSpaceList_t)) };
 	}
 }
 

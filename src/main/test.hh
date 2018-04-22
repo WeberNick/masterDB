@@ -5,9 +5,9 @@
 #include "segment/segment_fsm.hh"
 
 void test(const control_block_t& aControlBlock) {
-     std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
+     //std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
 
-    PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
+    //PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
 //	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
 
 }

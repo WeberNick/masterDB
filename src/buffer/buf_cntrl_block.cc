@@ -24,7 +24,7 @@ BufferControlBlock::~BufferControlBlock()
 
 void BufferControlBlock::upgradeLock(LOCK_MODE aMode)
 {
-    if(getLockMode() < aMode) //is upgrade needed?
+    if(getLockMode() <= aMode) //is upgrade needed?
     {
         switch(aMode)
         {
@@ -34,12 +34,17 @@ void BufferControlBlock::upgradeLock(LOCK_MODE aMode)
             case kSHARED:
                 getMtx().lock_shared();
                 setLockMode(aMode);  
+                incrFixCount();
                 break;
             case kEXCLUSIVE:
+                if(getLockMode() == kSHARED)
+                {
+                    getMtx().unlock_shared();
+                    decrFixCount();
+                }
                 getMtx().lock();
                 setLockMode(aMode);
                 setFixCount(1);
-                setModified(true);
                 break;
             default:
                 const std::string lErrMsg("Lock type not supported");

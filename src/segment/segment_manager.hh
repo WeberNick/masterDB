@@ -64,7 +64,7 @@ class SegmentManager
         void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string aName);
-		int deleteTupelPhysically (std::string aMasterName, uint16_t aID, uint8_t aType);
+		void deleteTupelPhysically (const std::string& aMasterName, uint16_t aID, uint8_t aType);
 
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
