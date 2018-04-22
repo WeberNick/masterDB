@@ -40,7 +40,8 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	
 	if(lFreeTuplePointer == 0) // If true, not enough free space on nsm page => getFreePage buggy
 	{
-		std::cerr << "If this is executed, getFreePage() does not work correctly" << std::endl;
+		const std::string lErrMsg("Not enough free space on nsm page.");
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
 		return -1;
 	}
 	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); // copy the content of aTuple to the nsm page
@@ -48,6 +49,9 @@ int SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	lBCB->setModified(true);
 	lBCB->getMtx().unlock();
 	BufferManager::getInstance().unfix(lBCB);
+
+	const std::string lErrMsg("Inserted tuple successfully.");
+    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
 
 	return 0;
 }

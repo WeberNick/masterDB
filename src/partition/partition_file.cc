@@ -20,7 +20,8 @@ void PartitionFile::create()
 {
 	if(exists())
 	{
-        std::cerr << "Partition already exists and cannot be created" << std::endl;
+        const std::string lErrMsg("Partition already exists and cannot be created");
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
         return;
     }
 
@@ -41,13 +42,15 @@ void PartitionFile::remove()
 		}
 		else
 		{
-            std::cerr << "No file partition at " + _partitionPath << std::endl;
+            const std::string lErrMsg("No file partition at " + _partitionPath);
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
             return;
 		}
 	}
 	else
 	{
-        std::cerr << "No file exists at " + _partitionPath << std::endl;
+        const std::string lErrMsg("No file exists at " + _partitionPath);
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
         return;
 	}
 }

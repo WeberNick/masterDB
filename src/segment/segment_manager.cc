@@ -48,6 +48,8 @@ SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, std::
     _segments[lSegment->getID()] = lSegment;
     seg_t lSegT ={aPartition.getID(), lSegment->getID(),	aName,1,  lSegment->getIndexPages().at(0) };
     createSegmentSub(lSegT);
+    const std::string lErrMsg("Created new Segment FSM successfully.");
+    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
     return (SegmentFSM*)_segments.at(lSegment->getID());
 }
 SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, std::string aName)
@@ -56,6 +58,8 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
     _segments[lSegment->getID()] = lSegment;
     seg_t lSegT ={aPartition.getID(), lSegment->getID(),	aName,2,  lSegment->getIndexPages().at(0)};
     createSegmentSub(lSegT);
+    const std::string lErrMsg("Created new Segment FSM SP successfully.");
+    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
     return (SegmentFSM_SP*)_segments.at(lSegment->getID());
 }
 void SegmentManager::createSegmentSub(seg_t aSegT){
@@ -106,7 +110,8 @@ void SegmentManager::deleteSegment(const uint16_t aID)
             break;
         }
     }
-  }
+    const std::string lErrMsg("Deleted segment successfully.");
+    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }  }
 
 void SegmentManager::deleteSegment(const std::string aName)
 {
@@ -146,6 +151,8 @@ int SegmentManager::deleteTupelPhysically (std::string aMasterName, uint16_t aID
     /*####################################################################*/
     //lSegments->unfix(lBCB);
     /*####################################################################*/
+            const std::string lErrMsg("Tuple deleted successfully.");
+            if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }  
             return 1;
         }
         ++j;
@@ -156,6 +163,8 @@ int SegmentManager::deleteTupelPhysically (std::string aMasterName, uint16_t aID
     /*####################################################################*/
     }
     //tuple not found, rtn -1
+    const std::string lErrMsg("Deletion of tuple went wrong - tuple not found.");
+    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
     return -1;
 }
 bool SegmentManager::deleteTypeChecker ( byte* aRecord,uint16_t aID,uint8_t aType){
@@ -230,6 +239,8 @@ int SegmentManager::createMasterSegments(PartitionBase* aPartition){
     //store them into Segment Master
     createSegmentSub(lPSegT);
     createSegmentSub(lSSegT);
+    const std::string lErrMsg("Created master segments successfully.");
+    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
     return 1;
 }
 

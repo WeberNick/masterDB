@@ -58,6 +58,7 @@ int main(const int argc, const char *argv[]) {
 
 	    /* Test call in test.hh */
         if (lArgs.test()) {
+            std::cout << "test." << std::endl;
             test(lCB);
         }
 

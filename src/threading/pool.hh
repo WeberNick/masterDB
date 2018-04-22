@@ -26,6 +26,9 @@
 #include <vector>
 
 namespace Pool {
+    /**
+    * Creates a new threadpool for submitting new jobs
+    */
   class ThreadPool
     {
     private:
@@ -102,17 +105,23 @@ namespace Pool {
         };
 
     public:
-   
-        ThreadPool()
-            :ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u)
+        /**
+         * Constructor 
+         */
+        ThreadPool(const CB& aControlBlock):
+            ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u, aControlBlock)
         {
         
         }
-
-        explicit ThreadPool(const std::uint32_t numThreads):
+        
+        /**
+         * Creates all threads for pool
+         */
+        explicit ThreadPool(const std::uint32_t numThreads, const CB& aControlBlock):
             _done(false),
             _workQueue(),
-            _threads()
+            _threads(),
+            _cb(aControlBlock)
         {
             try
             {
@@ -120,10 +129,14 @@ namespace Pool {
                 {
                     _threads.emplace_back(&ThreadPool::worker, this);
                 }
+                const std::string lMsg("All threads started successfully.");
+                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
             }
             catch(...)
             {
                 destroy_all();
+                const std::string lMsg("Creation of threadpool went wrong - all threads destroyed.");
+                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
                 throw;
             }
         }
@@ -143,6 +156,8 @@ namespace Pool {
             destroy_all();
         }
 
+        
+
         /**
          * Submit a job to be run by the thread pool.
          */
@@ -157,6 +172,8 @@ namespace Pool {
             PackagedTask task(std::move(boundTask));
             TaskFuture<ResultType> result(task.get_future());
             _workQueue.push(std::make_unique<TaskType>(std::move(task)));
+            const std::string lMsg("New job submitted to Threadpool.");
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
             return result;
         }
 
@@ -196,11 +213,12 @@ namespace Pool {
         std::atomic_bool _done;
         ThreadQueue<std::unique_ptr<IThreadTask>> _workQueue;
         std::vector<std::thread> _threads;
+        const CB& _cb;
     };
 
-  namespace Default {
+ /* namespace Default {
     inline ThreadPool& getInstance() {
-      static ThreadPool defaultPool;
+      static ThreadPool defaultPool(;
       return defaultPool;
     }
 
@@ -208,7 +226,7 @@ namespace Pool {
     inline auto submitJob(Func&& func, Args&&... args) {
       return getInstance().submit(std::forward<Func>(func), std::forward<Args>(args)...);
     }
-  } // namespace Default
+  } // namespace Default */
 } // namespace Pool
 
 #endif
