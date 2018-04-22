@@ -29,7 +29,7 @@
   #define P_NO_BLOCKS DKIOCGETBLOCKCOUNT 
   #define P_BLOCK_SIZE DKIOCGETBLOCKSIZE 
 #else
-	//unsupported
+	// unsupported
   #define P_NO_BLOCKS 0 
   #define P_BLOCK_SIZE 0 
 #endif

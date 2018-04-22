@@ -16,25 +16,27 @@
    >      indicates print from main
    bold   indicates print from other methods
    normal indicates terminal output (e.g. output from creation of partition with linux command) */
-int main(const int argc, const char *argv[]) {
+int main(const int argc, const char* argv[]) {
     /* Parse Command Line Arguments */
     Args lArgs;
     argdesc_vt lArgDesc;
     construct_arg_desc(lArgDesc);
 
     if (!parse_args<Args>(1, argc, argv, lArgDesc, lArgs)) {
-        std::cerr << "error while parsing arguments." << std::endl;
+        std::cerr << "Error while parsing arguments." << std::endl;
+        return -1;
+    } 
+    if (argc < 2) {
+        std::cerr << "You have to provide at least one argument." << std::endl;
         return -1;
     }
-
-    if (lArgs.help()) {
+    if (lArgs.help() || argc == 0) {
        print_usage(std::cout, argv[0], lArgDesc);
        return 0;
     }
 
     //Actual programm starts here.     
-    try
-    {
+    try {
         //ich habe keine Ahnung, wie das ganze Einlesen funktioniert, aber diese beiden Parameter sollten auch mit eingelesen werden.
         std::string masterSegmentSegment = "b";
         std::string masterSegmentPartitions = "c";
@@ -49,27 +51,23 @@ int main(const int argc, const char *argv[]) {
             lArgs.trace()
         };
 
-        //init all global singletons
+        // init all global singletons
         Trace::getInstance().init(lCB);
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
         DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB);
 
-	    /* Test call in test.hh */
+	    // Test call in test.hh
         if (lArgs.test()) {
             test(lCB);
         }
 
         //boot..
 
-        //shutdown
-
-
+        //shutdown..
     
-    } //Any exceptions from which there is no recover possible, are catched here 
-    catch(const ReturnException& ex)
-    {
+    } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }

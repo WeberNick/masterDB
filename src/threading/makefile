@@ -8,6 +8,7 @@ LINKER = \
 	\
 
 INCL = -I../.. -I..
+
 #Header needed by all
 HDR = \
 	../infra/types.hh \
@@ -16,7 +17,6 @@ HDR = \
 OBJ = \
 	queue.o \
 	pool.o \
-
 
 all : $(OBJ)
 

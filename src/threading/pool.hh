@@ -9,9 +9,6 @@
 
 #pragma once
 
-#ifndef POOL_HH
-#define POOL_HH
-
 #include "queue.hh"
 
 #include <algorithm>
@@ -26,30 +23,26 @@
 #include <vector>
 
 namespace Pool {
-  class ThreadPool
-    {
-    private:
-        class IThreadTask
-        {
-        public:
+    class ThreadPool {
+      private:
+        class IThreadTask {
+          public:
             IThreadTask() = default;
             virtual ~IThreadTask() = default;
             IThreadTask(const IThreadTask& rhs) = delete;
             IThreadTask& operator=(const IThreadTask& rhs) = delete;
             IThreadTask(IThreadTask&& other) = default;
             IThreadTask& operator=(IThreadTask&& other) = default;
-            
+
             virtual void execute() = 0;
         };
 
         template <typename Func>
-        class ThreadTask: public IThreadTask
-        {
-        public:
-            ThreadTask(Func&& func)
-                :_func(std::move(func))
-            {
-            }
+        class ThreadTask : public IThreadTask {
+          public:
+            ThreadTask(Func&& func) : 
+                _func(std::move(func))
+            {}
 
             ~ThreadTask() override = default;
             ThreadTask(const ThreadTask& rhs) = delete;
@@ -57,12 +50,9 @@ namespace Pool {
             ThreadTask(ThreadTask&& other) = default;
             ThreadTask& operator=(ThreadTask&& other) = default;
 
-            void execute() override
-            {
-                _func();
-            }
+            void execute() override { _func(); }
 
-        private:
+          private:
             Func _func;
         };
 
@@ -77,52 +67,41 @@ namespace Pool {
         public:
             TaskFuture(std::future<T>&& future)
                 :_future(std::move(future))
-            {
-            }
+            {}
 
             TaskFuture(const TaskFuture& rhs) = delete;
             TaskFuture& operator=(const TaskFuture& rhs) = delete;
             TaskFuture(TaskFuture&& other) = default;
             TaskFuture& operator=(TaskFuture&& other) = default;
-            ~TaskFuture()
-            {
-                if(_future.valid())
-                {
+            ~TaskFuture() {
+                if(_future.valid()) {
                     _future.get();
                 }
             }
 
-            auto get()
-            {
+            auto get() {
                 return _future.get();
             }
 
-            private:
+          private:
             std::future<T> _future;
         };
 
-    public:
-   
+      public:
         ThreadPool()
-            :ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u)
-        {
-        
-        }
+            : ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u)
+        {}
 
-        explicit ThreadPool(const std::uint32_t numThreads):
+        explicit ThreadPool(const std::uint32_t numThreads) :
             _done(false),
             _workQueue(),
             _threads()
         {
-            try
-            {
-                for(std::uint32_t i = 0u; i < numThreads; ++i)
-                {
+            try {
+                for (std::uint32_t i = 0u; i < numThreads; ++i) {
                     _threads.emplace_back(&ThreadPool::worker, this);
                 }
-            }
-            catch(...)
-            {
+            } catch (...) {
                 destroy_all();
                 throw;
             }
@@ -147,30 +126,26 @@ namespace Pool {
          * Submit a job to be run by the thread pool.
          */
         template <typename Func, typename... Args>
-        auto submit(Func&& func, Args&&... args)
-        {
+        auto submit(Func&& func, Args&&... args) {
             auto boundTask = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
             using ResultType = std::result_of_t<decltype(boundTask)()>;
             using PackagedTask = std::packaged_task<ResultType()>;
             using TaskType = ThreadTask<PackagedTask>;
-            
+
             PackagedTask task(std::move(boundTask));
             TaskFuture<ResultType> result(task.get_future());
             _workQueue.push(std::make_unique<TaskType>(std::move(task)));
             return result;
         }
 
-        private:
+      private:
         /**
          * Constantly running function each thread uses to acquire work items from the queue.
          */
-        void worker()
-        {
-            while(!_done)
-            {
+        void worker() {
+            while (!_done) {
                 std::unique_ptr<IThreadTask> pTask(nullptr);
-                if(_workQueue.waitPop(pTask))
-                {
+                if (_workQueue.waitPop(pTask)) {
                     pTask->execute();
                 }
             }
@@ -179,36 +154,31 @@ namespace Pool {
         /**
          * Invalidates the queue and joins all running threads.
          */
-        void destroy_all()
-        {
+        void destroy_all() {
             _done = true;
             _workQueue.invalidate();
-            for(auto& thread : _threads)
-            {
-                if(thread.joinable())
-                {
+            for (auto& thread : _threads) {
+                if (thread.joinable()) {
                     thread.join();
                 }
             }
         }
 
-    private:
+      private:
         std::atomic_bool _done;
         ThreadQueue<std::unique_ptr<IThreadTask>> _workQueue;
         std::vector<std::thread> _threads;
     };
 
-  namespace Default {
-    inline ThreadPool& getInstance() {
-      static ThreadPool defaultPool;
-      return defaultPool;
-    }
+    namespace Default {
+        inline ThreadPool& getInstance() {
+            static ThreadPool defaultPool;
+            return defaultPool;
+        }
 
-    template <typename Func, typename... Args>
-    inline auto submitJob(Func&& func, Args&&... args) {
-      return getInstance().submit(std::forward<Func>(func), std::forward<Args>(args)...);
-    }
-  } // namespace Default
+        template <typename Func, typename... Args>
+        inline auto submitJob(Func&& func, Args&&... args) {
+            return getInstance().submit(std::forward<Func>(func), std::forward<Args>(args)...);
+        }
+    } // namespace Default
 } // namespace Pool
-
-#endif

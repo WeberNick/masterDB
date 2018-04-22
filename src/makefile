@@ -8,7 +8,6 @@ DIRECTORIES = \
 	main \
 	\
 
-
 all:
 	for dir in $(DIRECTORIES); do \
 		(cd $$dir; $(MAKE) all); \
