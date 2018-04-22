@@ -7,45 +7,38 @@
  * @todos   TBD
  */
 
+#pragma once
+
 #ifndef POOL_HH
 #define POOL_HH
 
 #include "queue.hh"
 
+#include <algorithm>
 #include <atomic>
-#include <future>
-#include <thread>
-#include <vector>
 #include <cstdint>
 #include <functional>
+#include <future>
+#include <memory>
+#include <thread>
 #include <type_traits>
 #include <utility>
-#include <memory>
-#include <algorithm>
+#include <vector>
 
-class ThreadPool {
-  
-  public:
-    ThreadPool();
-    explicit ThreadPool(const std::uint32_t numThreads);
-    ThreadPool(const ThreadPool& rhs) = delete;
-    ThreadPool& operator=(const ThreadPool& rhs) = delete;
-    ~ThreadPool();
-
-    template <typename Func, typename... Args>
-    auto submit(Func&& func, Args&&... args);
-
-  protected:
-    class IThreadTask
+namespace Pool {
+  class ThreadPool
+    {
+    private:
+        class IThreadTask
         {
         public:
-            IThreadTask(void) = default;
-            virtual ~IThreadTask(void) = default;
+            IThreadTask() = default;
+            virtual ~IThreadTask() = default;
             IThreadTask(const IThreadTask& rhs) = delete;
             IThreadTask& operator=(const IThreadTask& rhs) = delete;
             IThreadTask(IThreadTask&& other) = default;
             IThreadTask& operator=(IThreadTask&& other) = default;
-
+            
             virtual void execute() = 0;
         };
 
@@ -54,17 +47,17 @@ class ThreadPool {
         {
         public:
             ThreadTask(Func&& func)
-                :_func{std::move(func)}
+                :_func(std::move(func))
             {
             }
 
-            ~ThreadTask(void) override = default;
+            ~ThreadTask() override = default;
             ThreadTask(const ThreadTask& rhs) = delete;
             ThreadTask& operator=(const ThreadTask& rhs) = delete;
             ThreadTask(ThreadTask&& other) = default;
             ThreadTask& operator=(ThreadTask&& other) = default;
 
-            inline void execute() override
+            void execute() override
             {
                 _func();
             }
@@ -73,14 +66,149 @@ class ThreadPool {
             Func _func;
         };
 
-  private:
-    void worker_thread();
-    void destroy_all();
+    public:
+        /**
+         * A wrapper around a std::future that adds the behavior of futures returned from std::async.
+         * Specifically, this object will block and wait for execution to finish before going out of scope.
+         */
+        template <typename T>
+        class TaskFuture
+        {
+        public:
+            TaskFuture(std::future<T>&& future)
+                :_future(std::move(future))
+            {
+            }
 
-  private:
-    std::atomic_bool _done;
-    ThreadQueue<std::unique_ptr<IThreadTask>> _queue;
-    std::vector<std::thread> _threads;
-};
+            TaskFuture(const TaskFuture& rhs) = delete;
+            TaskFuture& operator=(const TaskFuture& rhs) = delete;
+            TaskFuture(TaskFuture&& other) = default;
+            TaskFuture& operator=(TaskFuture&& other) = default;
+            ~TaskFuture()
+            {
+                if(_future.valid())
+                {
+                    _future.get();
+                }
+            }
+
+            auto get()
+            {
+                return _future.get();
+            }
+
+            private:
+            std::future<T> _future;
+        };
+
+    public:
+   
+        ThreadPool()
+            :ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u)
+        {
+        
+        }
+
+        explicit ThreadPool(const std::uint32_t numThreads):
+            _done(false),
+            _workQueue(),
+            _threads()
+        {
+            try
+            {
+                for(std::uint32_t i = 0u; i < numThreads; ++i)
+                {
+                    _threads.emplace_back(&ThreadPool::worker, this);
+                }
+            }
+            catch(...)
+            {
+                destroy_all();
+                throw;
+            }
+        }
+
+        ThreadPool(const ThreadPool& rhs) = delete;
+
+        /**
+         * Non-assignable.
+         */
+        ThreadPool& operator=(const ThreadPool& rhs) = delete;
+
+        /**
+         * Destructor.
+         */
+        ~ThreadPool()
+        {
+            destroy_all();
+        }
+
+        /**
+         * Submit a job to be run by the thread pool.
+         */
+        template <typename Func, typename... Args>
+        auto submit(Func&& func, Args&&... args)
+        {
+            auto boundTask = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
+            using ResultType = std::result_of_t<decltype(boundTask)()>;
+            using PackagedTask = std::packaged_task<ResultType()>;
+            using TaskType = ThreadTask<PackagedTask>;
+            
+            PackagedTask task(std::move(boundTask));
+            TaskFuture<ResultType> result(task.get_future());
+            _workQueue.push(std::make_unique<TaskType>(std::move(task)));
+            return result;
+        }
+
+        private:
+        /**
+         * Constantly running function each thread uses to acquire work items from the queue.
+         */
+        void worker()
+        {
+            while(!_done)
+            {
+                std::unique_ptr<IThreadTask> pTask(nullptr);
+                if(_workQueue.waitPop(pTask))
+                {
+                    pTask->execute();
+                }
+            }
+        }
+
+        /**
+         * Invalidates the queue and joins all running threads.
+         */
+        void destroy_all()
+        {
+            _done = true;
+            _workQueue.invalidate();
+            for(auto& thread : _threads)
+            {
+                if(thread.joinable())
+                {
+                    thread.join();
+                }
+            }
+        }
+
+    private:
+        std::atomic_bool _done;
+        ThreadQueue<std::unique_ptr<IThreadTask>> _workQueue;
+        std::vector<std::thread> _threads;
+    };
+
+  namespace Default {
+    inline ThreadPool& getInstance() {
+      static ThreadPool defaultPool;
+      return defaultPool;
+    }
+
+    template <typename Func, typename... Args>
+    inline auto submitJob(Func&& func, Args&&... args) {
+      return getInstance().submit(std::forward<Func>(func), std::forward<Args>(args)...);
+    }
+  } // namespace Default
+} // namespace Pool
 
 #endif

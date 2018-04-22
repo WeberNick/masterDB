@@ -2,7 +2,10 @@ CXXFLAGS = -Wall -Weffc++ -std=c++17
 
 CC = g++
 
-LINKER = -lstdc++fs
+LINKER = \
+	-lstdc++fs \
+	-lpthread \
+	\
 
 INCL = -I../.. -I..
 #Header needed by all
