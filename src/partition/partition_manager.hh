@@ -70,8 +70,8 @@ class PartitionManager
         void  createPartitionSub(const part_t& aParT);
         PartitionFile* createMasterPartition(const part_t& aPart);
         //install functionality
-        PartitionFile*  createMasterPartition(std::string aPath, uint aGrowthIndicator, part_t& aMasterTuple);
-        void            insertMasterPartitionTuple(part_t aMasterTuple);
+        PartitionFile*  createMasterPartition(const std::string& aPath, uint aGrowthIndicator, part_t& aMasterTuple);
+        void            insertMasterPartitionTuple(const part_t& aMasterTuple);
 
     private:
         uint _counterPartitionID;
