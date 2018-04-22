@@ -66,13 +66,6 @@ int main(const int argc, const char* argv[]) {
             std::cout << "test." << std::endl;
             test(lCB);
         }
-<<<<<<< HEAD
-
-        //boot..
-
-        //shutdown..
-=======
->>>>>>> d4969aaa2c96ff341d504181b212a8886162daab
     
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
