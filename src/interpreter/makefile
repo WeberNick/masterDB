@@ -5,7 +5,9 @@ CC = g++
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh
+	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
 	\
 
 OBJ = \
@@ -16,7 +18,7 @@ OBJ = \
 
 all : $(OBJ)
 
-interpreter_fsip.o : interpreter_fsip.cc interpreter_fsip.hh $(HDR)
+interpreter_fsip.o : interpreter_fsip.cc interpreter_fsip.hh $(HDR) ../infra/bit_intrinsics.hh ../infra/header_structs.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) interpreter_fsip.cc
 
 interpreter_fsm.o : interpreter_fsm.cc interpreter_fsm.hh $(HDR)

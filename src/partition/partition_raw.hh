@@ -23,16 +23,30 @@ class PartitionRaw : public PartitionBase
         PartitionRaw& operator=(PartitionRaw&&) = delete;
 
     public:
-		~PartitionRaw();
+		~PartitionRaw() = default;
 
-	public:
+    public:
+        /**
+         *  @brief  Wrapper for call to allocPage in PartitonBase (this handles specific behaviour)
+         *  @return an index to the allocated page
+         *  @see    partition_base.hh
+         */
+        virtual uint32_t allocPage();
+        
+        /**
+        * @brief Retrieves the size of the raw partition
+        */
+        virtual size_t partSize();
+        virtual size_t partSizeInPages();
+
+	private:
 	    /**
 	     *	@brief 	formats the raw partition	
 	     */
 	    void create();
 
 	    /**
-	     *	@brief	does currently nothing
+	     *	@brief	runs format on partition, setting all pages as free
 	     */
 	    void remove();
 

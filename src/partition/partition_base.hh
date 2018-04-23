@@ -44,7 +44,8 @@ namespace fs = std::experimental::filesystem;
 
 const uint64_t LSN = 0;
 
-class PartitionBase {
+class PartitionBase 
+{
     protected:
         friend class PartitionManager;
         explicit PartitionBase() = delete;
@@ -57,75 +58,94 @@ class PartitionBase {
     public:
         virtual ~PartitionBase() = 0;
 
-  public:
-    void format();
-    /**
-     *  @brief  opens the file in read/write mode
-     *  @return an int representing a file descriptor, -1 on failure
-     */
-    void open();
+    public:
+        /**
+         *  @brief  Opens the partition in read/write mode. If the partition is already open, an open counter 
+         *          will be increased
+         *  @throws FileException on failure
+         *  @see    infra/exception.hh
+         */
+        void open();
 
-    /**
-     *  @brief  closes the open file
-     *  @return 0 if successful, -1 on failure
-     */
-    void close();
+        /**
+         *  @brief  Closes the partition. If the open count is greater than 1, it is decreased. Otherwise the
+         *          partition will be closed and the file descriptor is set to -1
+         *  @throws FileException on failure
+         *  @see    infra/exception.hh
+         */
+        void close();
 
-    /**
-     *  @brief  allocates a free page
-     *  @return an index to the allocated page
-     */
-    uint32_t allocPage();
+        /**
+         *  @brief  Allocates a new page in the partition
+         *  @return an index to the allocated page
+         *  @throws 
+         *  @see    interpreter/interpreter_fsip.hh, infra/exception.hh
+         *  @note   doesn't use the buffer manager yet but retrieves its fsips directly
+         */
+        virtual uint32_t allocPage();
 
-    //allocPage now makes use of the buffer. This is the old version not using the buffer.
-    uint32_t allocPageForce();
+        /**
+         *  @brief  Physically remove a page by setting its bit in the fsip
+         *  @param  aPageIndex: an index indicating which page to remove
+         *  @see    interpeter/interpreter_fsip.hh
+         */
+        void freePage(const uint aPageIndex);
 
-    /**
-     *  @brief  removes a page
-     *  @param  aPageIndex: an index indicating which page to remove
-     */
-    void freePage(const uint aPageIndex);
+        /**
+         *  @brief  Read a page from the partition into a main memory buffer
+         *  @param  aBuffer: the buffer to read the page into
+         *  @param  aPageIndex: an index indicating which page to read
+         *  @param  aBufferSize: size of the buffer in bytes
+         *  @throws FileException on failure
+         *  @see    infra/exception.hh
+         */
+        void readPage(byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 
-    /**
-     *  @brief  reads a page
-     *  @param  aFileDescriptor: aFileDescriptor: a file to read
-     *  @param  aBuffer: where to read into
-     *  @param  aPageIndex: an index indicating which page to read
-     *  @param  aBufferSize: size of the page
-     */
-    void readPage(byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
-
-    /**
-     *  @brief  writes a page
-     *  @param  aFileDescriptor: aFileDescriptor: a file to write
-     *  @param  aBuffer: where to write from
-     *  @param  aPageIndex: an index indicating which page to write
-     *  @param  aBufferSize: size of the page
-     */
-    void writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
+        /**
+         *  @brief  Write a page from a main memory buffer on the partition
+         *  @param  aBuffer: where to write from
+         *  @param  aPageIndex: an index indicating which page to write
+         *  @param  aBufferSize: size of the buffer in bytes
+         *  @throws FileException on Failure
+         *  @see    infra/exception.hh
+         */
+        void writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
 
 
-    
-	virtual void create() = 0;
-	virtual void remove() = 0;
 
-  public:
-    inline std::string getPath() { return _partitionPath; }
-    inline std::string getName() { return _partitionName; }
-    inline uint getPageSize() { return _pageSize; }
-    inline uint getSizeInPages() { return _sizeInPages; }
-    inline uint8_t getID() { return _partitionID; }
-    inline uint getOpenCount() { return _openCount; }
+    public:
+        inline std::string getPath() { return _partitionPath; }
+        inline std::string getName() { return _partitionName; }
+        inline uint getPageSize() { return _pageSize; }
+        inline uint getSizeInPages() { return _sizeInPages; }
+        inline uint8_t getID() { return _partitionID; }
+        inline uint getOpenCount() { return _openCount; }
 
-  protected:
-    inline bool exists(){ return fs::exists(_partitionPath); }
-    inline bool isFile(){ return fs::is_regular_file(_partitionPath); }
-    inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
+    protected: 
+        /**
+         *  @brief  Format the partition by initializing its fsip
+         */
+        void format();
 
-  protected:
-    uint retrieveSizeInPages();
-	void init();
-    uint getMaxPagesPerFSIP();
+        /**
+         *  @brief  Physically create the partition. Needs to be implemented by respective partition type
+         *  @see    partition_file.hh, partition_raw.hh
+         */
+        virtual void create() = 0;
+
+        /**
+         *  @brief  Physically removes the partition. Needs to be implemented by respective partition type
+         *  @see    partition_file.hh, partition_raw.hh
+         */
+        virtual void remove() = 0;
+
+    protected:
+        inline bool exists(){ return fs::exists(_partitionPath); }
+        inline bool isFile(){ return fs::is_regular_file(_partitionPath); }
+        inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
+        virtual size_t partSize() = 0;
+        virtual size_t partSizeInPages() = 0;
+        uint getMaxPagesPerFSIP();
 
 
   protected:
@@ -143,6 +163,6 @@ class PartitionBase {
     uint _openCount;
     /* The partitions file descriptor */
     int _fileDescriptor;
-
+    /* Control block containing all specified parameters*/
     const CB& _cb;
 };

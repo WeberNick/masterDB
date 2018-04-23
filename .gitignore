@@ -8,8 +8,8 @@
 *.obj
 
 #Executable Main
-System/util/iomeasure/main
-System/src/main/main
+util/iomeasure/main
+src/main/main
 
 # Precompiled Headers
 *.gch

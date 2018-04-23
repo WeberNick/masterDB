@@ -73,6 +73,29 @@ OutOfMemoryException::OutOfMemoryException(
             "There was insufficient memory to fulfill the allocation request.")
 {}
 
+PartitionFullException::PartitionFullException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            "The partition is full. Can not allocate any new pages.")
+{}
+
+FSIPException::FSIPException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName,
+        const std::string&  aErrorMessage) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            aErrorMessage)
+{}
+
 InvalidArgumentException::InvalidArgumentException(
         const char*         aFileName,
         const unsigned int  aLineNumber,

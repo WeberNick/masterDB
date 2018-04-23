@@ -10,37 +10,10 @@ PartitionBase::PartitionBase(const std::string aPath, const std::string aName, c
 	_fileDescriptor(-1),
 	_cb(aControlBlock)
 {
-    InterpreterFSIP::setPageSize(aControlBlock.pageSize());
+    InterpreterFSIP::init(aControlBlock);
 }
 
 PartitionBase::~PartitionBase(){}
-
-void PartitionBase::format()
-{
-	byte* lPagePointer = new byte[_pageSize];
-	uint lPagesPerFSIP = getMaxPagesPerFSIP();
-	uint lCurrentPageNo = 0;
-	InterpreterFSIP fsip;
-	uint remainingPages = _sizeInPages;
-	uint lNumberOfPagesToManage;
-    open();
-	while(remainingPages > 1)
-	{
-		--remainingPages;
-		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
-		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
-		writePage(lPagePointer, lCurrentPageNo, _pageSize);
-		lCurrentPageNo += (lPagesPerFSIP + 1);
-		remainingPages -= lNumberOfPagesToManage;
-	}
-	fsip.detach();
-	readPage(lPagePointer, LSN, _pageSize);
-	fsip.attach(lPagePointer);
-	writePage(lPagePointer, LSN, _pageSize);
-	close();
-	delete[] lPagePointer;
-}
-
 
 void PartitionBase::open()
 {
@@ -78,6 +51,37 @@ void PartitionBase::close()
 
 uint32_t PartitionBase::allocPage()
 {
+
+	byte* lPagePointer = new byte[_pageSize];
+	InterpreterFSIP fsip;
+	fsip.attach(lPagePointer);
+	uint lIndexOfFSIP = 0;
+	uint32_t lAllocatedPageIndex;
+	do
+	{
+		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
+        try
+        {
+		    lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+        }
+        catch(const FSIPException& ex)
+        {
+			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
+		    if(lIndexOfFSIP >= _sizeInPages) //Next offset is bigger than the partition
+            {
+                const std::string lErrMsg("The partition is full. Can not allocate any new pages.");
+                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+                throw PartitionFullException(__FILE__, __LINE__, __PRETTY_FUNCTION__); 
+            }
+            continue;
+        }
+		writePage(lPagePointer, lIndexOfFSIP, _pageSize);
+        break;
+        //continue will jump here
+	}
+	while(true); //if a free page is found, break will be executed. If not, an exception is thrown
+	delete[] lPagePointer;
+	return lAllocatedPageIndex;	//return offset to free block
 	/*
 	byte* lPagePointer;
 	BufferManager lBufMan;
@@ -110,38 +114,6 @@ uint32_t PartitionBase::allocPage()
 
 	return lAllocatedPageIndex;	//return offset to free block
 */
-    return allocPageForce();
-}
-
-uint32_t PartitionBase::allocPageForce()
-{
-	byte* lPagePointer = new byte[_pageSize];
-	InterpreterFSIP fsip;
-	fsip.attach(lPagePointer);
-	uint lIndexOfFSIP = 0;
-	int lAllocatedPageIndex;
-	do
-	{
-		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
-		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
-		if(lAllocatedPageIndex == -1)
-		{
-			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
-		} 
-		else
-		{
-			writePage(lPagePointer, lIndexOfFSIP, _pageSize);
-		} 
-		if(lIndexOfFSIP >= _sizeInPages) //Next offset is bigger than the partition
-        {
-            const std::string lErrMsg("The partition is full. Not able to allocate a new free page"); //change to appropriate msg
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw BaseException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); //achnge to approp exc
-        }
-	}
-	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
-	delete[] lPagePointer;
-	return lAllocatedPageIndex;	//return offset to free block
 }
 
 void PartitionBase::freePage(const uint aPageIndex)
@@ -175,66 +147,32 @@ void PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const 
 	}
 }
 
-uint PartitionBase::retrieveSizeInPages() //in number of pages 
+void PartitionBase::format()
 {
-    uint lSize = 0;
-	if(isFile())
+	byte* lPagePointer = new byte[_pageSize];
+	const uint lPagesPerFSIP = getMaxPagesPerFSIP();
+	uint lCurrentPageNo = 0;
+	InterpreterFSIP fsip;
+	uint remainingPages = _sizeInPages;
+	uint lNumberOfPagesToManage;
+    open();
+	while(remainingPages > 1)
 	{
-		lSize = fs::file_size(_partitionPath) / _pageSize;
+		--remainingPages;
+		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
+		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
+		writePage(lPagePointer, lCurrentPageNo, _pageSize);
+		lCurrentPageNo += (lPagesPerFSIP + 1);
+		remainingPages -= lNumberOfPagesToManage;
 	}
-	else if(isRawDevice())
-	{
-		int lFileDescriptor = ::open(_partitionPath.c_str(), O_RDONLY);
-   		if(lFileDescriptor == -1) 
-   	 	{
-            const std::string lErrMsg = std::string("An error occured while opening the file: ") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
-        }
-    	uint64_t lSector_count = 0;
-    	uint32_t lSector_size = 0;
-       	if(ioctl(lFileDescriptor, P_NO_BLOCKS, &lSector_count) == -1 || ioctl(lFileDescriptor, P_BLOCK_SIZE, &lSector_size) == -1)
-       	{
-            const std::string lErrMsg = std::string("An error occurred while using ioctl: ") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
-    	}
-       	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
-        if(lDisk_size % _pageSize != 0)
-        {
-            const std::string lErrMsg = std::string("Partition size modulo page size is not equal to zero");
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
-        } 
-        lSize = lDisk_size / _pageSize;
-        if(::close(lFileDescriptor) == -1) //call close in global namespace
-		{
-            const std::string lErrMsg = std::string("An error occured while closing the file: ") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
-		}
-    }
-	else 
-	{
-        const std::string lErrMsg = std::string("Partition type is not supported");
-        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-        throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
-	}
-    return lSize;
+	fsip.detach();
+	readPage(lPagePointer, LSN, _pageSize);
+	fsip.attach(lPagePointer);
+	writePage(lPagePointer, LSN, _pageSize);
+	close();
+	delete[] lPagePointer;
 }
 
-void PartitionBase::init()
-{
-	if(exists())
-	{
-        try{ _sizeInPages = retrieveSizeInPages(); }
-        catch(const FileException& ex){ std::cerr << ex.what() << std::endl; }
-	}
-	else
-	{
-		std::cerr << "Partition does not exist physically yet. You may call the create functionality provided by the partition object." << std::endl;
-	}
-}
 
 uint PartitionBase::getMaxPagesPerFSIP()
 {

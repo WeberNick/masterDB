@@ -11,9 +11,11 @@
 #ifndef INTERPRETER_FSIP_HH
 #define INTERPRETER_FSIP_HH
 
-#include "infra/bit_intrinsics.hh"
-#include "infra/header_structs.hh"
-#include "infra/types.hh"
+#include "../infra/types.hh"
+#include "../infra/exception.hh"
+#include "../infra/trace.hh"
+#include "../infra/bit_intrinsics.hh"
+#include "../infra/header_structs.hh"
 
 #include <fstream>
 #include <iomanip>
@@ -61,18 +63,18 @@ class InterpreterFSIP {
      *	@param	aLSN - Log Sequence Number
      *	@param	aPID - The ID of the partition this page is stored in
      *
-     * 	@return either an offset to the free block or -1 if no free block was found
+     * 	@return an offset to the free block 
+     * 	@throws FSIPException on failure
+     * 	@see    infra/exception.hh
      */
-    int getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID);
+    uint32_t getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID);
 
     /**
      *	@brief	reserve the page at the given index position
-     *
      *	@param	aPageIndex - Page index inside the partition
-     *
-     * 	@return either 0 if successful or -1 if not successful
+     *  @throws FSIPException on failure
      */
-    int reservePage(const uint aPageIndex);
+    void reservePage(const uint aPageIndex);
 
     /**
      *	@brief	free the page at the given index position
@@ -107,8 +109,8 @@ class InterpreterFSIP {
         friend class PartitionBase;
         /*	size of the page */
         static size_t _pageSize;
-        /*	Set page size */
-        static void setPageSize(const size_t aPageSize);
+        static const CB* _cb;
+        static void init(const CB& aControlBlock);
 
   private:
     /*	pointer to the beginning of the page */

@@ -5,30 +5,70 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 	_growthIndicator(aGrowthIndicator)
 {
     create();
-	init();
 }
 PartitionFile::PartitionFile(const part_t& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock),
 	_growthIndicator(aTuple._pGrowth)
 {
-    _sizeInPages = retrieveSizeInPages();
+    if(exists()) _sizeInPages = partSizeInPages();
+    else _sizeInPages = 0;
 }
 
-PartitionFile::~PartitionFile()
-{}
+uint32_t PartitionFile::allocPage()
+{
+    uint32_t lPageIndex = 0;
+    try
+    {
+        lPageIndex = PartitionBase::allocPage();
+    }
+    catch(const PartitionFullException& ex)
+    {
+        try
+        {
+            extend();
+            //extend was successfull
+        }
+        catch(const fs::filesystem_error& fse)
+        {
+            const std::string lTraceMsg = std::string("An Error occured while trying to extend the file size: ") + std::string(fse.what());
+            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
+            throw ex;
+        }
+    }
+    //need to reformat the new pages
+    lPageIndex = PartitionBase::allocPage();
+    return lPageIndex;
+}
+
+size_t PartitionFile::partSize()
+{
+	if(isFile())
+	{
+        return fs::file_size(_partitionPath);
+	}
+    return 0;
+}
+
+size_t PartitionFile::partSizeInPages()
+{
+    return (partSize() / _pageSize);
+}
+
 
 void PartitionFile::create()
 {
 	if(exists())
 	{
-        const std::string lErrMsg("Partition already exists and cannot be created");
-        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        const std::string lTraceMsg("Partition already exists and cannot be created");
+        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
         return;
     }
 
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_growthIndicator);
 	system(lCommand.c_str());
-    _sizeInPages = retrieveSizeInPages(); //may throw
+    _sizeInPages = partSizeInPages(); 
+    const std::string lTraceMsg("File partition was created");
+    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
     format(); //may throw
 }
 
@@ -56,9 +96,12 @@ void PartitionFile::remove()
 	}
 }
 
-void PartitionFile::extend(const uint aNoPages)
+void PartitionFile::extend()
 {
-  //todo 
+    const size_t lNewSize = (_sizeInPages + _growthIndicator) * _pageSize;
+    fs::resize_file(_partitionPath, lNewSize); //will throw if fails
+    _sizeInPages = lNewSize / _pageSize;
+    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Size of file partition was extended"); }
 }
 
 void PartitionFile::printPage(uint aPageIndex)

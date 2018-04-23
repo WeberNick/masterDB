@@ -1,9 +1,11 @@
 #include "interpreter_fsip.hh"
 
-size_t InterpreterFSIP::_pageSize = 4096;
+size_t InterpreterFSIP::_pageSize = 0;
+const CB* InterpreterFSIP::_cb = nullptr;
 
-void InterpreterFSIP::setPageSize(const size_t aPageSize) {
-    _pageSize = aPageSize;
+void InterpreterFSIP::init(const CB& aControlBlock) {
+    _pageSize = aControlBlock.pageSize();
+    _cb = &aControlBlock;
 }
 
 InterpreterFSIP::InterpreterFSIP() : _pp(NULL), _header(NULL) {}
@@ -67,9 +69,11 @@ uint InterpreterFSIP::getNextFreePage() {
 }
 
 // added LSN and PID to param list, pls update header for allocated block
-int InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID) {
+uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID) {
     if (_header->_freeBlocksCount == 0) {
-        return -1;
+        const std::string lErrMsg = std::string("No free pages on this FSIP");
+        if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        throw FSIPException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
     }
     attach(aPP);
     uint32_t lPosFreeBlock = _header->_nextFreePage;
@@ -85,7 +89,7 @@ int InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aP
     return lPosFreeBlock + _header->_basicHeader._pageIndex;
 }
 
-int InterpreterFSIP::reservePage(const uint aPageIndex) {
+void InterpreterFSIP::reservePage(const uint aPageIndex) {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
     uint32_t *lPP = (uint32_t *)_pp;
@@ -97,14 +101,15 @@ int InterpreterFSIP::reservePage(const uint aPageIndex) {
     uint32_t test = *lPP;
     test &= lMask;
     if (test != 0) {
-        return -1;
+        const std::string lErrMsg = std::string("FSIP was not able to reserve the requested page");
+        if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        throw FSIPException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
     }
     // reserve if free
     *lPP = *lPP | (lMask);
     --(_header->_freeBlocksCount);
     _header->_nextFreePage = getNextFreePage();
     // debug(aPageIndex);
-    return 0;
 }
 
 void InterpreterFSIP::freePage(const uint aPageIndex) {

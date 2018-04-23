@@ -74,6 +74,25 @@ class OutOfMemoryException : public BaseException
                 const char*         aFunctionName);
 };
 
+class PartitionFullException : public BaseException
+{
+    public:
+        PartitionFullException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
+class FSIPException : public BaseException
+{
+    public:
+        FSIPException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName,
+                const std::string&  aErrorMessage);
+};
+
 class InvalidArgumentException : public BaseException
 {
 	public:
