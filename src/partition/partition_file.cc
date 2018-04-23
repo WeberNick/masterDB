@@ -31,7 +31,7 @@ uint32_t PartitionFile::allocPage()
         catch(const fs::filesystem_error& fse)
         {
             const std::string lTraceMsg = std::string("An Error occured while trying to extend the file size: ") + std::string(fse.what());
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
+            TRACE(lTraceMsg);
             throw ex;
         }
     }
@@ -60,7 +60,7 @@ void PartitionFile::create()
 	if(exists())
 	{
         const std::string lTraceMsg("Partition already exists and cannot be created");
-        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
+        TRACE(lTraceMsg);
         return;
     }
 
@@ -69,7 +69,7 @@ void PartitionFile::create()
 	system(lCommand.c_str());
     _sizeInPages = partSizeInPages(); 
     const std::string lTraceMsg("File partition was created");
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
+    TRACE(lTraceMsg); 
     format(); //may throw
 }
 
@@ -84,15 +84,15 @@ void PartitionFile::remove()
 		}
 		else
 		{
-            const std::string lErrMsg("No file partition at " + _partitionPath);
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+            const std::string lTraceMsg("No file partition at " + _partitionPath);
+            TRACE(lTraceMsg);
             return;
 		}
 	}
 	else
 	{
-        const std::string lErrMsg("No file exists at " + _partitionPath);
-        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+        const std::string lTraceMsg("No file exists at " + _partitionPath);
+        TRACE(lTraceMsg);
         return;
 	}
 }
@@ -102,7 +102,7 @@ void PartitionFile::extend()
     const size_t lNewSize = (_sizeInPages + _growthIndicator) * _pageSize;
     fs::resize_file(_partitionPath, lNewSize); //will throw if fails
     _sizeInPages = lNewSize / _pageSize;
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Size of file partition was extended"); }
+    TRACE("Size of file partition was extended");
 }
 
 void PartitionFile::printPage(uint aPageIndex)

@@ -15,6 +15,7 @@
 #include <shared_mutex>
 #include <iostream>
 
+
 using size_t = std::size_t;
 using byte = std::byte;
 using byte_vpt = std::vector<byte *>;
@@ -34,14 +35,12 @@ struct control_block_t
     const std::string   _tracePath;
     const size_t        _pageSize;
     const size_t        _noBufFrames;
-    const bool          _print;
     const bool          _trace;
 
     const std::string&  mstrPart() const { return _masterPartition; }
     const std::string&  tracePath() const { return _tracePath; }
     size_t              pageSize() const { return _pageSize; }
     size_t              frames() const { return _noBufFrames; }
-    bool                print() const { return _print; }
     bool                trace() const { return _trace; }
     void printParas() const 
     {
@@ -50,7 +49,6 @@ struct control_block_t
             << "Path of Log File: " << tracePath() << "\n"
             << "Page Size: " << pageSize() << "\n"
             << "Buffer Frames: " << frames() << "\n"
-            << "Print: " <<  print() << "\n"
             << "Trace: " << trace() << "\n"
             << std::endl;
     }

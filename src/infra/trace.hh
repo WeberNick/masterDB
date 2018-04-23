@@ -16,6 +16,10 @@
 #include <string>
 #include <fstream>
 #include <ctime>
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+
+#define TRACE(msg) Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
 class Trace
 {
@@ -46,6 +50,7 @@ class Trace
     private:
         std::string     _logPath;
         std::ofstream   _logStream;
+        const CB*       _cb;
         bool            _init;
 };
 

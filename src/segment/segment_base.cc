@@ -68,8 +68,8 @@ void SegmentBase::releasePage(const uint aPageNo, const bool aModified)
                 break;
             default:
                 const std::string lErrMsg("Lock type not supported");
-                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-                throw SwitchException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+                TRACE(lErrMsg);
+                throw SwitchException(FLF, lErrMsg);
                 break;    
         }
         _bufMan.unfix(lBCB);

@@ -96,6 +96,18 @@ FSIPException::FSIPException(
             aErrorMessage)
 {}
 
+NSMException::NSMException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName,
+        const std::string&  aErrorMessage) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            aErrorMessage)
+{}
+
 InvalidArgumentException::InvalidArgumentException(
         const char*         aFileName,
         const unsigned int  aLineNumber,

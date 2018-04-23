@@ -115,8 +115,8 @@ class BufferManager
 
     public:
         /* request access to a page and fix it */
-        BCB* fix(const PID aPageID, LOCK_MODE aMode);
-        BCB* emptyfix(const PID aPageID);
+        BCB* fix(const PID& aPageID, LOCK_MODE aMode);
+        BCB* emptyfix(const PID& aPageID);
         /* unfix a page */
         void unfix(BCB*& aBufferControlBlock);
         /* write page to disk */
@@ -131,9 +131,9 @@ class BufferManager
         inline size_t   getFrameSize(){ return _frameSize; }
         
     private:
-        BCB*                locatePage(const PID aPageID, const size_t aHashIndex);
-        void                readPageIn(BCB* lFBCB,PID aPageID);
-        void                initNewPage(BCB* aFBCB,PID aPageID,uint64_t aLSN);
+        BCB*                locatePage(const PID& aPageID);
+        void                readPageIn(BCB* lFBCB, const PID& aPageID);
+        void                initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
         size_t              getFrame();
 
     private:

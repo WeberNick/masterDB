@@ -26,29 +26,29 @@ size_t PartitionRaw::partSize()
    		if(lFileDescriptor == -1) 
    	 	{
             const std::string lErrMsg = std::string("An error occured while opening the file: ") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+            TRACE(lErrMsg);
+            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
         }
     	uint64_t lSector_count = 0;
     	uint32_t lSector_size = 0;
        	if(ioctl(lFileDescriptor, P_NO_BLOCKS, &lSector_count) == -1 || ioctl(lFileDescriptor, P_BLOCK_SIZE, &lSector_size) == -1)
        	{
             const std::string lErrMsg = std::string("An error occurred while using ioctl: ") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+            TRACE(lErrMsg);
+            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
     	}
        	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
         if(lDisk_size % _pageSize != 0)
         {
             const std::string lErrMsg = std::string("Partition size modulo page size is not equal to zero");
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+            TRACE(lErrMsg);
+            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
         } 
         if(::close(lFileDescriptor) == -1) //call close in global namespace
 		{
             const std::string lErrMsg = std::string("An error occured while closing the file: ") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+            TRACE(lErrMsg);
+            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
 		}
        return (lDisk_size / _pageSize);
     }
@@ -67,8 +67,7 @@ void PartitionRaw::create()
 		if(isRawDevice())		
         {
             _sizeInPages = partSizeInPages();
-            const std::string lTraceMsg("Raw partition was created");
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lTraceMsg); }
+            TRACE("Raw partition was created");
 			format();
 		}
 	}

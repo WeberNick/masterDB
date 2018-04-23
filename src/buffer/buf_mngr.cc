@@ -58,12 +58,9 @@ void BufferManager::init(const CB& aCB)
         }
         catch(std::bad_alloc& ba)
         {
-            if(aCB.trace())
-            {
-                const std::string lErrMsg = std::string("bad_alloc caught: ") + std::string(ba.what()); 
-                Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
-            }
-            throw ReturnException(__FILE__, __LINE__, __PRETTY_FUNCTION__);
+            const std::string lErrMsg = std::string("bad_alloc caught: ") + std::string(ba.what()); 
+            TRACE(lErrMsg);
+            throw;
         }
         _freeFrames.init(_noFrames);
         _freeBCBs.init(_noFrames);
@@ -74,7 +71,7 @@ void BufferManager::init(const CB& aCB)
 }
 
 //the following is not tested at all, expect major bugs
-BCB* BufferManager::fix(const PID aPageID, LOCK_MODE aMode)
+BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 {
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
@@ -104,7 +101,7 @@ BCB* BufferManager::fix(const PID aPageID, LOCK_MODE aMode)
     {
         /* page not in bufferpool. before it can be read, a free frame in the 
         * bufferpool must be found or a page must be replaced */
-        lNextBCB = locatePage(aPageID, lHashIndex); //get page in bufferpool
+        lNextBCB = locatePage(aPageID); //get page in bufferpool
         readPageIn(lNextBCB,aPageID);
     }
 
@@ -134,11 +131,10 @@ BCB* BufferManager::fix(const PID aPageID, LOCK_MODE aMode)
     return lNextBCB;
 }
 
-BCB* BufferManager::emptyfix(const PID aPageID) //assumed to always request in X lock mode
+BCB* BufferManager::emptyfix(const PID& aPageID) //assumed to always request in X lock mode
 {
     BCB* lNextBCB = nullptr;
-    const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
-    lNextBCB = locatePage(aPageID,lHashIndex);
+    lNextBCB = locatePage(aPageID);
     lNextBCB->getMtx().lock();
     lNextBCB->setLockMode(kEXCLUSIVE);
     lNextBCB->setFixCount(1);
@@ -179,17 +175,14 @@ byte* BufferManager::getFramePtr(BCB* aBCB)
     if(lFrameIndex >= _noFrames)
     {
         const std::string lErrMsg = std::string("Invalid BCB provided: frame index is not in buffer pool"); 
-        if(_cb->trace())
-        {
-            Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
-        }
-        throw InvalidArgumentException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+        TRACE(lErrMsg);
+        throw InvalidArgumentException(FLF, lErrMsg);
         return nullptr;
     }
     return _bufferpool + (lFrameIndex * _frameSize);
 }
 
-BCB* BufferManager::locatePage(const PID aPageID, const size_t aHashIndex)
+BCB* BufferManager::locatePage(const PID& aPageID)
 {
     //BCB = Buffer Control Block
     getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
@@ -224,7 +217,7 @@ BCB* BufferManager::locatePage(const PID aPageID, const size_t aHashIndex)
     return lFBCB;
 }
 
-void BufferManager::readPageIn(BCB* lFBCB, PID aPageID){
+void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
     lFBCB->getMtx().lock_shared();
     try
@@ -234,6 +227,9 @@ void BufferManager::readPageIn(BCB* lFBCB, PID aPageID){
         lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
         lPart->close(); //close partition
     }
+    /*******************************************************************************************************
+    *  Nick: Jonas, are you sure this is correct and the program can recover from the exception? Pls fix  *
+    *******************************************************************************************************/
     catch(const InvalidArgumentException& ex) //BCB had an invalid frame index
     {
         std::cerr << ex.what() << std::endl;
@@ -302,7 +298,7 @@ size_t BufferManager::getFrame()
     return INVALID; //in theory, this can not be returned. always check for max value return
 }
 
-void BufferManager::initNewPage(BCB* aFBCB,PID aPageID, uint64_t aLSN){
+void BufferManager::initNewPage(BCB* aFBCB,const PID& aPageID, uint64_t aLSN){
     byte* lFramePtr = getFramePtr(aFBCB);
     //LSN,PageIndex,PartitionID,Version, unused,unused
     basic_header_t lBH = {aLSN, aPageID.pageNo(), aPageID.fileID(), 1, 0, 0};

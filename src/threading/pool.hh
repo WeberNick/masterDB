@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include "../infra/types.hh"
+#include "../infra/exception.hh"
+#include "../infra/trace.hh"
 #include "queue.hh"
 
 #include <algorithm>
@@ -108,12 +111,10 @@ namespace Pool {
                 for (std::uint32_t i = 0u; i < numThreads; ++i) {
                     _threads.emplace_back(&ThreadPool::worker, this);
                 }
-                const std::string lMsg("All threads started successfully.");
-                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
+                TRACE("All threads started successfully.");
             } catch(...) {
                 destroy_all();
-                const std::string lMsg("Creation of threadpool went wrong - all threads destroyed.");
-                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
+                TRACE("Creation of threadpool went wrong - all threads destroyed.");
                 throw;
             }
         }
@@ -146,8 +147,7 @@ namespace Pool {
             PackagedTask task(std::move(boundTask));
             TaskFuture<ResultType> result(task.get_future());
             _workQueue.push(std::make_unique<TaskType>(std::move(task)));
-            const std::string lMsg("New job submitted to Threadpool.");
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
+            TRACE("New job submitted to Threadpool.");
             return result;
         }
 

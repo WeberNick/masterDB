@@ -23,8 +23,8 @@ void PartitionBase::open()
 		if(_fileDescriptor == -1)
 		{
             const std::string lErrMsg = std::string("An error occured while opening the file: '") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+            TRACE(lErrMsg);
+            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
 		}
 	}
 	++_openCount;
@@ -37,8 +37,8 @@ void PartitionBase::close()
 		if(::close(_fileDescriptor) == -1) //call close in global namespace
 		{
             const std::string lErrMsg = std::string("An error occured while closing the file: '") + std::string(std::strerror(errno));
-            if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-            throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+            TRACE(lErrMsg);
+            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
 		}
 		--_openCount;
 		_fileDescriptor = -1;
@@ -70,8 +70,8 @@ uint32_t PartitionBase::allocPage()
 		    if(lIndexOfFSIP >= _sizeInPages) //Next offset is bigger than the partition
             {
                 const std::string lErrMsg("The partition is full. Can not allocate any new pages.");
-                if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-                throw PartitionFullException(__FILE__, __LINE__, __PRETTY_FUNCTION__); 
+                TRACE(lErrMsg);
+                throw PartitionFullException(FLF); 
             }
             continue;
         }
@@ -132,8 +132,8 @@ void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aB
 	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1)
 	{
         const std::string lErrMsg = std::string("An error occured while reading the file: '") + std::string(std::strerror(errno));
-        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-        throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+        TRACE(lErrMsg);
+        throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
 	}
 }
 
@@ -142,8 +142,8 @@ void PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const 
 	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _cb.trace())
 	{
         const std::string lErrMsg = std::string("An error occured while writing the file: '") + std::string(std::strerror(errno));
-        if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-        throw FileException(__FILE__, __LINE__, __PRETTY_FUNCTION__, _partitionPath.c_str(), lErrMsg);
+        TRACE(lErrMsg);
+        throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
 	}
 }
 

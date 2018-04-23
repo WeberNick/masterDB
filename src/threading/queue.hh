@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include "../infra/types.hh"
+#include "../infra/exception.hh"
+#include "../infra/trace.hh"
 #include <atomic>
 #include <condition_variable>
 #include <mutex>

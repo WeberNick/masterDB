@@ -111,8 +111,7 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     emptyfix=true;
     lPID._pageNo = ((_fsmPages.size() - 1) * fsmp.getMaxPagesPerFSM()) + lFreePageIndex;
     fsmp.detach();
-    const std::string lErrMsg("Successfully found free page on segment.");
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+    TRACE("Successfully found free page on segment.");
     return lPID;
 }
 
@@ -121,8 +120,7 @@ PID SegmentFSM::getNewPage() {
     /***********************
     *  Do this without marking the whole page as full  *
     ***********************/
-    const std::string lErrMsg("Successfully got new page on segment.");
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+    TRACE("Successfully got new page on segment.");
     return getFreePage(getPageSize() - sizeof(segment_fsm_header_t), emptyfix);
 }
    /*     //reserve new page
@@ -184,8 +182,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
         lBCB->getMtx().unlock_shared();
         _bufMan.unfix(lBCB);
     }
-    const std::string lErrMsg("Successfully load segment.");
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+    TRACE("Successfully load segment.");
 }
 
 void SegmentFSM::storeSegment() {
@@ -225,6 +222,5 @@ void SegmentFSM::storeSegment() {
         _bufMan.unfix(lBCB);
         ++j;
     }
-    const std::string lErrMsg("Successfully stored segment.");
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
+    TRACE("Successfully stored segment.");
 }

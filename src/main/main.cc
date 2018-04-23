@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 
 
 void test(const control_block_t& aControlBlock) {
@@ -15,13 +17,13 @@ void test(const control_block_t& aControlBlock) {
     //PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
 //	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
 
-    Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Trace works");
+    Trace::getInstance().log(FLF, "Trace works");
     std::string lHome(std::getenv("HOME"));
     std::string lPath = lHome + std::string("/Desktop/Partition");
     std::cout << "Path: " << lPath << std::endl;
     PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
     size_t lPartSize = lFile->partSize(); 
-    std::cout << "Partition SIze: " << lPartSize << std::endl;
+    std::cout << "Partition Size: " << lPartSize << std::endl;
     
 
 
@@ -31,7 +33,6 @@ void test(const control_block_t& aControlBlock) {
 /***********************************************************************
 *  todo: test install, boot, (shutdown), buf manager, and everything  *
 ***********************************************************************/
-
 
 /* Pass path to partition as argument when executing!
    
@@ -49,13 +50,19 @@ int main(const int argc, const char* argv[]) {
         std::cerr << "Error while parsing arguments." << std::endl;
         return -1;
     } 
-    if (argc < 2) {
-        std::cerr << "You have to provide at least one argument." << std::endl;
-        return -1;
-    }
     if (lArgs.help() || argc == 0) {
        print_usage(std::cout, argv[0], lArgDesc);
        return 0;
+    }
+    if(!(fs::exists(lArgs.masterPartition())))
+    {
+        std::cerr << "Given path to the master partition is invalid!" << std::endl;
+        //return -1; //wait until boot and so on works and uncomment this
+    }
+    if(lArgs.trace() && !fs::exists(lArgs.tracePath()))
+    {
+        std::cerr << "The path to store the trace file at, is invalid!" << std::endl;
+        return -1;
     }
 
     //Actual programm starts here.     

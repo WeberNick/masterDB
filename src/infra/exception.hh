@@ -18,6 +18,8 @@
 #include <cerrno>
 #include <cstring>
 
+#define FLF __FILE__, __LINE__, __PRETTY_FUNCTION__
+
 class BaseException : public std::runtime_error 
 {
     public:
@@ -87,6 +89,16 @@ class FSIPException : public BaseException
 {
     public:
         FSIPException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName,
+                const std::string&  aErrorMessage);
+};
+
+class NSMException : public BaseException
+{
+    public:
+        NSMException(
                 const char*         aFileName,
                 const unsigned int  aLineNumber,
                 const char*         aFunctionName,

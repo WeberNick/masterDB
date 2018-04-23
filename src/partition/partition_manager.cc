@@ -53,9 +53,7 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string a
     part_t lp = {lPartition->getID(),aPath,aName,pType,aGrowthIndicator};
     createPartitionSub(lp);
 
-    const std::string lMsg("File partition instance created.");
-    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
-
+    TRACE("File partition instance created.");
     return (PartitionFile*)_partitions.at(lPartition->getID());
 }
 
@@ -69,9 +67,7 @@ PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPa
     part_t lp = {lPartition->getID(),aPath,aName,pType,0};
     createPartitionSub(lp);
 
-    const std::string lMsg("Raw partition instance created.");
-    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
-
+    TRACE("Raw partition instance created.");
     return (PartitionRaw*)_partitions.at(lPartition->getID());
 }
 
@@ -103,8 +99,6 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
         }
         _partitions[lTuple._pID]=s;
     }
-    const std::string lMsg("Got partition successfully.");
-    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
     return _partitions.at(aID);
 }
 
@@ -141,8 +135,7 @@ void PartitionManager::deletePartition(const uint8_t aID){
             break;
         }
     }
-    const std::string lMsg("Partition deleted successfully.");
-    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
+    TRACE("Partition deleted successfully.");
 }
 void PartitionManager::deletePartition(const std::string& aName){
     deletePartition(_partitionsByName[aName]->_pID);
@@ -161,8 +154,7 @@ PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath,
     part_t lp = {lPartition->getID(),_cb->mstrPart(),aPath,pType,aGrowthIndicator};
     aMasterTuple = lp;
 
-    const std::string lMsg("Master partition created successfully.");
-    if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lMsg); }
+    TRACE("Master partition created successfully.");
     return lPartition;
 }
 

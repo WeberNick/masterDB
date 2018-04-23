@@ -72,8 +72,8 @@ uint InterpreterFSIP::getNextFreePage() {
 uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID) {
     if (_header->_freeBlocksCount == 0) {
         const std::string lErrMsg = std::string("No free pages on this FSIP");
-        if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-        throw FSIPException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+        TRACE(lErrMsg);
+        throw FSIPException(FLF, lErrMsg);
     }
     attach(aPP);
     uint32_t lPosFreeBlock = _header->_nextFreePage;
@@ -102,8 +102,8 @@ void InterpreterFSIP::reservePage(const uint aPageIndex) {
     test &= lMask;
     if (test != 0) {
         const std::string lErrMsg = std::string("FSIP was not able to reserve the requested page");
-        if(_cb->trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg); }
-        throw FSIPException(__FILE__, __LINE__, __PRETTY_FUNCTION__, lErrMsg);
+        TRACE(lErrMsg);
+        throw FSIPException(FLF, lErrMsg);
     }
     // reserve if free
     *lPP = *lPP | (lMask);
