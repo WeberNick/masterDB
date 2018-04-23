@@ -66,10 +66,8 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
                 _bufMan.unfix(lBcb);
                 return lPID; 
             } else {
-                /*****************************
-                *  Check if PID is correct  *
-                *****************************/
-                lPID._pageNo = i * fsmp.getMaxPagesPerFSM() + lIndex;
+                
+                lPID._pageNo = _pages[i * fsmp.getMaxPagesPerFSM() + lIndex].first._pageNo;
                 lBcb->setModified(true);
                 lBcb->getMtx().unlock();
                 _bufMan.unfix(lBcb);
@@ -97,10 +95,7 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     lBcb = _bufMan.emptyfix(lPID);
     lPagePointer = _bufMan.getFramePtr(lBcb);
     fsmp.attach(lPagePointer);
-    /********************
-    *  Check this out  *
-    ********************/
-    //fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
+    fsmp.initNewFSM(lPagePointer, 0, lFSMIndex, _partition.getID(), fsmp.getMaxPagesPerFSM());
 
     PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
     uint32_t lFreePageIndex = fsmp.getFreePage(lPageStatus);
