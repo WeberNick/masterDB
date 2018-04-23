@@ -5,10 +5,17 @@
 
 #include "db_instance_manager.hh"
 
-#include "test.hh"
-
 #include <iostream>
 #include <cstdlib>
+
+
+void test(const control_block_t& aControlBlock) {
+     //std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
+
+    //PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
+//	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
+
+}
 
 
 /***********************************************************************
@@ -59,13 +66,14 @@ int main(const int argc, const char* argv[]) {
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
-        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
 
 	    // Test call in test.hh
         if (lArgs.test()) {
             std::cout << "test." << std::endl;
             test(lCB);
         }
+
+        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
     
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
