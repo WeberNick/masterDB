@@ -13,6 +13,7 @@
 #include <string>
 #include <mutex>
 #include <shared_mutex>
+#include <iostream>
 
 using size_t = std::size_t;
 using byte = std::byte;
@@ -42,6 +43,17 @@ struct control_block_t
     size_t              frames() const { return _noBufFrames; }
     bool                print() const { return _print; }
     bool                trace() const { return _trace; }
+    void printParas() const 
+    {
+        std::cout << "The following parameters are set:\n"
+            << "Master Partition Path: " << mstrPart() << "\n"
+            << "Path of Log File: " << tracePath() << "\n"
+            << "Page Size: " << pageSize() << "\n"
+            << "Buffer Frames: " << frames() << "\n"
+            << "Print: " <<  print() << "\n"
+            << "Trace: " << trace() << "\n"
+            << std::endl;
+    }
 };
 using CB = control_block_t;
 

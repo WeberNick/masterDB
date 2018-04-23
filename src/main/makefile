@@ -17,7 +17,6 @@ HDR = \
 MAIN_HDR = \
 	../infra/args.hh \
 	db_instance_manager.hh \
-	test.hh \
 	\
 
 DBIM_HDR = \

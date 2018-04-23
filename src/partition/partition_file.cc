@@ -65,6 +65,7 @@ void PartitionFile::create()
     }
 
 	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_growthIndicator);
+    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string("Execute: ") + lCommand); }
 	system(lCommand.c_str());
     _sizeInPages = partSizeInPages(); 
     const std::string lTraceMsg("File partition was created");

@@ -15,6 +15,16 @@ void test(const control_block_t& aControlBlock) {
     //PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
 //	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
 
+    Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, "Trace works");
+    std::string lHome(std::getenv("HOME"));
+    std::string lPath = lHome + std::string("/Desktop/Partition");
+    std::cout << "Path: " << lPath << std::endl;
+    PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
+    size_t lPartSize = lFile->partSize(); 
+    std::cout << "Partition SIze: " << lPartSize << std::endl;
+    
+
+
 }
 
 
@@ -61,6 +71,8 @@ int main(const int argc, const char* argv[]) {
             lArgs.trace()
         };
 
+        lCB.printParas();
+
         // init all global singletons
         Trace::getInstance().init(lCB);
         PartitionManager::getInstance().init(lCB);
@@ -73,7 +85,7 @@ int main(const int argc, const char* argv[]) {
             test(lCB);
         }
 
-        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
+        //DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
     
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;

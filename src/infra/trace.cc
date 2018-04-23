@@ -15,7 +15,7 @@ void Trace::init(const CB& aCB)
 {
     if(!_init)
     {
-        _logPath = aCB.tracePath();
+        _logPath = aCB.tracePath() + "/log.txt";
         _logStream.open(_logPath.c_str(), std::ofstream::out | std::ofstream::app);
     }
 }
@@ -23,7 +23,8 @@ void Trace::init(const CB& aCB)
 void Trace::log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage)
 {
     std::time_t lCurrTime = std::time(nullptr);
-    _logStream << std::asctime(std::localtime(&lCurrTime))
+    std::string lTime(std::asctime(std::localtime(&lCurrTime)));
+    _logStream << lTime 
         << ": " << aFileName 
         << ", line " << aLineNumber
         << ", " << aFunctionName
