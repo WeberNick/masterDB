@@ -85,6 +85,7 @@ int main(const int argc, const char* argv[]) {
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
+        DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
 
 	    // Test call in test.hh
         if (lArgs.test()) {
@@ -92,7 +93,6 @@ int main(const int argc, const char* argv[]) {
             test(lCB);
         }
 
-        //DatabaseInstanceManager::getInstance().init(lArgs.install(), lCB); //installs or boots the DBS
     
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
