@@ -24,6 +24,8 @@
 #include <shared_mutex>
 #include <random>
 #include <new>
+#include <chrono>
+#include <thread>
 
 class BufferManager
 {

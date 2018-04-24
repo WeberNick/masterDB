@@ -50,6 +50,7 @@ int main(const int argc, const char* argv[]) {
         std::cerr << "Error while parsing arguments." << std::endl;
         return -1;
     } 
+
     if (lArgs.help() || argc == 0) {
        print_usage(std::cout, argv[0], lArgDesc);
        return 0;
@@ -65,16 +66,18 @@ int main(const int argc, const char* argv[]) {
         return -1;
     }
 
+
+    //DONT CHANGE THESE
+    //const bool          C_INSTALL                   = lArgs.install();
+    //const std::string   C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
+    //const std::string   C_TRACE_DIR_PATH            = lArgs.tracePath();
+    //const size_t        C_PAGE_SIZE                 = 4096;
+    //const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
+    //const bool          C_TRACE_ACTIVATED           = lArgs.trace();
+
     //Actual programm starts here.     
     try
     {
-        //DONT CHANGE THESE
-        //const bool          C_INSTALL                   = lArgs.install();
-        //const std::string   C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
-        //const std::string   C_TRACE_DIR_PATH            = lArgs.tracePath();
-        //const size_t        C_PAGE_SIZE                 = 4096;
-        //const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
-        //const bool          C_TRACE_ACTIVATED           = lArgs.trace();
     
         //ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;

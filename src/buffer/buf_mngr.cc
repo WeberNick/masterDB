@@ -223,7 +223,25 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     try
     {
         byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
-        lPart->open(); //open partition
+        const size_t lNoTries = 3;
+        for(size_t i = 0; i < lNoTries; ++i)
+        {
+            try
+            {
+                lPart->open(); //open partition
+                break;
+            }
+            catch(const FileException& fex)
+            {
+                if(i == (lNoTries - 1))
+                {
+                    TRACE(std::to_string(lNoTries) + std::string(" unsuccessful tries to open partition"));
+                    throw; //throw catched exception
+                }
+                TRACE("Could not open partition. Retry in one second");
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+        }
         lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
         lPart->close(); //close partition
     }
@@ -232,11 +250,8 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     *******************************************************************************************************/
     catch(const InvalidArgumentException& ex) //BCB had an invalid frame index
     {
-        std::cerr << ex.what() << std::endl;
-    }
-    catch(const FileException& ex) //something wnt wrong opening/closing/reading the partition
-    {
-        std::cerr << ex.what() << std::endl;
+        TRACE(std::string("Cannot recover from exception: ") + std::string(ex.what()));
+        throw ReturnException(FLF);
     }
     lFBCB->getMtx().unlock_shared();
 }
