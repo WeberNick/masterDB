@@ -1,6 +1,6 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aPartitionID, const uint aGrowthIndicator, const CB& aControlBlock) :
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const uint aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {

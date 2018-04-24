@@ -40,6 +40,7 @@ class PartitionFile : public PartitionBase
         */
         virtual size_t partSize();
         virtual size_t partSizeInPages();
+        inline uint getGrowthIndicator(){ return _growthIndicator; }
 
 
     private:

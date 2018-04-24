@@ -18,12 +18,12 @@ DatabaseInstanceManager::~DatabaseInstanceManager()
     shutdown();
 }
 
-void DatabaseInstanceManager::init(const bool aInstall, const CB& aControlBlock)
+void DatabaseInstanceManager::init(const CB& aControlBlock)
 {
     if(!_init)
     {
         _cb = &aControlBlock;
-        if(aInstall)
+        if(_cb->install())
         {
             install();
         }
@@ -39,7 +39,7 @@ void DatabaseInstanceManager::init(const bool aInstall, const CB& aControlBlock)
 void DatabaseInstanceManager::install()
 {
   part_t lMasterPartitionTuple;
-  _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 20,lMasterPartitionTuple);
+  _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 1000,lMasterPartitionTuple);
   _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
   _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
 }

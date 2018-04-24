@@ -31,12 +31,14 @@ constexpr uint32_t MAX32 =  std::numeric_limits<uint32_t>::max();
 
 struct control_block_t
 {
+    const bool          _install;
     const std::string   _masterPartition;
     const std::string   _tracePath;
     const size_t        _pageSize;
     const size_t        _noBufFrames;
     const bool          _trace;
 
+    bool                install() const { return _install; }
     const std::string&  mstrPart() const { return _masterPartition; }
     const std::string&  tracePath() const { return _tracePath; }
     size_t              pageSize() const { return _pageSize; }
@@ -45,6 +47,7 @@ struct control_block_t
     void printParas() const 
     {
         std::cout << "The following parameters are set:\n"
+            << "Install: " << install() << "\n"
             << "Master Partition Path: " << mstrPart() << "\n"
             << "Path of Log File: " << tracePath() << "\n"
             << "Page Size: " << pageSize() << "\n"

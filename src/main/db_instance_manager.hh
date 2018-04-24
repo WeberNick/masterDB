@@ -41,7 +41,7 @@ class DatabaseInstanceManager
 			return lDBIM_Instance;
 		}
 
-        void init(const bool aInstall, const CB& aControlBlock);
+        void init(const CB& aControlBlock);
 
 	private:
 		void install();

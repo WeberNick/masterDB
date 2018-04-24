@@ -146,11 +146,10 @@ PartitionFile* PartitionManager::createMasterPartition(const part_t& aPart)
    return new PartitionFile(aPart, *_cb); 
 }
 
-PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath, uint aGrowthIndicator, part_t& aMasterTuple){
+PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, part_t& aMasterTuple){
      int pType = 1;
     PartitionFile* lPartition = new PartitionFile(aPath, _cb->mstrPart(), aGrowthIndicator, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
-
     part_t lp = {lPartition->getID(),_cb->mstrPart(),aPath,pType,aGrowthIndicator};
     aMasterTuple = lp;
 
