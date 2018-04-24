@@ -1,6 +1,7 @@
 #include "db_instance_manager.hh"
 
 DatabaseInstanceManager::DatabaseInstanceManager() :
+    _path(),
     _masterPartition(nullptr),
     _partMngr(PartitionManager::getInstance()),
     _segMngr(SegmentManager::getInstance()),
@@ -23,6 +24,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
     if(!_init)
     {
         _cb = &aControlBlock;
+        _path = _cb->mstrPart() + std::string("MasterPartition");
         if(_cb->install())
         {
             install();
@@ -39,7 +41,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
 void DatabaseInstanceManager::install()
 {
   part_t lMasterPartitionTuple;
-  _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 1000,lMasterPartitionTuple);
+  _masterPartition =   _partMngr.createMasterPartition(_path, 1000,lMasterPartitionTuple);
   _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
   _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
 }

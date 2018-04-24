@@ -81,7 +81,7 @@ int main(const int argc, const char* argv[]) {
     
         //ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
-        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
+        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/");
         const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
         const size_t        C_PAGE_SIZE                 = 4096;
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();

@@ -59,6 +59,7 @@ class DatabaseInstanceManager
 		void store(std::vector<T_TupleType>& aTuples, const uint aIndex);
 	
 	private:
+        std::string     _path;
         PartitionFile* _masterPartition;
 		PartitionManager& _partMngr;
 		SegmentManager& _segMngr;
@@ -71,7 +72,7 @@ class DatabaseInstanceManager
 template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-    part_t lMasterPartitionTuple = {0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20};
+    part_t lMasterPartitionTuple = {0, _partMngr._masterPartName, _path, 1, 20};
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
 	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
     byte* lPage;
