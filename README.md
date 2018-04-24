@@ -8,13 +8,13 @@ Implementation of a buffer manager based database system. The development of the
 
 To build and run, you will need the Build-Management-Tool _GNU MAKE_ and a _C++17_ compatible compiler (only tested with _GCC 7.3.0_)
 
-### Cloning
+### Clone
 
 ```
 git clone https://github.com/WeberNick/MasterTeamProjekt.git
 ```
 
-### Installing
+### Build
 
 In the git repository directory (_MasterTeamProjekt_) go to directory '_src_' and run _make_:
 ```
@@ -22,26 +22,23 @@ cd src
 make
 ```
 
-### Running (Quickstart guide)
-To execute the program, go to the build directory _src_ and type 
-
-```
-./main/main
-```
-
-or go in the _main_ directory and type
-
-```
-./main
-```
-
-To actually use the DBS, several command line arguments are needed. To get a list of possible arguements (from the main directory) type
+### Install (Quickstart guide)
+After building the executable, the system can be used. Several command line arguments are needed to start the system. To get a list of possible arguments (from the main directory) type  
 
 ```
 ./main --help
 ```
 
-Note: Since this is still under construction, some tests may be disabled or commented out.
+
+When starting the system for the first time, it must create some files for internal usage and to store session information. Therefore, run the following command when starting the system for the first time:
+
+```
+./main --install --master /path/to/directory/
+```
+
+Note: The flag _--master_ expects a parameter which must be a valid path in the file system. Pay attention that the trailing backslash is included in the path.
+
+..todo..
 
 ## Project Status
 
