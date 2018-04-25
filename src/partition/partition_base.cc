@@ -71,7 +71,7 @@ uint32_t PartitionBase::allocPage()
             {
                 const std::string lErrMsg("The partition is full. Can not allocate any new pages.");
                 TRACE(lErrMsg);
-                throw PartitionFullException(FLF); 
+                throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP);
             }
             continue;
         }

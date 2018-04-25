@@ -10,7 +10,7 @@
 #pragma once
 
 #include "partition_base.hh"
-
+#include "../interpreter/interpreter_fsip.hh"
 #include <string>
 #include <cmath>
 #include <cstdlib>

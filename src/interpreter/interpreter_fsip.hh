@@ -83,6 +83,8 @@ class InterpreterFSIP {
      */
     void freePage(const uint aPageIndex);
 
+    inline uint grow(const uint aGrowth, const uint aMaxPagesPerFSIP){ return aGrowth + aMaxPagesPerFSIP; }
+
   public:
     /* Getters*/
     inline byte *pagePtr() { return _pp; }

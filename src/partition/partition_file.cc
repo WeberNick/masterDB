@@ -27,6 +27,14 @@ uint32_t PartitionFile::allocPage()
         {
             extend();
             //extend was successfull
+            InterpreterFSIP fsip;
+            fsip.attach(ex.getBufferPtr());
+            const uint lToGrow = fsip.grow(_growthIndicator, getMaxPagesPerFSIP());
+            if(lToGrow > 0)
+            {
+                fsip.initNewFSIP(ex.getBufferPtr(), LSN, ex.getIndexOfFSIP(), _partitionID, lToGrow);
+                writePage(ex.getBufferPtr(), ex.getIndexOfFSIP(), _pageSize);
+            }
         }
         catch(const fs::filesystem_error& fse)
         {
