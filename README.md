@@ -1,4 +1,4 @@
-# PLACEHOLDER
+# masterDB
 
 Implementation of a buffer manager based database system. The development of the system was carried out over the duration of one year as part of a university project at the [Chair of Applied Computer Science III, University of Mannheim](http://lspi3.informatik.uni-mannheim.de/en/home/). 
 
@@ -11,12 +11,12 @@ To build and run, you will need the Build-Management-Tool _GNU MAKE_ and a _C++1
 ### Clone
 
 ```
-git clone https://github.com/WeberNick/MasterTeamProjekt.git
+git clone https://github.com/WeberNick/masterDB.git
 ```
 
 ### Build
 
-In the git repository directory (_MasterTeamProjekt_) go to directory '_src_' and run _make_:
+In the git repository directory (_masterDB_) go to directory '_src_' and run _make_:
 ```
 cd src
 make
