@@ -4,6 +4,11 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
+    if(_growthIndicator < 8)
+    {
+        TRACE("A growth indicator smaller than 8 was provided. As the system needs a growth factor of at least 8, it is set accordingly");
+        _growthIndicator = 8;
+    }
     create();
 }
 PartitionFile::PartitionFile(const part_t& aTuple, const CB& aControlBlock):
