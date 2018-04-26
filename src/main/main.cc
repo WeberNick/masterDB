@@ -1,4 +1,4 @@
-#include "../infra/args.hh"
+        #include "../infra/args.hh"
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
@@ -19,11 +19,14 @@ void test(const control_block_t& aControlBlock) {
 
     Trace::getInstance().log(FLF, "Trace works");
     std::string lHome(std::getenv("HOME"));
-    std::string lPath = lHome + std::string("/Desktop/Partition");
+    std::string lPath = lHome + std::string("/Partition");
     std::cout << "Path: " << lPath << std::endl;
-    PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
-    size_t lPartSize = lFile->partSize(); 
-    std::cout << "Partition Size: " << lPartSize << std::endl;
+    //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
+  //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
+  //  SegmentManager::getInstance().createNewSegmentFSM(*lFile,"blub");
+  DatabaseInstanceManager::getInstance().init(true,aControlBlock);
+    //size_t lPartSize = lFile->partSize(); 
+    //std::cout << "Partition Size: " << lPartSize << std::endl;
     
 
 
@@ -109,6 +112,7 @@ int main(const int argc, const char* argv[]) {
         if (lArgs.test()) {
             std::cout << "test." << std::endl;
             test(lCB);
+            return EXIT_SUCCESS;
         }
 
     

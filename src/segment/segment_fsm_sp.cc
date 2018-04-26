@@ -3,7 +3,8 @@
 SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock) :
     SegmentFSM(aSegID, aPartition, aControlBlock)
 {
-    InterpreterSP::setPageSize(aControlBlock.pageSize());    
+    InterpreterSP::setPageSize(aControlBlock.pageSize());  
+	TRACE("SegmentFSM_SP successfully created.") ;
 }
 
 SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock) :
@@ -13,6 +14,7 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock)
 SegmentFSM_SP::~SegmentFSM_SP() {}
 
 void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
+	TRACE("trying to insert Tuple");
 	// get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTupleSize, emptyfix);

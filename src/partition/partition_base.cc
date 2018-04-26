@@ -71,6 +71,7 @@ uint32_t PartitionBase::allocPage()
             {
                 const std::string lErrMsg("The partition is full. Can not allocate any new pages.");
                 TRACE(lErrMsg);
+				close();
                 throw PartitionFullException(FLF); 
             }
             continue;
@@ -81,6 +82,7 @@ uint32_t PartitionBase::allocPage()
 	}
 	while(true); //if a free page is found, break will be executed. If not, an exception is thrown
 	delete[] lPagePointer;
+	TRACE(std::string("Page ")+std::to_string(lAllocatedPageIndex)+std::string(" of Partition ")+std::to_string(getID())+std::string(" allocated."));
 	return lAllocatedPageIndex;	//return offset to free block
 	/*
 	byte* lPagePointer;

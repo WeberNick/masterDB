@@ -7,9 +7,8 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const C
     _partition.open();
     /* PagesToManage * 2 because one byte manages two pages (4 bits for one page). */
     uint32_t lNoPagesToManage = (_partition.getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
-    uint lSegmentIndex = _partition.allocPage();
-    _indexPages.push_back(lSegmentIndex);
-    //no need to init indexPage as pageHeader is written on store
+    
+    //no need to alloxc index page as this is done by constructor of SegmentBase
     uint lFSMIndex = _partition.allocPage();
     _fsmPages.push_back(lFSMIndex);
     _partition.close();
@@ -22,8 +21,11 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const C
     fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
     lBCB->setModified(true);
     lBCB->getMtx().unlock();
+    _bufMan.unfix(lBCB);
     fsmp.detach();
     InterpreterFSM::setPageSize(_cb.pageSize());
+    TRACE("SegmentFSM successfully created.") ;
+
 }
 
 SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
@@ -52,18 +54,25 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
         lPagePointer = _bufMan.getFramePtr(lBcb);
         fsmp.attach(lPagePointer);
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
-
+        std::string lMes = std::string("loop iteration ")+std::to_string(i);
+        TRACE(lMes);
         uint32_t lIndex = fsmp.getFreePage(lPageStatus);
+        lMes=std::string("Interpreter getFreePage returns: ")+std::to_string(lIndex)+" at Segment "+std::to_string(_segID)+std::string(" _pages.size() is ")+std::to_string(_pages.size());
+        TRACE(lMes);
         if (lIndex != MAX32) {
             /* If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet, otherwise the page already exists) */
-            if (lIndex + i * fsmp.getMaxPagesPerFSM() > _pages.size()) {
+            if (lIndex + i * fsmp.getMaxPagesPerFSM() >= _pages.size()) {
+                _partition.open();
                 uint lPageIndex = _partition.allocPage();
+                _partition.close();
                 lPID._pageNo = lPageIndex;
                 _pages.push_back(std::pair<PID, BCB*>(lPID, nullptr));
                 emptyfix=true;
                 lBcb->setModified(true);
                 lBcb->getMtx().unlock();
                 _bufMan.unfix(lBcb);
+                lMes=  std::string("successfully found a free page. on existing FSM but created new one");
+                TRACE(lMes);
                 return lPID; 
             } else {
                 
@@ -71,6 +80,8 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
                 lBcb->setModified(true);
                 lBcb->getMtx().unlock();
                 _bufMan.unfix(lBcb);
+                lMes=std::string("successfully found a free page. existing page");
+                TRACE(lMes);
                 return lPID;
             }
         } //if lIndex == -1
@@ -78,7 +89,9 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
         if(i != _fsmPages.size() -1) _bufMan.unfix(lBcb); 
     }
     /* No FSM page found that returns a free page, create a new one. */
+    _partition.open();
     uint32_t lFSMIndex = _partition.allocPage();
+    _partition.close();
     _fsmPages.push_back(lFSMIndex);
 
     /* Insert NextFSM to header of current FSM, which is still loaded and locked. */
@@ -106,7 +119,7 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     emptyfix=true;
     lPID._pageNo = ((_fsmPages.size() - 1) * fsmp.getMaxPagesPerFSM()) + lFreePageIndex;
     fsmp.detach();
-    TRACE("Successfully found free page on segment.");
+    TRACE("Successfully found free page on segment. created new fsm and new page.");
     return lPID;
 }
 

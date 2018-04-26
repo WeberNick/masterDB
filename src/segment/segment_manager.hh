@@ -71,8 +71,6 @@ class SegmentManager
 
 	public:
 		inline uint getNoSegments() { return _segments.size(); }	
-		inline const seg_vt& getSegmentTuples(){ return _segmentTuples; }	
-		
 
 
 	private:
@@ -86,13 +84,16 @@ class SegmentManager
 		uint16_t _counterSegmentID;
 		/* Stores all managed segment objects by ID */
 		std::map<uint16_t, SegmentBase*> _segments;
-		/* Stores pointers to all segment Tuples by ID/Name */
-		std::map<uint16_t, seg_t*> _segmentsByID;
-		std::map<std::string, seg_t*> _segmentsByName;
-		/* Stores all segment Tuples*/
-		seg_vt _segmentTuples;
 
-		bool _installed = false; //only true, if installed.
+		//changed storage model
+
+
+		/* Stores all segment Tuples by ID in map */
+		std::map<uint16_t, seg_t> _segmentsByID;
+		//stores Name/ID pair used for lookup in next table
+		std::map<std::string, uint16_t> _segmentsByName;
+		
+		//bool _installed = false; //only true, if installed.
 		
 
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1 
