@@ -7,7 +7,7 @@
 *.o
 *.obj
 
-#Executable Main
+# Executable Main
 util/iomeasure/main
 src/main/main
 logs/
@@ -37,8 +37,7 @@ src/logs/
 *.out
 *.app
 
-
-#Text Files, Gnuplot Files and CSV-Files
+# Text Files, Gnuplot Files and CSV-Files
 *.txt
 *.plt
 *.csv
@@ -47,5 +46,8 @@ src/logs/
 *.gz
 *.toc
 
-#clang-format
+# VSCode
+.vscode/
+
+# clang-format
 .clang-format
