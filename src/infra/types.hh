@@ -81,10 +81,6 @@ struct part_t
 	std::string _pPath;
 	int _pType;//1:= PartitionFile, 2:=partitionRaw
 	uint _pGrowth;
-    std::string toString(){
-        std::string rtn = "partID "+ std::to_string(_pID) + " Name "+ _pName +" Path "+ _pPath +" type "+ std::to_string(_pType)+ " growth "+ std::to_string(_pGrowth);
-        return rtn;
-    }
 };
 using part_vt = std::vector<part_t>;
 
@@ -95,10 +91,6 @@ struct seg_t
 	std::string _sName; //segment name (unique)
 	int _sType; //segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
 	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
-    std::string toString(){
-        std::string rtn = "SegID "+ std::to_string(_sID) + " Name "+_sName+" Partition "+ std::to_string(_sPID) +" type "+ std::to_string(_sType) + " firstIndexPage "+std::to_string(_sFirstPage);
-        return rtn;
-    }
 };
 using seg_vt = std::vector<seg_t>;
 

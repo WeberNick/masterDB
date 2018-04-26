@@ -12,6 +12,7 @@
  */
 #pragma once
 
+#include "types.hh"
 #include <exception>
 #include <string>
 #include <iostream>
@@ -82,7 +83,19 @@ class PartitionFullException : public BaseException
         PartitionFullException(
                 const char*         aFileName,
                 const unsigned int  aLineNumber,
-                const char*         aFunctionName);
+                const char*         aFunctionName,
+                byte*               aBufferPointer,
+                const uint          aIndexOfFSIP);
+        PartitionFullException(const PartitionFullException& aOther);
+        PartitionFullException& operator=(const PartitionFullException&) = delete;
+
+    public:
+        inline byte* getBufferPtr() const { return _bufPtr; }
+        inline uint  getIndexOfFSIP() const { return _index; }
+
+    private:
+        byte*   _bufPtr;
+        uint    _index;
 };
 
 class FSIPException : public BaseException
