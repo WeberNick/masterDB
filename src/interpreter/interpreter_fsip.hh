@@ -83,8 +83,10 @@ class InterpreterFSIP {
      */
     void freePage(const uint aPageIndex);
 
+    uint32_t grow(uint aNumberOfPages, uint aMaxPagesPerFSIP);
+
   public:
-    /* Getters*/
+    /*  tters*/
     inline byte *pagePtr() { return _pp; }
     inline fsip_header_t *header() { return _header; }
     inline uint noManagedPages() { return header()->_managedPages; } // Remove noManagedPages()

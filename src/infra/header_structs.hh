@@ -24,7 +24,7 @@ struct basic_header_t {
 struct fsip_header_t {
     uint32_t _freeBlocksCount; // Number of free pages in the managed part (numer of 0s)
     uint32_t _nextFreePage;    // index of the next 0 (indicating a free Block)
-    uint32_t _managedPages;    // index of the next 0 (indicating a free Block)
+    uint32_t _managedPages;    // how many valid bits on fsip
     uint8_t _version;          // FSIP header version
     uint8_t _unused1;
     uint8_t _unused2;

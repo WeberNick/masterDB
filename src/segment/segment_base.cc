@@ -9,9 +9,10 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const
     _cb(aControlBlock)
 {
 	_partition.open();
-	int lSegmentIndex = _partition.allocPage();
+    int lSegmentIndex = _partition.allocPage();
 	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
 	_partition.close();
+    TRACE("SegmentBase successfully created.") ;
 
   //no need to init pages, will be done in store.
 }
