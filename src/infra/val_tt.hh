@@ -1,5 +1,4 @@
-#ifndef INFRA_TYPES_VAL_TT_HH
-#define INFRA_TYPES_VAL_TT_HH
+#pragma once
 
 #include <iostream>
 
@@ -153,5 +152,3 @@ val_tt<T> val_tt<T>::operator-(const val_tt<T>& x) const {
     const bool lIsNull = (isNull() || x.isNull());
     return val_tt<T>(_val - x._val, lIsNull);
 }
-
-#endif
