@@ -1,4 +1,4 @@
-        #include "../infra/args.hh"
+#include "../infra/args.hh"
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
@@ -10,28 +10,28 @@
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 
+void test(const control_block_t &aControlBlock) {
+    // std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
 
-void test(const control_block_t& aControlBlock) {
-     //std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
-
-    //PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
-//	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
+    // PartitionFile *lPartFile =
+    // PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition",
+    // "DefaultName", 1000);
+    //	std::cout << "## TEST: Size in Pages (should be 0): " <<
+    //lPartFile->getSizeInPages() << std::endl;
 
     Trace::getInstance().log(FLF, "Trace works");
     std::string lHome(std::getenv("HOME"));
     std::string lPath = lHome + std::string("/Partition");
     std::cout << "Path: " << lPath << std::endl;
-    //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
-  //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
-  //  SegmentManager::getInstance().createNewSegmentFSM(*lFile,"blub");
-  DatabaseInstanceManager::getInstance().init(true,aControlBlock);
-    //size_t lPartSize = lFile->partSize(); 
-    //std::cout << "Partition Size: " << lPartSize << std::endl;
-    
-
-
+    // PartitionFile* lFile =
+    // PartitionManager::getInstance().createPartitionFileInstance(lPath,
+    // "MyPartition", 100);
+    //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
+    //  SegmentManager::getInstance().createNewSegmentFSM(*lFile,"blub");
+    //DatabaseInstanceManager::getInstance().init(true, aControlBlock);
+    // size_t lPartSize = lFile->partSize();
+    // std::cout << "Partition Size: " << lPartSize << std::endl;
 }
-
 
 /***********************************************************************
 *  todo: test install, boot, (shutdown), buf manager, and everything  *
@@ -78,11 +78,11 @@ int main(const int argc, const char* argv[]) {
     //const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
     //const bool          C_TRACE_ACTIVATED           = lArgs.trace();
 
-    //Actual programm starts here.     
+    // Actual programm starts here.     
     try
     {
     
-        //ASSIGN APPROPRIATE TESTING PARAS
+        // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
         const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/");
         const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
@@ -99,14 +99,14 @@ int main(const int argc, const char* argv[]) {
             C_TRACE_ACTIVATED
         };
 
-        lCB.printParas();
+        std::cout << lCB;
 
         // init all global singletons
         Trace::getInstance().init(lCB);
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
-        DatabaseInstanceManager::getInstance().init(lCB); //installs or boots the DBS
+        DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
 	    // Test call in test.hh
         if (lArgs.test()) {
@@ -115,6 +115,9 @@ int main(const int argc, const char* argv[]) {
             return EXIT_SUCCESS;
         }
 
+        CommandParser& cp = CommandParser::getInstance();
+        cp.init(lCB);
+        cp.runcli();
     
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;

@@ -8,6 +8,7 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
     _partIndex(1), 
     _segIndex(2),
     _cb(nullptr),
+    _running(false),
     _init(false)
 {
   //think of reserver page.. 
@@ -33,6 +34,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
         {
             boot();
         }
+        _running = true;
         _init = true;
     }
 }
@@ -60,9 +62,10 @@ void DatabaseInstanceManager::boot()
 
 void DatabaseInstanceManager::shutdown()
 {
-  //stop transactions
-    _segMngr.storeSegments();
-    BufferManager::getInstance().flushAll();
+    if (isRunning()) {
+        // stop transactions
+        _segMngr.storeSegments();
+        BufferManager::getInstance().flushAll();
+        _running = false;
+    }
 }
-
-

@@ -38,7 +38,7 @@ class Trace
             return lInstance;
         }
 
-        void init(const CB& aCB);
+        void init(const CB& aControlBlock);
 
     public:
         void log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage);

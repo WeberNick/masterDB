@@ -45,12 +45,12 @@ BufferManager::~BufferManager()
     delete[] _bufferpool;
 }
 
-void BufferManager::init(const CB& aCB)
+void BufferManager::init(const CB& aControlBlock)
 {
     if(!_init)
     {
-        _noFrames = aCB.frames();
-        _frameSize = aCB.pageSize();
+        _noFrames = aControlBlock.frames();
+        _frameSize = aControlBlock.pageSize();
         try
         {
             _bufferHash = new BufferHashTable(_noFrames);
@@ -64,7 +64,7 @@ void BufferManager::init(const CB& aCB)
         }
         _freeFrames.init(_noFrames);
         _freeBCBs.init(_noFrames);
-        _cb = &aCB;
+        _cb = &aControlBlock;
         BufferControlBlock::setCB(_cb);
         _init = true;
     }

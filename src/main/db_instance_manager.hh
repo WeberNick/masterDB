@@ -42,52 +42,52 @@ class DatabaseInstanceManager
 		}
 
         void init(const CB& aControlBlock);
+		void shutdown();
 
 	private:
 		void install();
 		void boot();
-		void shutdown();
 
 	public:
 		inline PartitionManager& getPartMngr() { return _partMngr; }
 		inline SegmentManager& getSegMngr() { return _segMngr; }
+        inline bool isRunning() { return _running; }
 
 	private:
 		template<typename T_TupleType>
 		void load(std::vector<T_TupleType>& aTuples, const uint aIndex);
-		template<typename T_TupleType> //probably of no use, physical tuples allways up to date. BufMngr.flushall should be enough
+		template<typename T_TupleType> // probably of no use, physical tuples always up to date. BufMngr.flushall should be enough
 		void store(std::vector<T_TupleType>& aTuples, const uint aIndex);
 	
 	private:
-        std::string     _path;
-        PartitionFile* _masterPartition;
-		PartitionManager& _partMngr;
-		SegmentManager& _segMngr;
-        uint _partIndex; //Index of first segment storing pages with partition tuples, should be 1
-        uint _segIndex; //Index of first segment storing pages with segment tuples, should be 2
-        const CB* _cb;
-        bool _init;
+        std::string       _path;
+        PartitionFile*    _masterPartition;
+        PartitionManager& _partMngr;
+        SegmentManager&   _segMngr;
+        uint              _partIndex; // Index of first segment storing pages with partition tuples, should be 1
+        uint              _segIndex;  // Index of first segment storing pages with segment tuples, should be 2
+        const CB*         _cb;
+        bool              _running;
+        bool              _init;
 };
 
 template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-    part_t lMasterPartitionTuple = {0, _partMngr._masterPartName, _path, 1, 20};
+    part_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _path, 1, 20 };
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
-	SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
+    SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
     byte* lPage;
     InterpreterSP lInterpreter;
 
-    for (uint i = 0; i < lSegments->getNoPages(); ++i)
-    {
+    for (uint i = 0; i < lSegments->getNoPages(); ++i) {
         lPage = lSegments->getPage(i, kSHARED);
 
-   	    lInterpreter.attach(lPage);  
-   	    for (uint j = 0; j < lInterpreter.noRecords(); ++j)
-   	    {
+        lInterpreter.attach(lPage);
+        for (uint j = 0; j < lInterpreter.noRecords(); ++j) {
             aTuples.push_back((*((T_TupleType*)lInterpreter.getRecord(j))));
-   	    }
-        
+        }
+
         lSegments->releasePage(i);
     }
     _segMngr.deleteSegment(lSegments);
@@ -99,32 +99,32 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
 {
     SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex); 
     int lFreeBytesPerPage = lMasterSeg->getMaxFreeBytes();
-    //get size of master segment
+    // get size of master segment
     int lCapazIst = lMasterSeg->getNoPages() * ( lFreeBytesPerPage / sizeof(T_TupleType) ) ;
-    //get number of segments
+    // get number of segments
     // estimate if size is big enough, if not add new pages
     int lCapazSoll = aTuples.size()/sizeof(T_TupleType);
     if(lCapazIst-lCapazSoll < 0){
-        //how many new pages?
+        // how many new pages?
         int a =  (int) ceil(( lCapazSoll-lCapazIst) / ( lFreeBytesPerPage /sizeof(T_TupleType) ));
         while(a>0){
-            //alloc new pages
+            // alloc new pages
             lMasterSeg->getNewPage();
             ++a;
         }
 
     }
-    //write all tuples that were not deleted (condition to be hold in delete segment method)
-    //get new tuples (tuples always up to date)
-    //delete all content of pages
-    //write everything on segment
+    // write all tuples that were not deleted (condition to be hold in delete segment method)
+    // get new tuples (tuples always up to date)
+    // delete all content of pages
+    // write everything on segment
     byte* lPage = new byte[_masterPartition->getPageSize()];
     InterpreterSP lInterpreter;
     uint lSegCounter = 0;
     byte* lPos;
     for (uint i = 0; i < lMasterSeg->getNoPages(); ++i)
     {
-           //lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
+        //lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
         lInterpreter.attach(lPage);
         lInterpreter.initNewPage(lPage);   
         while(true){

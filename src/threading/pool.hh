@@ -184,18 +184,11 @@ namespace Pool {
         const CB& _cb;
     };
 
- /* namespace Default {
-    inline ThreadPool& getInstance() {
-      static ThreadPool defaultPool(;
-      return defaultPool;
-    }
-
-    template <typename Func, typename... Args>
-    inline auto submitJob(Func&& func, Args&&... args) {
-      return getInstance().submit(std::forward<Func>(func), std::forward<Args>(args)...);
-    }
-  } // namespace Default */
-} // namespace Pool
+    namespace Default {
+        inline ThreadPool& getInstance() {
+            static ThreadPool defaultPool;
+            return defaultPool;
+        }
 
         template <typename Func, typename... Args>
         inline auto submitJob(Func&& func, Args&&... args) {
