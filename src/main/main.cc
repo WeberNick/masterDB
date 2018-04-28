@@ -108,22 +108,14 @@ int main(const int argc, const char* argv[]) {
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
         DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
+        CommandParser::getInstance().init(lCB);
 
 	    // Test call in test.hh
         if (lArgs.test()) {
-            // start thread for cli
-            CommandParser& cp = CommandParser::getInstance();
-            cp.init(lCB);
-            cp.runcli();
-            /*std::cout << "test." << std::endl;
+            std::cout << "test." << std::endl;
             test(lCB);
-            return EXIT_SUCCESS;*/
+            return EXIT_SUCCESS;
         }
-
-        /*// start thread for cli
-        CommandParser& cp = CommandParser::getInstance();
-        cp.init(lCB);
-        cp.runcli();*/
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
