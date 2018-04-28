@@ -9,20 +9,22 @@
 
 #include "../infra/linereaderedit.hh"
 #include "../infra/types.hh"
+#include "../main/db_instance_manager.hh"
 #include "../partition/partition_manager.hh"
 #include "../segment/segment_manager.hh"
 
-struct Command {
-    const char* _name;
-    bool _hasParams;
-    size_t _comLength;
-    size_t _numParams;
-    int (*_func)(char_vpt&);
-    const char* _helpMsg;
-};
-
 class CommandParser {
-  protected:
+  private:
+    struct Command {
+        const char* _name;
+        bool _hasParams;
+        size_t _comLength;
+        size_t _numParams;
+        int (*_func)(const char_vpt&);
+        const char* _helpMsg;
+    };
+
+  public:
     explicit CommandParser();
     explicit CommandParser(const CommandParser&) = delete;
     explicit CommandParser(CommandParser&&) = delete;
@@ -31,20 +33,22 @@ class CommandParser {
     ~CommandParser();
 
   private:
+    void runcli();
     Command* findCommand(const std::vector<char*>& splits);
     void printw();
     void printh();
     void printe();
-  
+    void close();
+
   private:
-    static int com_help(const char_vpt& splits);
-    static int com_exit(const char_vpt& splits);
-    static int com_create_p(const char_vpt& splits);
-    static int com_drop_p(const char_vpt& splits);
-    static int com_create_s(const char_vpt& splits);
-    static int com_drop_s(const char_vpt& splits);
-    static int com_show_p(const char_vpt& splits);
-    static int com_show_s(const char_vpt& splits);
+    static int com_help(const char_vpt& args);
+    static int com_exit(const char_vpt& args);
+    static int com_create_p(const char_vpt& args);
+    static int com_drop_p(const char_vpt& args);
+    static int com_create_s(const char_vpt& args);
+    static int com_drop_s(const char_vpt& args);
+    static int com_show_p(const char_vpt& args);
+    static int com_show_s(const char_vpt& args);
 
   public:
     static CommandParser& getInstance() {
@@ -53,11 +57,13 @@ class CommandParser {
     }
 
     void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
-    void runcli();
 
   private:
+    static std::vector<Command> _commands;
     LineReaderEdit _reader;
 
+    size_t _maxCommandLength;
+    bool _exit;
     bool _init;
     const CB* _cb;
 };
