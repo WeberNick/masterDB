@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -Weffc++ -std=c++17 -static-libstdc++
+CXXFLAGS = -Wall -std=c++17 -static-libstdc++
 
 CC = g++
 

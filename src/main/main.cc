@@ -100,21 +100,19 @@ int main(const int argc, const char* argv[]) {
             C_TRACE_ACTIVATED
         };
 
-        std::cout << lCB;
+        //std::cout << lCB;
 
+        CommandParser::getInstance().init(lCB);
         // init all global singletons
-        Trace::getInstance().init(lCB);
-        PartitionManager::getInstance().init(lCB);
-        SegmentManager::getInstance().init(lCB);
-        BufferManager::getInstance().init(lCB);
-        DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
+        //Trace::getInstance().init(lCB);
+        //PartitionManager::getInstance().init(lCB);
+        //SegmentManager::getInstance().init(lCB);
+        //BufferManager::getInstance().init(lCB);
+        //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
 	    // Test call in test.hh
         if (lArgs.test()) {
             // start thread for cli
-            CommandParser& cp = CommandParser::getInstance();
-            cp.init(lCB);
-            cp.runcli();
             /*std::cout << "test." << std::endl;
             test(lCB);
             return EXIT_SUCCESS;*/

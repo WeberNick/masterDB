@@ -9,20 +9,37 @@
 
 #include "../infra/linereaderedit.hh"
 #include "../infra/types.hh"
-#include "../main/db_instance_manager.hh"
-#include "../partition/partition_manager.hh"
-#include "../segment/segment_manager.hh"
+//#include "../main/db_instance_manager.hh"
+//#include "../partition/partition_manager.hh"
+//#include "../segment/segment_manager.hh"
+
+class CommandParser;
+using CP = CommandParser;
 
 class CommandParser {
   private:
-    struct Command {
-        const char* _name;
-        bool _hasParams;
-        size_t _comLength;
-        size_t _numParams;
-        int (*_func)(const char_vpt&);
-        const char* _helpMsg;
+    class Command {
+        public:
+            explicit Command(
+                const CP& aCP, 
+                const char* aName, 
+                const bool aHasParams, 
+                const size_t aCommandLength, 
+                const size_t aNumParams, 
+                int (CP::*aFunc)(const char_vpt&) const,
+                const char* aMsg);
+            Command& operator=(const Command& aCmd);
+        public:
+            const CP& _cp;
+            const char* _name;
+            bool _hasParams;
+            size_t _comLength;
+            size_t _numParams;
+            int (CP::*_func)(const char_vpt&) const;
+            const char* _helpMsg;
     };
+
+    using CMD = Command;
 
   public:
     explicit CommandParser();
@@ -34,21 +51,21 @@ class CommandParser {
 
   private:
     void runcli();
-    Command* findCommand(const std::vector<char*>& splits);
-    void printw();
-    void printh();
-    void printe();
+    CMD* findCommand(const std::vector<char*>& splits);
+    void printw() const;
+    void printh() const;
+    void printe() const;
     void close();
 
   private:
-    static int com_help(const char_vpt& args);
-    static int com_exit(const char_vpt& args);
-    static int com_create_p(const char_vpt& args);
-    static int com_drop_p(const char_vpt& args);
-    static int com_create_s(const char_vpt& args);
-    static int com_drop_s(const char_vpt& args);
-    static int com_show_p(const char_vpt& args);
-    static int com_show_s(const char_vpt& args);
+     int com_help(const char_vpt& args) const;
+     int com_exit(const char_vpt& args) const;
+     int com_create_p(const char_vpt& args) const;
+     int com_drop_p(const char_vpt& args) const;
+     int com_create_s(const char_vpt& args) const;
+     int com_drop_s(const char_vpt& args) const;
+     int com_show_p(const char_vpt& args) const;
+     int com_show_s(const char_vpt& args) const;
 
   public:
     static CommandParser& getInstance() {
@@ -59,7 +76,7 @@ class CommandParser {
     void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
 
   private:
-    static std::vector<Command> _commands;
+    std::vector<Command> _commands;
     LineReaderEdit _reader;
 
     size_t _maxCommandLength;
@@ -67,3 +84,4 @@ class CommandParser {
     bool _init;
     const CB* _cb;
 };
+

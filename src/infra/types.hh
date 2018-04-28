@@ -44,20 +44,22 @@ struct control_block_t
     size_t              pageSize() const { return _pageSize; }
     size_t              frames() const { return _noBufFrames; }
     bool                trace() const { return _trace; }
-    friend std::ostream& operator<<(std::ostream& strm, const control_block_t& cb);
+
 };
 using CB = control_block_t;
 
-std::ostream& operator<<(std::ostream& strm, const control_block_t& cb) {
-    strm << "The following parameters are set:\n"
-         << "Install: " << cb.install() << "\n"
-         << "Master Partition Path: " << cb.mstrPart() << "\n"
-         << "Path of Log File: " << cb.tracePath() << "\n"
-         << "Page Size: " << cb.pageSize() << "\n"
-         << "Buffer Frames: " << cb.frames() << "\n"
-         << "Trace: " << cb.trace() << "\n";
-    return strm << std::endl;
-}
+
+    //std::ostream& operator<<(std::ostream& strm, const control_block_t& cb) {
+        //strm << "The following parameters are set:\n"
+             //<< "Install: " << cb.install() << "\n"
+             //<< "Master Partition Path: " << cb.mstrPart() << "\n"
+             //<< "Path of Log File: " << cb.tracePath() << "\n"
+             //<< "Page Size: " << cb.pageSize() << "\n"
+             //<< "Buffer Frames: " << cb.frames() << "\n"
+             //<< "Trace: " << cb.trace() << "\n";
+        //return strm << std::endl;
+    //}
+
 
 struct page_id_t
 {
@@ -92,21 +94,10 @@ struct seg_t
   std::string _sName;      // segment name (unique)
   int         _sType;      // segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
   uint        _sFirstPage; // first segment index ( (C) Nico) page in order to load segment into memory
-  friend std::ostream& operator<<(std::ostream& strm, const seg_t& seg);
-  friend std::string to_string(const seg_t& seg);
+  inline friend std::ostream& operator<<(std::ostream& strm, const seg_t& seg){ return strm; };
+  inline friend std::string to_string(const seg_t& seg){ std::ostringstream ss; ss << seg; return ss.str(); } 
 };
 using seg_vt = std::vector<seg_t>;
-
-std::ostream& operator<<(std::ostream& strm, const seg_t& seg) {
-    // todo: implement
-    return strm << std::endl;
-}
-
-std::string to_string(const seg_t& seg) {
-    std::ostringstream ss;
-    ss << seg;
-    return ss.str();
-}
 
 enum class PageStatus 
 {

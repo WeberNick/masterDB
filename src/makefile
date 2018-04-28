@@ -4,6 +4,7 @@ DIRECTORIES = \
 	segment \
 	interpreter \
 	buffer \
+	cli \
 	main \
 	\
 
