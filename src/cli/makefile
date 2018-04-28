@@ -11,6 +11,10 @@ INCL = -I../.. -I..
 
 HDR = \
 	../infra/types.hh \
+	../infra/linereaderedit.hh \
+	../infra/types.hh \
+	../partition/partition_manager.hh \
+	../segment/segment_manager.hh \
 	\
 
 OBJ = \

@@ -4,6 +4,7 @@
 #include "../infra/trace.hh"
 
 #include "db_instance_manager.hh"
+#include "../cli/parser.hh"
 
 #include <iostream>
 #include <cstdlib>
@@ -11,7 +12,7 @@
 namespace fs = std::experimental::filesystem;
 
 void test(const control_block_t &aControlBlock) {
-    // std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
+    /*// std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
 
     // PartitionFile *lPartFile =
     // PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition",
@@ -30,7 +31,8 @@ void test(const control_block_t &aControlBlock) {
     //  SegmentManager::getInstance().createNewSegmentFSM(*lFile,"blub");
     //DatabaseInstanceManager::getInstance().init(true, aControlBlock);
     // size_t lPartSize = lFile->partSize();
-    // std::cout << "Partition Size: " << lPartSize << std::endl;
+    // std::cout << "Partition Size: " << lPartSize << std::endl;*/
+
 }
 
 /***********************************************************************
@@ -70,7 +72,7 @@ int main(const int argc, const char* argv[]) {
     }
 
 
-    //DONT CHANGE THESE
+    // DONT CHANGE THESE
     //const bool          C_INSTALL                   = lArgs.install();
     //const std::string   C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
     //const std::string   C_TRACE_DIR_PATH            = lArgs.tracePath();
@@ -81,7 +83,6 @@ int main(const int argc, const char* argv[]) {
     // Actual programm starts here.     
     try
     {
-    
         // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
         const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/");
@@ -110,15 +111,19 @@ int main(const int argc, const char* argv[]) {
 
 	    // Test call in test.hh
         if (lArgs.test()) {
-            std::cout << "test." << std::endl;
+            // start thread for cli
+            CommandParser& cp = CommandParser::getInstance();
+            cp.init(lCB);
+            cp.runcli();
+            /*std::cout << "test." << std::endl;
             test(lCB);
-            return EXIT_SUCCESS;
+            return EXIT_SUCCESS;*/
         }
 
+        /*// start thread for cli
         CommandParser& cp = CommandParser::getInstance();
         cp.init(lCB);
-        cp.runcli();
-    
+        cp.runcli();*/
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

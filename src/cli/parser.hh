@@ -9,17 +9,19 @@
 
 #include "../infra/linereaderedit.hh"
 #include "../infra/types.hh"
+#include "../partition/partition_manager.hh"
+#include "../segment/segment_manager.hh"
+
+struct Command {
+    const char* _name;
+    bool _hasParams;
+    size_t _comLength;
+    size_t _numParams;
+    int (*_func)(char_vpt&);
+    const char* _helpMsg;
+};
 
 class CommandParser {
-  
-  struct Command {
-    const char* _name;
-    // fct pointer
-    bool _hasParams;
-    size_t _maxParams;
-    std::string _printMsg;
-  }
-
   protected:
     explicit CommandParser();
     explicit CommandParser(const CommandParser&) = delete;
@@ -29,9 +31,20 @@ class CommandParser {
     ~CommandParser();
 
   private:
-    void printWelcome();
-    void printHelp();    
-    void printExit();
+    Command* findCommand(const std::vector<char*>& splits);
+    void printw();
+    void printh();
+    void printe();
+  
+  private:
+    static int com_help(const char_vpt& splits);
+    static int com_exit(const char_vpt& splits);
+    static int com_create_p(const char_vpt& splits);
+    static int com_drop_p(const char_vpt& splits);
+    static int com_create_s(const char_vpt& splits);
+    static int com_drop_s(const char_vpt& splits);
+    static int com_show_p(const char_vpt& splits);
+    static int com_show_s(const char_vpt& splits);
 
   public:
     static CommandParser& getInstance() {
@@ -39,17 +52,10 @@ class CommandParser {
         return lComPars;
     }
 
-    void init(const CB& aControlBlock, const char* aPrompt = "> ", const char aCommentChar = '#');
-
-  public:
+    void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
     void runcli();
 
   private:
-    static Command _com_help;
-    static const char* _com_exit;
-    static const char* _com_createpart;
-    static const char* _com_createsegm;
-
     LineReaderEdit _reader;
 
     bool _init;

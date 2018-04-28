@@ -1,5 +1,17 @@
 #include "linereaderedit.hh"
 
+LineReaderEdit::LineReaderEdit() :
+    _prompt(">"),
+    _commentchar('#'), // for comments until end of line, must occur at beginning of line
+    _line(0),
+    _ok(false),
+    _linesize(0),
+    _linecount(0),
+    _commentlinecount(0),
+    _no_bytes_read(0),
+    _splits()
+{}
+
 LineReaderEdit::LineReaderEdit(const char* aPrompt, char aCommentChar) :
     _prompt(aPrompt),
     _commentchar(aCommentChar), // for comments until end of line, must occur at beginning of line

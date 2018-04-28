@@ -27,7 +27,8 @@ class LineReaderEdit {
     LineReaderEdit& operator=(const LineReaderEdit&);
 
   public:
-    LineReaderEdit(const char* aPrompt, char aCommentChar = '#');
+    explicit LineReaderEdit();
+    explicit LineReaderEdit(const char* aPrompt, char aCommentChar = '#');
     ~LineReaderEdit();
 
   public:

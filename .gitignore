@@ -1,3 +1,9 @@
+# Mac
+.DS_Store
+
+# Visual Studio Code
+.vscode/
+
 # Prerequisites
 *.d
 
@@ -7,11 +13,9 @@
 *.o
 *.obj
 
-# Executable Main
-util/iomeasure/main
-src/main/main
-logs/
-src/logs/
+#Executable Main
+System/util/iomeasure/main
+System/src/main/main
 
 # Precompiled Headers
 *.gch
@@ -37,6 +41,7 @@ src/logs/
 *.out
 *.app
 
+
 # Text Files, Gnuplot Files and CSV-Files
 *.txt
 *.plt
@@ -45,9 +50,6 @@ src/logs/
 *.log
 *.gz
 *.toc
-
-# VSCode
-.vscode/
 
 # clang-format
 .clang-format

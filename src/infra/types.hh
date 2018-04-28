@@ -16,18 +16,18 @@
 #include <iostream>
 #include <sstream>
 
-using size_t = std::size_t;
 using byte = std::byte;
-using byte_vpt = std::vector<byte *>;
+using size_t = std::size_t;
 using uint = unsigned int;
+using char_vpt = std::vector<char*>;
 using uint_vt = std::vector<uint>;
+using byte_vpt = std::vector<byte *>;
 using uint32_vt = std::vector<uint32_t>;
 using sMtx = std::shared_mutex;
 using mtx = std::mutex;
 
 constexpr size_t INVALID = std::numeric_limits<size_t>::max();
 constexpr uint32_t MAX32 =  std::numeric_limits<uint32_t>::max();
-
 
 struct control_block_t
 {
@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& strm, const control_block_t& cb) {
 struct page_id_t
 {
     uint8_t _fileID;
-    uint32_t _pageNo; //correct? 
+    uint32_t _pageNo; // correct? 
 
     uint8_t fileID() const { return _fileID; }
     uint32_t pageNo() const { return _pageNo; }
@@ -77,21 +77,21 @@ using pid_vt = std::vector<PID>;
 
 struct part_t
 {
-	uint _pID;
+	uint        _pID;
 	std::string _pName;
 	std::string _pPath;
-	int _pType;//1:= PartitionFile, 2:=partitionRaw
-	uint _pGrowth;
+	int         _pType;   // 1:= PartitionFile, 2:=partitionRaw
+	uint        _pGrowth;
 };
 using part_vt = std::vector<part_t>;
 
 struct seg_t
 {
-  uint _sPID;         // partition ID
-  uint _sID;          // segment ID
-  std::string _sName; // segment name (unique)
-  int _sType;         // segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
-  uint _sFirstPage;   // first segment index ( (C) Nico) page in order to load segment into memory
+  uint        _sPID;       // partition ID
+  uint        _sID;        // segment ID
+  std::string _sName;      // segment name (unique)
+  int         _sType;      // segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
+  uint        _sFirstPage; // first segment index ( (C) Nico) page in order to load segment into memory
   friend std::ostream& operator<<(std::ostream& strm, const seg_t& seg);
   friend std::string to_string(const seg_t& seg);
 };
