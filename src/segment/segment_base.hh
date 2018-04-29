@@ -59,6 +59,8 @@ class SegmentBase
          */
         void releasePage(const uint aPageNo, const bool aModified = false);
 
+        void printPageToFile(uint aPageNo);
+
 	public:
 		virtual PID getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
 		inline const PID& getPageID(uint aPageNo){ return _pages.at(aPageNo).first; }

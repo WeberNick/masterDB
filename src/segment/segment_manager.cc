@@ -222,6 +222,8 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
 }
 
 
+
+
 //old code
 /*
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)

@@ -24,7 +24,29 @@ void test(const control_block_t& aControlBlock) {
     //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
   //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
   //  SegmentManager::getInstance().createNewSegmentFSM(*lFile,"blub");
-  DatabaseInstanceManager::getInstance().init(true,aControlBlock);
+    
+    //a test scenario
+
+    //install    
+    DatabaseInstanceManager::getInstance().init(aControlBlock);
+    
+    //create a new Partition
+    PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
+    //create a Segment
+    SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bla");
+    char lTuple[] = "ThisDoesNotWork";
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    //insert a tuple
+    lSeg->insertTuple((byte*) &lTuple,16);
+    lSeg->printPageToFile(0);
+    //get Page on search for tuple
+
+    //flush Page to disk
+
+    //try to get it loaded and find it
+
+
+
     //size_t lPartSize = lFile->partSize(); 
     //std::cout << "Partition Size: " << lPartSize << std::endl;
     
@@ -84,8 +106,8 @@ int main(const int argc, const char* argv[]) {
     
         //ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
-        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/");
-        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
+        const std::string   C_MASTER_PARTITION_PATH     = std::string("/home/jonny/MasterTeamProjekt/MasterPartition");
+        const std::string   C_TRACE_DIR_PATH            = std::string("/home/jonny/MasterTeamProjekt/");
         const size_t        C_PAGE_SIZE                 = 4096;
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
         const bool          C_TRACE_ACTIVATED           = true;
