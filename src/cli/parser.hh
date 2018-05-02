@@ -12,6 +12,8 @@
 //#include "../main/db_instance_manager.hh"
 //#include "../partition/partition_manager.hh"
 //#include "../segment/segment_manager.hh"
+//
+#include <array>
 
 class CommandParser;
 using CP = CommandParser;
@@ -20,17 +22,20 @@ class CommandParser {
   private:
     class Command {
         public:
+            explicit Command() = delete;
             explicit Command(
-                const CP& aCP, 
                 const char* aName, 
                 const bool aHasParams, 
                 const size_t aCommandLength, 
                 const size_t aNumParams, 
                 int (CP::*aFunc)(const char_vpt&) const,
                 const char* aMsg);
-            Command& operator=(const Command& aCmd);
+            explicit Command(const Command&) = delete;
+            explicit Command(Command&&) = delete;
+            Command& operator=(const Command&) = delete;
+            Command& operator=(Command&&) = delete;
+            ~Command() = default;
         public:
-            const CP& _cp;
             const char* _name;
             bool _hasParams;
             size_t _comLength;
@@ -47,11 +52,11 @@ class CommandParser {
     explicit CommandParser(CommandParser&&) = delete;
     CommandParser& operator=(const CommandParser&) = delete;
     CommandParser& operator=(CommandParser&&) = delete;
-    ~CommandParser();
+    ~CommandParser() = default;
 
   private:
     void runcli();
-    CMD* findCommand(const std::vector<char*>& splits);
+    const CMD* findCommand(const std::vector<char*>& splits);
     void printw() const;
     void printh() const;
     void printe() const;
@@ -76,12 +81,11 @@ class CommandParser {
     void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
 
   private:
-    std::vector<Command> _commands;
+    const std::array<const Command, 8> _commands;
     LineReaderEdit _reader;
 
     size_t _maxCommandLength;
     bool _exit;
-    bool _init;
     const CB* _cb;
 };
 
