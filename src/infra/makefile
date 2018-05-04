@@ -1,5 +1,8 @@
-CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
-CFLAGS   = -O3 -Wall -std=c++17
+CXXFLAGS = -O3 -Wall -std=c++17
+
+LINKER = \
+	-ledit \
+	\
 
 CC = g++
 
@@ -27,13 +30,13 @@ trace.o : trace.cc trace.hh types.hh exception.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) trace.cc
 
 stime.o : stime.cc stime.hh
-	$(CC) -c $(CFLAGS) $(INCL) stime.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) stime.cc
 
 datejd.o : datejd.cc datejd.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) datejd.cc
 
 linereaderedit.o : linereaderedit.cc linereaderedit.hh datejd.hh val_tt.hh stime.hh stimestamp.hh
-	$(CC) -c $(CFLAGS) $(INCL) linereaderedit.cc
+	$(CC) -c $(CXXFLAGS) $(INCL) linereaderedit.cc $(LINKER)
 
 stimestamp.o : stimestamp.cc stimestamp.hh datejd.hh stime.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) stimestamp.cc

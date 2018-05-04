@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17 -static-libstdc++
+CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++
 CC = g++
 
 LINKER = -lstdc++fs

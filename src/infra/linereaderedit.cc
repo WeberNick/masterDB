@@ -36,7 +36,9 @@ bool LineReaderEdit::next() {
     return ok();
 }
 
-void LineReaderEdit::close() {}
+void LineReaderEdit::close() {
+
+}
 
 void LineReaderEdit::getNonCommentLine() {
     const char* x = "\0";

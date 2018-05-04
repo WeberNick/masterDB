@@ -62,12 +62,12 @@ int main(const int argc, const char* argv[]) {
     }
     if(!(fs::exists(lArgs.masterPartition())))
     {
-        std::cerr << "Given path to the master partition is invalid!" << std::endl;
+        std::cerr << "Given path to the master partition is invalid." << std::endl;
         //return -1; //wait until boot and so on works and uncomment this
     }
     if(lArgs.trace() && !fs::exists(lArgs.tracePath()))
     {
-        std::cerr << "The path to store the trace file at, is invalid!" << std::endl;
+        std::cerr << "The path where to store the trace file is invalid." << std::endl;
         return -1;
     }
 
@@ -100,22 +100,23 @@ int main(const int argc, const char* argv[]) {
             C_TRACE_ACTIVATED
         };
 
-        std::cout << lCB;
+        //std::cout << lCB;
+        CommandParser::getInstance().init(lCB, "mdb > ", '#');
 
         // init all global singletons
-        Trace::getInstance().init(lCB);
+        /*Trace::getInstance().init(lCB);
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
         DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
-        CommandParser::getInstance().init(lCB);
 
 	    // Test call in test.hh
         if (lArgs.test()) {
+            // start thread for cli
             std::cout << "test." << std::endl;
             test(lCB);
             return EXIT_SUCCESS;
-        }
+        }*/
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

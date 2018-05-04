@@ -4,6 +4,7 @@ CC = g++
 LINKER = \
 	-lstdc++fs \
 	-lpthread \
+	-ledit \
 	\
 
 INCL = -I../.. -I..

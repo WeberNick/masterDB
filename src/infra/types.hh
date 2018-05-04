@@ -31,33 +31,31 @@ constexpr uint32_t MAX32 =  std::numeric_limits<uint32_t>::max();
 
 struct control_block_t
 {
-    const bool          _install;
-    const std::string   _masterPartition;
-    const std::string   _tracePath;
-    const size_t        _pageSize;
-    const size_t        _noBufFrames;
-    const bool          _trace;
+    const bool _install;
+    const std::string _masterPartition;
+    const std::string _tracePath;
+    const size_t _pageSize;
+    const size_t _noBufFrames;
+    const bool _trace;
 
-    bool                install() const { return _install; }
-    const std::string&  mstrPart() const { return _masterPartition; }
-    const std::string&  tracePath() const { return _tracePath; }
-    size_t              pageSize() const { return _pageSize; }
-    size_t              frames() const { return _noBufFrames; }
-    bool                trace() const { return _trace; }
-    friend std::ostream& operator<<(std::ostream& strm, const control_block_t& cb);
+    bool install() const { return _install; }
+    const std::string& mstrPart() const { return _masterPartition; }
+    const std::string& tracePath() const { return _tracePath; }
+    size_t pageSize() const { return _pageSize; }
+    size_t frames() const { return _noBufFrames; }
+    bool trace() const { return _trace; }
+    inline friend std::ostream& operator<<(std::ostream& strm, const control_block_t& cb) {
+        strm << "The following parameters are set:\n"
+             << "Install: " << cb.install() << "\n"
+             << "Master Partition Path: " << cb.mstrPart() << "\n"
+             << "Path of Log File: " << cb.tracePath() << "\n"
+             << "Page Size: " << cb.pageSize() << "\n"
+             << "Buffer Frames: " << cb.frames() << "\n"
+             << "Trace: " << cb.trace() << "\n";
+        return strm << std::endl;
+    }
 };
 using CB = control_block_t;
-
-std::ostream& operator<<(std::ostream& strm, const control_block_t& cb) {
-    strm << "The following parameters are set:\n"
-         << "Install: " << cb.install() << "\n"
-         << "Master Partition Path: " << cb.mstrPart() << "\n"
-         << "Path of Log File: " << cb.tracePath() << "\n"
-         << "Page Size: " << cb.pageSize() << "\n"
-         << "Buffer Frames: " << cb.frames() << "\n"
-         << "Trace: " << cb.trace() << "\n";
-    return strm << std::endl;
-}
 
 struct page_id_t
 {
@@ -87,26 +85,19 @@ using part_vt = std::vector<part_t>;
 
 struct seg_t
 {
-  uint        _sPID;       // partition ID
-  uint        _sID;        // segment ID
-  std::string _sName;      // segment name (unique)
-  int         _sType;      // segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
-  uint        _sFirstPage; // first segment index ( (C) Nico) page in order to load segment into memory
-  friend std::ostream& operator<<(std::ostream& strm, const seg_t& seg);
-  friend std::string to_string(const seg_t& seg);
+    uint _sPID;         // partition ID
+    uint _sID;          // segment ID
+    std::string _sName; // segment name (unique)
+    int _sType;         // segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
+    uint _sFirstPage;   // first segment index ( (C) Nico) page in order to load segment into memory
+    inline friend std::ostream& operator<<(std::ostream& strm, const seg_t& seg) { return strm << std::endl; };
+    inline friend std::string to_string(const seg_t& seg) {
+        std::ostringstream ss;
+        ss << seg;
+        return ss.str();
+    }
 };
 using seg_vt = std::vector<seg_t>;
-
-std::ostream& operator<<(std::ostream& strm, const seg_t& seg) {
-    // todo: implement
-    return strm << std::endl;
-}
-
-std::string to_string(const seg_t& seg) {
-    std::ostringstream ss;
-    ss << seg;
-    return ss.str();
-}
 
 enum class PageStatus 
 {
