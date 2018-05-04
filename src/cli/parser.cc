@@ -18,42 +18,40 @@ CP::Command::Command(const CP& aCP,
     _usageInfo(aUsageInfo)
 {}
 
-CP::Command& CP::Command::operator=(const Command& aCommand) {
-    return *this = &aCommand;
-}
+//CP::Command& CP::Command::operator=(const Command& aCommand) {
+//    return *this = &aCommand;
+//}
 
 const char* CP::_HELP_FLAG = "-h";
 
-CommandParser::CommandParser() : 
-    _commands(),
-    _maxCommandLength(0),
-    _reader(), 
-    _init(false),
-    _cb(nullptr)
-{}
+CommandParser::CommandParser() :
+    _commands{
 
-CommandParser::~CommandParser() {}
+        Command(*this, "HELP", false, 1, 0, &CP::com_help, "Displays usage information.", "HELP"),
+        Command(*this, "CREATE PARTITION", true, 2, 3, &CP::com_create_p, "Create a partition at a given destination path with a name and a growth indicator.",
+                "CREATE PARTITION [str:path] [str:name] [int:growth_indicator]"),
+        Command(*this, "DROP PARTITION", true, 2, 1, &CP::com_drop_p, "Drop a partition by name.", "DROP PARTITION [str:name]"),
+        Command(*this, "CREATE SEGMENT", true, 2, 2, &CP::com_create_s, "Create a segment for a given partition with a name.",
+                "CREATE SEGMENT [str:partname] [str:segname]"),
+        Command(*this, "DROP SEGMENT", true, 2, 1, &CP::com_drop_s, "Drop a segment of a given partition by its name.",
+                "DROP SEGMENT [str:partname] [str:segname]"),
+        Command(*this, "SHOW PARTITION", true, 2, 1, &CP::com_show_p, "Show detailed information of a partition.", "SHOW PARTITION [str:partname]"),
+        Command(*this, "SHOW SEGMENT", true, 2, 2, &CP::com_show_s, "Show detailed information of a segment.", "SHOW SEGMENT [str:partname] [str:segname]"),
+        Command(*this, "EXIT", false, 1, 0, &CP::com_exit, "Shut down masterDB and exit.", "EXIT")
+    },
+    _maxCommandLength(0), _reader(), _init(false), _cb(nullptr) {}
 
 void CommandParser::init(const CB& aControlBlock, const char* aPrompt, const char aCommentChar) {
     if (!_init) {
-        _commands = { Command(*this, "HELP", false, 1, 0, &CP::com_help, "Displays usage information.", "HELP"),
-                      Command(*this, "CREATE PARTITION", true, 2, 3, &CP::com_create_p, "Create a partition at a given destination path with a name and a growth indicator.", "CREATE PARTITION [str:path] [str:name] [int:growth_indicator]"),
-                      Command(*this, "DROP PARTITION", true, 2, 1, &CP::com_drop_p, "Drop a partition by name.", "DROP PARTITION [str:name]"),
-                      Command(*this, "CREATE SEGMENT", true, 2, 2, &CP::com_create_s, "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
-                      Command(*this, "DROP SEGMENT", true, 2, 1, &CP::com_drop_s, "Drop a segment of a given partition by its name.", "DROP SEGMENT [str:partname] [str:segname]"),
-                      Command(*this, "SHOW PARTITION", true, 2, 1, &CP::com_show_p, "Show detailed information of a partition.", "SHOW PARTITION [str:partname]"),
-                      Command(*this, "SHOW SEGMENT", true, 2, 2, &CP::com_show_s, "Show detailed information of a segment.", "SHOW SEGMENT [str:partname] [str:segname]"),
-                      Command(*this, "EXIT", false, 1, 0, &CP::com_exit, "Shut down masterDB and exit.", "EXIT") };
         _reader.set_prompt(aPrompt);
         _reader.set_commentchar(aCommentChar);
         for (size_t i = 0; i < _commands.size(); ++i) {
             _maxCommandLength = strlen(_commands[i]._name) > _maxCommandLength ? strlen(_commands[i]._name) : _maxCommandLength;
         }
         _cb = &aControlBlock;
-        _init = true;
+        //start thread
+        runcli();
     }
-    // start thread
-    runcli();
 }
 
 void CommandParser::runcli() {
@@ -61,9 +59,9 @@ void CommandParser::runcli() {
     for (_reader.open(); _reader.ok(); _reader.next()) {
         _reader.split_line(' ', true);
         const char_vpt splits = _reader.splits();
-        Command* com = findCommand(splits);
+        const Command* com = findCommand(splits);
         if (com != NULL) {
-            FIX DROP SEGMENT -h (2,1)
+            // FIX DROP SEGMENT -h (2,1)
             if ((splits.size() - com->_comLength) != com->_numParams) {
                 if (splits.size() == com->_comLength + 1 && *splits[splits.size() - 1] == *CP::_HELP_FLAG) {
                     std::cout << "Help information for command: " << com->_name << std::endl;
@@ -108,7 +106,7 @@ void CommandParser::runcli() {
     // DatabaseInstanceManager::getInstance().shutdown();
 }
 
-CP::Command* CommandParser::findCommand(const std::vector<char*>& splits) {
+const CP::Command* CommandParser::findCommand(const std::vector<char*>& splits) {
     std::string com(splits.at(0));
     std::string com_warg = "";
     if (splits.size() > 1) { com_warg = std::string(splits.at(0)) + " " + std::string(splits.at(1)); }

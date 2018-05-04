@@ -9,9 +9,12 @@
 
 #include "../infra/linereaderedit.hh"
 #include "../infra/types.hh"
+
 #include "../main/db_instance_manager.hh"
 #include "../partition/partition_manager.hh"
 #include "../segment/segment_manager.hh"
+
+#include <array>
 
 class CommandParser;
 using CP = CommandParser;
@@ -54,12 +57,13 @@ class CommandParser {
     explicit CommandParser(CommandParser&&) = delete;
     CommandParser& operator=(const CommandParser&) = delete;
     CommandParser& operator=(CommandParser&&) = delete;
-    ~CommandParser();
+    ~CommandParser() = default;
 
   private:
     void runcli();
-    Command* findCommand(const std::vector<char*>& splits);
+    const Command* findCommand(const std::vector<char*>& splits);
     std::string findCommand(std::string& arg) const;
+
     void printw() const;
     void printh() const;
     void printe() const;
@@ -84,7 +88,7 @@ class CommandParser {
 
   private:
     static const char* _HELP_FLAG;
-    std::vector<Command> _commands;
+    const std::array<const Command, 8> _commands;
     size_t _maxCommandLength;
 
     LineReaderEdit _reader;
