@@ -7,8 +7,9 @@
  */
 #pragma once
 
-#include "../infra/linereaderedit.hh"
+#include "linereaderedit.hh"
 #include "../infra/types.hh"
+#include "../infra/exception.hh"
 
 #include "../main/db_instance_manager.hh"
 #include "../partition/partition_manager.hh"
@@ -45,10 +46,11 @@ class CommandParser {
     };
 
     enum CommandStatus {
-      ERROR = -1,
-      OK = 0,
-      EXIT = 1,
-      WRONGTYPE = 2
+        EXIT = -1,     // regular exit
+        OK = 0,        // ok, continue with next command
+        WRONGTYPE = 1, // wrong type of an argument
+        ERROR = 2      // error, recover and continue
+        // ABORT = 3,     // error, abort
     };
 
   public:
@@ -61,8 +63,8 @@ class CommandParser {
 
   private:
     void runcli();
-    const Command* findCommand(const std::vector<char*>& splits);
-    std::string findCommand(std::string& arg) const;
+    const Command* findCommand(const char_vpt* splits);
+    std::string findCommand(const std::string& arg) const;
 
     void printw() const;
     void printh() const;

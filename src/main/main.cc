@@ -99,9 +99,7 @@ int main(const int argc, const char* argv[]) {
             C_BUFFER_POOL_SIZE,
             C_TRACE_ACTIVATED
         };
-
-        //std::cout << lCB;
-        CommandParser::getInstance().init(lCB, "mdb > ", '#');
+        std::cout << lCB;
 
         // init all global singletons
         /*Trace::getInstance().init(lCB);
@@ -117,6 +115,8 @@ int main(const int argc, const char* argv[]) {
             test(lCB);
             return EXIT_SUCCESS;
         }*/
+
+        CommandParser::getInstance().init(lCB, "mdb > ", '#');
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

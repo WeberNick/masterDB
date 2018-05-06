@@ -1,5 +1,9 @@
 #include "db_instance_manager.hh"
 
+/**
+ * @brief Construct a new Database Instance Manager:: Database Instance Manager object
+ * 
+ */
 DatabaseInstanceManager::DatabaseInstanceManager() :
     _path(),
     _masterPartition(nullptr),
@@ -14,7 +18,10 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
   //think of reserver page.. 
 }
 
-
+/**
+ * @brief Destroy the Database Instance Manager:: Database Instance Manager object
+ * 
+ */
 DatabaseInstanceManager::~DatabaseInstanceManager()
 {
     shutdown();
@@ -43,7 +50,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
 void DatabaseInstanceManager::install()
 {
   part_t lMasterPartitionTuple;
-  _masterPartition =   _partMngr.createMasterPartition(_path, 1000,lMasterPartitionTuple);
+  _masterPartition = _partMngr.createMasterPartition(_path, 1000, lMasterPartitionTuple);
   _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
   _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
 }

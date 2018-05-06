@@ -52,6 +52,13 @@ class LineReaderEdit {
     inline bool isEmpty() const { return (begin() == end()); }
     inline uint64_t no_bytes_read() const { return _no_bytes_read; }
     inline bool endswith(const char aEndChar) const { return last() == aEndChar; }
+    inline bool isdigit(const char ch) const { return std::isdigit(static_cast<unsigned char>(ch)); }
+    inline bool isnumber(const char* c) const {
+        while(*c)
+            if(!isdigit(*c++))
+                return false;
+        return true;
+    }
     inline void removelast() { 
         _linesize--;
         _line[_linesize] = '\0';
