@@ -83,7 +83,7 @@ class InterpreterFSIP {
      */
     void freePage(const uint aPageIndex);
 
-    uint32_t grow(uint aNumberOfPages, uint aMaxPagesPerFSIP);
+    uint32_t grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP);
 
   public:
     /*  tters*/

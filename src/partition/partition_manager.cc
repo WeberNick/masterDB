@@ -31,13 +31,13 @@ void PartitionManager::init(const CB& aControlBlock)
     }
 }
 
-void PartitionManager::load(part_vt& aTuples)
+void PartitionManager::load(const part_vt& aTuples)
 {
     //fill internal data structure with all relevant info
-    for(auto& partTuple : aTuples)
+    for(const auto& partTuple : aTuples)
     {
-      _partitionsByID[partTuple._pID] = partTuple;
-      _partitionsByName[partTuple._pName] = partTuple._pID;
+      _partitionsByID[partTuple.partID()] = partTuple;
+      _partitionsByName[partTuple.name()] = partTuple.partID();
     }
 }
 
@@ -48,7 +48,7 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string a
     PartitionFile* lPartition = new PartitionFile(aPath, aName, aGrowthIndicator, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
 
-    part_mem_t t = {lPartition->getID(),aName,aPath,pType,aGrowthIndicator};
+    Partition_T t(lPartition->getID(),aName,aPath,pType,aGrowthIndicator);
 
     createPartitionSub(t);
 
@@ -71,14 +71,14 @@ PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPa
     return (PartitionRaw*)_partitions.at(lPartition->getID());
 }
 
-void PartitionManager::createPartitionSub(part_mem_t aParT){
+void PartitionManager::createPartitionSub(const Partition_T& aParT){
     SegmentManager& lSegMan = SegmentManager::getInstance();
-    _partitionsByID[aParT._pID] = aParT;
-    _partitionsByName[aParT._pName] = aParT._pID;
+    _partitionsByID[aParT.partID()] = aParT;
+    _partitionsByName[aParT.name()] = aParT.partID();
 
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) lSegMan.getSegment(_masterSegPartName);
     
-    lSeg->insertTuple((byte*) aParT.toDisk(),aParT.diskSize());
+    lSeg->insertTuple<Partition_T>(aParT);
 }
 
 PartitionBase* PartitionManager::getPartition(const uint8_t aID)
@@ -86,9 +86,9 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
     //if the object has not been created before
     if (_partitions.find(aID)==_partitions.end()) {
         TRACE("Trying to get Partition from Disk");
-         part_mem_t lTuple = _partitionsByID[aID];
+        const Partition_T* lTuple = &_partitionsByID[aID];
         PartitionBase* s;
-        switch(lTuple._pType){
+        switch(lTuple->type()){
             case 1://PartitionFile
             s = new PartitionFile(lTuple, *_cb);
             break;
@@ -98,7 +98,7 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
 
             default: return nullptr;
         }
-        _partitions[lTuple._pID]=s;
+        _partitions[lTuple->partID()]=s;
     }
     TRACE("found Partition, its ID is "+std::to_string(aID));
     return _partitions.at(aID);
@@ -115,13 +115,13 @@ void PartitionManager::deletePartition(const uint8_t aID){
         delete lIter->second;
         _partitions.erase(lIter);
     }
-    part_mem_t lpart = _partitionsByID[aID];
+    const Partition_T lpart = _partitionsByID[aID];
     //delete tuple on disk
     SegmentManager& lSegMan = SegmentManager::getInstance();
-    lSegMan.deleteTupelPhysically(_masterSegPartName,aID,1);
+    lSegMan.deleteTupelPhysically<Partition_T>(_masterSegPartName,aID);
 
     //delete tuple in memory
-    _partitionsByName.erase(lpart._pName);
+    _partitionsByName.erase(lpart.name());
     _partitionsByID.erase(aID);
     TRACE("Partition deleted successfully.");
 }
@@ -130,24 +130,24 @@ void PartitionManager::deletePartition(const std::string& aName){
     deletePartition(_partitionsByName[aName]);
 }
 
-PartitionFile* PartitionManager::createMasterPartition(const part_mem_t& aPart)
+PartitionFile* PartitionManager::createMasterPartition(const Partition_T* aPart)
 {
    return new PartitionFile(aPart, *_cb); 
 }
 
-PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, part_mem_t& aMasterTuple){
+PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple){
      uint pType = 1;
     PartitionFile* lPartition = new PartitionFile(aPath, _masterPartName, aGrowthIndicator, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
     TRACE(" ");
-    part_mem_t t = { lPartition->getID(),_masterPartName,aPath,pType,aGrowthIndicator};
-    aMasterTuple = t;
+    Partition_T* t = new Partition_T(lPartition->getID(),_masterPartName,aPath,pType,aGrowthIndicator);
+    aMasterTuple = *t;
 
     TRACE("Master partition created successfully.");
     return lPartition;
 }
 
-void PartitionManager::insertMasterPartitionTuple(const part_mem_t& aMasterTuple){
+void PartitionManager::insertMasterPartitionTuple(const Partitiopn_T& aMasterTuple){
     //insert Tuple in Segment
     createPartitionSub(aMasterTuple);
 }

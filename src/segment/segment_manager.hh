@@ -64,7 +64,8 @@ class SegmentManager
         void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string& aName);
-		void deleteTupelPhysically (const std::string& aMasterName, uint16_t aID, uint8_t aType);
+        template<Tuple_T>
+		void deleteTupelPhysically (const std::string& aMasterName, uint16_t aID);
 
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
@@ -75,8 +76,7 @@ class SegmentManager
 
 	private:
 		void storeSegments();
-		bool deleteTypeChecker  ( byte* aRecord,uint16_t aID,uint8_t aType);
-		void createSegmentSub (seg_mem_t aSegT);
+		void createSegmentSub (const Segment_T& aSegT);
 
 
 	private:
@@ -89,7 +89,7 @@ class SegmentManager
 
 
 		/* Stores all segment Tuples by ID in map */
-		std::map<uint16_t, seg_mem_t> _segmentsByID;
+		std::map<uint16_t, Segment_T> _segmentsByID;
 		//stores Name/ID pair used for lookup in next table
 		std::map<std::string, uint16_t> _segmentsByName;
 		
@@ -110,3 +110,41 @@ class SegmentManager
         bool        _init;
 
 };
+
+template<typename Tuple_T>
+void SegmentManager::deleteTupelPhysically(const std::string& aMasterName, uint16_t aID){
+    //type=0 if segment, type=1 if partition
+
+    //open master Segment by name and load it
+    SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(aMasterName);
+    byte* lPage;
+    InterpreterSP lInterpreter;
+
+    //search all pages for tuple
+    uint j;
+    for (size_t i = 0; i < lSegments->getNoPages(); ++i)
+    {
+      lPage = lSegments->getPage(i, kSHARED);
+
+   	  lInterpreter.attach(lPage);
+      j = 0;
+   	  while( j < lInterpreter.noRecords())
+   	  {
+          Tuple_T lTuple;
+          lTuple.toMemory(lInterpreter.getRecord(j));
+        if(lTuple.ID() == aID){
+            //mark deleted
+            lSegments->getPage(i, kEXCLUSIVE);
+            lInterpreter.deleteRecordSoft(j);
+            lSegments->releasePage(i, true);
+            TRACE("Tuple deleted successfully.");
+            return;
+        }
+        ++j;
+   	  }
+    lSegments->releasePage(i);
+    }
+    const std::string lErrMsg("Deletion of tuple went wrong - tuple not found.");
+    TRACE(lErrMsg);
+    throw BaseException(FLF, lErrMsg);
+}

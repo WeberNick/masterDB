@@ -6,8 +6,8 @@ PartitionRaw::PartitionRaw(const std::string aPath, const std::string aName, con
     create();
 }
 
-PartitionRaw::PartitionRaw(const part_mem_t& aTuple, const CB& aControlBlock):
-	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock)
+PartitionRaw::PartitionRaw(const Partition_T* aTuple, const CB& aControlBlock):
+	PartitionBase(aTuple->path(), aTuple->name(), aTuple->partID(), aControlBlock)
 {
     if(exists()) _sizeInPages = partSizeInPages();
     else _sizeInPages = 0;

@@ -1,6 +1,6 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint aGrowthIndicator, const uint aPartitionID, const CB& aControlBlock) :
+PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint16_t aGrowthIndicator, const uint aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
@@ -11,9 +11,9 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
     TRACE(lMes);
 
 }
-PartitionFile::PartitionFile(const part_mem_t& aTuple, const CB& aControlBlock):
-	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock),
-	_growthIndicator(aTuple._pGrowth)
+PartitionFile::PartitionFile(const Partition_T* aTuple, const CB& aControlBlock):
+	PartitionBase(aTuple->path(), aTuple->name(), aTuple->partID(), aControlBlock),
+	_growthIndicator(aTuple->growth())
 {
     if(exists()) _sizeInPages = partSizeInPages();
     else _sizeInPages = 0;
@@ -112,7 +112,7 @@ void PartitionFile::extend()
     load last fsip and attach fsip interpreter
     uint remainingPages = Interpreter.grow(_growthIndicator,getMaxPagesPerFSIP() )
     if(remainingPages>0){
-        load next position where a fsip should be (which is something like lastFSIP + getMaxPagesPerFSIP)
+        load next position where a fsip should be (which is something like lastFSIP + getMaxPagesPerFSIP +1)
         initNewFSIP with remainingPages
     }
     */

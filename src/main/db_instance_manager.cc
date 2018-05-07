@@ -50,7 +50,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
 void DatabaseInstanceManager::install()
 {
     TRACE("installing database");
-  part_mem_t lMasterPartitionTuple;
+  Partition_T lMasterPartitionTuple;
   _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 1000,lMasterPartitionTuple);
   _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
   _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
@@ -61,9 +61,9 @@ void DatabaseInstanceManager::boot()
     TRACE("booting");
   part_vt aPartitionTuples;
   seg_vt aSegmentTuples;
-  load<part_mem_t>(aPartitionTuples, _partIndex);
+  load<Partition_T>(aPartitionTuples, _partIndex);
   TRACE("partition Tuples loaded");
-  load<seg_mem_t>(aSegmentTuples, _segIndex);
+  load<Segment_T>(aSegmentTuples, _segIndex);
     TRACE("Segment Tuples loaded");
   _partMngr.load(aPartitionTuples);
   _segMngr.load(aSegmentTuples);

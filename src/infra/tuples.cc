@@ -5,13 +5,13 @@ Partition_T::Partition_T() :
 {}
 
 
-Partition_T::Partition_T(const uint32_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth) : 
+Partition_T::Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth) : 
     _size(0), _pID(aPID), _pName(aName), _pPath(aPath), _pType(aType), _pGrowth(aGrowth)
 {
-    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(aType) + sizeof(aGrowth); //+1 for each string for \0
+    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
     std::cout << "Size of class: " << _size << std::endl;
 }
-void Partition_T::init(const uint32_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth)
+void Partition_T::init(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth)
 {
     _pID = aPID;
     _pName = aName;
@@ -23,17 +23,14 @@ void Partition_T::init(const uint32_t aPID, const std::string& aName, const std:
 
 void Partition_T::toDisk(byte* aPtr)
 {
-    size_t test = 0;
-    *(uint32_t*)aPtr = _pID;
+    *(uint8_t*)aPtr = _pID;
     aPtr += sizeof(_pID);
-    test += sizeof(_pID);
     for(size_t i = 0; i < _pName.size() + 1; ++i)
     {
         *(char*)aPtr = _pName.c_str()[i];
         std::bitset<8> b(*(char*)aPtr);
         std::cout << b << "(" << (*(char*)aPtr) << ") ";
         ++aPtr;
-        ++test;
     }
     std::cout << std::endl;
 
@@ -43,45 +40,109 @@ void Partition_T::toDisk(byte* aPtr)
         std::bitset<8> b(*(char*)aPtr);
         std::cout << b << "(" <<(*(char*)aPtr) << ") ";
         ++aPtr;
-        ++test;
     }
     std::cout << std::endl;    
-
     *(uint8_t*)aPtr = _pType;
-    std::cout << "##### Type: " << _pType << std::endl;
-    uint t = _pType;
-    std::cout << "#### as uint: " << t << std::endl;
-    ++aPtr;
-    ++test;
-
+    aPtr += sizeof(_pType);
     *(uint16_t*)aPtr = _pGrowth;
-    test += sizeof(_pGrowth);
-    std::cout << "range: " << test << std::endl;
+    aPtr += sizeof(_pGrowth);
 }
 
 
 void Partition_T::toMemory(byte* aPtr)
 {
-    _pID = *(uint32_t*)aPtr;
+    _pID = *(uint8_t*)aPtr;
     aPtr += sizeof(_pID);
     _pName = std::string((const char*)aPtr);
     aPtr += _pName.size() + 1;
     _pPath = std::string((const char*)aPtr);
     aPtr += _pPath.size() + 1;
     _pType = *(uint8_t*)aPtr;
-    ++aPtr;
+    aPtr += sizeof(_pType);
     _pGrowth = *(uint16_t*)aPtr;
+    aPtr += sizeof(_pGrowth);
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
 }
-
 
 std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple)
 {
     stream << "Size: " << aPartTuple.size()
-        << ", ID: " << aPartTuple.ID()
+        << ", PID: " << aPartTuple.partID()
         << ", Name: " << aPartTuple.name()
         << ", Path: " << aPartTuple.path()
         << ", Type: " << aPartTuple.type()
         << ", Growth: " << aPartTuple.growth();
     return stream;
 }
+
+
+Segment_T::Segment_T() : 
+    _size(0), _sPID(0), _sID(0), _sName(""), _sType(0), _sFirstPage(0)
+{}
+
+
+Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage) : 
+    _size(0), _sPID(aPID), _sID(aSID), _sName(aName), _sType(aType), _sFirstPage(aFirstPage)
+{
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    std::cout << "Size of class: " << _size << std::endl;
+}
+
+void Segment_T::init(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage)
+{
+    _sPID = aPID;
+    _sID = aSID;
+    _sName = aName;
+    _sType = aType;
+    _sFirstPage = aFirstPage;
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+}
+
+void Segment_T::toDisk(byte* aPtr)
+{
+    *(uint8_t*)aPtr = _sPID;
+    aPtr += sizeof(_sPID);
+    *(uint16_t*)aPtr = _sID;
+    aPtr += sizeof(_sID);
+    for(size_t i = 0; i < _sName.size() + 1; ++i)
+    {
+        *(char*)aPtr = _sName.c_str()[i];
+        std::bitset<8> b(*(char*)aPtr);
+        std::cout << b << "(" << (*(char*)aPtr) << ") ";
+        ++aPtr;
+    }
+    std::cout << std::endl;
+
+    *(uint8_t*)aPtr = _sType;
+    aPtr += sizeof(_sType);
+    *(uint32_t*)aPtr = _sFirstPage;
+    aPtr += sizeof(_sFirstPage);
+}
+
+
+void Segment_T::toMemory(byte* aPtr)
+{
+    _sPID = *(uint8_t*)aPtr;
+    aPtr += sizeof(_sPID);
+    _sID = *(uint16_t*)aPtr;
+    aPtr += sizeof(_sID);
+    _sName = std::string((const char*)aPtr);
+    aPtr += _sName.size() + 1;
+    _sType = *(uint8_t*)aPtr;
+    aPtr += sizeof(_sType);
+    _sFirstPage = *(uint32_t*)aPtr;
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+}
+
+std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple)
+{
+    stream << "Size: " << aSegmentTuple.size()
+        << ", PID: " << aSegmentTuple.partID()
+        << ", SID: " << aSegmentTuple.segID()
+        << ", Name: " << aSegmentTuple.name()
+        << ", Type: " << aSegmentTuple.type()
+        << ", First Page: " << aSegmentTuple.firstPage();
+    return stream;
+}
+
+

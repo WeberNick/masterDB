@@ -18,6 +18,7 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../infra/tuples.hh"
 #include "partition_base.hh"
 #include "partition_file.hh"
 #include "partition_raw.hh"
@@ -50,7 +51,7 @@ class PartitionManager
         void init(const CB& aControlBlock);
 
     public:
-        void load(part_vt& aTuples);
+        void load(const part_vt& aTuples);
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
@@ -66,16 +67,16 @@ class PartitionManager
         inline size_t           getNoPartitions(){ return _partitions.size(); }
 
     private:
-        void            createPartitionSub(part_mem_t aParT); //has some issues if aParT is a const reference
-        PartitionFile*  createMasterPartition(const part_mem_t& aPart);
+        void            createPartitionSub(const Partition_T& aParT); //has some issues if aParT is a const reference
+        PartitionFile*  createMasterPartition(const Partition_T* aPart);
         //install functionality
-        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, part_mem_t& aMasterTuple);
-        void            insertMasterPartitionTuple(const part_mem_t& aMasterTuple);
+        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
+        void            insertMasterPartitionTuple(const Partition_T& aMasterTuple);
 
     private:
         uint _counterPartitionID;
         std::map<uint8_t, PartitionBase*> _partitions;
-        std::map<uint16_t, part_mem_t> _partitionsByID;
+        std::map<uint16_t, Partition_T> _partitionsByID;
 		std::map<std::string, uint16_t> _partitionsByName;
 
         std::string _masterPartName;

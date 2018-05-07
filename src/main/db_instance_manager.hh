@@ -79,10 +79,10 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
     lPartMan._partitionsByID[0]=lMasterPartitionTuple;
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);*/
-    part_mem_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 };
+    Partition_T lMasterPartitionTuple(0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 );
     
     TRACE("load");
-    PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
+    PartitionFile* lMasterPart = _partMngr.createMasterPartition(&lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
     byte* lPage = new byte[lMasterPart->getPageSize()];
     TRACE("getPageSize "+std::to_string(lMasterPart->getPageSize()));
@@ -94,9 +94,10 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
         TRACE("step");
         for (uint j = 0; j < lInterpreter.noRecords(); ++j) {
             TRACE("step "+std::to_string(j)+std::to_string(lInterpreter.noRecords()));   
-             T_TupleType* temp = (T_TupleType*) lInterpreter.getRecord(j);
+             T_TupleType temp;
+             temp.toMemory(lInterpreter.getRecord(j));
             TRACE(" ");
-            aTuples.push_back(*temp) ;
+            aTuples.push_back(temp) ;
             TRACE(" ");
         }
     }
@@ -107,7 +108,7 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
     TRACE("load completed");
 }
 
-template<typename T_TupleType>
+/*template<typename T_TupleType>
 void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
     SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex); 
@@ -151,4 +152,4 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
     }
 	delete[] lPage;
         _segMngr.deleteSegment(lMasterSeg);
-}
+}*/

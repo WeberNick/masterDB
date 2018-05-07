@@ -132,8 +132,6 @@ struct part_mem_t
     }
 };
 
-using part_vt = std::vector<part_mem_t>;
-
 
 struct seg_disk_t{ //Segment DiskType
   uint        _sPID;       // partition ID
@@ -187,8 +185,6 @@ struct seg_mem_t
     }
       
 };
-
-using seg_vt = std::vector<seg_mem_t>;
 
 enum class PageStatus 
 {
