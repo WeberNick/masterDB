@@ -24,6 +24,7 @@ HDR = \
 MAIN_HDR = \
 	../infra/args.hh \
 	../cli/parser.hh \
+	../infra/tuples.hh \
 	db_instance_manager.hh \
 	\
 
@@ -39,6 +40,7 @@ OBJ = \
 	../infra/args.o \
 	../infra/exception.o \
 	../infra/trace.o \
+	../infra/tuples.o \
 	\
 	../cli/linereaderedit.o \
 	../cli/datejd.o \

@@ -8,6 +8,7 @@ OBJ = \
 	args.o \
 	exception.o \
 	trace.o \
+	tuples.o \
 	\
 
 all : $(OBJ)
@@ -20,6 +21,9 @@ exception.o : exception.cc exception.hh types.hh
 
 trace.o : trace.cc trace.hh types.hh exception.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) trace.cc
+
+tuples.o : tuples.cc tuples.hh types.hh exception.hh trace.hh
+	$(CC) -c $(CXXFLAGS) $(INCL) tuples.cc
 
 clean :
 	rm -f *.o a.out

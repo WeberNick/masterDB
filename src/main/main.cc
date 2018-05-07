@@ -3,6 +3,8 @@
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
 
+#include "../infra/tuples.hh"
+
 #include "db_instance_manager.hh"
 #include "../cli/parser.hh"
 
@@ -67,6 +69,26 @@ void testStartUp(const control_block_t &aControlBlock){
     lSeg->printPageToFile(0,false);
 }
 
+void testTupleToDIsk()
+{
+
+    Partition_T lPart(64, "My Partition", "/path/to/partition/name", 1, 100);
+    const size_t size = lPart.size();
+    byte* buf = new byte[4096];
+    lPart.toDisk(buf);
+    char* t = (char*)buf;
+    for(size_t i = 0; i < size; ++i)
+    {
+        std::cout << "ToChar: " << *t << std::endl;
+        ++t;
+    }
+    Partition_T lPart2;
+    lPart2.toMemory(buf);
+    std::cout << lPart << std::endl;
+    std::cout << lPart2 << std::endl;
+}
+
+
 /***********************************************************************
 *  todo: test install, boot, (shutdown), buf manager, and everything  *
 ***********************************************************************/
@@ -117,8 +139,8 @@ int main(const int argc, const char* argv[]) {
     {
         // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
-        const std::string   C_MASTER_PARTITION_PATH     = std::string("/home/jonny/MasterTeamProjekt/MasterPartition");
-        const std::string   C_TRACE_DIR_PATH            = std::string("/home/jonny/MasterTeamProjekt/");
+        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
+        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
         const size_t        C_PAGE_SIZE                 = 4096;
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
         const bool          C_TRACE_ACTIVATED           = true;
@@ -132,6 +154,8 @@ int main(const int argc, const char* argv[]) {
             C_TRACE_ACTIVATED
         };
         std::cout << lCB;
+
+        testTupleToDIsk();
 
 //second CB for start up.
         const control_block_t lCB2 = {
@@ -150,8 +174,10 @@ int main(const int argc, const char* argv[]) {
         BufferManager::getInstance().init(lCB);
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
+        
+
        // test(lCB);
-        testStartUp(lCB2);
+        //testStartUp(lCB2);
          // testStartUp(lCB2);
 	    // Test call in test.hh
      /*   if (lArgs.test()) {
