@@ -39,8 +39,8 @@ void SegmentManager::load(const seg_vt& aTuples)
       //!!!!!!!!!!!!!!!!!!!!!!!!!!
       //!!!! COPY SEG TUPLE !!!!!!
       //!!!!!!!!!!!!!!!!!!!!!!!!!!
-      _segmentsByID[segTuple.segID()] = segTuple;
-      _segmentsByName[segTuple.name()] = segTuple.segID();
+      _segmentsByID[segTuple.ID()] = segTuple;
+      _segmentsByName[segTuple.name()] = segTuple.ID();
     }
 }
 
@@ -69,9 +69,9 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
 }
 
 void SegmentManager::createSegmentSub(const Segment_T& aSegT){
-    TRACE(std::string("trying to insert the following tuple:\n") +aSegT.toString() );
-    _segmentsByID[aSegT.segID()] = aSegT;
-    _segmentsByName[aSegT.name()] = aSegT.segID();
+    TRACE(std::string("trying to insert the following tuple:\n") +aSegT.to_string() );
+    _segmentsByID[aSegT.ID()] = aSegT;
+    _segmentsByName[aSegT.name()] = aSegT.ID();
 
     SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_masterSegSegName);
     lSegments->insertTuple<Segment_T>(aSegT);
@@ -98,7 +98,7 @@ void SegmentManager::deleteSegment(const uint16_t aID)
         delete segIter->second;
         _segments.erase(segIter);
     }
-    Segment_T seg = _segmentsByID[aID];
+    const Segment_T seg(_segmentsByID.at(aID));
     //delete tuple on disk
     deleteTupelPhysically<Segment_T>(_masterSegSegName,aID);
 
@@ -121,7 +121,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
     if (_segments.find(aSegmentID)==_segments.end()) {
         TRACE("trying to load the segment from disk");
         //find out which type
-        const Segment_T lTuple = _segmentsByID[aSegmentID];
+        const Segment_T lTuple(_segmentsByID.at(aSegmentID));
         PartitionManager& partMngr = PartitionManager::getInstance();
         PartitionBase& part = *(partMngr.getPartition(lTuple.ID()));
         SegmentBase* s;

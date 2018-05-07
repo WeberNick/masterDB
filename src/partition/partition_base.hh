@@ -49,7 +49,7 @@ class PartitionBase
     protected:
         friend class PartitionManager;
         explicit PartitionBase() = delete;
-        explicit PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock);
+        explicit PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock);
         explicit PartitionBase(const PartitionBase&) = delete;
         explicit PartitionBase(PartitionBase&&) = delete;
         PartitionBase& operator=(const PartitionBase&) = delete;
@@ -89,7 +89,7 @@ class PartitionBase
          *  @param  aPageIndex: an index indicating which page to remove
          *  @see    interpeter/interpreter_fsip.hh
          */
-        void freePage(const uint aPageIndex);
+        void freePage(const uint32_t aPageIndex);
 
         /**
          *  @brief  Read a page from the partition into a main memory buffer
@@ -99,7 +99,7 @@ class PartitionBase
          *  @throws FileException on failure
          *  @see    infra/exception.hh
          */
-        void readPage(byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
+        void readPage(byte *aBuffer, const uint32_t aPageIndex, const uint aBufferSize);
 
         /**
          *  @brief  Write a page from a main memory buffer on the partition
@@ -109,17 +109,21 @@ class PartitionBase
          *  @throws FileException on Failure
          *  @see    infra/exception.hh
          */
-        void writePage(const byte *aBuffer, const uint aPageIndex, const uint aBufferSize);
+        void writePage(const byte *aBuffer, const uint32_t aPageIndex, const uint aBufferSize);
 
 
 
     public:
-        inline std::string getPath() { return _partitionPath; }
-        inline std::string getName() { return _partitionName; }
+        inline const std::string& getPath() const { return _partitionPath; }
+        inline const std::string& getPath() { return _partitionPath; }
+        inline const std::string& getName() const { return _partitionName; }
+        inline const std::string& getName() { return _partitionName; }
+        inline uint getPageSize() const { return _pageSize; }
         inline uint getPageSize() { return _pageSize; }
+        inline uint getSizeInPages() const { return _sizeInPages; }
         inline uint getSizeInPages() { return _sizeInPages; }
+        inline uint8_t getID() const { return _partitionID; }
         inline uint8_t getID() { return _partitionID; }
-        inline uint getOpenCount() { return _openCount; }
 
     protected: 
         /**

@@ -55,8 +55,8 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile*   createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator);
-        PartitionRaw*    createPartitionRawInstance(const std::string aPath, const std::string aName);
+        PartitionFile*   createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
+        PartitionRaw*    createPartitionRawInstance(const std::string& aPath, const std::string& aName);
         PartitionBase*   getPartition(const uint8_t aID);
         PartitionBase*   getPartition(const std::string& aName);
         void             deletePartition(const uint8_t aID);
@@ -68,13 +68,13 @@ class PartitionManager
 
     private:
         void            createPartitionSub(const Partition_T& aParT); //has some issues if aParT is a const reference
-        PartitionFile*  createMasterPartition(const Partition_T* aPart);
+        PartitionFile*  createMasterPartition(const Partition_T& aPart);
         //install functionality
         PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
         void            insertMasterPartitionTuple(const Partition_T& aMasterTuple);
 
     private:
-        uint _counterPartitionID;
+        uint8_t _counterPartitionID;
         std::map<uint8_t, PartitionBase*> _partitions;
         std::map<uint16_t, Partition_T> _partitionsByID;
 		std::map<std::string, uint16_t> _partitionsByName;

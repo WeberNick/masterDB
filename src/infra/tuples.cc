@@ -11,6 +11,31 @@ Partition_T::Partition_T(const uint8_t aPID, const std::string& aName, const std
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
     std::cout << "Size of class: " << _size << std::endl;
 }
+
+Partition_T::Partition_T(const Partition_T& aPartitionTuple) :
+    _size(aPartitionTuple.size()),
+    _pID(aPartitionTuple.ID()),
+    _pName(aPartitionTuple.name()),
+    _pPath(aPartitionTuple.path()),
+    _pType(aPartitionTuple.type()),
+    _pGrowth(aPartitionTuple.growth())
+{}
+
+Partition_T& Partition_T::operator=(const Partition_T& aPartitionTuple)
+{
+    if(this != &aPartitionTuple)
+    {
+        //exception safe copy assignment with swap would be overkill
+        _size    = aPartitionTuple.size();
+        _pID     = aPartitionTuple.ID();
+        _pName   = aPartitionTuple.name();
+        _pPath   = aPartitionTuple.path();
+        _pType   = aPartitionTuple.type();
+        _pGrowth = aPartitionTuple.growth();
+    }
+    return *this;
+}
+
 void Partition_T::init(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth)
 {
     _pID = aPID;
@@ -21,7 +46,7 @@ void Partition_T::init(const uint8_t aPID, const std::string& aName, const std::
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
 }
 
-void Partition_T::toDisk(byte* aPtr)
+void Partition_T::toDisk(byte* aPtr) const
 {
     *(uint8_t*)aPtr = _pID;
     aPtr += sizeof(_pID);
@@ -48,6 +73,11 @@ void Partition_T::toDisk(byte* aPtr)
     aPtr += sizeof(_pGrowth);
 }
 
+void Partition_T::toDisk(byte* aPtr)
+{
+    static_cast<const Partition_T&>(*this).toDisk(aPtr);
+}
+
 
 void Partition_T::toMemory(byte* aPtr)
 {
@@ -67,7 +97,7 @@ void Partition_T::toMemory(byte* aPtr)
 std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple)
 {
     stream << "Size: " << aPartTuple.size()
-        << ", PID: " << aPartTuple.partID()
+        << ", PID: " << aPartTuple.ID()
         << ", Name: " << aPartTuple.name()
         << ", Path: " << aPartTuple.path()
         << ", Type: " << aPartTuple.type()
@@ -88,6 +118,30 @@ Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string&
     std::cout << "Size of class: " << _size << std::endl;
 }
 
+Segment_T::Segment_T(const Segment_T& aSegmentTuple) :
+    _size(aSegmentTuple.size()),
+    _sPID(aSegmentTuple.partID()),
+    _sID(aSegmentTuple.ID()),
+    _sName(aSegmentTuple.name()),
+    _sType(aSegmentTuple.type()),
+    _sFirstPage(aSegmentTuple.firstPage())
+{}
+
+Segment_T& Segment_T::operator=(const Segment_T& aSegmentTuple)
+{
+    if(this != &aSegmentTuple)
+    {
+        //exception safe copy assignment with swap would be overkill
+        _size       = aSegmentTuple.size();
+        _sPID       = aSegmentTuple.partID();
+        _sID        = aSegmentTuple.ID();
+        _sName      = aSegmentTuple.name();
+        _sType      = aSegmentTuple.type();
+        _sFirstPage = aSegmentTuple.firstPage();
+    }
+    return *this;
+}
+
 void Segment_T::init(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage)
 {
     _sPID = aPID;
@@ -98,7 +152,7 @@ void Segment_T::init(const uint8_t aPID, const uint16_t aSID, const std::string&
     _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
 }
 
-void Segment_T::toDisk(byte* aPtr)
+void Segment_T::toDisk(byte* aPtr) const
 {
     *(uint8_t*)aPtr = _sPID;
     aPtr += sizeof(_sPID);
@@ -119,6 +173,10 @@ void Segment_T::toDisk(byte* aPtr)
     aPtr += sizeof(_sFirstPage);
 }
 
+void Segment_T::toDisk(byte* aPtr)
+{
+    static_cast<const Segment_T&>(*this).toDisk(aPtr);
+}
 
 void Segment_T::toMemory(byte* aPtr)
 {
@@ -138,7 +196,7 @@ std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple)
 {
     stream << "Size: " << aSegmentTuple.size()
         << ", PID: " << aSegmentTuple.partID()
-        << ", SID: " << aSegmentTuple.segID()
+        << ", SID: " << aSegmentTuple.ID()
         << ", Name: " << aSegmentTuple.name()
         << ", Type: " << aSegmentTuple.type()
         << ", First Page: " << aSegmentTuple.firstPage();

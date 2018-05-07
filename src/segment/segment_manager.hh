@@ -12,6 +12,7 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../infra/tuples.hh"
 #include "../infra/header_structs.hh"
 #include "../partition/partition_manager.hh"
 #include "../partition/partition_base.hh"
@@ -50,7 +51,7 @@ class SegmentManager
         void init(const CB& aControlBlock);
 
 	public:
-		void load(seg_vt& aTuples);
+		void load(const seg_vt& aTuples);
 
 	public:
 		SegmentFSM* createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
@@ -64,7 +65,7 @@ class SegmentManager
         void deleteSegment(SegmentBase* aSegment);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string& aName);
-        template<Tuple_T>
+        template<typename Tuple_T>
 		void deleteTupelPhysically (const std::string& aMasterName, uint16_t aID);
 
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);

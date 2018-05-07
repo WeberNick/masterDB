@@ -1,6 +1,6 @@
 #include "partition_file.hh"
 
-PartitionFile::PartitionFile(const std::string aPath, const std::string aName, const uint16_t aGrowthIndicator, const uint aPartitionID, const CB& aControlBlock) :
+PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
@@ -11,9 +11,9 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
     TRACE(lMes);
 
 }
-PartitionFile::PartitionFile(const Partition_T* aTuple, const CB& aControlBlock):
-	PartitionBase(aTuple->path(), aTuple->name(), aTuple->partID(), aControlBlock),
-	_growthIndicator(aTuple->growth())
+PartitionFile::PartitionFile(const Partition_T& aTuple, const CB& aControlBlock):
+	PartitionBase(aTuple.path(), aTuple.name(), aTuple.ID(), aControlBlock),
+	_growthIndicator(aTuple.growth())
 {
     if(exists()) _sizeInPages = partSizeInPages();
     else _sizeInPages = 0;

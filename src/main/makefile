@@ -20,6 +20,7 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	../infra/tuples.hh \
 	
 MAIN_HDR = \
 	../infra/args.hh \

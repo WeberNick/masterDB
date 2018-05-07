@@ -36,13 +36,13 @@ void PartitionManager::load(const part_vt& aTuples)
     //fill internal data structure with all relevant info
     for(const auto& partTuple : aTuples)
     {
-      _partitionsByID[partTuple.partID()] = partTuple;
-      _partitionsByName[partTuple.name()] = partTuple.partID();
+      _partitionsByID[partTuple.ID()] = partTuple;
+      _partitionsByName[partTuple.name()] = partTuple.ID();
     }
 }
 
 
-PartitionFile* PartitionManager::createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator)
+PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator)
 {
     uint pType = 1;
     PartitionFile* lPartition = new PartitionFile(aPath, aName, aGrowthIndicator, _counterPartitionID++, *_cb);
@@ -56,14 +56,14 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string a
     return (PartitionFile*)_partitions.at(lPartition->getID());
 }
 
-PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPath, const std::string aName)
+PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
 {
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
 
     uint pType = 0;
 
-    part_mem_t t = {lPartition->getID(),aName,aPath,pType,MAX32};
+    Partition_T t(lPartition->getID(),aName,aPath,pType,MAX16);
 
     createPartitionSub(t);
 
@@ -73,8 +73,8 @@ PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string aPa
 
 void PartitionManager::createPartitionSub(const Partition_T& aParT){
     SegmentManager& lSegMan = SegmentManager::getInstance();
-    _partitionsByID[aParT.partID()] = aParT;
-    _partitionsByName[aParT.name()] = aParT.partID();
+    _partitionsByID[aParT.ID()] = aParT;
+    _partitionsByName[aParT.name()] = aParT.ID();
 
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) lSegMan.getSegment(_masterSegPartName);
     
@@ -86,9 +86,9 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
     //if the object has not been created before
     if (_partitions.find(aID)==_partitions.end()) {
         TRACE("Trying to get Partition from Disk");
-        const Partition_T* lTuple = &_partitionsByID[aID];
+        const Partition_T& lTuple = _partitionsByID[aID];
         PartitionBase* s;
-        switch(lTuple->type()){
+        switch(lTuple.type()){
             case 1://PartitionFile
             s = new PartitionFile(lTuple, *_cb);
             break;
@@ -98,7 +98,7 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
 
             default: return nullptr;
         }
-        _partitions[lTuple->partID()]=s;
+        _partitions[lTuple.ID()]=s;
     }
     TRACE("found Partition, its ID is "+std::to_string(aID));
     return _partitions.at(aID);
@@ -115,7 +115,7 @@ void PartitionManager::deletePartition(const uint8_t aID){
         delete lIter->second;
         _partitions.erase(lIter);
     }
-    const Partition_T lpart = _partitionsByID[aID];
+    const Partition_T lpart(_partitionsByID.at(aID));
     //delete tuple on disk
     SegmentManager& lSegMan = SegmentManager::getInstance();
     lSegMan.deleteTupelPhysically<Partition_T>(_masterSegPartName,aID);
@@ -130,7 +130,7 @@ void PartitionManager::deletePartition(const std::string& aName){
     deletePartition(_partitionsByName[aName]);
 }
 
-PartitionFile* PartitionManager::createMasterPartition(const Partition_T* aPart)
+PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)
 {
    return new PartitionFile(aPart, *_cb); 
 }
@@ -147,7 +147,7 @@ PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath,
     return lPartition;
 }
 
-void PartitionManager::insertMasterPartitionTuple(const Partitiopn_T& aMasterTuple){
+void PartitionManager::insertMasterPartitionTuple(const Partition_T& aMasterTuple){
     //insert Tuple in Segment
     createPartitionSub(aMasterTuple);
 }

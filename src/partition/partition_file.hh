@@ -21,8 +21,8 @@ class PartitionFile : public PartitionBase
 {
     private:
         friend class PartitionManager;
-        explicit PartitionFile(const std::string aPath, const std::string aName, const uint aPartitionID, const uint16_t aGrowthIndicator,const CB& aControlBlock);
-        PartitionFile(const Partition_T* aTuple, const CB& aControlBlock);
+        explicit PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock);
+        explicit PartitionFile(const Partition_T& aTuple, const CB& aControlBlock);
         PartitionFile(const PartitionFile&) = delete;
         PartitionFile &operator=(const PartitionFile&) = delete;
     public:
