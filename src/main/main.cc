@@ -94,12 +94,12 @@ int main(const int argc, const char* argv[]) {
     }
  /*   if(!(fs::exists(lArgs.masterPartition())))
     {
-        std::cerr << "Given path to the master partition is invalid!" << std::endl;
+        std::cerr << "Given path to the master partition is invalid." << std::endl;
         //return -1; //wait until boot and so on works and uncomment this
     }
     if(lArgs.trace() && !fs::exists(lArgs.tracePath()))
     {
-        std::cerr << "The path to store the trace file at, is invalid!" << std::endl;
+        std::cerr << "The path where to store the trace file is invalid." << std::endl;
         return -1;
     }
 */
@@ -131,9 +131,9 @@ int main(const int argc, const char* argv[]) {
             C_BUFFER_POOL_SIZE,
             C_TRACE_ACTIVATED
         };
+        std::cout << lCB;
 
-        //std::cout << lCB;
-
+//second CB for start up.
         const control_block_t lCB2 = {
             false,
             C_MASTER_PARTITION_PATH,
@@ -161,10 +161,7 @@ int main(const int argc, const char* argv[]) {
             return EXIT_SUCCESS;
         }*/
 
-        /*// start thread for cli
-        CommandParser& cp = CommandParser::getInstance();
-        cp.init(lCB);
-        cp.runcli();*/
+        CommandParser::getInstance().init(lCB, "mdb > ", '#');
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

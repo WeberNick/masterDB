@@ -1,5 +1,9 @@
 #include "db_instance_manager.hh"
 
+/**
+ * @brief Construct a new Database Instance Manager:: Database Instance Manager object
+ * 
+ */
 DatabaseInstanceManager::DatabaseInstanceManager() :
     _path(),
     _masterPartition(nullptr),
@@ -14,7 +18,10 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
   //think of reserver page.. 
 }
 
-
+/**
+ * @brief Destroy the Database Instance Manager:: Database Instance Manager object
+ * 
+ */
 DatabaseInstanceManager::~DatabaseInstanceManager()
 {
     TRACE("DB Instance manager destructed.");

@@ -36,13 +36,15 @@ bool LineReaderEdit::next() {
     return ok();
 }
 
-void LineReaderEdit::close() {}
+void LineReaderEdit::close() {
+
+}
 
 void LineReaderEdit::getNonCommentLine() {
     const char* x = "\0";
 
     do {
-        //_line = readline(prompt());
+        _line = readline(prompt());
 
         if (0 == _line) {
             _ok = false;
@@ -63,7 +65,7 @@ void LineReaderEdit::getNonCommentLine() {
         if (_commentchar == (*x)) { ++_commentlinecount; }
     } while ((0 == linesize()) || ('\0' == *x) || (commentchar() == (*_line)));
 
-    //add_history(_line);
+    add_history(_line);
     _ok = true;
 }
 
