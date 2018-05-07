@@ -6,8 +6,9 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
     _partMngr(PartitionManager::getInstance()),
     _segMngr(SegmentManager::getInstance()),
     _partIndex(1), 
-    _segIndex(2),
+    _segIndex(3),
     _cb(nullptr),
+    _running(false),
     _init(false)
 {
   //think of reserver page.. 
@@ -16,7 +17,8 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
 
 DatabaseInstanceManager::~DatabaseInstanceManager()
 {
-    shutdown();
+    TRACE("DB Instance manager destructed.");
+   // shutdown();
 }
 
 void DatabaseInstanceManager::init(const CB& aControlBlock)
@@ -32,6 +34,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
         {
             boot();
         }
+        _running = true;
         _init = true;
     }
 }
@@ -39,7 +42,8 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
 
 void DatabaseInstanceManager::install()
 {
-  part_t lMasterPartitionTuple;
+    TRACE("installing database");
+  part_mem_t lMasterPartitionTuple;
   _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 1000,lMasterPartitionTuple);
   _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
   _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
@@ -47,11 +51,13 @@ void DatabaseInstanceManager::install()
 
 void DatabaseInstanceManager::boot()
 {
+    TRACE("booting");
   part_vt aPartitionTuples;
   seg_vt aSegmentTuples;
-  load<part_t>(aPartitionTuples, _partIndex);
-  load<seg_t>(aSegmentTuples, _segIndex);
-    
+  load<part_mem_t>(aPartitionTuples, _partIndex);
+  TRACE("partition Tuples loaded");
+  load<seg_mem_t>(aSegmentTuples, _segIndex);
+    TRACE("Segment Tuples loaded");
   _partMngr.load(aPartitionTuples);
   _segMngr.load(aSegmentTuples);
   _masterPartition = (PartitionFile*)_partMngr.getPartition(_partMngr._masterPartName);
@@ -59,9 +65,11 @@ void DatabaseInstanceManager::boot()
 
 void DatabaseInstanceManager::shutdown()
 {
-  //stop transactions
-    _segMngr.storeSegments();
-    BufferManager::getInstance().flushAll();
+    TRACE("storing Database");
+  //  if (isRunning()) {
+        // stop transactions
+        _segMngr.storeSegments();
+        BufferManager::getInstance().flushAll();
+ //       _running = false;
+  //  }
 }
-
-

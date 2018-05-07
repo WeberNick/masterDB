@@ -66,16 +66,16 @@ class PartitionManager
         inline size_t           getNoPartitions(){ return _partitions.size(); }
 
     private:
-        void            createPartitionSub(const part_t& aParT);
-        PartitionFile*  createMasterPartition(const part_t& aPart);
+        void            createPartitionSub(part_mem_t aParT); //has some issues if aParT is a const reference
+        PartitionFile*  createMasterPartition(const part_mem_t& aPart);
         //install functionality
-        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, part_t& aMasterTuple);
-        void            insertMasterPartitionTuple(const part_t& aMasterTuple);
+        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, part_mem_t& aMasterTuple);
+        void            insertMasterPartitionTuple(const part_mem_t& aMasterTuple);
 
     private:
         uint _counterPartitionID;
         std::map<uint8_t, PartitionBase*> _partitions;
-        std::map<uint16_t, part_t> _partitionsByID;
+        std::map<uint16_t, part_mem_t> _partitionsByID;
 		std::map<std::string, uint16_t> _partitionsByName;
 
         std::string _masterPartName;

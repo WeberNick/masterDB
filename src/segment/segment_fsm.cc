@@ -154,6 +154,7 @@ PID SegmentFSM::getNewPage() {
     */
 
 void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
+    TRACE("Trying to load a Segment from Page "+std::to_string(aPageIndex)+ " on partition "+std::to_string(_partition.getID()));
     // partition and bufferManager have to be set
     size_t lPageSize = getPageSize();
     byte *lPageBuffer;
@@ -163,7 +164,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     uint32_t l1FSM;
     PID lPID;
     BCB* lBCB;
-
+    TRACE(" ");
     while (lnxIndex != 0) {
         lPID =  {_partition.getID(),lnxIndex};
         lBCB = _bufMan.fix(lPID, kSHARED);
@@ -172,6 +173,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
         _indexPages.push_back(lnxIndex);
         l1FSM = lHeader._firstFSM;
         _segID = lHeader._segID;
+        TRACE(" ");
         for (uint i = 0; i < lHeader._currSize; ++i) {
             PID lTmpPID = {_partition.getID(), *(((uint32_t *)lPageBuffer) + i)};  
             _pages.push_back(page_t(lTmpPID, nullptr));
@@ -180,6 +182,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
         lBCB->getMtx().unlock_shared();
         _bufMan.unfix(lBCB);
     }
+    TRACE("Load FSMs");
     _fsmPages.push_back(l1FSM);
     while (_fsmPages.at(_fsmPages.size() -1) != 0) {
         lPID._pageNo = _fsmPages.at(_fsmPages.size() -1);
@@ -207,13 +210,15 @@ void SegmentFSM::storeSegment() {
     BCB* lBCB;
     // create last invalid index page:
     _indexPages.push_back(0);
-
+    TRACE("IndexPages.size: "+std::to_string(_indexPages.size())+" on Segment "+std::to_string(_segID));
     // for all index pages
+
     while (j < _indexPages.size() - 1) {
         lPID={_partition.getID(),_indexPages.at(j)};
         lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
         lPageBuffer = _bufMan.getFramePtr(lBCB);
         k = 0;
+        TRACE("i"+std::to_string(i)+" managedPages "+std::to_string(managedPages)+" k "+std::to_string(k)+" maxPerPage "+std::to_string(maxPerPage));
         while ((i < managedPages) & (k < maxPerPage)) {
             *(((uint32_t *)lPageBuffer) + k) = _pages.at(i).first.pageNo();
             ++i;

@@ -15,6 +15,7 @@ HDR = \
 	
 MAIN_HDR = \
 	../infra/args.hh \
+	../cli/parser.hh \
 	db_instance_manager.hh \
 	\
 
@@ -26,15 +27,20 @@ DBIM_HDR = \
 	../interpreter/interpreter_sp.hh \
 	\
 
-
 OBJ = \
 	../infra/args.o \
 	../infra/exception.o \
 	../infra/trace.o \
+	../infra/linereaderedit.o \
+	../infra/datejd.o \
+	../infra/stime.o \
+	../infra/stimestamp.o \
 	../partition/partition_manager.o \
 	../partition/partition_base.o \
 	../partition/partition_file.o \
 	../partition/partition_raw.o \
+	\
+	../cli/parser.o \
 	\
 	../segment/segment_manager.o \
 	../segment/segment_base.o \

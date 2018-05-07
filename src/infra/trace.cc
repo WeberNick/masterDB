@@ -16,11 +16,11 @@ Trace::~Trace()
     }
 }
 
-void Trace::init(const CB& aCB)
+void Trace::init(const CB& aControlBlock)
 {
     if(!_init)
     {
-        _cb = &aCB;
+        _cb = &aControlBlock;
         _logPath = _cb->tracePath();
         _logPath.append("logs/");
         fs::create_directory(_logPath);

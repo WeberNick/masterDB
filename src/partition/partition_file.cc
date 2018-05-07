@@ -11,7 +11,7 @@ PartitionFile::PartitionFile(const std::string aPath, const std::string aName, c
     TRACE(lMes);
 
 }
-PartitionFile::PartitionFile(const part_t& aTuple, const CB& aControlBlock):
+PartitionFile::PartitionFile(const part_mem_t& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple._pPath, aTuple._pName, aTuple._pID, aControlBlock),
 	_growthIndicator(aTuple._pGrowth)
 {
@@ -107,7 +107,16 @@ void PartitionFile::extend()
     const size_t lNewSize = (_sizeInPages + _growthIndicator) * _pageSize;
     fs::resize_file(_partitionPath, lNewSize); //will throw if fails
     _sizeInPages = lNewSize / _pageSize;
-    //FSIP.grow fehlt noch. Idee: gehe auf letzte FSIP, schau wie viele unvalid bits dort sind. Setze anzahl als valid, wenn nötig, initialisiere neue FSIPs.
+    //GROW FSIPS
+    /*
+    load last fsip and attach fsip interpreter
+    uint remainingPages = Interpreter.grow(_growthIndicator,getMaxPagesPerFSIP() )
+    if(remainingPages>0){
+        load next position where a fsip should be (which is something like lastFSIP + getMaxPagesPerFSIP)
+        initNewFSIP with remainingPages
+    }
+    */
+    
     TRACE("Size of file partition was extended");
 }
 

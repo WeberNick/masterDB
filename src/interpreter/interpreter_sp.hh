@@ -46,6 +46,7 @@ class InterpreterSP
 		byte* addNewRecord(const uint aRecordSize); // returns 0 if page is full
 		int deleteRecordHard (uint16_t aRecordNo); //actually delete record so that it is not restorable
 		int deleteRecordSoft (uint16_t aRecordNo); //just mark as deleted
+		byte* getRecord(const uint aRecordNo);
 
 
 
@@ -55,7 +56,6 @@ class InterpreterSP
 		inline uint 	 		freeSpace(){ return header()->_freeSpace; }
 		inline uint 	 		noRecords(){ return header()->_noRecords; }
 
-		inline byte*   	 		getRecord(const uint aRecordNo);
 		inline slot_t& 	 		slot(const uint i){ return _slots[- (int) i]; }
 		inline size_t  	 		getPageSize(){ return _pageSize; }
 
@@ -82,12 +82,4 @@ void InterpreterSP::attach(byte* aPP)
 	_pp = aPP;
 	_header = get_hdr_ptr();
 	_slots  = get_slot_base_ptr();
-}
-
-byte* InterpreterSP::getRecord(const uint aRecordNo) 
-{ 
-	if(aRecordNo >= noRecords()) { 
-		return 0; 
-	}
-	return (_pp + slot(aRecordNo)._offset); 
 }

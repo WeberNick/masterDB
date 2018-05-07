@@ -76,13 +76,24 @@ OutOfMemoryException::OutOfMemoryException(
 PartitionFullException::PartitionFullException(
         const char*         aFileName,
         const unsigned int  aLineNumber,
-        const char*         aFunctionName) :
+        const char*         aFunctionName,
+        byte*               aBufferPointer,
+        const uint          aIndexOfFSIP) :
 	BaseException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            "The partition is full. Can not allocate any new pages.")
+            "The partition is full. Can not allocate any new pages."),
+    _bufPtr(aBufferPointer), 
+    _index(aIndexOfFSIP)
 {}
+
+PartitionFullException::PartitionFullException(const PartitionFullException& aOther) : 
+    BaseException(aOther),
+    _bufPtr(aOther.getBufferPtr()),
+    _index(aOther.getIndexOfFSIP())
+{}
+
 
 FSIPException::FSIPException(
         const char*         aFileName,

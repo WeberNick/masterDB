@@ -76,7 +76,7 @@ class SegmentManager
 	private:
 		void storeSegments();
 		bool deleteTypeChecker  ( byte* aRecord,uint16_t aID,uint8_t aType);
-		void createSegmentSub (seg_t aSegT);
+		void createSegmentSub (seg_mem_t aSegT);
 
 
 	private:
@@ -89,7 +89,7 @@ class SegmentManager
 
 
 		/* Stores all segment Tuples by ID in map */
-		std::map<uint16_t, seg_t> _segmentsByID;
+		std::map<uint16_t, seg_mem_t> _segmentsByID;
 		//stores Name/ID pair used for lookup in next table
 		std::map<std::string, uint16_t> _segmentsByName;
 		

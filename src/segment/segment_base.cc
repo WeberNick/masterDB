@@ -43,11 +43,16 @@ byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
 
 void SegmentBase::writePage(const uint aPageNo)
 {
+    TRACE("Trying to write Page");
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
+            TRACE("Trying to write Page");
+
         lBCB->setModified(true);
-        _bufMan.flush(lBCB);    
+        _bufMan.flush(lBCB); 
+            TRACE("Trying to write Page");
+   
     }
 }
 
@@ -132,11 +137,20 @@ byte* SegmentBase::getPageX(const uint aPageNo)
     return _bufMan.getFramePtr(lBCB);
 }
 
-void SegmentBase::printPageToFile(uint aPageNo) {
+void SegmentBase::printPageToFile(uint aPageNo, bool afromDisk ) {
     //get Segment by Name
     //get physical pageNo and check if in buffer before
 
-    byte* lPP2 = getPage(aPageNo, kSHARED);
+    byte* lPP2;
+    if(!afromDisk){
+        lPP2 = getPage(aPageNo, kSHARED);
+    }
+    else{
+        lPP2 = new byte[4096];
+        _partition.open();
+        _partition.readPage(lPP2,_pages[aPageNo].first._pageNo,4096);
+        _partition.close();
+    }
     TRACE("Got the Page!");
     std::ofstream myfile;
     std::string filename = "partiton"+std::to_string(_partition.getID())+"Segment"+std::to_string(_segID)+"PageLogical"+ std::to_string(aPageNo) + ".txt";
@@ -146,5 +160,10 @@ void SegmentBase::printPageToFile(uint aPageNo) {
         myfile << std::hex << *(lPP + a) << std::endl;
     }
     myfile.close();
-    releasePage(aPageNo);
+    if(afromDisk){
+        delete lPP2;
+    }
+    else{
+        releasePage(aPageNo);
+    }
 }

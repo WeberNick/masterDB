@@ -1,25 +1,28 @@
-        #include "../infra/args.hh"
+#include "../infra/args.hh"
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
 
 #include "db_instance_manager.hh"
+#include "../cli/parser.hh"
 
 #include <iostream>
 #include <cstdlib>
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 
+void test(const control_block_t &aControlBlock) {
+    // std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
 
-void test(const control_block_t& aControlBlock) {
-     //std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
-
-    //PartitionFile *lPartFile = PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition", "DefaultName", 1000);
-//	std::cout << "## TEST: Size in Pages (should be 0): " << lPartFile->getSizeInPages() << std::endl;
+    // PartitionFile *lPartFile =
+    // PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition",
+    // "DefaultName", 1000);
+    //	std::cout << "## TEST: Size in Pages (should be 0): " <<
+    //lPartFile->getSizeInPages() << std::endl;
 
     Trace::getInstance().log(FLF, "Trace works");
     std::string lHome(std::getenv("HOME"));
-    std::string lPath = lHome + std::string("/Partition");
+    std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
     std::cout << "Path: " << lPath << std::endl;
     //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
   //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
@@ -30,30 +33,39 @@ void test(const control_block_t& aControlBlock) {
     //install    
     DatabaseInstanceManager::getInstance().init(aControlBlock);
     
-    //create a new Partition
+    TRACE("create a new Partition");
     PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
-    //create a Segment
+    TRACE("create a Segment");
     SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bla");
     char lTuple[] = "ThisDoesNotWork";
+    TRACE("get segment and insert tuple");
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
     //insert a tuple
-    lSeg->insertTuple((byte*) &lTuple,16);
-    lSeg->printPageToFile(0);
-    //get Page on search for tuple
+    lSeg->insertTuple((byte*) &lTuple,sizeof(lTuple));
+   // char lTuple2[] = "SomeMoreRandomChars";
+   // lSeg->insertTuple((byte*) &lTuple2,20);
+   TRACE("getMasterSegment");
+    lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(1);
+    lSeg->getPage(0,kSHARED);
+    lSeg->printPageToFile(0,false);
 
-    //flush Page to disk
-
-    //try to get it loaded and find it
-
-
-
-    //size_t lPartSize = lFile->partSize(); 
-    //std::cout << "Partition Size: " << lPartSize << std::endl;
-    
-
-
+   // TRACE(" FLUSH PAGE TO DISK");
+    //BufferManager::getInstance().flushAll();
+  //  TRACE(" TRY TO LOAD TUPLE AGAIN");
+  //  lSeg->getPage(0,kSHARED);
+  //  lSeg->printPageToFile(0,true);
+    DatabaseInstanceManager::getInstance().shutdown();
+    TRACE("SHUTDOWN COMPLETED");
 }
-
+void testStartUp(const control_block_t &aControlBlock){
+    
+    DatabaseInstanceManager::getInstance().init(aControlBlock);
+    TRACE("GET SEGMENT");
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    TRACE("GET PAGE");
+    lSeg->getPage(0,kSHARED);
+    lSeg->printPageToFile(0,false);
+}
 
 /***********************************************************************
 *  todo: test install, boot, (shutdown), buf manager, and everything  *
@@ -80,7 +92,7 @@ int main(const int argc, const char* argv[]) {
        print_usage(std::cout, argv[0], lArgDesc);
        return 0;
     }
-    if(!(fs::exists(lArgs.masterPartition())))
+ /*   if(!(fs::exists(lArgs.masterPartition())))
     {
         std::cerr << "Given path to the master partition is invalid!" << std::endl;
         //return -1; //wait until boot and so on works and uncomment this
@@ -90,9 +102,9 @@ int main(const int argc, const char* argv[]) {
         std::cerr << "The path to store the trace file at, is invalid!" << std::endl;
         return -1;
     }
+*/
 
-
-    //DONT CHANGE THESE
+    // DONT CHANGE THESE
     //const bool          C_INSTALL                   = lArgs.install();
     //const std::string   C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
     //const std::string   C_TRACE_DIR_PATH            = lArgs.tracePath();
@@ -100,11 +112,10 @@ int main(const int argc, const char* argv[]) {
     //const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
     //const bool          C_TRACE_ACTIVATED           = lArgs.trace();
 
-    //Actual programm starts here.     
+    // Actual programm starts here.     
     try
     {
-    
-        //ASSIGN APPROPRIATE TESTING PARAS
+        // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
         const std::string   C_MASTER_PARTITION_PATH     = std::string("/home/jonny/MasterTeamProjekt/MasterPartition");
         const std::string   C_TRACE_DIR_PATH            = std::string("/home/jonny/MasterTeamProjekt/");
@@ -121,23 +132,39 @@ int main(const int argc, const char* argv[]) {
             C_TRACE_ACTIVATED
         };
 
-        lCB.printParas();
+        //std::cout << lCB;
 
+        const control_block_t lCB2 = {
+            false,
+            C_MASTER_PARTITION_PATH,
+            C_TRACE_DIR_PATH,
+            C_PAGE_SIZE,
+            C_BUFFER_POOL_SIZE,
+            C_TRACE_ACTIVATED
+        };
+      //  CommandParser::getInstance().init(lCB);
         // init all global singletons
         Trace::getInstance().init(lCB);
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
-        DatabaseInstanceManager::getInstance().init(lCB); //installs or boots the DBS
+        //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
+       // test(lCB);
+        testStartUp(lCB2);
+         // testStartUp(lCB2);
 	    // Test call in test.hh
-        if (lArgs.test()) {
+     /*   if (lArgs.test()) {
+            // start thread for cli
             std::cout << "test." << std::endl;
             test(lCB);
             return EXIT_SUCCESS;
-        }
+        }*/
 
-    
+        /*// start thread for cli
+        CommandParser& cp = CommandParser::getInstance();
+        cp.init(lCB);
+        cp.runcli();*/
     } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
