@@ -144,7 +144,8 @@ class PartitionBase
         virtual void remove() = 0;
 
     protected:
-        inline bool exists(){ return fs::exists(_partitionPath); }
+        static bool exists(const std::string& aPath){ return fs::exists(aPath); }
+        inline bool exists(){ return PartitionBase::exists(_partitionPath); }
         inline bool isFile(){ return fs::is_regular_file(_partitionPath); }
         inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
         virtual size_t partSize() = 0;

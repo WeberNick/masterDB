@@ -23,7 +23,7 @@
 #include "partition_file.hh"
 #include "partition_raw.hh"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class PartitionManager
@@ -75,12 +75,12 @@ class PartitionManager
 
     private:
         uint8_t _counterPartitionID;
-        std::map<uint8_t, PartitionBase*> _partitions;
-        std::map<uint16_t, Partition_T> _partitionsByID;
-		std::map<std::string, uint16_t> _partitionsByName;
+        std::unordered_map<uint8_t, PartitionBase*> _partitions;
+        std::unordered_map<uint8_t, Partition_T> _partitionsByID;
+		std::unordered_map<std::string, uint8_t> _partitionsByName;
 
-        std::string _masterPartName;
-        std::string _masterSegPartName;
+        const std::string _masterPartName;
+        const std::string _masterSegPartName;
 
         const CB*   _cb;
         bool        _init;

@@ -5,12 +5,10 @@ PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName,
 	_growthIndicator(aGrowthIndicator)
 {
     std::string lMes = std::string("File partition instance created. _gI/agI ")+std::to_string(_growthIndicator)+std::to_string(aGrowthIndicator);
-
     create();
-    
     TRACE(lMes);
-
 }
+
 PartitionFile::PartitionFile(const Partition_T& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple.path(), aTuple.name(), aTuple.ID(), aControlBlock),
 	_growthIndicator(aTuple.growth())
@@ -39,7 +37,26 @@ uint32_t PartitionFile::allocPage()
             TRACE(lTraceMsg);
             throw ex;
         }
-            //need to reformat the new pages
+        /*
+        load last fsip and attach fsip interpreter
+        uint remainingPages = Interpreter.grow(_growthIndicator,getMaxPagesPerFSIP() )
+        if(remainingPages>0){
+            load next position where a fsip should be (which is something like lastFSIP + getMaxPagesPerFSIP +1)
+            initNewFSIP with remainingPages
+        }
+        */
+        InterpreterFSIP lFSIP;
+        lFSIP.attach(ex.getBufferPtr());
+        const size_t lPagesPerFSIP = getMaxPagesPerFSIP();
+        const uint lRemainingPages = lFSIP.grow(_growthIndicator, lPagesPerFSIP);
+        if(lRemainingPages > 0)
+        {
+            const uint lNextFSIP = ex.getIndexOfFSIP() + lPagesPerFSIP + 1;
+            const uint lNumberOfPagesToManage = ((lRemainingPages > lPagesPerFSIP) ? lPagesPerFSIP : lRemainingPages);
+            lFSIP.initNewFSIP(ex.getBufferPtr(), LSN, lNextFSIP, _partitionID, lNumberOfPagesToManage);
+		    writePage(ex.getBufferPtr(), lNextFSIP, _pageSize);
+        }
+        delete[] ex.getBufferPtr();
         lPageIndex = PartitionBase::allocPage();
     }
     return lPageIndex;
@@ -61,45 +78,55 @@ size_t PartitionFile::partSizeInPages()
 
 
 void PartitionFile::create()
-{
+{   
 	if(exists())
 	{
-        const std::string lTraceMsg("Partition already exists and cannot be created");
-        TRACE(lTraceMsg);
-        return;
+        TRACE("Partition already exists and cannot be created");
+        throw PartitionExistsException(FLF);
     }
-
-	std::string lCommand = "dd if=/dev/zero of=" + _partitionPath + " bs=" + std::to_string(_pageSize) + " count=" + std::to_string(_growthIndicator);
-    if(_cb.trace()){ Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, std::string("Execute: ") + lCommand); }
-	system(lCommand.c_str());
-    _sizeInPages = partSizeInPages(); 
-    const std::string lTraceMsg("File partition was created");
-    TRACE(lTraceMsg); 
-    format(); //may throw
+    std::string lTraceMsg = std::string("Trying to create file partition at '") + _partitionPath + std::string("'");
+    TRACE(lTraceMsg);
+    std::ofstream ofs(_partitionPath, std::ofstream::out);
+    ofs.close();
+    if(exists())
+    {
+        const size_t lFileSize = _growthIndicator * _pageSize;
+        fs::resize_file(_partitionPath, lFileSize); //will throw if fails
+        _sizeInPages = partSizeInPages(); 
+        lTraceMsg = "File partition (with " + std::to_string(_sizeInPages) + " pages) was successfully created in the file system";
+        TRACE(lTraceMsg); 
+        format(); //may throw
+    }
+    else
+    {
+        lTraceMsg = "Something went wrong while trying to create the file";
+        TRACE(lTraceMsg); 
+        throw PartitionException(FLF, lTraceMsg);
+    }
 }
 
 void PartitionFile::remove()
 {
-	if(exists())
-	{
-		if(isFile())
-		{
-			std::string lCommand = "rm " + _partitionPath;
-			system(lCommand.c_str());
-		}
-		else
-		{
-            const std::string lTraceMsg("No file partition at " + _partitionPath);
-            TRACE(lTraceMsg);
-            return;
-		}
-	}
-	else
-	{
-        const std::string lTraceMsg("No file exists at " + _partitionPath);
+    std::string lTraceMsg;
+    if(!exists())
+    {
+        lTraceMsg = std::string("No file exists at '") + _partitionPath + std::string("'");
         TRACE(lTraceMsg);
         return;
-	}
+    }
+    lTraceMsg = std::string("Trying to remove file partition at '") + _partitionPath + std::string("'");
+    TRACE(lTraceMsg);
+    if(fs::remove(_partitionPath))
+    {
+        lTraceMsg = "File partition was successfully removed from the file system";
+        TRACE(lTraceMsg); 
+    }
+    else
+    {
+        lTraceMsg = "Something went wrong while trying to remove the file from the file system";
+        TRACE(lTraceMsg); 
+        throw PartitionException(FLF, lTraceMsg);
+    }
 }
 
 void PartitionFile::extend()
@@ -108,14 +135,6 @@ void PartitionFile::extend()
     fs::resize_file(_partitionPath, lNewSize); //will throw if fails
     _sizeInPages = lNewSize / _pageSize;
     //GROW FSIPS
-    /*
-    load last fsip and attach fsip interpreter
-    uint remainingPages = Interpreter.grow(_growthIndicator,getMaxPagesPerFSIP() )
-    if(remainingPages>0){
-        load next position where a fsip should be (which is something like lastFSIP + getMaxPagesPerFSIP +1)
-        initNewFSIP with remainingPages
-    }
-    */
     
     TRACE("Size of file partition was extended");
 }

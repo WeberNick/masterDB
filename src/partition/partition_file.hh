@@ -11,10 +11,14 @@
 
 #include "partition_base.hh"
 #include "../infra/tuples.hh"
+#include "../interpreter/interpreter_fsip.hh"
 
 #include <string>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>      // std::ofstream
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 
 
 class PartitionFile : public PartitionBase
@@ -41,6 +45,7 @@ class PartitionFile : public PartitionBase
         */
         virtual size_t partSize();
         virtual size_t partSizeInPages();
+        inline uint16_t getGrowthIndicator() const { return _growthIndicator; }
         inline uint16_t getGrowthIndicator(){ return _growthIndicator; }
 
 
