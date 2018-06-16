@@ -114,16 +114,16 @@ class PartitionBase
 
 
     public:
-        inline const std::string& getPath() const { return _partitionPath; }
-        inline const std::string& getPath() { return _partitionPath; }
-        inline const std::string& getName() const { return _partitionName; }
-        inline const std::string& getName() { return _partitionName; }
-        inline uint getPageSize() const { return _pageSize; }
-        inline uint getPageSize() { return _pageSize; }
-        inline uint getSizeInPages() const { return _sizeInPages; }
-        inline uint getSizeInPages() { return _sizeInPages; }
-        inline uint8_t getID() const { return _partitionID; }
-        inline uint8_t getID() { return _partitionID; }
+        inline const std::string& getPath() const noexcept { return _partitionPath; }
+        inline const std::string& getPath() noexcept { return _partitionPath; }
+        inline const std::string& getName() const noexcept { return _partitionName; }
+        inline const std::string& getName() noexcept { return _partitionName; }
+        inline uint getPageSize() const noexcept { return _pageSize; }
+        inline uint getPageSize() noexcept { return _pageSize; }
+        inline uint getSizeInPages() const noexcept { return _sizeInPages; }
+        inline uint getSizeInPages() noexcept { return _sizeInPages; }
+        inline uint8_t getID() const noexcept { return _partitionID; }
+        inline uint8_t getID() noexcept { return _partitionID; }
 
     protected: 
         /**
@@ -144,10 +144,10 @@ class PartitionBase
         virtual void remove() = 0;
 
     protected:
-        static bool exists(const std::string& aPath){ return fs::exists(aPath); }
-        inline bool exists(){ return PartitionBase::exists(_partitionPath); }
-        inline bool isFile(){ return fs::is_regular_file(_partitionPath); }
-        inline bool isRawDevice(){ return fs::is_block_file(_partitionPath); }
+        static bool exists(const std::string& aPath) noexcept { return fs::exists(aPath); }
+        inline bool exists() noexcept { return PartitionBase::exists(_partitionPath); }
+        inline bool isFile() noexcept { return fs::is_regular_file(_partitionPath); }
+        inline bool isRawDevice() noexcept { return fs::is_block_file(_partitionPath); }
         virtual size_t partSize() = 0;
         virtual size_t partSizeInPages() = 0;
         uint getMaxPagesPerFSIP();

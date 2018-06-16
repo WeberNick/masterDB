@@ -48,10 +48,10 @@ class SegmentManager
             return lSegmentManagerInstance;
         }
 
-        void init(const CB& aControlBlock);
+        void init(const CB& aControlBlock) noexcept;
 
 	public:
-		void load(const seg_vt& aTuples);
+		void load(const seg_vt& aTuples) noexcept;
 
 	public:
 		SegmentFSM* createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
@@ -62,7 +62,7 @@ class SegmentManager
 		SegmentBase* getSegment(const uint16_t aSegmentID);
 		SegmentBase* getSegment(const std::string& aSegmentName);
 
-        void deleteSegment(SegmentBase* aSegment);
+        void deleteSegment(SegmentBase* aSegment) noexcept;
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string& aName);
         template<typename Tuple_T>
@@ -72,7 +72,7 @@ class SegmentManager
 
 
 	public:
-		inline uint getNoSegments() { return _segments.size(); }	
+		inline uint getNoSegments() noexcept { return _segments.size(); }	
 
 
 	private:
@@ -108,8 +108,6 @@ class SegmentManager
 		std::string _masterSegSegName; //name of Master segment containing all segments
 
         const CB*   _cb;
-        bool        _init;
-
 };
 
 template<typename Tuple_T>

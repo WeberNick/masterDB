@@ -23,32 +23,32 @@
 
 class Args {
   public:
-    Args();
+    Args() = default;
 
   public:
-    inline bool help() { return _help; }
-    inline void help(const bool &x) { _help = x; }
+    inline bool help() noexcept { return _help; }
+    inline void help(const bool &x) noexcept { _help = x; }
     
-    inline bool test() { return _test; }
-    inline void test(const bool &x) { _test = x; }
+    inline bool test() noexcept { return _test; }
+    inline void test(const bool &x) noexcept { _test = x; }
 
-    inline bool install() { return _install; }
-    inline void install(const bool &x) { _install = x; }
+    inline bool install() noexcept { return _install; }
+    inline void install(const bool &x) noexcept { _install = x; }
 
-    inline bool trace() { return _trace; }
-    inline void trace(const bool &x) { _trace = x; }
+    inline bool trace() noexcept { return _trace; }
+    inline void trace(const bool &x) noexcept { _trace = x; }
 
-    inline uint segmentIndexPage() { return _segmentIndexPage; }
-    inline void segmentIndexPage(const uint &x) { _segmentIndexPage = x; }
+    inline uint segmentIndexPage() noexcept { return _segmentIndexPage; }
+    inline void segmentIndexPage(const uint &x) noexcept { _segmentIndexPage = x; }
 
-    inline uint bufferFrames() { return _noBufFrames; }
-    inline void bufferFrames(const uint &x) { _noBufFrames = x; }
+    inline uint bufferFrames() noexcept { return _noBufFrames; }
+    inline void bufferFrames(const uint &x) noexcept { _noBufFrames = x; }
 
-    inline const std::string masterPartition() { return _masterPartition; }
-    inline void masterPartition(const std::string &x) { _masterPartition = x; }
+    inline const std::string masterPartition() noexcept { return _masterPartition; }
+    inline void masterPartition(const std::string &x) noexcept { _masterPartition = x; }
     
-    inline const std::string tracePath() { return _tracePath; }
-    inline void tracePath(const std::string &x) { _tracePath = x; }
+    inline const std::string tracePath() noexcept { return _tracePath; }
+    inline void tracePath(const std::string &x) noexcept { _tracePath = x; }
 
 
   private:

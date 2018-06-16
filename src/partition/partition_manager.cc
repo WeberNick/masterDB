@@ -10,8 +10,7 @@ PartitionManager::PartitionManager() :
     _partitionsByName(),
     _masterPartName("MasterPartition"),
     _masterSegPartName("PartitionMasterSegment"),
-    _cb(nullptr),
-    _init(false)
+    _cb(nullptr)
 {}
 
 PartitionManager::~PartitionManager()
@@ -24,10 +23,9 @@ PartitionManager::~PartitionManager()
 
 void PartitionManager::init(const CB& aControlBlock)
 {
-    if(!_init)
+    if(!_cb)
     {
         _cb = &aControlBlock;
-        _init = true;
     }
 }
 
@@ -132,7 +130,7 @@ void PartitionManager::deletePartition(const uint8_t aID){
 }
 
 void PartitionManager::deletePartition(const std::string& aName){
-    deletePartition(_partitionsByName[aName]);
+    deletePartition(_partitionsByName.at(aName));
 }
 
 PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)

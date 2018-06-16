@@ -13,9 +13,11 @@
 *.o
 *.obj
 
-#Executable Main
+# Executable Main
 util/iomeasure/main
 src/main/main
+logs/	
+src/logs/
 
 # Precompiled Headers
 *.gch

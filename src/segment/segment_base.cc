@@ -26,9 +26,6 @@ SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) :
     _cb(aControlBlock)
 {}
 
-SegmentBase::~SegmentBase()
-{}
-
 byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
 {
     if(aMode == kNOLOCK)

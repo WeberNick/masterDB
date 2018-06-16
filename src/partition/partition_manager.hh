@@ -83,6 +83,4 @@ class PartitionManager
         const std::string _masterSegPartName;
 
         const CB*   _cb;
-        bool        _init;
-
 };
