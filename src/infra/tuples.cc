@@ -9,7 +9,7 @@ Partition_T::Partition_T(const uint8_t aPID, const std::string& aName, const std
     _size(0), _pID(aPID), _pName(aName), _pPath(aPath), _pType(aType), _pGrowth(aGrowth)
 {
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
-    std::cout << "Size of class: " << _size << std::endl;
+   // std::cout << "Size of class: " << _size << std::endl;
 }
 
 Partition_T::Partition_T(const Partition_T& aPartitionTuple) :
@@ -54,19 +54,19 @@ void Partition_T::toDisk(byte* aPtr) const
     {
         *(char*)aPtr = _pName.c_str()[i];
         std::bitset<8> b(*(char*)aPtr);
-        std::cout << b << "(" << (*(char*)aPtr) << ") ";
+        //std::cout << b << "(" << (*(char*)aPtr) << ") ";
         ++aPtr;
     }
-    std::cout << std::endl;
+   // std::cout << std::endl;
 
     for(size_t i = 0; i < _pPath.size() + 1; ++i)
     {
         *(char*)aPtr = _pPath.c_str()[i];
         std::bitset<8> b(*(char*)aPtr);
-        std::cout << b << "(" <<(*(char*)aPtr) << ") ";
+        //std::cout << b << "(" <<(*(char*)aPtr) << ") ";
         ++aPtr;
     }
-    std::cout << std::endl;    
+   // std::cout << std::endl;    
     *(uint8_t*)aPtr = _pType;
     aPtr += sizeof(_pType);
     *(uint16_t*)aPtr = _pGrowth;
@@ -115,7 +115,7 @@ Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string&
     _size(0), _sPID(aPID), _sID(aSID), _sName(aName), _sType(aType), _sFirstPage(aFirstPage)
 {
     _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
-    std::cout << "Size of class: " << _size << std::endl;
+   // std::cout << "Size of class: " << _size << std::endl;
 }
 
 Segment_T::Segment_T(const Segment_T& aSegmentTuple) :
@@ -162,10 +162,10 @@ void Segment_T::toDisk(byte* aPtr) const
     {
         *(char*)aPtr = _sName.c_str()[i];
         std::bitset<8> b(*(char*)aPtr);
-        std::cout << b << "(" << (*(char*)aPtr) << ") ";
+      //  std::cout << b << "(" << (*(char*)aPtr) << ") ";
         ++aPtr;
     }
-    std::cout << std::endl;
+   // std::cout << std::endl;
 
     *(uint8_t*)aPtr = _sType;
     aPtr += sizeof(_sType);

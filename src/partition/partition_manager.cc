@@ -115,12 +115,11 @@ PartitionBase* PartitionManager::getPartition(const std::string& aName){
 }
 
 void PartitionManager::deletePartition(const uint8_t aID){
-    //delete object if exists
-    auto lIter =  _partitions.find(aID);
-    if( lIter !=_partitions.end()){
-        delete lIter->second;
-        _partitions.erase(lIter);
-    }
+    //delete partition
+    PartitionBase* lPart = getPartition(aID);
+    lPart->remove();
+    //delete object
+    _partitions.erase(aID);
     const Partition_T lpart(_partitionsByID.at(aID));
     //delete tuple on disk
     SegmentManager& lSegMan = SegmentManager::getInstance();
