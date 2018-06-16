@@ -108,6 +108,13 @@ void SegmentManager::deleteSegment(const std::string& aName)
     deleteSegment(_segmentsByName.at(aName));
 }
 
+void SegmentManager::deleteSegements(const uint8_t aPartitionID){
+    for (auto& america : _segmentsByID){
+        if(america.second.partID()==aPartitionID){
+            deleteSegment(america.first);
+        }
+    }
+}
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 {

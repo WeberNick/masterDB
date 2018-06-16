@@ -113,6 +113,10 @@ PartitionBase* PartitionManager::getPartition(const std::string& aName){
 }
 
 void PartitionManager::deletePartition(const uint8_t aID){
+    //delete all Segments on that partition
+    SegmentManager& lSegMan = SegmentManager::getInstance();
+    lSegMan.deleteSegements(aID);
+
     //delete partition
     PartitionBase* lPart = getPartition(aID);
     lPart->remove();
@@ -120,7 +124,6 @@ void PartitionManager::deletePartition(const uint8_t aID){
     _partitions.erase(aID);
     const Partition_T lpart(_partitionsByID.at(aID));
     //delete tuple on disk
-    SegmentManager& lSegMan = SegmentManager::getInstance();
     lSegMan.deleteTupelPhysically<Partition_T>(_masterSegPartName,aID);
 
     //delete tuple in memory
