@@ -135,12 +135,13 @@ class BufferManager final
         inline size_t   getNoFrames() noexcept { return _noFrames; }
         inline size_t   getFrameSize() noexcept { return _frameSize; }
         inline void     resetBCB(BCB* aBCB) noexcept { _freeBCBs.resetBCB(aBCB); }
+        void            resetBCB(PID& aPID) noexcept;
         
     private:
-        BCB*                locatePage(const PID& aPageID);
+        BCB*                locatePage(const PID& aPageID) noexcept;
         void                readPageIn(BCB* lFBCB, const PID& aPageID);
         void                initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
-        size_t              getFrame();
+        size_t              getFrame() noexcept;
 
     private:
         inline FreeFrames&  getFreeFrames() noexcept { return _freeFrames; }

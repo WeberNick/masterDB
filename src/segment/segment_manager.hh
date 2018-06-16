@@ -42,7 +42,7 @@ class SegmentManager
          *
          *  @return reference to the only SegmentManager instance
          */
-        static SegmentManager& getInstance()
+        static SegmentManager& getInstance() noexcept
         {
             static SegmentManager lSegmentManagerInstance;
             return lSegmentManagerInstance;
