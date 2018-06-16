@@ -23,7 +23,7 @@
 
 class Args {
   public:
-    Args() = default;
+    Args();
 
   public:
     inline bool help() noexcept { return _help; }

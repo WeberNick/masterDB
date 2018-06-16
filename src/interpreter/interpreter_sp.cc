@@ -2,21 +2,21 @@
 
 size_t InterpreterSP::_pageSize = 4096;
 
-void InterpreterSP::setPageSize(const size_t aPageSize) {
+void InterpreterSP::setPageSize(const size_t aPageSize) noexcept {
     _pageSize = aPageSize;
 }
 
-InterpreterSP::InterpreterSP() : _pp(NULL), _header(NULL), _slots(0) 
+InterpreterSP::InterpreterSP() : _pp(nullptr), _header(nullptr), _slots(nullptr) 
 {}
 
-void InterpreterSP::detach() 
+void InterpreterSP::detach() noexcept
 {
-	_pp     = 0;
-	_header = 0;
-	_slots  = 0;
+	_pp     = nullptr;
+	_header = nullptr;
+	_slots  = nullptr;
 }
 
-void InterpreterSP::initNewPage(byte* aPP) 
+void InterpreterSP::initNewPage(byte* aPP) noexcept 
 {
 	if(aPP)
 	{
@@ -28,16 +28,12 @@ void InterpreterSP::initNewPage(byte* aPP)
 		header()->_unused2 = 0;
 		
 		aPP += header()->_nextFreeSpace;
-        /*********************************
-        *  Nick: Check this conversion  *
-        *********************************/
-       
 		*((freeSpaceList_t*) aPP) = freeSpaceList_t{0, static_cast<uint16_t>(_pageSize - sizeof(sp_header_t) - sizeof(freeSpaceList_t)) };
 	}
 }
 
 /* Give record size as parameter, determine where to write the record and return location as a pointer */
-byte* InterpreterSP::addNewRecord(const uint aRecordSize)
+byte* InterpreterSP::addNewRecord(const uint aRecordSize) noexcept
 {
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment
 	const uint lTotalSize = lRecordSize + sizeof(slot_t);        // add space for one new slot 
@@ -102,12 +98,12 @@ byte* InterpreterSP::addNewRecord(const uint aRecordSize)
 }
 
 //just mark deleted
-int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo){
+int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo) noexcept {
 	slot(aRecordNo)._status=0;
 	return 1;
 }
 //actually delete it
-int InterpreterSP::deleteRecordHard (uint16_t aRecordNo){
+int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept {
 	//TODO
 
 	//put free in front of Free Space List by
@@ -119,7 +115,7 @@ int InterpreterSP::deleteRecordHard (uint16_t aRecordNo){
 	return -1;
 
 }
-byte* InterpreterSP::getRecord(uint aRecordNo){
+byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
 	if(aRecordNo >= noRecords()) { 
 		return nullptr;
 	}
