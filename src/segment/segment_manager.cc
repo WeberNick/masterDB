@@ -33,9 +33,6 @@ void SegmentManager::load(const seg_vt& aTuples) noexcept
     // fill internal data structure with all relevant info
     for(const auto& segTuple : aTuples)
     {
-      //!!!!!!!!!!!!!!!!!!!!!!!!!!
-      //!!!! COPY SEG TUPLE !!!!!!
-      //!!!!!!!!!!!!!!!!!!!!!!!!!!
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
     }
