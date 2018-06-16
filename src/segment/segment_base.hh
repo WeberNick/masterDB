@@ -32,7 +32,7 @@ class SegmentBase
         explicit SegmentBase(SegmentBase&&) = delete;
 		SegmentBase& operator=(const SegmentBase&) = delete;
         SegmentBase& operator=(SegmentBase&&) = delete;
-		virtual ~SegmentBase() = default;
+		virtual ~SegmentBase();
 
 	public:
         /**

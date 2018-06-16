@@ -42,7 +42,7 @@ class SegmentManager
          *
          *  @return reference to the only SegmentManager instance
          */
-        static SegmentManager& getInstance()
+        static SegmentManager& getInstance() noexcept
         {
             static SegmentManager lSegmentManagerInstance;
             return lSegmentManagerInstance;
@@ -67,6 +67,7 @@ class SegmentManager
 		void deleteSegment(const std::string& aName);
         template<typename Tuple_T>
 		void deleteTupelPhysically (const std::string& aMasterName, uint16_t aID);
+        void deleteSegements(const uint8_t aPartitionID);
 
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 

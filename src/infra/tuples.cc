@@ -108,6 +108,7 @@ Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string&
     _size(0), _sPID(aPID), _sID(aSID), _sName(aName), _sType(aType), _sFirstPage(aFirstPage)
 {
     _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+   // std::cout << "Size of class: " << _size << std::endl;
 }
 
 Segment_T::Segment_T(const Segment_T& aSegmentTuple) :

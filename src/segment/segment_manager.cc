@@ -33,9 +33,6 @@ void SegmentManager::load(const seg_vt& aTuples) noexcept
     // fill internal data structure with all relevant info
     for(const auto& segTuple : aTuples)
     {
-      //!!!!!!!!!!!!!!!!!!!!!!!!!!
-      //!!!! COPY SEG TUPLE !!!!!!
-      //!!!!!!!!!!!!!!!!!!!!!!!!!!
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
     }
@@ -111,6 +108,13 @@ void SegmentManager::deleteSegment(const std::string& aName)
     deleteSegment(_segmentsByName.at(aName));
 }
 
+void SegmentManager::deleteSegements(const uint8_t aPartitionID){
+    for (auto& america : _segmentsByID){
+        if(america.second.partID()==aPartitionID){
+            deleteSegment(america.first);
+        }
+    }
+}
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 {

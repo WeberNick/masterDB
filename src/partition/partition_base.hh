@@ -48,15 +48,15 @@ class PartitionBase
 {
     protected:
         friend class PartitionManager;
-        explicit PartitionBase() = delete;
-        explicit PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock);
+        PartitionBase() = delete;
+        PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock);
         explicit PartitionBase(const PartitionBase&) = delete;
         explicit PartitionBase(PartitionBase&&) = delete;
         PartitionBase& operator=(const PartitionBase&) = delete;
         PartitionBase& operator=(PartitionBase&&) = delete;
 
     public:
-        virtual ~PartitionBase() = 0;
+        virtual ~PartitionBase() = default;
 
     public:
         /**
@@ -150,7 +150,7 @@ class PartitionBase
         inline bool isRawDevice() noexcept { return fs::is_block_file(_partitionPath); }
         virtual size_t partSize() = 0;
         virtual size_t partSizeInPages() = 0;
-        uint getMaxPagesPerFSIP();
+        uint getMaxPagesPerFSIP() noexcept;
 
 
   protected:

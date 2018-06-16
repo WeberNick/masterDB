@@ -13,8 +13,6 @@ PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName,
     InterpreterFSIP::init(aControlBlock);
 }
 
-PartitionBase::~PartitionBase(){}
-
 void PartitionBase::open()
 {
 	if(_openCount == 0)
@@ -176,7 +174,7 @@ void PartitionBase::format()
 }
 
 
-uint PartitionBase::getMaxPagesPerFSIP()
+uint PartitionBase::getMaxPagesPerFSIP() noexcept
 {
 	InterpreterFSIP fsip;
 	return (_pageSize - fsip.getHeaderSize()) * 8;

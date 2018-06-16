@@ -25,8 +25,8 @@ class PartitionFile : public PartitionBase
 {
     private:
         friend class PartitionManager;
-        explicit PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock);
-        explicit PartitionFile(const Partition_T& aTuple, const CB& aControlBlock);
+        PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock);
+        PartitionFile(const Partition_T& aTuple, const CB& aControlBlock);
         PartitionFile(const PartitionFile&) = delete;
         PartitionFile &operator=(const PartitionFile&) = delete;
     public:
@@ -43,8 +43,8 @@ class PartitionFile : public PartitionBase
         /**
         * @brief Retrieves the size of the file
         */
-        virtual size_t partSize();
-        virtual size_t partSizeInPages();
+        virtual size_t partSize() noexcept;
+        virtual size_t partSizeInPages() noexcept;
         inline uint16_t getGrowthIndicator() const noexcept { return _growthIndicator; }
         inline uint16_t getGrowthIndicator() noexcept { return _growthIndicator; }
 

@@ -8,15 +8,15 @@ void InterpreterFSIP::init(const CB& aControlBlock) {
     _cb = &aControlBlock;
 }
 
-InterpreterFSIP::InterpreterFSIP() : _pp(NULL), _header(NULL) {}
+InterpreterFSIP::InterpreterFSIP() : _pp(nullptr), _header(nullptr) {}
 
-void InterpreterFSIP::detach() {
-    _pp = NULL;
-    _header = NULL;
+void InterpreterFSIP::detach() noexcept {
+    _pp = nullptr;
+    _header = nullptr;
 }
 
 void InterpreterFSIP::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
-                                  const uint32_t aNoBlocks) {
+                                  const uint32_t aNoBlocks) noexcept {
     attach(aPP);
     uint32_t max = aNoBlocks / 32; // wie weit ist Seite frei?
     uint32_t i = 0;
@@ -49,7 +49,7 @@ void InterpreterFSIP::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t
     // debug(aPageIndex);
 }
 
-uint InterpreterFSIP::getNextFreePage() {
+uint InterpreterFSIP::getNextFreePage() noexcept {
     //	std::cout<<"###### finding next free Page ######"<<std::endl;
     size_t lCondition = ((_pageSize - sizeof(fsip_header_t)) / 4) - 1;
     for (uint32_t j = (_header->_nextFreePage) / 32; j <= lCondition; ++j) { // looping through FSIP with step 8
@@ -89,7 +89,7 @@ uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8
     return lPosFreeBlock + 1 + _header->_basicHeader._pageIndex;
 }
 
-void InterpreterFSIP::reservePage(const uint aPageIndex) {
+void InterpreterFSIP::reservePage(const uint aPageIndex) noexcept {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
     uint32_t *lPP = (uint32_t *)_pp;
@@ -112,7 +112,7 @@ void InterpreterFSIP::reservePage(const uint aPageIndex) {
     // debug(aPageIndex);
 }
 
-void InterpreterFSIP::freePage(const uint aPageIndex) {
+void InterpreterFSIP::freePage(const uint aPageIndex) noexcept {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
 
@@ -145,7 +145,7 @@ void InterpreterFSIP::debug(const uint aPageIndex) {
     myfile.close();
 }
 
-uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP){
+uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP) noexcept {
     //assert (aNumberOfPages >= 8)
 
     //get how many pages fit on page

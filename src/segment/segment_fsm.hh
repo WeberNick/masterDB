@@ -29,7 +29,7 @@ class SegmentFSM : public SegmentBase
     explicit SegmentFSM(SegmentFSM&&) = delete;
     SegmentFSM& operator=(const SegmentFSM&) = delete;
     SegmentFSM& operator=(SegmentFSM&&) = delete;
-    ~SegmentFSM() = default;
+    ~SegmentFSM();
 
   public:
     PID getFreePage(uint aNoOfBytes, bool& emptyfix);

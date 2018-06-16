@@ -33,6 +33,24 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
     _fsmPages()
 {}
 
+SegmentFSM::~SegmentFSM(){
+    //Remove all data pages
+    PID lPID;
+    lPID._fileID=_partition.getID();
+    //remove all fsms
+    for (auto iter : _fsmPages){
+        lPID._pageNo=iter;
+        _bufMan.resetBCB(lPID);
+        _partition.freePage(iter);
+    }
+    //Remove all index Pages
+    for (auto iter : _indexPages){
+        lPID._pageNo=iter;
+        _bufMan.resetBCB(lPID);
+        _partition.freePage(iter);
+    }
+}
+
 //returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
 PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
