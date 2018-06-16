@@ -28,6 +28,13 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
     }
 }
 
+void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
+{
+    aBCB->getMtx().lock();
+    resetBCB(aBCB);
+    aBCB->getMtx().unlock();
+}
+
 BufferManager::BufferManager() :
 	_noFrames(0),
 	_frameSize(0),

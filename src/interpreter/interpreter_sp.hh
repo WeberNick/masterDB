@@ -31,45 +31,44 @@ class InterpreterSP
 		};
 
 	public:
-		explicit InterpreterSP();
+		InterpreterSP();
         explicit InterpreterSP(const InterpreterSP&) = delete;
         explicit InterpreterSP(InterpreterSP&&) = delete;
         InterpreterSP& operator=(const InterpreterSP&) = delete;
         InterpreterSP& operator=(InterpreterSP&&) = delete;
 
 	public:
-		inline void  attach(byte* aPP);
-		void  detach();
+		inline void  attach(byte* aPP) noexcept;
+		void  detach() noexcept;
 
 	public:
-		void  initNewPage(byte* aPP); // combines initialization of fresh page with attach
-		byte* addNewRecord(const uint aRecordSize); // returns 0 if page is full
-		int deleteRecordHard (uint16_t aRecordNo); //actually delete record so that it is not restorable
-		int deleteRecordSoft (uint16_t aRecordNo); //just mark as deleted
-		byte* getRecord(const uint aRecordNo);
+		void  initNewPage(byte* aPP) noexcept ; // combines initialization of fresh page with attach
+		byte* addNewRecord(const uint aRecordSize) noexcept ; // returns 0 if page is full
+		int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable
+		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
+		byte* getRecord(const uint aRecordNo) noexcept ;
 
 
 
 	public:
-		inline byte*     		pagePtr(){ return _pp; }
-		inline sp_header_t* 	header(){ return _header; }
-		inline uint 	 		freeSpace(){ return header()->_freeSpace; }
-		inline uint 	 		noRecords(){ return header()->_noRecords; }
+		inline byte*     		pagePtr() noexcept { return _pp; }
+		inline sp_header_t* 	header() noexcept { return _header; }
+		inline uint 	 		freeSpace() noexcept { return header()->_freeSpace; }
+		inline uint 	 		noRecords() noexcept { return header()->_noRecords; }
 
-		inline slot_t& 	 		slot(const uint i){ return _slots[- (int) i]; }
-		inline size_t  	 		getPageSize(){ return _pageSize; }
+		inline slot_t& 	 		slot(const uint i) noexcept { return _slots[- (int) i]; }
+		inline size_t  	 		getPageSize() noexcept { return _pageSize; }
 
 	private:
-		inline sp_header_t* 	get_hdr_ptr() { return ((sp_header_t*) (_pp + _pageSize - sizeof(sp_header_t))); }
-		inline slot_t*   		get_slot_base_ptr() { return ((slot_t*) (_pp + _pageSize - sizeof(sp_header_t) - sizeof(slot_t))); }
+		inline sp_header_t* 	get_hdr_ptr() noexcept { return ((sp_header_t*) (_pp + _pageSize - sizeof(sp_header_t))); }
+		inline slot_t*   		get_slot_base_ptr() noexcept { return ((slot_t*) (_pp + _pageSize - sizeof(sp_header_t) - sizeof(slot_t))); }
 
     private:
         friend class SegmentFSM_SP;
         /*	size of the page */
         static size_t _pageSize;
         /*	Set page size */
-        static void setPageSize(const size_t aPageSize);
-
+        static void setPageSize(const size_t aPageSize) noexcept;
 
 	private:
 		byte*     _pp;
@@ -77,7 +76,7 @@ class InterpreterSP
 		slot_t*   _slots;  // new
 };
 
-void InterpreterSP::attach(byte* aPP)
+void InterpreterSP::attach(byte* aPP) noexcept
 {
 	_pp = aPP;
 	_header = get_hdr_ptr();
