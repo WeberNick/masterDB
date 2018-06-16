@@ -194,12 +194,12 @@ std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple)
 }
 
 Employee_T::Employee_T() : 
-    _size(0), _pAge(0), _pName(""), _pSalary(0)
+    _size(0), _pAge(0), _pSalary(0), _pName("")
 {}
 
 
 Employee_T::Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary) : 
-    _size(0), _pAge(aAge), _pName(aName), _pSalary(aSalary)
+    _size(0), _pAge(aAge), _pSalary(aSalary), _pName(aName)
 {
     _size = sizeof(_pAge) + (_pName.size() + 1) + sizeof(_pSalary) ; //+1 for each string for \0
 }
@@ -207,8 +207,8 @@ Employee_T::Employee_T(const uint8_t aAge, const std::string& aName, const uint1
 Employee_T::Employee_T(const Employee_T& aEmployeeTuple) :
     _size(aEmployeeTuple.size()),
     _pAge(aEmployeeTuple.age()),
-    _pName(aEmployeeTuple.name()),
-    _pSalary(aEmployeeTuple.salary())
+    _pSalary(aEmployeeTuple.salary()),
+    _pName(aEmployeeTuple.name())
 {}
 
 Employee_T& Employee_T::operator=(const Employee_T& aEmployeeTuple)
@@ -218,8 +218,8 @@ Employee_T& Employee_T::operator=(const Employee_T& aEmployeeTuple)
         //exception safe copy assignment with swap would be overkill
         _size    = aEmployeeTuple.size();
         _pAge     = aEmployeeTuple.age();
-        _pName   = aEmployeeTuple.name();
         _pSalary   = aEmployeeTuple.salary();
+        _pName   = aEmployeeTuple.name();
     }
     return *this;
 }
@@ -227,8 +227,8 @@ Employee_T& Employee_T::operator=(const Employee_T& aEmployeeTuple)
 void Employee_T::init(const uint8_t aAge, const std::string& aName, const uint16_t aSalary) noexcept
 {
     _pAge = aAge;
-    _pName = aName;
     _pSalary = aSalary;
+    _pName = aName;
     _size = sizeof(_pAge) + (_pName.size() + 1) + sizeof(_pSalary);
 }
 

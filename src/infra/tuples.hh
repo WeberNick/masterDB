@@ -29,8 +29,8 @@
 class Partition_T
 {
     public:
-        explicit Partition_T();
-        explicit Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth); 
+        Partition_T();
+        Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth); 
         explicit Partition_T(const Partition_T& aPartTuple);
         explicit Partition_T(Partition_T&&) = delete;
         Partition_T& operator=(const Partition_T& aPartitionTuple);
@@ -77,8 +77,8 @@ std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple);
 class Segment_T
 {
     public:
-        explicit Segment_T();
-        explicit Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage);
+        Segment_T();
+        Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage);
         explicit Segment_T(const Segment_T& aSegmentTuple);
         explicit Segment_T(Segment_T&&) = delete;
         Segment_T& operator=(const Segment_T& aSegmentTuple);
@@ -123,8 +123,8 @@ std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple);
 class Employee_T
 {
     public:
-        explicit Employee_T();
-        explicit Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary); 
+        Employee_T();
+        Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary); 
         explicit Employee_T(const Employee_T& aEmployeeTuple);
         explicit Employee_T(Employee_T&&) = delete;
         Employee_T& operator=(const Employee_T& aEmployeeTuple);
