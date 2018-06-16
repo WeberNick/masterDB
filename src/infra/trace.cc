@@ -16,7 +16,7 @@ Trace::~Trace()
     }
 }
 
-void Trace::init(const CB& aControlBlock)
+void Trace::init(const CB& aControlBlock) noexcept
 {
     if(!_init)
     {
@@ -36,7 +36,7 @@ void Trace::init(const CB& aControlBlock)
     }
 }
 
-void Trace::log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage)
+void Trace::log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage) noexcept
 {
     if(_cb->trace())
     {

@@ -28,6 +28,13 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
     }
 }
 
+void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
+{
+    aBCB->getMtx().lock();
+    resetBCB(aBCB);
+    aBCB->getMtx().unlock();
+}
+
 BufferManager::BufferManager() :
 	_noFrames(0),
 	_frameSize(0),
@@ -193,7 +200,7 @@ byte* BufferManager::getFramePtr(BCB* aBCB)
     return _bufferpool + (lFrameIndex * _frameSize);
 }
 
-BCB* BufferManager::locatePage(const PID& aPageID)
+BCB* BufferManager::locatePage(const PID& aPageID) noexcept
 {
     TRACE("Try to locate page");
     //BCB = Buffer Control Block
@@ -201,7 +208,8 @@ BCB* BufferManager::locatePage(const PID& aPageID)
     BCB* lFBCB = getFreeBCBs().getFreeBCBList(); //get free BCB
     if(!lFBCB) //if lFBCB == nullptr
     {
-        throw ReturnException(FLF); //should not happen because we have more bcbs than frames.
+        throw ReturnException(FLF); 
+        //should not happen because we have more bcbs than frames.
         //everytime a frame is reused, a BCB is freed and inserted back into the free bcb list
     }
     getFreeBCBs().setFreeBCBList(lFBCB->getNextInChain()); //set free BCB list to next free BCB
@@ -281,7 +289,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
 
 
 
-size_t BufferManager::getFrame()
+size_t BufferManager::getFrame() noexcept
 {
     size_t lFrameNo;
     getFreeFrames().getFreeFrameListMtx().lock(); //protect free frames array
@@ -346,6 +354,41 @@ void BufferManager::initNewPage(BCB* aFBCB,const PID& aPageID, uint64_t aLSN){
     *((basic_header_t*) lFramePtr) = lBH;
 }
 
-  
+void BufferManager::resetBCB(PID& aPID) noexcept
+{
+    const size_t lHashIndex = _bufferHash->hash(aPID); //determine hash of requested page
 
+    _bufferHash->getBucketMtx(lHashIndex).lock(); //lock exclusively 
+    BCB* lCurBCB = _bufferHash->getBucketBCB(lHashIndex); //initialize search in hash chain
+
+    if(!lCurBCB)
+    {
+        _bufferHash->getBucketMtx(lHashIndex).unlock();
+        return;
+    }
+    else if(lCurBCB->getPID() == aPID)
+    {
+        _bufferHash->setBucketBCB(lHashIndex, lCurBCB->getNextInChain());
+        _bufferHash->getBucketMtx(lHashIndex).unlock();
+        return;
+    }
+
+    while(lCurBCB->getNextInChain()) //as long as there are allocated CBs
+    {
+        if(lCurBCB->getNextInChain()->getPID() == aPID) //is there a CB for the requested page
+        {
+            //page found
+            BCB* tmp = lCurBCB->getNextInChain()->getNextInChain();
+            resetBCB(lCurBCB->getNextInChain());
+            lCurBCB->setNextInChain(tmp);
+            _bufferHash->getBucketMtx(lHashIndex).unlock(); //release
+            return;
+        }
+        else
+        {
+            lCurBCB = lCurBCB->getNextInChain(); //follow hash chain
+        }
+    }
+}
+  
 

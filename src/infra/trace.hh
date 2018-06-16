@@ -21,10 +21,10 @@ namespace fs = std::experimental::filesystem;
 
 #define TRACE(msg) Trace::getInstance().log(__FILE__, __LINE__, __PRETTY_FUNCTION__, msg)
 
-class Trace
+class Trace final
 {
     private:
-        explicit Trace();
+        Trace();
         explicit Trace(const Trace&) = delete;
         explicit Trace(Trace&&) = delete;
         Trace& operator=(const Trace&) = delete;
@@ -32,20 +32,20 @@ class Trace
         ~Trace();
 
     public:
-        inline static Trace& getInstance()
+        inline static Trace& getInstance() noexcept
         {
             static Trace lInstance;
             return lInstance;
         }
 
-        void init(const CB& aControlBlock);
+        void init(const CB& aControlBlock) noexcept;
 
     public:
-        void log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage);
+        void log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage) noexcept;
 
     public:
-        inline const std::string&   getLogPath(){ return _logPath; }
-        inline const std::ofstream& getLogStream(){ return _logStream; }
+        inline const std::string&   getLogPath() noexcept { return _logPath; }
+        inline const std::ofstream& getLogStream() noexcept { return _logStream; }
 
     private:
         std::string     _logPath;
