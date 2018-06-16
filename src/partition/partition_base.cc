@@ -1,6 +1,6 @@
 #include "partition_base.hh"
 
-PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock) : 
+PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
 	_pageSize(aControlBlock.pageSize()),
@@ -118,7 +118,7 @@ uint32_t PartitionBase::allocPage()
 */
 }
 
-void PartitionBase::freePage(const uint aPageIndex)
+void PartitionBase::freePage(const uint32_t aPageIndex)
 {
 	byte* lPagePointer = new byte[_pageSize];
 	readPage(lPagePointer, aPageIndex, _pageSize);
@@ -129,7 +129,7 @@ void PartitionBase::freePage(const uint aPageIndex)
 	delete[] lPagePointer;
 }
 
-void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
+void PartitionBase::readPage(byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize)
 {
 	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1)
 	{
@@ -139,7 +139,7 @@ void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aB
 	}
 }
 
-void PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
+void PartitionBase::writePage(const byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize)
 {
 	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _cb.trace())
 	{

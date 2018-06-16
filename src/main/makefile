@@ -1,10 +1,17 @@
 CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++
 CC = g++
 
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+READFLAG = -lreadline
+else
+READFLAG = -ledit
+endif
+
 LINKER = \
 	-lstdc++fs \
 	-lpthread \
-	-ledit \
 	\
 
 INCL = -I../.. -I..
@@ -13,10 +20,12 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	../infra/tuples.hh \
 	
 MAIN_HDR = \
 	../infra/args.hh \
 	../cli/parser.hh \
+	../infra/tuples.hh \
 	db_instance_manager.hh \
 	\
 
@@ -32,16 +41,18 @@ OBJ = \
 	../infra/args.o \
 	../infra/exception.o \
 	../infra/trace.o \
-	../infra/linereaderedit.o \
-	../infra/datejd.o \
-	../infra/stime.o \
-	../infra/stimestamp.o \
+	../infra/tuples.o \
+	\
+	../cli/linereaderedit.o \
+	../cli/datejd.o \
+	../cli/stime.o \
+	../cli/stimestamp.o \
+	../cli/parser.o \
+	\
 	../partition/partition_manager.o \
 	../partition/partition_base.o \
 	../partition/partition_file.o \
 	../partition/partition_raw.o \
-	\
-	../cli/parser.o \
 	\
 	../segment/segment_manager.o \
 	../segment/segment_base.o \
@@ -64,10 +75,10 @@ ALL = main
 all : $(ALL)
 
 main : db_instance_manager.o main.o
-	$(CC) main.o $(OBJ) -o main $(LINKER)
+	$(CC) main.o $(OBJ) -o main $(LINKER) $(READFLAG)
 
 main.o : main.cc $(HDR) $(MAIN_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER) $(READFLAG)
 
 db_instance_manager.o : db_instance_manager.cc db_instance_manager.hh $(HDR) $(DBIM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc

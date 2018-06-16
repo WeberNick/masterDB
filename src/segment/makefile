@@ -8,6 +8,7 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	../infra/tuples.hh \
 	\
 
 #Header needed by 'segment_manager'

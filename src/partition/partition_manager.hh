@@ -18,11 +18,12 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../infra/tuples.hh"
 #include "partition_base.hh"
 #include "partition_file.hh"
 #include "partition_raw.hh"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class PartitionManager
@@ -50,12 +51,12 @@ class PartitionManager
         void init(const CB& aControlBlock);
 
     public:
-        void load(part_vt& aTuples);
+        void load(const part_vt& aTuples);
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile*   createPartitionFileInstance(const std::string aPath, const std::string aName, const uint aGrowthIndicator);
-        PartitionRaw*    createPartitionRawInstance(const std::string aPath, const std::string aName);
+        PartitionFile*   createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
+        PartitionRaw*    createPartitionRawInstance(const std::string& aPath, const std::string& aName);
         PartitionBase*   getPartition(const uint8_t aID);
         PartitionBase*   getPartition(const std::string& aName);
         void             deletePartition(const uint8_t aID);
@@ -66,20 +67,20 @@ class PartitionManager
         inline size_t           getNoPartitions(){ return _partitions.size(); }
 
     private:
-        void            createPartitionSub(const part_t& aParT);
-        PartitionFile*  createMasterPartition(const part_t& aPart);
+        void            createPartitionSub(const Partition_T& aParT); //has some issues if aParT is a const reference
+        PartitionFile*  createMasterPartition(const Partition_T& aPart);
         //install functionality
-        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, part_t& aMasterTuple);
-        void            insertMasterPartitionTuple(const part_t& aMasterTuple);
+        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
+        void            insertMasterPartitionTuple(const Partition_T& aMasterTuple);
 
     private:
-        uint _counterPartitionID;
-        std::map<uint8_t, PartitionBase*> _partitions;
-        std::map<uint16_t, part_t> _partitionsByID;
-		std::map<std::string, uint16_t> _partitionsByName;
+        uint8_t _counterPartitionID;
+        std::unordered_map<uint8_t, PartitionBase*> _partitions;
+        std::unordered_map<uint8_t, Partition_T> _partitionsByID;
+		std::unordered_map<std::string, uint8_t> _partitionsByName;
 
-        std::string _masterPartName;
-        std::string _masterSegPartName;
+        const std::string _masterPartName;
+        const std::string _masterSegPartName;
 
         const CB*   _cb;
         bool        _init;

@@ -43,11 +43,16 @@ byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
 
 void SegmentBase::writePage(const uint aPageNo)
 {
+    TRACE("Trying to write Page");
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
+            TRACE("Trying to write Page");
+
         lBCB->setModified(true);
-        _bufMan.flush(lBCB);    
+        _bufMan.flush(lBCB); 
+            TRACE("Trying to write Page");
+   
     }
 }
 
@@ -97,11 +102,14 @@ byte* SegmentBase::getPageF(const uint aPageNo)
 
 byte* SegmentBase::getPageS(const uint aPageNo)
 {
+    TRACE("Get Page Shared");
     auto& lPair = _pages.at(aPageNo); //may throw if aPageNo not in map
     PID& lPID = lPair.first;
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
+            TRACE("Fix it");
+
         lBCB = _bufMan.fix(lPID, kSHARED);
     }
     else
@@ -127,4 +135,35 @@ byte* SegmentBase::getPageX(const uint aPageNo)
             lBCB->upgradeLock(kEXCLUSIVE);
     }
     return _bufMan.getFramePtr(lBCB);
+}
+
+void SegmentBase::printPageToFile(uint aPageNo, bool afromDisk ) {
+    //get Segment by Name
+    //get physical pageNo and check if in buffer before
+
+    byte* lPP2;
+    if(!afromDisk){
+        lPP2 = getPage(aPageNo, kSHARED);
+    }
+    else{
+        lPP2 = new byte[4096];
+        _partition.open();
+        _partition.readPage(lPP2,_pages[aPageNo].first._pageNo,4096);
+        _partition.close();
+    }
+    TRACE("Got the Page!");
+    std::ofstream myfile;
+    std::string filename = "partiton"+std::to_string(_partition.getID())+"Segment"+std::to_string(_segID)+"PageLogical"+ std::to_string(aPageNo) + ".txt";
+    myfile.open(_cb.tracePath() + filename);
+    uint32_t *lPP = (uint32_t *)lPP2;
+    for (uint a = 0; a < 4096 / 4; ++a) {
+        myfile << std::hex << *(lPP + a) << std::endl;
+    }
+    myfile.close();
+    if(afromDisk){
+        delete lPP2;
+    }
+    else{
+        releasePage(aPageNo);
+    }
 }

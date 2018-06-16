@@ -58,12 +58,14 @@ class BufferHashTable
 
     public:
         inline size_t   getTableSize(){ return _size; }
-        inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
+       // inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
         inline BCB*     getBucketBCB(const size_t aHash){ return _hashTable[aHash].getBCB(); }
         inline void     setBucketBCB(const size_t aHash, BCB* aBCB){ _hashTable[aHash].setBCB(aBCB); }
 
 	public:
 		size_t hash(const PID& aPageID);
+        sMtx&    getBucketMtx(const size_t aHash);
+
 
 	private:
         //the size of the hash table

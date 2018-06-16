@@ -145,12 +145,12 @@ void InterpreterFSIP::debug(const uint aPageIndex) {
     myfile.close();
 }
 
-uint32_t InterpreterFSIP::grow(uint aNumberOfPages, uint aMaxPagesPerFSIP){
+uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP){
     //assert (aNumberOfPages >= 8)
 
     //get how many pages fit on page
     uint freeOnThisPage = aMaxPagesPerFSIP - header()->_managedPages;
-    long ldist = freeOnThisPage - aNumberOfPages;
+    int64_t ldist = freeOnThisPage - aNumberOfPages;
     byte* lPP;
     uint8_t lMask = 0;
     uint remainingPages; //to be set on this FSIP
@@ -201,6 +201,6 @@ uint32_t InterpreterFSIP::grow(uint aNumberOfPages, uint aMaxPagesPerFSIP){
     else{
          //free rest of page by setting remainingPages to rest of bits.
         header()->_managedPages = aMaxPagesPerFSIP;
-        return (uint32_t) (-1)* ldist; //contains pages to be managed by next fsip
+        return static_cast<uint32_t>((-1)* ldist); //contains pages to be managed by next fsip
     }
 }

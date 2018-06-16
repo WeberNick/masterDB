@@ -60,3 +60,44 @@ void SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
 	}
 }
 
+void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {
+    TRACE("Trying to load a Segment from Page "+std::to_string(aPageIndex)+ " on partition "+std::to_string(_partition.getID()));
+    // partition and bufferManager have to be set
+    size_t lPageSize = getPageSize();
+    byte *lPageBuffer = new byte[_partition.getPageSize()];
+    uint32_t lnxIndex = aPageIndex;
+    segment_fsm_header_t lHeader;
+    fsm_header_t lHeader2;
+    uint32_t l1FSM;
+    _partition.open();
+	while (lnxIndex != 0) {
+		_partition.readPage(lPageBuffer,lnxIndex,_partition.getPageSize());
+        lHeader = *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t));
+        _indexPages.push_back(lnxIndex);
+        l1FSM = lHeader._firstFSM;
+        _segID = lHeader._segID;
+        TRACE(" ");
+        for (uint i = 0; i < lHeader._currSize; ++i) {
+            PID lTmpPID = {_partition.getID(), *(((uint32_t *)lPageBuffer) + i)};  
+            _pages.push_back(page_t(lTmpPID, nullptr));
+        }
+        lnxIndex = lHeader._nextIndexPage;
+    }
+    TRACE("Load FSMs");
+    _fsmPages.push_back(l1FSM);
+    while (_fsmPages.at(_fsmPages.size() -1) != 0) {
+        _partition.readPage(lPageBuffer,_fsmPages.at(_fsmPages.size()-1),_partition.getPageSize());
+        lHeader2 = *(fsm_header_t *)(lPageBuffer + lPageSize - sizeof(fsm_header_t));
+        _fsmPages.push_back(lHeader2._nextFSM);
+    }
+	delete[] lPageBuffer;
+	_partition.close();
+    TRACE("Successfully load segment.");
+}
+void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize) {
+	_partition.open();
+    _partition.readPage(aPageBuffer,_pages[aPageNo].first._pageNo,aBufferSize);
+	TRACE(std::to_string(_pages[aPageNo].first._pageNo));
+    _partition.close();
+	TRACE("read page");
+}

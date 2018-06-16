@@ -35,7 +35,53 @@ class SegmentFSM_SP : public SegmentFSM
     ~SegmentFSM_SP();
 
   public:
+    template<typename Tuple_T>
+    void insertTuple(const Tuple_T& aTuple);
     void insertTuple(byte* aTuple, const uint aTupleSize);
     void insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
     int getMaxFreeBytes() { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
+    void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
+    void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);    
 };
+
+template<typename Tuple_T>
+void SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
+{
+    TRACE("trying to insert Tuple");
+	// get page with enough space for the tuple and load it into memory
+	bool emptyfix = false;
+	PID lPID = getFreePage(aTuple.size(), emptyfix);
+	BCB* lBCB;
+	if(emptyfix){//the page is new, use different command on buffer
+		lBCB = _bufMan.emptyfix(lPID);
+	}
+	else{
+		lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
+	}
+	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
+
+	InterpreterSP lInterpreter;
+	//if the page is new, it has to be initialised first.
+	if(emptyfix){
+		lInterpreter.initNewPage(lBufferPage);
+	}
+
+	// attach page to sp interpreter
+	lInterpreter.attach(lBufferPage);
+	// if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
+	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTuple.size());
+	
+	if(lFreeTuplePointer == nullptr) // If true, not enough free space on nsm page => getFreePage buggy
+	{
+		const std::string lErrMsg("Not enough free space on nsm page.");
+        TRACE(lErrMsg);
+        throw NSMException(FLF, lErrMsg);
+	}
+    aTuple.toDisk(lFreeTuplePointer);
+	lInterpreter.detach();
+	lBCB->setModified(true);
+	lBCB->getMtx().unlock();
+	_bufMan.unfix(lBCB);
+    TRACE("Inserted tuple successfully.");
+}
+

@@ -10,18 +10,23 @@
 #pragma once
 
 #include "partition_base.hh"
+#include "../infra/tuples.hh"
+#include "../interpreter/interpreter_fsip.hh"
 
 #include <string>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>      // std::ofstream
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 
 
 class PartitionFile : public PartitionBase
 {
     private:
         friend class PartitionManager;
-        explicit PartitionFile(const std::string aPath, const std::string aName, const uint aPartitionID, const uint aGrowthIndicator,const CB& aControlBlock);
-        PartitionFile(const part_t& aTuple, const CB& aControlBlock);
+        explicit PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock);
+        explicit PartitionFile(const Partition_T& aTuple, const CB& aControlBlock);
         PartitionFile(const PartitionFile&) = delete;
         PartitionFile &operator=(const PartitionFile&) = delete;
     public:
@@ -40,7 +45,8 @@ class PartitionFile : public PartitionBase
         */
         virtual size_t partSize();
         virtual size_t partSizeInPages();
-        inline uint getGrowthIndicator(){ return _growthIndicator; }
+        inline uint16_t getGrowthIndicator() const { return _growthIndicator; }
+        inline uint16_t getGrowthIndicator(){ return _growthIndicator; }
 
 
     private:
@@ -51,6 +57,6 @@ class PartitionFile : public PartitionBase
 
     private:
         /* An indicator how the partition will grow (indicator * block size) */
-        uint _growthIndicator;
+        uint16_t _growthIndicator;
 };
 

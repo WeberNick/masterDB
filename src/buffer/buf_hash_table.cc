@@ -27,5 +27,9 @@ size_t BufferHashTable::hash(const PID& aPageID)
     std::hash<uint> lHash;
     return (lHash(aPageID.fileID()) + lHash(aPageID.pageNo())) % _size;
 }
+sMtx&    BufferHashTable::getBucketMtx(const size_t aHash)
+{ 
+	TRACE("got mutex of bucket "+std::to_string(aHash));
+	return _hashTable[aHash].getMtx(); }
 
 

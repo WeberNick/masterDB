@@ -73,38 +73,46 @@ void BufferManager::init(const CB& aControlBlock)
 //the following is not tested at all, expect major bugs
 BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 {
+    TRACE("Trying to Fix a page");
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
     _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock exclusively 
     BCB* lNextBCB = _bufferHash->getBucketBCB(lHashIndex); //initialize search in hash chain
+
     while(lNextBCB != nullptr && lPageNotFound) //as long as there are allocated CBs
     {
+        TRACE("One step in the chain");
         if(lNextBCB->getPID() == aPageID) //is there a CB for the requested page
         {
             //page found
             lPageNotFound = false;
-
+            TRACE(" ");
             while(lNextBCB->getFrameIndex() == INVALID) //page is being brought in
             {
                 //do nothing
+                TRACE(" ");
             }
             
             _bufferHash->getBucketMtx(lHashIndex).unlock_shared(); //release
         }
         else
         {
+            TRACE(" ");
             lNextBCB = lNextBCB->getNextInChain(); //follow hash chain
         }
     }
 
     if(lPageNotFound)
     {
+        TRACE( "Page not found");
+        //bucket has to be unlocked for further code.
+        _bufferHash->getBucketMtx(lHashIndex).unlock_shared();
         /* page not in bufferpool. before it can be read, a free frame in the 
         * bufferpool must be found or a page must be replaced */
         lNextBCB = locatePage(aPageID); //get page in bufferpool
         readPageIn(lNextBCB,aPageID);
     }
-
+    TRACE("setting Lockmode");
     if(aMode == kNOLOCK)
     {
         lNextBCB->setLockMode(aMode);
@@ -161,12 +169,17 @@ void BufferManager::flush(BCB*& aBufferControlBlockPtr)
         lPart->open(); //open partition
         lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); //write page back to disk
         lPart->close(); //close partition
+        TRACE("flushed");
     }
 }
 
 void BufferManager::flushAll()
 {
-
+    TRACE("Flushing complete Buffer");
+    std::vector<BCB*> lBCBs = _freeBCBs.getAllBCBs();
+    for (auto& lBCB : lBCBs){
+        flush(lBCB);
+    }
 }
 
 byte* BufferManager::getFramePtr(BCB* aBCB)
@@ -184,6 +197,7 @@ byte* BufferManager::getFramePtr(BCB* aBCB)
 
 BCB* BufferManager::locatePage(const PID& aPageID)
 {
+    TRACE("Try to locate page");
     //BCB = Buffer Control Block
     getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
     BCB* lFBCB = getFreeBCBs().getFreeBCBList(); //get free BCB
@@ -197,9 +211,12 @@ BCB* BufferManager::locatePage(const PID& aPageID)
     lFBCB->setPID(aPageID); //store requested page
     lFBCB->setModified(false); //page is not modified
     lFBCB->setFixCount(0); //fix will be applied later
+       TRACE("step");
     /* now the control block is linked to the hash table chain */
     const size_t lHashIndex = _bufferHash->hash(aPageID); //compute hash for this page
     _bufferHash->getBucketMtx(lHashIndex).lock(); //lock hash bucket
+    TRACE("step");
+
     if(_bufferHash->getBucketBCB(lHashIndex) == nullptr) //if hash chain is empty
     {
         _bufferHash->setBucketBCB(lHashIndex, lFBCB); //put pointer to BCB in chain
@@ -214,6 +231,7 @@ BCB* BufferManager::locatePage(const PID& aPageID)
     const size_t lFrameNo = getFrame(); //get a free frame
     lFBCB->setFrameIndex(lFrameNo);     
     lFBCB->getMtx().unlock(); //lock mutex of free BCB
+    TRACE("Page located");
     return lFBCB;
 }
 
@@ -242,6 +260,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
+        TRACE("Page read in");
         lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
         lPart->close(); //close partition
     }
@@ -254,6 +273,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
         throw ReturnException(FLF);
     }
     lFBCB->getMtx().unlock_shared();
+    TRACE("Page read in");
 }
 
 

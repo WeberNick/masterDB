@@ -73,6 +73,29 @@ OutOfMemoryException::OutOfMemoryException(
             "There was insufficient memory to fulfill the allocation request.")
 {}
 
+PartitionException::PartitionException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName,
+        const std::string&  aErrorMessage) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            aErrorMessage)
+{}
+
+PartitionExistsException::PartitionExistsException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            std::string("Cannot create existing partition or remove non existing partition"))
+{}
+
 PartitionFullException::PartitionFullException(
         const char*         aFileName,
         const unsigned int  aLineNumber,

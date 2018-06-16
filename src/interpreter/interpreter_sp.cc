@@ -119,3 +119,16 @@ int InterpreterSP::deleteRecordHard (uint16_t aRecordNo){
 	return -1;
 
 }
+byte* InterpreterSP::getRecord(uint aRecordNo){
+	if(aRecordNo >= noRecords()) { 
+		return nullptr;
+	}
+	else{
+		if(slot(aRecordNo)._status==0){
+			return nullptr;
+		}
+		else{
+			return _pp+slot(aRecordNo)._offset;
+		}
+	}
+}

@@ -86,6 +86,7 @@ class BufferManager
                 inline size_t   decrNoFreeBCBs(){ return --_noFreeBCBs; }
                 inline void     setFreeBCBList(BCB* aFreeBCB){ _freeBCBList = aFreeBCB; }
                 inline void     setNoFreeBCBs(size_t aNoFreeBCBs){ _noFreeBCBs = aNoFreeBCBs; }
+                inline std::vector<BCB*> getAllBCBs() { return _BCBs; }
 
             private:
                 //containing all BCB pointer. With this vector it is convenient to free the memory later
