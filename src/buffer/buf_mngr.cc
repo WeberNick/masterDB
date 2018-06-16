@@ -35,8 +35,7 @@ BufferManager::BufferManager() :
 	_bufferpool(nullptr),
 	_freeFrames(),
     _freeBCBs(),
-    _cb(nullptr),
-    _init(false)
+    _cb(nullptr)
 {}
 
 BufferManager::~BufferManager()
@@ -47,7 +46,7 @@ BufferManager::~BufferManager()
 
 void BufferManager::init(const CB& aControlBlock)
 {
-    if(!_init)
+    if(!_cb)
     {
         _noFrames = aControlBlock.frames();
         _frameSize = aControlBlock.pageSize();
@@ -63,10 +62,9 @@ void BufferManager::init(const CB& aControlBlock)
             throw;
         }
         _freeFrames.init(_noFrames);
-        _freeBCBs.init(_noFrames);
+        _freeBCBs.init(_noFrames * 1.2);
         _cb = &aControlBlock;
         BufferControlBlock::setCB(_cb);
-        _init = true;
     }
 }
 
@@ -201,6 +199,11 @@ BCB* BufferManager::locatePage(const PID& aPageID)
     //BCB = Buffer Control Block
     getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
     BCB* lFBCB = getFreeBCBs().getFreeBCBList(); //get free BCB
+    if(!lFBCB) //if lFBCB == nullptr
+    {
+        throw ReturnException(FLF); //should not happen because we have more bcbs than frames.
+        //everytime a frame is reused, a BCB is freed and inserted back into the free bcb list
+    }
     getFreeBCBs().setFreeBCBList(lFBCB->getNextInChain()); //set free BCB list to next free BCB
     getFreeBCBs().decrNoFreeBCBs(); //decrement number of free BCBs
     getFreeBCBs().getFreeBCBListMtx().unlock(); //unlock mutex of free BCB list
@@ -319,6 +322,8 @@ size_t BufferManager::getFrame()
                     {//write back to disk
                         flush(lHashChainEntry);
                     }
+                    lHashChainEntry->setNextInChain(_freeBCBs.getFreeBCBList());
+                    _freeBCBs.setFreeBCBList(lHashChainEntry);
                     //else page is not modified and can be replaced
                     lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
                     _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release lock on hash bucket

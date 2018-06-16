@@ -45,8 +45,8 @@ class PartitionFile : public PartitionBase
         */
         virtual size_t partSize();
         virtual size_t partSizeInPages();
-        inline uint16_t getGrowthIndicator() const { return _growthIndicator; }
-        inline uint16_t getGrowthIndicator(){ return _growthIndicator; }
+        inline uint16_t getGrowthIndicator() const noexcept { return _growthIndicator; }
+        inline uint16_t getGrowthIndicator() noexcept { return _growthIndicator; }
 
 
     private:

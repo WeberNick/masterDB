@@ -11,8 +11,6 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock)
     SegmentFSM(aPartition, aControlBlock)
 {}
 
-SegmentFSM_SP::~SegmentFSM_SP() {}
-
 void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	TRACE("trying to insert Tuple");
 	// get page with enough space for the tuple and load it into memory

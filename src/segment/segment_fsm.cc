@@ -33,9 +33,6 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
     _fsmPages()
 {}
 
-SegmentFSM::~SegmentFSM() {}
-
-
 //returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
 PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
