@@ -119,3 +119,43 @@ class Segment_T
 };
 using seg_vt = std::vector<Segment_T>;
 std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple);
+
+class Employee_T
+{
+    public:
+        explicit Employee_T();
+        explicit Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary); 
+        explicit Employee_T(const Employee_T& aEmployeeTuple);
+        explicit Employee_T(Employee_T&&) = delete;
+        Employee_T& operator=(const Employee_T& aEmployeeTuple);
+        Employee_T& operator=(Employee_T&&) = delete;
+        ~Employee_T() = default;
+
+    public:
+        void init(const uint8_t aAge, const std::string& aName, const uint16_t aSalary) noexcept;
+        void toDisk(byte* aPtr) const noexcept;
+        void toDisk(byte* aPtr) noexcept;
+        void toMemory(byte* aPtr) noexcept;
+    
+    public:
+        //getter
+        inline size_t size() const noexcept { return _size; };
+        inline size_t size() noexcept { return _size; }
+        inline uint8_t age() const noexcept { return _pAge; }
+        inline uint8_t age() noexcept { return _pAge; }
+        inline const std::string& name() const noexcept { return _pName; }
+        inline const std::string& name() noexcept { return _pName; }
+        inline uint16_t salary() const noexcept { return _pSalary; }
+        inline uint16_t salary() noexcept { return _pSalary; }
+        
+    private:
+        //size of class, with all the strings
+        size_t _size;
+        /* content of the tuple */
+        uint8_t    _pAge;
+        uint16_t    _pSalary;
+        std::string _pName;
+        
+};
+using emp_vt = std::vector<Employee_T>;
+std::ostream& operator<< (std::ostream& stream, const Employee_T& aEmpTuple);
