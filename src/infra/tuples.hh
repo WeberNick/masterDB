@@ -61,10 +61,9 @@ class Partition_T
         inline std::string to_string() { return static_cast<const Partition_T&>(*this).to_string(); }
 
     private:
-        //size of class, with all the strings
-        size_t _size;
-        /* content of the tuple */
-        uint8_t    _pID;
+        size_t      _size; // size of class, with all the strings
+        /* Tuple content*/
+        uint8_t     _pID;
         std::string _pName;
         std::string _pPath;
         uint8_t     _pType;   // 1:= PartitionFile, 2:=partitionRaw
@@ -72,7 +71,6 @@ class Partition_T
 };
 std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple);
 using part_vt = std::vector<Partition_T>;
-
 
 class Segment_T
 {
@@ -108,14 +106,13 @@ class Segment_T
         inline std::string to_string() { return static_cast<const Segment_T&>(*this).to_string(); }
      
     private:
-        //size of class, with all the strings
-        size_t _size;
-        /* content of the tuple */
-        uint8_t       _sPID;       // partition ID
-        uint16_t      _sID;        // segment ID
-        std::string   _sName; // segment name (unique)
-        uint8_t       _sType;      // segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
-        uint32_t      _sFirstPage; // first segment index ( (C) Nico) page in order to load segment into memory
+        size_t      _size; // size of class, with all the strings
+        /* Tuple content */
+        uint8_t     _sPID;       // partition ID
+        uint16_t    _sID;        // segment ID
+        std::string _sName;      // segment name (unique)
+        uint8_t     _sType;      // segment type; 1:= SegmentFSM, 2:= SegmentFSM_SP
+        uint32_t    _sFirstPage; // first segment index ((C) Nico) page in order to load segment into memory
 };
 using seg_vt = std::vector<Segment_T>;
 

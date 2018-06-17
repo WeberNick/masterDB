@@ -326,3 +326,63 @@ int LineReaderEdit::split_line(const char aSep, const bool aStrip) {
     }
     return splits().size();
 }
+
+/**
+ * @brief Split given line by aSep and return a vector of char pointers
+ * 
+ * @param aSep the separator where to split
+ * @param aStrip whether to strip the line
+ * @param aLine the line to split
+ * @return char_vpt a vector of char pointers to the split elements
+ */
+char_vpt LineReaderEdit::split_line(const char aSep, const bool aStrip, const std::string& aLine) {
+    char_vpt splits;
+    const char* e = end(aLine);
+    const char* x = line(aLine);
+    if (aStrip) { skipws(x); }
+    while (x < e) {
+        // aSeps, blanks must have been striped
+        // std::cout << "  loop: " << x << std::endl;
+        const char* lBegin = x;
+        // std::cout << "  begin: " << lBegin << std::endl;
+        if ('\"' == *x) {
+            ++x; // skip '\"'
+            lBegin = x;
+            while ('\"' != *x && x < e && '\0' != *x)
+                ++x;
+            // std::cerr << "*x = " << *x << std::endl;
+            if ('\"' == *x) {
+                char* lEnd = (char*)x;
+                // std::cerr << "*lEnd = " << *lEnd << std::endl;
+                ++x; // skip '\"'
+                if (aStrip) {
+                    while (lEnd >= lBegin && isspace(*(lEnd - 1))) {
+                        --lEnd;
+                        std::cerr << "*lEnd in loop: " << *lEnd << std::endl;
+                    }
+                    *lEnd = '\0';
+                    splits.push_back((char*)lBegin);
+                    // std::cerr << "read: " << lBegin << std::endl;
+                }
+            } else {
+                std::cerr << "unmatched \"." << std::endl;
+                char* lEnd = (char*)x;
+                *lEnd = '\0';
+                splits.push_back((char*)lBegin);
+            }
+        } else {
+            while (aSep != *x && x < e && '\0' != *x)
+                ++x;
+            char* lEnd = (char*)x;
+            if (aStrip) {
+                while (lEnd >= lBegin && isspace(*(lEnd - 1)))
+                    --lEnd;
+            }
+            *lEnd = '\0';
+            splits.push_back((char*)lBegin);
+            ++x; // skip sep
+        }
+        if (aStrip) { skipws(x); }
+    }
+    return splits;
+}

@@ -16,7 +16,8 @@ SegmentManager::SegmentManager() :
 
 SegmentManager::~SegmentManager()
 {
-    for(uint i = 0; i < _segments.size(); ++i) {
+    for(uint i = 0; i < _segments.size(); ++i)
+    {
         delete _segments[i];
     }
 }
@@ -48,8 +49,8 @@ SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, const
 {
     SegmentFSM* lSegment = new SegmentFSM(_counterSegmentID++, aPartition, *_cb);
     _segments[lSegment->getID()] = lSegment;
-    
-    Segment_T lSegT(aPartition.getID(),lSegment->getID(),aName,1,lSegment->getIndexPages().at(0));
+
+    Segment_T lSegT(aPartition.getID(), lSegment->getID(), aName, 1, lSegment->getIndexPages().at(0));
 
     createSegmentSub(lSegT);
     SegmentFSM* rtn = (SegmentFSM*)_segments.at(lSegment->getID());
@@ -61,8 +62,8 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
 {
     SegmentFSM_SP* lSegment = new SegmentFSM_SP(_counterSegmentID++, aPartition, *_cb);
     _segments[lSegment->getID()] = lSegment;
-    Segment_T lSegT(aPartition.getID(),lSegment->getID(),aName,2,lSegment->getIndexPages().at(0));
-    
+    Segment_T lSegT(aPartition.getID(), lSegment->getID(), aName, 2, lSegment->getIndexPages().at(0));
+
     createSegmentSub(lSegT);
     TRACE("Created new Segment FSM SP successfully.");
     return (SegmentFSM_SP*)_segments.at(lSegment->getID());
@@ -87,7 +88,7 @@ SegmentFSM_SP* SegmentManager::loadSegmentFSM_SP(PartitionBase& aPartition, cons
 
 void SegmentManager::deleteSegment(SegmentBase* aSegment)
 {
-  delete aSegment;
+    delete aSegment;
 }
 
 void SegmentManager::deleteSegment(const uint16_t aID)
@@ -100,7 +101,7 @@ void SegmentManager::deleteSegment(const uint16_t aID)
     }
     const Segment_T seg(_segmentsByID.at(aID));
     //delete tuple on disk
-    deleteTupelPhysically<Segment_T>(_masterSegSegName,aID);
+    deleteTuplePhysically<Segment_T>(_masterSegSegName,aID);
 
     //delete tuple in memory
     _segmentsByName.erase(seg.name());
@@ -154,16 +155,16 @@ SegmentBase* SegmentManager::getSegment(const std::string& aSegmentName){
 
 void SegmentManager::storeSegments()
 {
-    for (auto segmentsItr : _segments)
+    for (auto& segmentsItr : _segments)
     {
         segmentsItr.second->storeSegment();   
     }
 }
 
-void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::string& aName){
-   // create 2 Master Segments
-   // MasterSegParts
-   
+void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::string& aName)
+{
+     // create 2 Master Segments
+     // MasterSegParts
      SegmentFSM_SP* lPSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lPSeg->getID()] = lPSeg;
     
@@ -171,10 +172,10 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
     
     TRACE("MasterSegPart created");
     // MasterSegSegs
-      SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
+    SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lSSeg->getID()] = lSSeg;
-    
-    Segment_T lSSegT(aPartition->getID(),lSSeg->getID(),_masterSegSegName,2,lPSeg->getIndexPages().at(0));
+
+    Segment_T lSSegT(aPartition->getID(), lSSeg->getID(), _masterSegSegName, 2, lPSeg->getIndexPages().at(0));
 
     TRACE("MasterSegSeg created.");
     // store them into Segment Master
@@ -184,6 +185,22 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
     TRACE(lErrMsg);
 }
 
+const string_vt SegmentManager::getSegmentNames() {
+    string_vt names;
+    for (const auto& [id, segt] : _segmentsByID) {
+        names.push_back(segt.name());
+    }
+    return names;
+}
+
+const string_vt SegmentManager::getSegmentNamesForPartition(uint8_t aPID) {
+    string_vt qsnames;
+    for (const auto& [id, segt] : _segmentsByID) {
+        if (segt.partID() == aPID)
+            qsnames.push_back(segt.name());
+    }
+    return qsnames;
+}
 
 // old code
 /*

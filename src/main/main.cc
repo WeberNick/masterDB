@@ -155,7 +155,7 @@ int main(const int argc, const char* argv[]) {
         };
         std::cout << lCB;
 
-        testTupleToDIsk();
+        // testTupleToDIsk();
 
 //second CB for start up.
         const control_block_t lCB2 = {
