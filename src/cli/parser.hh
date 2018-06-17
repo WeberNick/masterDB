@@ -9,6 +9,7 @@
 
 #include "linereaderedit.hh"
 #include "../infra/types.hh"
+#include "../infra/tuples.hh"
 #include "../infra/exception.hh"
 
 #include "../main/db_instance_manager.hh"

@@ -20,10 +20,10 @@
 
 #include <string>
 
-class DatabaseInstanceManager 
+class DatabaseInstanceManager final
 {
 	private:
-		explicit DatabaseInstanceManager();
+		DatabaseInstanceManager();
         explicit DatabaseInstanceManager(const DatabaseInstanceManager&) = delete;
         explicit DatabaseInstanceManager(DatabaseInstanceManager&&) = delete;
 		DatabaseInstanceManager &operator=(const DatabaseInstanceManager&) = delete;
@@ -36,7 +36,7 @@ class DatabaseInstanceManager
 		 *
 		 *  @return reference to the only PartitionManager instance
 		 */
-		static DatabaseInstanceManager& getInstance() {
+		static DatabaseInstanceManager& getInstance() noexcept {
 			static DatabaseInstanceManager lDBIM_Instance;
 			return lDBIM_Instance;
 		}
@@ -49,9 +49,9 @@ class DatabaseInstanceManager
 		void boot();
 
 	public:
-		inline PartitionManager& getPartMngr() { return _partMngr; }
-		inline SegmentManager& getSegMngr() { return _segMngr; }
-        inline bool isRunning() { return _running; }
+		inline PartitionManager& getPartMngr() noexcept { return _partMngr; }
+		inline SegmentManager& getSegMngr() noexcept { return _segMngr; }
+        inline bool isRunning() noexcept { return _running; }
 
 	private:
 		template<typename T_TupleType>
@@ -68,7 +68,6 @@ class DatabaseInstanceManager
         uint              _segIndex;  // Index of first segment storing pages with segment tuples, should be 3
         const CB*         _cb;
         bool              _running;
-        bool              _init;
 };
 
 template<typename T_TupleType>

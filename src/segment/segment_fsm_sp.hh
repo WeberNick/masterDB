@@ -33,14 +33,14 @@ class SegmentFSM_SP : public SegmentFSM
     explicit SegmentFSM_SP(SegmentFSM_SP&&) = delete;
     SegmentFSM_SP& operator=(const SegmentFSM_SP&) = delete;
     SegmentFSM_SP& operator=(SegmentFSM_SP&&) = delete;
-    ~SegmentFSM_SP();
+    ~SegmentFSM_SP() = default;
 
   public:
     template<typename Tuple_T>
     void insertTuple(const Tuple_T& aTuple);
     void insertTuple(byte* aTuple, const uint aTupleSize);
     void insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
-    int getMaxFreeBytes() { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
+    int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);    
 };

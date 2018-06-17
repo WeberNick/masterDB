@@ -67,6 +67,8 @@ void testStartUp(const control_block_t &aControlBlock){
     TRACE("GET PAGE");
     lSeg->getPage(0,kSHARED);
     lSeg->printPageToFile(0,false);
+    DatabaseInstanceManager::getInstance().shutdown();
+    TRACE("SHUTDOWN COMPLETED");
 }
 
 void testTupleToDIsk()
@@ -139,8 +141,8 @@ int main(const int argc, const char* argv[]) {
     {
         // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
-        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
-        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
+        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition");
+        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
         const size_t        C_PAGE_SIZE                 = 4096;
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
         const bool          C_TRACE_ACTIVATED           = true;
@@ -155,7 +157,8 @@ int main(const int argc, const char* argv[]) {
         };
         std::cout << lCB;
 
-        // testTupleToDIsk();
+
+       // testTupleToDIsk();
 
 //second CB for start up.
         const control_block_t lCB2 = {
@@ -177,8 +180,8 @@ int main(const int argc, const char* argv[]) {
         
 
        // test(lCB);
-        //testStartUp(lCB2);
-         // testStartUp(lCB2);
+        testStartUp(lCB2);
+        // testStartUp(lCB2);
 	    // Test call in test.hh
      /*   if (lArgs.test()) {
             // start thread for cli
@@ -187,8 +190,9 @@ int main(const int argc, const char* argv[]) {
             return EXIT_SUCCESS;
         }*/
 
-        CommandParser::getInstance().init(lCB, "mdb > ", '#');
-    } catch(const ReturnException& ex) { // Any exceptions from which there is no recover possible, are catched here 
+       // CommandParser::getInstance().init(lCB, "mdb > ", '#');
+    } catch(const ReturnException& ex) {
+         // Any exceptions from which there is no recover possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;
     }

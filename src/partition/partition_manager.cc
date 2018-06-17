@@ -10,8 +10,7 @@ PartitionManager::PartitionManager() :
     _partitionsByName(),
     _masterPartName("MasterPartition"),
     _masterSegPartName("PartitionMasterSegment"),
-    _cb(nullptr),
-    _init(false)
+    _cb(nullptr)
 {}
 
 PartitionManager::~PartitionManager()
@@ -24,10 +23,9 @@ PartitionManager::~PartitionManager()
 
 void PartitionManager::init(const CB& aControlBlock)
 {
-    if(!_init)
+    if(!_cb)
     {
         _cb = &aControlBlock;
-        _init = true;
     }
 }
 
@@ -116,21 +114,25 @@ PartitionBase* PartitionManager::getPartition(const std::string& aName)
     return getPartition(_partitionsByName.at(aName));
 }
 
-Partition_T& PartitionManager::getPartitionT(const std::string& aName) {
+
+Partition_T& PartitionManager::getPartitionT(const std::string& aName)
+{
     return _partitionsByID.at(_partitionsByName.at(aName));
 }
 
 void PartitionManager::deletePartition(const uint8_t aID)
 {
-    //delete object if exists
-    auto lIter = _partitions.find(aID);
-    if (lIter != _partitions.end()) {
-        delete lIter->second;
-        _partitions.erase(lIter);
-    }
+    // delete all Segments on that partition
+    SegmentManager& lSegMan = SegmentManager::getInstance();
+    lSegMan.deleteSegements(aID);
+
+    // delete partition
+    PartitionBase* lPart = getPartition(aID);
+    lPart->remove();
+    // delete object
+    _partitions.erase(aID);
     const Partition_T lpart(_partitionsByID.at(aID));
     // delete tuple on disk
-    SegmentManager& lSegMan = SegmentManager::getInstance();
     lSegMan.deleteTuplePhysically<Partition_T>(_masterSegPartName, aID);
 
     // delete tuple in memory
@@ -144,15 +146,18 @@ uint8_t PartitionManager::getPartitionID(const std::string& aName)
     return _partitionsByName.at(aName);
 }
 
-const string_vt PartitionManager::getPartitionNames() {
+const string_vt PartitionManager::getPartitionNames()
+{
     string_vt names;
     for (auto& element : _partitionsByName)
         names.push_back(element.first);
     return names;
 }
 
-std::string PartitionManager::getPartitionName(const uint8_t aID) {
-    for (auto& part : _partitionsByName) {
+std::string PartitionManager::getPartitionName(const uint8_t aID)
+{
+    for (auto& part : _partitionsByName)
+    {
         if (aID == part.second)
             return part.first;
     }
@@ -161,7 +166,7 @@ std::string PartitionManager::getPartitionName(const uint8_t aID) {
 
 void PartitionManager::deletePartition(const std::string& aName)
 {
-    deletePartition(_partitionsByName[aName]);
+    deletePartition(_partitionsByName.at(aName));
 }
 
 PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)

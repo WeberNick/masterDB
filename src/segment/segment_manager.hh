@@ -42,15 +42,16 @@ class SegmentManager
          *
          *  @return reference to the only SegmentManager instance
          */
-        static SegmentManager& getInstance()
+        static SegmentManager& getInstance() noexcept
         {
             static SegmentManager lSegmentManagerInstance;
             return lSegmentManagerInstance;
         }
-        void init(const CB& aControlBlock);
+
+        void init(const CB& aControlBlock) noexcept;
 
 	public:
-		void load(const seg_vt& aTuples);
+		void load(const seg_vt& aTuples) noexcept;
 
 	public:
 		SegmentFSM*     createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
@@ -63,17 +64,18 @@ class SegmentManager
         const string_vt getSegmentNames();
         const string_vt getSegmentNamesForPartition(uint8_t aPID);
 
-        void deleteSegment(SegmentBase* aSegment);
+        void deleteSegment(SegmentBase* aSegment) noexcept;
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string& aName);
         template<typename Tuple_T>
 		void deleteTuplePhysically (const std::string& aMasterName, uint16_t aID);
+        void deleteSegements(const uint8_t aPartitionID);
 
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
 	public:
-		inline uint getNoSegments() { return _segments.size(); }
         inline const Segment_T& getSegmentByName(std::string& aSegmentName) { return _segmentsByID.at(_segmentsByName.at(aSegmentName)); }
+		inline uint getNoSegments() noexcept { return _segments.size(); }	
 
 	private:
 		void storeSegments();
@@ -91,11 +93,10 @@ class SegmentManager
 		uint32_vt      _indexPages;		
 		uint32_t       _maxSegmentsPerPage; // Number of Pages that can be managed on one SegmentManager Page
         std::string    _masterSegSegName; //name of Master segment containing all segments
-		
+
         BufferManager& _BufMngr;
         const CB*      _cb;
         // bool        _installed = false; // only true, if installed.
-        bool           _init;
 };
 
 template<typename Tuple_T>

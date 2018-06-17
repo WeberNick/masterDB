@@ -62,7 +62,7 @@ uint32_t PartitionFile::allocPage()
     return lPageIndex;
 }
 
-size_t PartitionFile::partSize()
+size_t PartitionFile::partSize() noexcept
 {
 	if(isFile())
 	{
@@ -71,7 +71,7 @@ size_t PartitionFile::partSize()
     return 0;
 }
 
-size_t PartitionFile::partSizeInPages()
+size_t PartitionFile::partSizeInPages() noexcept
 {
     return (partSize() / _pageSize);
 }

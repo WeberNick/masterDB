@@ -30,7 +30,7 @@ class PartitionManager
 {    
     private:
         friend class DatabaseInstanceManager;
-        explicit PartitionManager();
+        PartitionManager();
         explicit PartitionManager(const PartitionManager&) = delete;
         explicit PartitionManager(PartitionManager&&) = delete;
         PartitionManager& operator=(const PartitionManager&) = delete;
@@ -42,7 +42,7 @@ class PartitionManager
          *  @brief  This function is the only way to get access to the PartitionManager instance
          *  @return reference to the only PartitionManager instance
          */
-        static PartitionManager& getInstance()
+        static PartitionManager& getInstance() noexcept
         {
             static PartitionManager lPartitionManagerInstance;
             return lPartitionManagerInstance;
@@ -85,6 +85,5 @@ class PartitionManager
         const std::string _masterPartName;
         const std::string _masterSegPartName;
 
-        const CB* _cb;
-        bool      _init;
+        const CB*   _cb;
 };

@@ -20,11 +20,11 @@
 #include <string>
 #include <cmath>
 
-class InterpreterFSM {
+class InterpreterFSM final {
 
   public:
     /* standard constructor */
-    explicit InterpreterFSM();
+    InterpreterFSM();
     /* If CC and AO are needed, implement them correctly */
     explicit InterpreterFSM(const InterpreterFSM&) = delete;
     explicit InterpreterFSM(InterpreterFSM&&) = delete;
@@ -34,9 +34,9 @@ class InterpreterFSM {
 
   public:
     /*	set the page pointer and header */
-    inline void attach(byte *aPP);
+    inline void attach(byte *aPP) noexcept;
     /*	unset the page pointer and header */
-    void detach();
+    void detach() noexcept;
 
   public:
     /**
@@ -48,7 +48,7 @@ class InterpreterFSM {
      *	@param	aPID - The ID of the partition this page is stored in
      *	@param	aNoPages - Number of stored Pages in FSMP
      */
-    void initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages);
+    void initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages) noexcept;
 
     /**
      *	@brief	looks for the next free block in the FSIP and reserves the page
@@ -57,7 +57,7 @@ class InterpreterFSM {
      *
      * 	@return either an offset to the free block or -1 if no free block was found
      */
-    uint32_t getFreePage(const PageStatus aPageStatus);
+    uint32_t getFreePage(const PageStatus aPageStatus) noexcept;
 
     /**
      *	@brief	change the status of page at the given logical position within the segment
@@ -65,7 +65,7 @@ class InterpreterFSM {
      *	@param	aPageNo - Page index inside the partition
      *	@param	aPageStatus - 
      */
-    void changePageStatus(const uint aPageNo, const PageStatus aStatus);
+    void changePageStatus(const uint aPageNo, const PageStatus aStatus) noexcept;
     
     /**
      *  @brief
@@ -75,15 +75,15 @@ class InterpreterFSM {
      *
      *  @return 
      */
-    PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes);
-    PageStatus getPageStatus(const uint aPageNo);
+    PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes) noexcept;
+    PageStatus getPageStatus(const uint aPageNo) noexcept;
 
   public:
     /* Getter */
-    inline byte *pagePtr() { return _pp; }
-    inline uint32_t getNextFSMPage() { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
-    inline fsm_header_t *getHeaderPtr() { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
-    inline uint getMaxPagesPerFSM(){ return (_pageSize - sizeof(fsm_header_t)) * 2; }
+    inline byte *pagePtr() noexcept { return _pp; }
+    inline uint32_t getNextFSMPage() noexcept { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
+    inline fsm_header_t *getHeaderPtr() noexcept { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
+    inline uint getMaxPagesPerFSM() noexcept { return (_pageSize - sizeof(fsm_header_t)) * 2; }
 
     private:
         friend class SegmentFSM;
@@ -100,7 +100,7 @@ class InterpreterFSM {
     fsm_header_t *_header;
 };
 
-void InterpreterFSM::attach(byte *aPP) {
+void InterpreterFSM::attach(byte *aPP) noexcept {
     _pp = aPP;
     _header = getHeaderPtr();
 }

@@ -41,12 +41,12 @@ struct control_block_t
     const size_t _noBufFrames;
     const bool _trace;
 
-    bool install() const { return _install; }
-    const std::string& mstrPart() const { return _masterPartition; }
-    const std::string& tracePath() const { return _tracePath; }
-    size_t pageSize() const { return _pageSize; }
-    size_t frames() const { return _noBufFrames; }
-    bool trace() const { return _trace; }
+    bool install() const noexcept { return _install; }
+    const std::string& mstrPart() const noexcept { return _masterPartition; }
+    const std::string& tracePath() const noexcept { return _tracePath; }
+    size_t pageSize() const noexcept { return _pageSize; }
+    size_t frames() const noexcept { return _noBufFrames; }
+    bool trace() const noexcept { return _trace; }
 };
 using CB = control_block_t;
 
@@ -66,10 +66,10 @@ struct page_id_t
     uint8_t _fileID;
     uint32_t _pageNo; // correct? 
 
-    uint8_t fileID() const { return _fileID; }
-    uint32_t pageNo() const { return _pageNo; }
+    uint8_t fileID() const noexcept { return _fileID; }
+    uint32_t pageNo() const noexcept { return _pageNo; }
 
-    bool operator==(const page_id_t& aOther) 
+    bool operator==(const page_id_t& aOther) noexcept
     {
         return (_fileID == aOther._fileID && _pageNo == aOther._pageNo);
     }

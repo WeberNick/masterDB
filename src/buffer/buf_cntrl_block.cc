@@ -2,7 +2,7 @@
 
 const CB* BufferControlBlock::_cb = nullptr;
 
-void BufferControlBlock::setCB(const CB* aControlBlock)
+void BufferControlBlock::setCB(const CB* aControlBlock) noexcept
 {
     _cb = aControlBlock;
 }
@@ -17,12 +17,7 @@ BufferControlBlock::BufferControlBlock() :
     _nextInChain(nullptr)
 {}
 
-BufferControlBlock::~BufferControlBlock()
-{
-
-}
-
-void BufferControlBlock::upgradeLock(LOCK_MODE aMode)
+void BufferControlBlock::upgradeLock(LOCK_MODE aMode) noexcept
 {
     if(getLockMode() <= aMode) //is upgrade needed?
     {
