@@ -36,6 +36,7 @@ void PartitionManager::load(const part_vt& aTuples)
     {
       _partitionsByID[partTuple.ID()] = partTuple;
       _partitionsByName[partTuple.name()] = partTuple.ID();
+      TRACE(partTuple.to_string());
     }
 }
 
@@ -88,6 +89,7 @@ void PartitionManager::createPartitionSub(const Partition_T& aParT)
 
 PartitionBase* PartitionManager::getPartition(const uint8_t aID)
 {
+    TRACE("Trying to get partition "+std::to_string(aID));
     //if the object has not been created before
     if (_partitions.find(aID) == _partitions.end()) {
         TRACE("Trying to get Partition from Disk");

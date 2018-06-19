@@ -78,7 +78,7 @@ void BufferManager::init(const CB& aControlBlock)
 //the following is not tested at all, expect major bugs
 BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 {
-    TRACE("Trying to Fix a page");
+    TRACE("Trying to fix page"+std::to_string(aPageID.pageNo())+" on partition "+std::to_string(aPageID.fileID()));
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
     _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock exclusively 

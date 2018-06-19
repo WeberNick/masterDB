@@ -109,13 +109,14 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
     byte* lPage;
     InterpreterSP lInterpreter;
 
-    TRACE(std::to_string(aID));
+    TRACE("trying to delete: "+std::to_string(aID));
+    TRACE("from Segment "+std::to_string(lSegments->getID())+" "+_segmentsByID.at(lSegments->getID()).name());
+    TRACE("originally searched for "+aMasterName);
 
     //search all pages for tuple
     uint j;
     for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
-        TRACE(std::to_string(lSegments->getID())+_segmentsByID.at(lSegments->getID()).name());
       lPage = lSegments->getPage(i, kSHARED);
 
    	  lInterpreter.attach(lPage);
