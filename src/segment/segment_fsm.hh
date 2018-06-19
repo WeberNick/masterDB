@@ -29,11 +29,12 @@ class SegmentFSM : public SegmentBase
     explicit SegmentFSM(SegmentFSM&&) = delete;
     SegmentFSM& operator=(const SegmentFSM&) = delete;
     SegmentFSM& operator=(SegmentFSM&&) = delete;
-    ~SegmentFSM();
+    ~SegmentFSM() = default;
 
   public:
     PID getFreePage(uint aNoOfBytes, bool& emptyfix);
     PID getNewPage();
+    void erase();
 
   public:
     void storeSegment();                         // serialization

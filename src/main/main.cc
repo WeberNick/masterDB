@@ -67,6 +67,9 @@ void testStartUp(const control_block_t &aControlBlock){
     TRACE("GET PAGE");
     lSeg->getPage(0,kSHARED);
     lSeg->printPageToFile(0,false);
+    TRACE("DELETE PARTITION");
+    PartitionManager::getInstance().deletePartition("blub");
+    TRACE("PARTITION DELETED");
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
 }

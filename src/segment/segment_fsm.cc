@@ -33,7 +33,9 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
     _fsmPages()
 {}
 
-SegmentFSM::~SegmentFSM(){
+void SegmentFSM::erase(){
+    _partition.open();
+
     //Remove all data pages
     PID lPID;
     lPID._fileID=_partition.getID();
@@ -49,6 +51,9 @@ SegmentFSM::~SegmentFSM(){
         _bufMan.resetBCB(lPID);
         _partition.freePage(iter);
     }
+    _partition.close();
+    SegmentBase::erase();
+    
 }
 
 //returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
@@ -208,6 +213,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
         lBCB->getMtx().unlock_shared();
         _bufMan.unfix(lBCB);
     }
+    _fsmPages.erase(_fsmPages.end()-1);
     TRACE("Successfully load segment.");
 }
 

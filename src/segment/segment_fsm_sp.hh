@@ -41,7 +41,10 @@ class SegmentFSM_SP : public SegmentFSM
     void insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
     int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
-    void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);    
+    void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
+
+protected:
+	void erase();
 };
 
 template<typename Tuple_T>

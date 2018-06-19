@@ -120,10 +120,13 @@ void SegmentManager::deleteTupelPhysically(const std::string& aMasterName, uint1
     byte* lPage;
     InterpreterSP lInterpreter;
 
+    TRACE(std::to_string(aID));
+
     //search all pages for tuple
     uint j;
     for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
+        TRACE(std::to_string(lSegments->getID()));
       lPage = lSegments->getPage(i, kSHARED);
 
    	  lInterpreter.attach(lPage);
@@ -132,6 +135,7 @@ void SegmentManager::deleteTupelPhysically(const std::string& aMasterName, uint1
    	  {
           Tuple_T lTuple;
           lTuple.toMemory(lInterpreter.getRecord(j));
+          TRACE(std::to_string(j)+" "+lTuple.to_string());
         if(lTuple.ID() == aID){
             //mark deleted
             lSegments->getPage(i, kEXCLUSIVE);

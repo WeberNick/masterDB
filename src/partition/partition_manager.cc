@@ -121,6 +121,7 @@ void PartitionManager::deletePartition(const uint8_t aID){
     PartitionBase* lPart = getPartition(aID);
     lPart->remove();
     //delete object
+    delete lPart;
     _partitions.erase(aID);
     const Partition_T lpart(_partitionsByID.at(aID));
     //delete tuple on disk

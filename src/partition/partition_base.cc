@@ -119,9 +119,13 @@ uint32_t PartitionBase::allocPage()
 void PartitionBase::freePage(const uint32_t aPageIndex)
 {
 	byte* lPagePointer = new byte[_pageSize];
-	readPage(lPagePointer, aPageIndex, _pageSize);
+	uint32_t fsipIndex = (aPageIndex / (getMaxPagesPerFSIP()+1))*getMaxPagesPerFSIP();
+	TRACE(std::to_string(fsipIndex));
+	readPage(lPagePointer, fsipIndex , _pageSize);//fsip auf der aPageIndex verwaltet wird
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);
+	TRACE(std::to_string(aPageIndex));
+	//TRACE(std::to_string((aPageIndex % (getMaxPagesPerFSIP() +1)) -1));
 	fsip.freePage(aPageIndex);
 	fsip.detach();
 	delete[] lPagePointer;

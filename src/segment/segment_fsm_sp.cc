@@ -99,3 +99,7 @@ void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBu
     _partition.close();
 	TRACE("read page");
 }
+
+void SegmentFSM_SP::erase(){
+	SegmentFSM::erase();
+}

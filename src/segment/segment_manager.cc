@@ -33,6 +33,7 @@ void SegmentManager::load(const seg_vt& aTuples) noexcept
     // fill internal data structure with all relevant info
     for(const auto& segTuple : aTuples)
     {
+    std::cout<<segTuple<<std::endl;
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
     }
@@ -86,12 +87,12 @@ void SegmentManager::deleteSegment(SegmentBase* aSegment) noexcept
 
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
+    SegmentBase* lSeg = getSegment(aID);
+    lSeg->erase();
     //delete object if exists
-    auto segIter =  _segments.find(aID);
-    if( segIter !=_segments.end()){
-        delete segIter->second;
-        _segments.erase(segIter);
-    }
+    delete lSeg;
+    _segments.erase(aID);
+
     const Segment_T seg(_segmentsByID.at(aID));
     //delete tuple on disk
     deleteTupelPhysically<Segment_T>(_masterSegSegName,aID);

@@ -32,7 +32,7 @@ class SegmentBase
         explicit SegmentBase(SegmentBase&&) = delete;
 		SegmentBase& operator=(const SegmentBase&) = delete;
         SegmentBase& operator=(SegmentBase&&) = delete;
-		virtual ~SegmentBase();
+		virtual ~SegmentBase() = default;
 
 	public:
         /**
@@ -77,6 +77,7 @@ class SegmentBase
 	protected:
 		virtual void storeSegment() = 0;                          // serialization
 		virtual void loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
+        virtual void erase();
 
     private:
         byte* getPageF(const uint aPageNo);

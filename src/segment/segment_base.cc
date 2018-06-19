@@ -26,11 +26,15 @@ SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) :
     _cb(aControlBlock)
 {}
 
-SegmentBase::~SegmentBase(){
+void SegmentBase::erase(){
+    _partition.open();
     for (auto& iter : _pages){
+        if(iter.second){
         _bufMan.resetBCB(iter.second);
+        }
         _partition.freePage(iter.first._pageNo);
     }
+    _partition.close();
 }
 
 byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
@@ -106,7 +110,7 @@ byte* SegmentBase::getPageF(const uint aPageNo)
 
 byte* SegmentBase::getPageS(const uint aPageNo)
 {
-    TRACE("Get Page Shared");
+    TRACE("Get Page "+ std::to_string(_pages.at(aPageNo).first.pageNo())+" shared ");
     auto& lPair = _pages.at(aPageNo); //may throw if aPageNo not in map
     PID& lPID = lPair.first;
     BCB*& lBCB = lPair.second;
