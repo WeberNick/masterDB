@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "../infra/types.hh"
 #include "stimestamp.hh"
 #include "val_tt.hh"
 
@@ -42,12 +43,14 @@ class LineReaderEdit {
     inline char commentchar() const { return _commentchar; }
     inline void set_commentchar(const char commentchar) { _commentchar = commentchar; }
     inline const char* line() const { return _line; }
+    inline const char* line(std::string l) const {  return l.c_str(); }
     inline uint linesize() const { return _linesize; }
     inline uint commentlinecount() const { return _commentlinecount; }
     inline uint linecount() const { return _linecount; }
     inline bool ok() const { return _ok; }
     inline const char* begin() const { return _line; }
     inline const char* end() const { return (_line + _linesize); }
+    inline const char* end(std::string e) const { return (e.c_str() + e.size()); }
     inline const char last() const { return *(_line + _linesize - 1); }
     inline bool isEmpty() const { return (begin() == end()); }
     inline uint64_t no_bytes_read() const { return _no_bytes_read; }
@@ -93,20 +96,21 @@ class LineReaderEdit {
     
     /* the following destructively splits the _line at aSep and may perform stripping blanks */
     int split_line(const char aSep, const bool aStrip);
+    char_vpt split_line(const char aSep, const bool aStrip, const std::string& aLine);
     const std::vector<char*> splits() const { return _splits; }
 
   private:
     void getNonCommentLine();
 
   private:
-    const char* _prompt;
-    char _commentchar;
-    char* _line;
-    bool _ok;
-    uint _linesize; // for successfully read lines: line()[linesize()] == '\0'
-    uint _linecount;
-    uint _commentlinecount;
-    uint64_t _no_bytes_read;
-    uint _noSplit;              // current number of splits
+    const char*        _prompt;
+    char               _commentchar;
+    char*              _line;
+    bool               _ok;
+    uint               _linesize; // for successfully read lines: line()[linesize()] == '\0'
+    uint               _linecount;
+    uint               _commentlinecount;
+    uint64_t           _no_bytes_read;
+    uint               _noSplit;              // current number of splits
     std::vector<char*> _splits; // array for splits
 };

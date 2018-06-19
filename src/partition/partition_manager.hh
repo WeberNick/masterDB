@@ -47,7 +47,6 @@ class PartitionManager
             static PartitionManager lPartitionManagerInstance;
             return lPartitionManagerInstance;
         }
-
         void init(const CB& aControlBlock);
 
     public:
@@ -55,29 +54,33 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile*   createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
-        PartitionRaw*    createPartitionRawInstance(const std::string& aPath, const std::string& aName);
-        PartitionBase*   getPartition(const uint8_t aID);
-        PartitionBase*   getPartition(const std::string& aName);
-        void             deletePartition(const uint8_t aID);
-        void             deletePartition(const std::string& aName);
-
+        PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
+        PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
+        PartitionBase*  getPartition(const uint8_t aID);
+        PartitionBase*  getPartition(const std::string& aName);
+        Partition_T&    getPartitionT(const std::string& aName);
+        uint8_t         getPartitionID(const std::string& aName);
+        const string_vt getPartitionNames();
+        std::string     getPartitionName(const uint8_t aID);
+        
+        void            deletePartition(const uint8_t aID);
+        void            deletePartition(const std::string& aName);
 
     public:
-        inline size_t           getNoPartitions(){ return _partitions.size(); }
+        inline size_t   getNoPartitions() { return _partitions.size(); }
 
     private:
-        void            createPartitionSub(const Partition_T& aParT); //has some issues if aParT is a const reference
+        void            createPartitionSub(const Partition_T& aParT); // has some issues if aParT is a const reference
         PartitionFile*  createMasterPartition(const Partition_T& aPart);
-        //install functionality
+        /* install functionality */
         PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
         void            insertMasterPartitionTuple(const Partition_T& aMasterTuple);
 
     private:
-        uint8_t _counterPartitionID;
+        uint8_t                                     _counterPartitionID;
         std::unordered_map<uint8_t, PartitionBase*> _partitions;
-        std::unordered_map<uint8_t, Partition_T> _partitionsByID;
-		std::unordered_map<std::string, uint8_t> _partitionsByName;
+        std::unordered_map<uint8_t, Partition_T>    _partitionsByID;
+		std::unordered_map<std::string, uint8_t>    _partitionsByName;
 
         const std::string _masterPartName;
         const std::string _masterSegPartName;

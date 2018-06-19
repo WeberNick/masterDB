@@ -24,12 +24,13 @@ using char_vpt = std::vector<char*>;
 using uint_vt = std::vector<uint>;
 using byte_vpt = std::vector<byte *>;
 using uint32_vt = std::vector<uint32_t>;
+using string_vt = std::vector<std::string>;
 using sMtx = std::shared_mutex;
 using mtx = std::mutex;
 
 constexpr size_t INVALID = std::numeric_limits<size_t>::max();
-constexpr uint32_t MAX32 =  std::numeric_limits<uint32_t>::max();
-constexpr uint32_t MAX16 =  std::numeric_limits<uint16_t>::max();
+constexpr uint32_t MAX32 = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t MAX16 = std::numeric_limits<uint16_t>::max();
 
 struct control_block_t
 {
@@ -72,6 +73,7 @@ struct page_id_t
     {
         return (_fileID == aOther._fileID && _pageNo == aOther._pageNo);
     }
+
 };
 using PID = page_id_t;
 using pid_vt = std::vector<PID>;

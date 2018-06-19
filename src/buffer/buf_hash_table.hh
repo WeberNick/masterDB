@@ -61,6 +61,7 @@ class BufferHashTable final
        // inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
         inline BCB*     getBucketBCB(const size_t aHash) noexcept { return _hashTable[aHash].getBCB(); }
         inline void     setBucketBCB(const size_t aHash, BCB* aBCB) noexcept { _hashTable[aHash].setBCB(aBCB); }
+        std::vector<BCB*> getAllValidBCBs();
 
 	public:
 		size_t hash(const PID& aPageID) noexcept;

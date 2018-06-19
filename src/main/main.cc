@@ -62,14 +62,13 @@ void test(const control_block_t &aControlBlock) {
 void testStartUp(const control_block_t &aControlBlock){
     
     DatabaseInstanceManager::getInstance().init(aControlBlock);
-    TRACE("GET SEGMENT");
-    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    /*TRACE("GET SEGMENT");
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(1);
     TRACE("GET PAGE");
     lSeg->getPage(0,kSHARED);
     lSeg->printPageToFile(0,false);
-    TRACE("DELETE PARTITION");
+   */ TRACE("DELETE PARTITION");
     PartitionManager::getInstance().deletePartition("blub");
-    TRACE("PARTITION DELETED");
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
 }
@@ -159,6 +158,7 @@ int main(const int argc, const char* argv[]) {
             C_TRACE_ACTIVATED
         };
         std::cout << lCB;
+
 
        // testTupleToDIsk();
 

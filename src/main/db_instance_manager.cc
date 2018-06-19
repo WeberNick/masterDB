@@ -12,8 +12,7 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
     _partIndex(1), 
     _segIndex(3),
     _cb(nullptr),
-    _running(false),
-    _init(false)
+    _running(false)
 {
   //think of reserver page.. 
 }
@@ -30,7 +29,7 @@ DatabaseInstanceManager::~DatabaseInstanceManager()
 
 void DatabaseInstanceManager::init(const CB& aControlBlock)
 {
-    if(!_init)
+    if(!_cb)
     {
         _cb = &aControlBlock;
         if(_cb->install())
@@ -42,7 +41,6 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
             boot();
         }
         _running = true;
-        _init = true;
     }
 }
 

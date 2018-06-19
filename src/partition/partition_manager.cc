@@ -78,7 +78,8 @@ PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aP
     return static_cast<PartitionRaw*>(_partitions.at(lPartition->getID()));
 }
 
-void PartitionManager::createPartitionSub(const Partition_T& aParT){
+void PartitionManager::createPartitionSub(const Partition_T& aParT)
+{
     _partitionsByID[aParT.ID()] = aParT;
     _partitionsByName[aParT.name()] = aParT.ID();
     SegmentFSM_SP* lSeg = static_cast<SegmentFSM_SP*>(SegmentManager::getInstance().getSegment(_masterSegPartName));
@@ -108,32 +109,64 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
     return _partitions.at(aID);
 }
 
-PartitionBase* PartitionManager::getPartition(const std::string& aName){
+PartitionBase* PartitionManager::getPartition(const std::string& aName)
+{
     return getPartition(_partitionsByName.at(aName));
 }
 
-void PartitionManager::deletePartition(const uint8_t aID){
-    //delete all Segments on that partition
+
+Partition_T& PartitionManager::getPartitionT(const std::string& aName)
+{
+    return _partitionsByID.at(_partitionsByName.at(aName));
+}
+
+void PartitionManager::deletePartition(const uint8_t aID)
+{
+    // delete all Segments on that partition
     SegmentManager& lSegMan = SegmentManager::getInstance();
     lSegMan.deleteSegements(aID);
 
-    //delete partition
+    // delete partition
     PartitionBase* lPart = getPartition(aID);
     lPart->remove();
     //delete object
-    delete lPart;
+    delete lPart; //## evtl raus
     _partitions.erase(aID);
     const Partition_T lpart(_partitionsByID.at(aID));
-    //delete tuple on disk
-    lSegMan.deleteTupelPhysically<Partition_T>(_masterSegPartName,aID);
+    // delete tuple on disk
+    lSegMan.deleteTuplePhysically<Partition_T>(_masterSegPartName, aID);
 
-    //delete tuple in memory
+    // delete tuple in memory
     _partitionsByName.erase(lpart.name());
     _partitionsByID.erase(aID);
     TRACE("Partition deleted successfully.");
 }
 
-void PartitionManager::deletePartition(const std::string& aName){
+uint8_t PartitionManager::getPartitionID(const std::string& aName)
+{
+    return _partitionsByName.at(aName);
+}
+
+const string_vt PartitionManager::getPartitionNames()
+{
+    string_vt names;
+    for (auto& element : _partitionsByName)
+        names.push_back(element.first);
+    return names;
+}
+
+std::string PartitionManager::getPartitionName(const uint8_t aID)
+{
+    for (auto& part : _partitionsByName)
+    {
+        if (aID == part.second)
+            return part.first;
+    }
+    return nullptr;
+}
+
+void PartitionManager::deletePartition(const std::string& aName)
+{
     deletePartition(_partitionsByName.at(aName));
 }
 

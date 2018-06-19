@@ -181,8 +181,9 @@ void BufferManager::flush(BCB*& aBufferControlBlockPtr)
 void BufferManager::flushAll()
 {
     TRACE("Flushing complete Buffer");
-    std::vector<BCB*> lBCBs = _freeBCBs.getAllBCBs();
+    std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
     for (auto& lBCB : lBCBs){
+        TRACE("Partition: "+std::to_string(lBCB->getPID().fileID())+" Page: "+std::to_string(lBCB->getPID().pageNo()));
         flush(lBCB);
     }
 }
@@ -357,17 +358,20 @@ void BufferManager::initNewPage(BCB* aFBCB,const PID& aPageID, uint64_t aLSN){
 void BufferManager::resetBCB(PID& aPID) noexcept
 {
     const size_t lHashIndex = _bufferHash->hash(aPID); //determine hash of requested page
+    TRACE("Partition: "+std::to_string(aPID.fileID())+" Page: "+std::to_string(aPID.pageNo()));
 
     _bufferHash->getBucketMtx(lHashIndex).lock(); //lock exclusively 
     BCB* lCurBCB = _bufferHash->getBucketBCB(lHashIndex); //initialize search in hash chain
 
     if(!lCurBCB)
     {
+        TRACE("Hash Bucket empty");
         _bufferHash->getBucketMtx(lHashIndex).unlock();
         return;
     }
     else if(lCurBCB->getPID() == aPID)
     {
+        TRACE("was first in bucket");
         _bufferHash->setBucketBCB(lHashIndex, lCurBCB->getNextInChain());
         _bufferHash->getBucketMtx(lHashIndex).unlock();
         return;
@@ -375,9 +379,10 @@ void BufferManager::resetBCB(PID& aPID) noexcept
 
     while(lCurBCB->getNextInChain()) //as long as there are allocated CBs
     {
+        TRACE("one step in the chain");
         if(lCurBCB->getNextInChain()->getPID() == aPID) //is there a CB for the requested page
         {
-            //page found
+            TRACE("page found");
             BCB* tmp = lCurBCB->getNextInChain()->getNextInChain();
             resetBCB(lCurBCB->getNextInChain());
             lCurBCB->setNextInChain(tmp);

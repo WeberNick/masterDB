@@ -32,4 +32,19 @@ sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
 	return _hashTable[aHash].getMtx(); 
 }
 
+std::vector<BCB*> BufferHashTable::getAllValidBCBs(){
+	std::vector<BCB*> rtn;
+	BCB* lBCB = nullptr;
+	for(size_t i = 0; i < _size; ++i)
+	{
+		lBCB = _hashTable[i].getBCB();
+		while(lBCB)
+		{
+			rtn.push_back(lBCB);
+			lBCB = lBCB->_nextInChain;
+		}
+	}
+	return rtn;
+}
+
 

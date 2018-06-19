@@ -32,6 +32,11 @@ void SegmentBase::erase(){
         if(iter.second){
         _bufMan.resetBCB(iter.second);
         }
+        else{ 
+            TRACE("Entering the workaround");
+            //pages_vt does not work properly. This is a workaround as I could not fix the original problem.
+            _bufMan.resetBCB(iter.first);
+        }
         _partition.freePage(iter.first._pageNo);
     }
     _partition.close();
@@ -99,6 +104,8 @@ byte* SegmentBase::getPageF(const uint aPageNo)
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
         lBCB = _bufMan.fix(lPID, kNOLOCK);
+        _pages.at(aPageNo).second = lBCB;
+
     }
     else if(lBCB->getLockMode() < kNOLOCK) //should never occur
     {
@@ -119,6 +126,7 @@ byte* SegmentBase::getPageS(const uint aPageNo)
             TRACE("Fix it");
 
         lBCB = _bufMan.fix(lPID, kSHARED);
+        _pages.at(aPageNo).second = lBCB;
     }
     else
     {
@@ -136,6 +144,7 @@ byte* SegmentBase::getPageX(const uint aPageNo)
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
         lBCB = _bufMan.fix(lPID, kEXCLUSIVE);
+        _pages.at(aPageNo).second = lBCB;
     }
     else
     {
