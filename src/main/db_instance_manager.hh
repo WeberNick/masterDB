@@ -78,7 +78,7 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
     lPartMan._partitionsByID[0]=lMasterPartitionTuple;
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);*/
-    Partition_T lMasterPartitionTuple(0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 );
+    Partition_T lMasterPartitionTuple(1, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 );
     
     TRACE("load");
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);

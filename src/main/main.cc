@@ -181,8 +181,8 @@ int main(const int argc, const char* argv[]) {
 
         
 
-       // test(lCB);
-        testStartUp(lCB2);
+       //test(lCB);
+       testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh
      /*   if (lArgs.test()) {
