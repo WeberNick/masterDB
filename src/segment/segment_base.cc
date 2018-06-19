@@ -28,16 +28,10 @@ SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) :
 
 void SegmentBase::erase(){
     _partition.open();
-    for (auto& iter : _pages){
-        if(iter.second){
-        _bufMan.resetBCB(iter.second);
-        }
-        else{ 
-            TRACE("Entering the workaround");
-            //pages_vt does not work properly. This is a workaround as I could not fix the original problem.
-            _bufMan.resetBCB(iter.first);
-        }
-        _partition.freePage(iter.first._pageNo);
+    for (const auto& iter : _pages){
+        const auto& lPID = iter.first;
+        _bufMan.resetBCB(lPID);
+        _partition.freePage(lPID.pageNo());
     }
     _partition.close();
 }

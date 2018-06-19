@@ -24,7 +24,7 @@ void test(const control_block_t &aControlBlock) {
 
     Trace::getInstance().log(FLF, "Trace works");
     std::string lHome(std::getenv("HOME"));
-    std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
+    std::string lPath = lHome + std::string("/Desktop/Partition");
     std::cout << "Path: " << lPath << std::endl;
     //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
   //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
@@ -43,7 +43,7 @@ void test(const control_block_t &aControlBlock) {
     TRACE("get segment and insert tuple");
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
     //insert a tuple
-    lSeg->insertTuple((byte*) &lTuple,sizeof(lTuple));
+    lSeg->insertTuple((byte*) &lTuple, sizeof(lTuple));
    // char lTuple2[] = "SomeMoreRandomChars";
    // lSeg->insertTuple((byte*) &lTuple2,20);
    TRACE("getMasterSegment");
@@ -56,6 +56,7 @@ void test(const control_block_t &aControlBlock) {
   //  TRACE(" TRY TO LOAD TUPLE AGAIN");
   //  lSeg->getPage(0,kSHARED);
   //  lSeg->printPageToFile(0,true);
+    PartitionManager::getInstance().deletePartition("blub");
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
 }
@@ -143,8 +144,8 @@ int main(const int argc, const char* argv[]) {
     {
         // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
-        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition");
-        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
+        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
+        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
         const size_t        C_PAGE_SIZE                 = 4096;
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
         const bool          C_TRACE_ACTIVATED           = true;
@@ -181,8 +182,8 @@ int main(const int argc, const char* argv[]) {
 
         
 
-       // test(lCB);
-        testStartUp(lCB2);
+        test(lCB);
+        //testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh
      /*   if (lArgs.test()) {

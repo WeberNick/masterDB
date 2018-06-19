@@ -69,9 +69,14 @@ struct page_id_t
     uint8_t fileID() const noexcept { return _fileID; }
     uint32_t pageNo() const noexcept { return _pageNo; }
 
-    bool operator==(const page_id_t& aOther) noexcept
+    bool operator==(const page_id_t& aOther) const noexcept
     {
         return (_fileID == aOther._fileID && _pageNo == aOther._pageNo);
+    }
+
+    bool operator==(const page_id_t& aOther) noexcept
+    {
+        return static_cast<const page_id_t&>(*this).operator==(aOther);
     }
 
 };
