@@ -24,7 +24,7 @@ void test(const control_block_t &aControlBlock) {
 
     Trace::getInstance().log(FLF, "Trace works");
     std::string lHome(std::getenv("HOME"));
-    std::string lPath = lHome + std::string("/Desktop/Partition");
+    std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
     std::cout << "Path: " << lPath << std::endl;
     //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
   //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
@@ -47,7 +47,7 @@ void test(const control_block_t &aControlBlock) {
    // char lTuple2[] = "SomeMoreRandomChars";
    // lSeg->insertTuple((byte*) &lTuple2,20);
    TRACE("getMasterSegment");
-    lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(1);
+    lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(0);
     lSeg->getPage(0,kSHARED);
     lSeg->printPageToFile(0,false);
 
@@ -68,8 +68,16 @@ void testStartUp(const control_block_t &aControlBlock){
     TRACE("GET PAGE");
     lSeg->getPage(0,kSHARED);
     lSeg->printPageToFile(0,false);
-   */ TRACE("DELETE PARTITION");
-    PartitionManager::getInstance().deletePartition("blub");
+    TRACE("DELETE PARTITION");*/
+   // PartitionManager::getInstance().deletePartition("blub");
+    PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(std::getenv("HOME") + std::string("/MasterTeamProjekt/Partition"),"whatsoever",100);
+    TRACE("create a Segment");
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bliblablub");
+    Employee_T emp (1,"zwei",3);
+    for(size_t i =0; i<100;++i){
+    lSeg->insertTuple(emp);
+    }
+      
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
 }
@@ -144,8 +152,8 @@ int main(const int argc, const char* argv[]) {
     {
         // ASSIGN APPROPRIATE TESTING PARAS
         const bool          C_INSTALL                   = true;
-        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
-        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
+        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition");
+        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
         const size_t        C_PAGE_SIZE                 = 4096;
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
         const bool          C_TRACE_ACTIVATED           = true;
@@ -182,7 +190,7 @@ int main(const int argc, const char* argv[]) {
 
         
 
-       //test(lCB);
+      // test(lCB);
        testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh

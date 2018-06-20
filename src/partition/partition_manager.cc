@@ -31,13 +31,18 @@ void PartitionManager::init(const CB& aControlBlock)
 
 void PartitionManager::load(const part_vt& aTuples)
 {
+    uint8_t maxCounter=0;
     //fill internal data structure with all relevant info
     for(const auto& partTuple : aTuples)
     {
       _partitionsByID[partTuple.ID()] = partTuple;
       _partitionsByName[partTuple.name()] = partTuple.ID();
       TRACE(partTuple.to_string());
+      if(partTuple.ID() > maxCounter){
+          maxCounter = partTuple.ID();
+      } 
     }
+    _counterPartitionID = maxCounter+1;
 }
 
 PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator)

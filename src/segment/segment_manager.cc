@@ -32,13 +32,18 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
 void SegmentManager::load(const seg_vt& aTuples) noexcept
 {
     // fill internal data structure with all relevant info
+    uint16_t maxID = 0;
     for(const auto& segTuple : aTuples)
     {
     std::cout<<segTuple<<std::endl;
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
       TRACE(segTuple.to_string());
+      if( maxID <= segTuple.ID()){
+          maxID = segTuple.ID();
+      }
     }
+    _counterSegmentID = maxID+1;
 }
 
 SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName)
@@ -172,7 +177,7 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
     _segments[lPSeg->getID()] = lPSeg;
     
     Segment_T lPSegT(aPartition->getID(),lPSeg->getID(),aName,2,lPSeg->getIndexPages().at(0));
-    TRACE("First Page is "+std::to_string(lPSeg->getIndexPages().at(0)));
+    TRACE("ID is "+std::to_string(aPartition->getID()));
     TRACE("MasterSegPart created");
     // MasterSegSegs
     SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);

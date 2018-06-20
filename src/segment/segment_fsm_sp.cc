@@ -84,7 +84,7 @@ void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {
         _indexPages.push_back(lnxIndex);
         l1FSM = lHeader._firstFSM;
         _segID = lHeader._segID;
-        TRACE(" ");
+        TRACE("written in header: segID "+std::to_string(lHeader._segID) + " firstFSM: "+std::to_string(lHeader._firstFSM));
         for (uint i = 0; i < lHeader._currSize; ++i) {
             PID lTmpPID = {_partition.getID(), *(((uint32_t *)lPageBuffer) + i)};  
             _pages.push_back(page_t(lTmpPID, nullptr));
