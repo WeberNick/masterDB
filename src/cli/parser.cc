@@ -55,7 +55,13 @@ void CommandParser::init(const CB& aControlBlock, const char* aPrompt, const cha
 
 void CommandParser::multiexec(const string_vt& commands) {
     for (const auto& line : commands) {
-        const char_vpt& splits = _reader.split_line(' ', true, line);
+        std::cout << "line " << line << std::endl;
+        char * cstr = new char [line.length()+1];
+        std::strcpy (cstr, line.c_str());
+        _reader.getNonCommentLine(cstr);
+        _reader.split_line(' ', true);
+        const char_vpt& splits = _reader.splits();
+        std::cout << splits[0] << splits[1] << splits[2] << splits[3] << std::endl;
         const Command* com = findCommand(&splits);
         if (com != NULL) {
             if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID)) {
@@ -216,16 +222,20 @@ int CP::com_drop_s(const char_vpt* args) const {
 
 int CP::com_insert_tuple(const char_vpt* args) const {
     /* INSERT INTO Seg_Emp Employee 30 Mueller 8000 */
-    std::string segName(args->at(2));
-    std::string type(args->at(3));
+                TRACE("START INSERT TUPLE EMPLOYEE");
+
+    std::string segName(args->at(3));
+    std::string type(args->at(4));
+    std::cout << args->at(0) << " - " << args->at(1) << " - " << args->at(2) << " - " << segName << " - " << type << std::endl;
     // TODO rewrite this with templates
     if (type == "Employee") {
-        if (args->size() != (4+3)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
+        if (args->size() != (4+4)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
         else {
-            int emp_age = atoi(args->at(4));
-            std::string emp_name(args->at(5));
-            double emp_sal = atof(args->at(6));
+            int emp_age = atoi(args->at(5));
+            std::string emp_name(args->at(6));
+            double emp_sal = atof(args->at(7));
             Employee_T e(emp_age, emp_name, emp_sal);
+            TRACE("INSERT TUPLE EMPLOYEE");
            ( (SegmentFSM_SP*) (SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
             return CP::CommandStatus::OK;
         }
