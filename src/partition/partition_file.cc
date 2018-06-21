@@ -49,6 +49,8 @@ uint32_t PartitionFile::allocPage()
         lFSIP.attach(ex.getBufferPtr());
         const size_t lPagesPerFSIP = getMaxPagesPerFSIP();
         const uint lRemainingPages = lFSIP.grow(_growthIndicator, lPagesPerFSIP);
+        writePage(ex.getBufferPtr(),ex.getIndexOfFSIP(),_pageSize);
+        TRACE("remaining pages after growing: "+lRemainingPages);
         if(lRemainingPages > 0)
         {
             const uint lNextFSIP = ex.getIndexOfFSIP() + lPagesPerFSIP + 1;

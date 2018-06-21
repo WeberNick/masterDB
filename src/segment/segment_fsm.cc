@@ -45,12 +45,6 @@ void SegmentFSM::erase(){
         _bufMan.resetBCB(lPID);
         _partition.freePage(iter);
     }
-    //Remove all index Pages
-    for (auto iter : _indexPages){
-        lPID._pageNo=iter;
-        _bufMan.resetBCB(lPID);
-        _partition.freePage(iter);
-    }
     _partition.close();
     SegmentBase::erase();
     
@@ -75,7 +69,7 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
         lPagePointer = _bufMan.getFramePtr(lBcb);
         fsmp.attach(lPagePointer);
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
-        std::string lMes = std::string("loop iteration ")+std::to_string(i);
+        std::string lMes = std::string("loop iteration ")+std::to_string(i)+" calculated PageStatus: "+std::to_string(static_cast<uint>(lPageStatus));
         TRACE(lMes);
         uint32_t lIndex = fsmp.getFreePage(lPageStatus);
         lMes=std::string("Interpreter getFreePage returns: ")+std::to_string(lIndex)+" at Segment "+std::to_string(_segID)+std::string(" _pages.size() is ")+std::to_string(_pages.size());
@@ -97,7 +91,7 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
                 return lPID; 
             } else {
                 
-                lPID._pageNo = _pages[i * fsmp.getMaxPagesPerFSM() + lIndex].first._pageNo;
+                lPID._pageNo = _pages.at(i * fsmp.getMaxPagesPerFSM() + lIndex).first._pageNo;
                 lBcb->setModified(true);
                 lBcb->getMtx().unlock();
                 _bufMan.unfix(lBcb);
