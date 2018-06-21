@@ -32,12 +32,18 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
 void SegmentManager::load(const seg_vt& aTuples) noexcept
 {
     // fill internal data structure with all relevant info
+    uint16_t maxID = 0;
     for(const auto& segTuple : aTuples)
     {
     std::cout<<segTuple<<std::endl;
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
+      TRACE(segTuple.to_string());
+      if( maxID <= segTuple.ID()){
+          maxID = segTuple.ID();
+      }
     }
+    _counterSegmentID = maxID+1;
 }
 
 SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName)
@@ -126,7 +132,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
         //find out which type
         const Segment_T lTuple(_segmentsByID.at(aSegmentID));
         PartitionManager& partMngr = PartitionManager::getInstance();
-        PartitionBase& part = *(partMngr.getPartition(lTuple.ID()));
+        PartitionBase& part = *(partMngr.getPartition(lTuple.partID()));
         SegmentBase* s;
         switch(lTuple.type()){
             //DOES NOT WORK BECAUSE: partition muss noch geladen werden, und zwar die, auf der Segment steht.
@@ -171,14 +177,14 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
     _segments[lPSeg->getID()] = lPSeg;
     
     Segment_T lPSegT(aPartition->getID(),lPSeg->getID(),aName,2,lPSeg->getIndexPages().at(0));
-    
+    TRACE("ID is "+std::to_string(aPartition->getID()));
     TRACE("MasterSegPart created");
     // MasterSegSegs
     SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lSSeg->getID()] = lSSeg;
 
-    Segment_T lSSegT(aPartition->getID(), lSSeg->getID(), _masterSegSegName, 2, lPSeg->getIndexPages().at(0));
-
+    Segment_T lSSegT(aPartition->getID(), lSSeg->getID(), _masterSegSegName, 2, lSSeg->getIndexPages().at(0));
+    TRACE("First Page is "+std::to_string(lSSeg->getIndexPages().at(0)));   
     TRACE("MasterSegSeg created.");
     // store them into Segment Master
     createSegmentSub(lSSegT);

@@ -87,7 +87,6 @@ class BufferManager final
                 inline void     setFreeBCBList(BCB* aFreeBCB) noexcept { _freeBCBList = aFreeBCB; }
                 inline void     setNoFreeBCBs(size_t aNoFreeBCBs) noexcept { _noFreeBCBs = aNoFreeBCBs; }
                 inline void     freeBCB(BCB* aBCB) noexcept { aBCB->setNextInChain(getFreeBCBList()); setFreeBCBList(aBCB); };
-                inline std::vector<BCB*> getAllBCBs() noexcept { return _BCBs; }
                 void            resetBCB(BCB* aBCB) noexcept; //used to reset a BCB after the page it corresponds to was deleted
 
             private:
@@ -134,8 +133,7 @@ class BufferManager final
     public:
         inline size_t   getNoFrames() noexcept { return _noFrames; }
         inline size_t   getFrameSize() noexcept { return _frameSize; }
-        inline void     resetBCB(BCB* aBCB) noexcept { _freeBCBs.resetBCB(aBCB); }
-        void            resetBCB(PID& aPID) noexcept;
+        void            resetBCB(const PID& aPID) noexcept;
         
     private:
         BCB*                locatePage(const PID& aPageID) noexcept;

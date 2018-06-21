@@ -31,33 +31,33 @@ void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
 }
 
 uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept {
+    // search for page with sufficient free space
+    // calculate new occupation
+    // change status
     uint32_t i = 0;
     while (i < _header->_noPages) {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
         bool fits = 0;
         PageStatus max = PageStatus::kPageStatusSize;
-        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= static_cast<int>(max)) {
+        if (static_cast<uint>(lPageStatus) + static_cast<uint>(aPageStatus) < static_cast<uint>(max)) {
             fits = true;
         }
         if (fits) {
-            lPageStatus = static_cast<PageStatus>(static_cast<int>(aPageStatus) + static_cast<int>(aPageStatus));
+            lPageStatus = static_cast<PageStatus>(static_cast<uint>(lPageStatus) + static_cast<uint>(aPageStatus));
+            //TRACE("fits, new PageStatus is "+std::to_string(static_cast<uint>(lPageStatus)));
             changePageStatus(i, lPageStatus);
             return i;
         }
         ++i;
     }
-    if (i < (_pageSize - sizeof(fsm_header_t)) * 2) { // add new page to segment
+    if (i < (_pageSize - sizeof(fsm_header_t)) * 2) { // add new data page to segment
         changePageStatus(i, aPageStatus);
         _header->_noPages++;
         return i;
     } else {
         return MAX32; // no free space on this fsm, load or create next
     }
-
-    // search for page with sufficient free space
-    // calculate new occupation
-    // change status
 }
 
 void InterpreterFSM::changePageStatus(const uint aPageNo, const PageStatus aStatus) noexcept {
@@ -77,11 +77,11 @@ PageStatus InterpreterFSM::getPageStatus(const uint aPageNo) noexcept {
     uint8_t currByte = *((uint8_t *)_pp + aPageNo / 2);
     if (aPageNo % 2 == 0) {
         currByte &= 15;
-        return static_cast<PageStatus>(currByte);
-    } else {
+    } 
+    else {
         currByte >>= 4;
-        return static_cast<PageStatus>(currByte);
     }
+    return static_cast<PageStatus>(currByte);
 }
 
 

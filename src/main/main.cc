@@ -43,13 +43,18 @@ void test(const control_block_t &aControlBlock) {
     TRACE("get segment and insert tuple");
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
     //insert a tuple
-    lSeg->insertTuple((byte*) &lTuple,sizeof(lTuple));
+     TRACE("INSERT STUFF");
+    for(size_t i =0; i<100000;++i){
+        Employee_T emp (1,"zwei",i);
+        lSeg->insertTuple(emp);
+    }
+   // lSeg->insertTuple((byte*) &lTuple, sizeof(lTuple));
    // char lTuple2[] = "SomeMoreRandomChars";
    // lSeg->insertTuple((byte*) &lTuple2,20);
-   TRACE("getMasterSegment");
-    lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(1);
+//TRACE("getMasterSegment");
+  /*  lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(0);
     lSeg->getPage(0,kSHARED);
-    lSeg->printPageToFile(0,false);
+    lSeg->printPageToFile(0,false);*/
 
    // TRACE(" FLUSH PAGE TO DISK");
     //BufferManager::getInstance().flushAll();
@@ -67,8 +72,18 @@ void testStartUp(const control_block_t &aControlBlock){
     TRACE("GET PAGE");
     lSeg->getPage(0,kSHARED);
     lSeg->printPageToFile(0,false);
-   */ TRACE("DELETE PARTITION");
-    PartitionManager::getInstance().deletePartition("blub");
+    TRACE("DELETE PARTITION");*/
+   // PartitionManager::getInstance().deletePartition("blub");
+  //  PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(std::getenv("HOME") + std::string("/MasterTeamProjekt/Partition"),"whatsoever",100);
+ //   TRACE("create a Segment");
+  //  SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bliblablub");
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    TRACE("INSERT STUFF");
+    for(size_t i =0; i<20;++i){
+        Employee_T emp (1,"zwei",i);
+        lSeg->insertTuple(emp);
+    }
+      
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
 }
@@ -181,8 +196,8 @@ int main(const int argc, const char* argv[]) {
 
         
 
-       // test(lCB);
-        testStartUp(lCB2);
+       test(lCB);
+      // testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh
      /*   if (lArgs.test()) {

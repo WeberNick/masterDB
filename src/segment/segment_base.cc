@@ -11,6 +11,7 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const
 	_partition.open();
     int lSegmentIndex = _partition.allocPage();
 	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
+    TRACE("index page: "+std::to_string(_indexPages.at(0)));
 	_partition.close();
     TRACE("SegmentBase successfully created.") ;
 
@@ -28,16 +29,19 @@ SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) :
 
 void SegmentBase::erase(){
     _partition.open();
-    for (auto& iter : _pages){
-        if(iter.second){
-        _bufMan.resetBCB(iter.second);
-        }
-        else{ 
-            TRACE("Entering the workaround");
-            //pages_vt does not work properly. This is a workaround as I could not fix the original problem.
-            _bufMan.resetBCB(iter.first);
-        }
-        _partition.freePage(iter.first._pageNo);
+    //Remove all data pages
+    for (const auto& iter : _pages){
+        const auto& lPID = iter.first;
+        _bufMan.resetBCB(lPID);
+        _partition.freePage(lPID.pageNo());
+    }
+     //Remove all index Pages
+     PID lPID;
+    lPID._fileID=_partition.getID();
+    for (auto iter : _indexPages){
+        lPID._pageNo=iter;
+        _bufMan.resetBCB(lPID);
+        _partition.freePage(iter);
     }
     _partition.close();
 }

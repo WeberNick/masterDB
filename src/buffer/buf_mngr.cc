@@ -31,7 +31,7 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
 void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
 {
     aBCB->getMtx().lock();
-    resetBCB(aBCB);
+    freeBCB(aBCB);
     aBCB->getMtx().unlock();
 }
 
@@ -78,7 +78,7 @@ void BufferManager::init(const CB& aControlBlock)
 //the following is not tested at all, expect major bugs
 BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 {
-    TRACE("Trying to Fix a page");
+    TRACE("Trying to fix page"+std::to_string(aPageID.pageNo())+" on partition "+std::to_string(aPageID.fileID()));
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
     _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock exclusively 
@@ -355,7 +355,7 @@ void BufferManager::initNewPage(BCB* aFBCB,const PID& aPageID, uint64_t aLSN){
     *((basic_header_t*) lFramePtr) = lBH;
 }
 
-void BufferManager::resetBCB(PID& aPID) noexcept
+void BufferManager::resetBCB(const PID& aPID) noexcept
 {
     const size_t lHashIndex = _bufferHash->hash(aPID); //determine hash of requested page
     TRACE("Partition: "+std::to_string(aPID.fileID())+" Page: "+std::to_string(aPID.pageNo()));
@@ -384,7 +384,7 @@ void BufferManager::resetBCB(PID& aPID) noexcept
         {
             TRACE("page found");
             BCB* tmp = lCurBCB->getNextInChain()->getNextInChain();
-            resetBCB(lCurBCB->getNextInChain());
+            _freeBCBs.resetBCB(lCurBCB->getNextInChain());
             lCurBCB->setNextInChain(tmp);
             _bufferHash->getBucketMtx(lHashIndex).unlock(); //release
             return;

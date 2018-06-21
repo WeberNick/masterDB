@@ -57,7 +57,11 @@ class SegmentBase
          * @see     buf_mngr.hh
          */
         void releasePage(const uint aPageNo, const bool aModified = false);
-
+        /**
+         * @brief   Prints a data page of a segment to file coded in hex
+         * @param   aPageNo: the logical page number to print
+         * @param   afromDisk: if true, page is directly extracted from disk, if not, the page is buffered.
+         */
         void printPageToFile(uint aPageNo,bool afromDisk = false);
 
 	public:
@@ -77,7 +81,7 @@ class SegmentBase
 	protected:
 		virtual void storeSegment() = 0;                          // serialization
 		virtual void loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
-        virtual void erase();
+        virtual void erase();                                     // deletes the segment
 
     private:
         byte* getPageF(const uint aPageNo);

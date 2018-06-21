@@ -20,6 +20,7 @@
 #include "segment_fsm.hh"
 
 #include <vector>
+#include <algorithm>
 #include <cstring>
 
 class SegmentFSM_SP : public SegmentFSM
