@@ -10,7 +10,9 @@ SegmentManager::SegmentManager() :
     _masterSegSegName("SegmentMasterSegment"),
     _BufMngr( BufferManager::getInstance()),
     _cb(nullptr)
-{}
+{
+    TRACE("'SegementManager' constructed");
+}
 
 SegmentManager::~SegmentManager()
 {
@@ -18,6 +20,7 @@ SegmentManager::~SegmentManager()
     {
         delete elem.second;
     }
+    TRACE("'SegementManager' destructed");
 }
 
 void SegmentManager::init(const CB& aControlBlock) noexcept
@@ -26,6 +29,7 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
     {
         _cb = &aControlBlock;
         _maxSegmentsPerPage = (_cb->pageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); // number of pages one segment page can manage
+    TRACE("'SegementManager' initialized");
     }
 }
 
@@ -171,6 +175,7 @@ void SegmentManager::storeSegments()
 
 void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::string& aName)
 {
+    TRACE("Creation of master segments starts...");
      // create 2 Master Segments
      // MasterSegParts
      SegmentFSM_SP* lPSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
@@ -189,8 +194,7 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
     // store them into Segment Master
     createSegmentSub(lSSegT);
     createSegmentSub(lPSegT);
-    const std::string lErrMsg("Created master segments successfully.");
-    TRACE(lErrMsg);
+    TRACE("Creation of master segments finished");
 }
 
 const string_vt SegmentManager::getSegmentNames() {

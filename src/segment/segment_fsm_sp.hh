@@ -96,11 +96,14 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 template<typename Tuple_T>
 Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
 {
-    byte* lPagePtr = getPage(aTID.pageNo(), kNOLOCK);
+    Tuple_T result;
+    auto it = std::find_if(_pages.begin(), _pages.end(), [aTID] (const std::pair<PID, BCB*>& elem) { return elem.first.pageNo() == aTID.pageNo(); }); //get iterator to PID in page vector
+    if(it == _pages.cend()){ return result; }
+    size_t index = it - _pages.cbegin();
+    byte* lPagePtr = getPage(index, kNOLOCK);
     InterpreterSP lInterpreter;
     lInterpreter.attach(lPagePtr);
     byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());
-    Tuple_T result;
-    result.toMemory(lTuplePtr);
+    if(lTuplePtr){ result.toMemory(lTuplePtr); }
     return result;
 }

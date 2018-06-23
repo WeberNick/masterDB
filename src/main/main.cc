@@ -150,6 +150,7 @@ void testNick()
     TRACE("## TEST : Insert Tuple");
     TID myTID = mySeg->insertTuple<Employee_T>(empTmp);
     TRACE("## TEST : Get Tuple");
+    //Does not work
     Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
     std::cout << emp.to_string() << std::endl;
 

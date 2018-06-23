@@ -167,8 +167,8 @@ void BufferManager::unfix(BCB*& aBufferControlBlockPtr)
 {
     TRACE("Unfix BCB with PID : " + aBufferControlBlockPtr->getPID().to_string());
     aBufferControlBlockPtr->unlock();
-    aBufferControlBlockPtr = nullptr;
     TRACE("BCB with PID : " + aBufferControlBlockPtr->getPID().to_string() + " is unfixed");
+    aBufferControlBlockPtr = nullptr;
 }
 
 //BCB has to be locked beforehand
