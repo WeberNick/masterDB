@@ -107,6 +107,37 @@ void testTupleToDIsk()
     std::cout << lPart2 << std::endl;
 }
 
+void testNick()
+{
+    // ASSIGN APPROPRIATE TESTING PARAS
+    const bool          C_INSTALL                   = true;
+    const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
+    const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
+    const size_t        C_PAGE_SIZE                 = 4096;
+    const size_t        C_BUFFER_POOL_SIZE          = 100000;
+    const bool          C_TRACE_ACTIVATED           = true;
+
+    const control_block_t lCB = {
+        C_INSTALL,
+        C_MASTER_PARTITION_PATH,
+        C_TRACE_DIR_PATH,
+        C_PAGE_SIZE,
+        C_BUFFER_POOL_SIZE,
+        C_TRACE_ACTIVATED
+    };
+    std::cout << lCB;
+
+    Trace::getInstance().init(lCB);
+    PartitionManager::getInstance().init(lCB);
+    SegmentManager::getInstance().init(lCB);
+    BufferManager::getInstance().init(lCB);
+    DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
+
+
+
+    
+}
+
 
 /***********************************************************************
 *  todo: test install, boot, (shutdown), buf manager, and everything  *
@@ -188,15 +219,16 @@ int main(const int argc, const char* argv[]) {
         };
       //  CommandParser::getInstance().init(lCB);
         // init all global singletons
-        Trace::getInstance().init(lCB);
-        PartitionManager::getInstance().init(lCB);
-        SegmentManager::getInstance().init(lCB);
-        BufferManager::getInstance().init(lCB);
+        //Trace::getInstance().init(lCB);
+        //PartitionManager::getInstance().init(lCB);
+        //SegmentManager::getInstance().init(lCB);
+        //BufferManager::getInstance().init(lCB);
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
 
-       test(lCB);
+       //test(lCB);
+       testNick();
       // testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh

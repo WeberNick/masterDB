@@ -9,10 +9,10 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
-	../infra/tuples.hh \
 	\
 
 PM_HDR = \
+	../infra/tuples.hh \
 	partition_base.hh \
 	partition_file.hh \
 	partition_raw.hh \

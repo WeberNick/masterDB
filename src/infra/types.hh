@@ -79,6 +79,16 @@ struct page_id_t
         return static_cast<const page_id_t&>(*this).operator==(aOther);
     }
 
+    std::string to_string() const noexcept
+    {
+        return std::string("File ID : '") + std::to_string(_fileID) + std::string("', Page : '") + std::to_string(_pageNo) + std::string("'");
+     }
+
+    std::string to_string()
+    {
+        return static_cast<const page_id_t&>(*this).to_string();
+    }
+
 };
 using PID = page_id_t;
 using pid_vt = std::vector<PID>;
@@ -113,3 +123,19 @@ enum LOCK_MODE
     kEXCLUSIVE = 2,
     kLockModeSize = 3
 };
+
+inline std::string lockModeToString(LOCK_MODE aMode)
+{
+    switch(aMode)
+    {
+        case kNoType: return std::string("kNoType"); break;
+        case kNOLOCK: return std::string ("kNOLOCK"); break;
+        case kSHARED: return std::string("kSHARED"); break;
+        case kEXCLUSIVE: return std::string("kEXCLUSIVE"); break;
+        case kLockModeSize: return std::string("Number of lock types: ") + std::to_string(kLockModeSize); break;
+        default: return std::string(""); break;
+    }
+}
+
+
+

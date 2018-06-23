@@ -78,23 +78,7 @@ void SegmentBase::releasePage(const uint aPageNo, const bool aModified)
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
-        switch(lBCB->getLockMode())
-        {
-            case kNOLOCK:
-                break;
-            case kSHARED:
-                lBCB->getMtx().unlock_shared();
-                break;
-            case kEXCLUSIVE:
-                lBCB->setModified(aModified);
-                lBCB->getMtx().unlock();
-                break;
-            default:
-                const std::string lErrMsg("Lock type not supported");
-                TRACE(lErrMsg);
-                throw SwitchException(FLF, lErrMsg);
-                break;    
-        }
+        if(lBCB->getLockMode() == kEXCLUSIVE){ lBCB->setModified(aModified); }
         _bufMan.unfix(lBCB);
     }
     lBCB = nullptr;

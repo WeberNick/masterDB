@@ -20,7 +20,6 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const C
     InterpreterFSM fsmp;
     fsmp.initNewFSM(lPagePointer, LSN, lFSMIndex, _partition.getID(), lNoPagesToManage);
     lBCB->setModified(true);
-    lBCB->getMtx().unlock();
     _bufMan.unfix(lBCB);
     fsmp.detach();
     InterpreterFSM::setPageSize(_cb.pageSize());
@@ -84,7 +83,6 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
                 _pages.push_back(std::pair<PID, BCB*>(lPID, nullptr));
                 emptyfix=true;
                 lBcb->setModified(true);
-                lBcb->getMtx().unlock();
                 _bufMan.unfix(lBcb);
                 lMes=  std::string("successfully found a free page. on existing FSM but created new one");
                 TRACE(lMes);
@@ -93,7 +91,6 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
                 
                 lPID._pageNo = _pages.at(i * fsmp.getMaxPagesPerFSM() + lIndex).first._pageNo;
                 lBcb->setModified(true);
-                lBcb->getMtx().unlock();
                 _bufMan.unfix(lBcb);
                 lMes=std::string("successfully found a free page. existing page");
                 TRACE(lMes);
@@ -116,7 +113,6 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     
     (*((fsm_header_t*) (lPagePointer + getPageSize() - sizeof(fsm_header_t) )))._nextFSM = lFSMIndex;
     lBcb->setModified(true);
-    lBcb->getMtx().unlock();
     _bufMan.unfix(lBcb);
     
     lPID._pageNo = lFSMIndex;
@@ -129,7 +125,6 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     uint32_t lFreePageIndex = fsmp.getFreePage(lPageStatus);
 
     lBcb->setModified(true);
-    lBcb->getMtx().unlock();
     _bufMan.unfix(lBcb);
     emptyfix=true;
     lPID._pageNo = ((_fsmPages.size() - 1) * fsmp.getMaxPagesPerFSM()) + lFreePageIndex;
@@ -194,7 +189,6 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
             _pages.push_back(page_t(lTmpPID, nullptr));
         }
         lnxIndex = lHeader._nextIndexPage;
-        lBCB->getMtx().unlock_shared();
         _bufMan.unfix(lBCB);
     }
     TRACE("Load FSMs");
@@ -207,7 +201,6 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
         lPageBuffer = _bufMan.getFramePtr(lBCB);
         lHeader2 = *(fsm_header_t *)(lPageBuffer + lPageSize - sizeof(fsm_header_t));
         _fsmPages.push_back(lHeader2._nextFSM);
-        lBCB->getMtx().unlock_shared();
         _bufMan.unfix(lBCB);
     }
     if(_fsmPages.at(_fsmPages.size()-1)==0){
@@ -257,7 +250,6 @@ void SegmentFSM::storeSegment() {
         *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)) = lHeader;
         lBCB->setModified(true);
        // TRACE("first fsm page: "+std::to_string(  ((segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)))->_firstFSM ));
-        lBCB->getMtx().unlock();
         _bufMan.unfix(lBCB);
         ++j;
     }

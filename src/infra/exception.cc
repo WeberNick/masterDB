@@ -96,6 +96,17 @@ PartitionExistsException::PartitionExistsException(
             std::string("Cannot create existing partition or remove non existing partition"))
 {}
 
+PartitionNotExistsException::PartitionNotExistsException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            std::string("The requested partition does not exist"))
+{}
+
 PartitionFullException::PartitionFullException(
         const char*         aFileName,
         const unsigned int  aLineNumber,

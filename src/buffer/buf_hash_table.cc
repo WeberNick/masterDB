@@ -27,6 +27,7 @@ size_t BufferHashTable::hash(const PID& aPageID) noexcept
     std::hash<uint> lHash;
     return (lHash(aPageID.fileID()) + lHash(aPageID.pageNo())) % _size;
 }
+
 sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
 { 
 	return _hashTable[aHash].getMtx(); 

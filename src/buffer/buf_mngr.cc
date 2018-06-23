@@ -30,9 +30,9 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
 
 void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
 {
-    aBCB->getMtx().lock();
+    aBCB->lock();
     freeBCB(aBCB);
-    aBCB->getMtx().unlock();
+    aBCB->unlock();
 }
 
 BufferManager::BufferManager() :
@@ -43,12 +43,15 @@ BufferManager::BufferManager() :
 	_freeFrames(),
     _freeBCBs(),
     _cb(nullptr)
-{}
+{
+    TRACE("'BufferManager' constructed");
+}
 
 BufferManager::~BufferManager()
 {
     delete _bufferHash;
     delete[] _bufferpool;
+    TRACE("'BufferManager' destructed");
 }
 
 void BufferManager::init(const CB& aControlBlock)
@@ -64,108 +67,114 @@ void BufferManager::init(const CB& aControlBlock)
         }
         catch(std::bad_alloc& ba)
         {
-            const std::string lErrMsg = std::string("bad_alloc caught: ") + std::string(ba.what()); 
-            TRACE(lErrMsg);
+            TRACE(std::string("bad_alloc caught: ") + std::string(ba.what()));
             throw;
         }
         _freeFrames.init(_noFrames);
         _freeBCBs.init(_noFrames * 1.2);
         _cb = &aControlBlock;
         BufferControlBlock::setCB(_cb);
+        TRACE("'BufferManager' initialized");
     }
 }
 
 //the following is not tested at all, expect major bugs
 BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 {
-    TRACE("Trying to fix page"+std::to_string(aPageID.pageNo())+" on partition "+std::to_string(aPageID.fileID()));
+    TRACE("Trying to fix page : " + aPageID.to_string());
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
-    _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock exclusively 
+    _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock shared 
     BCB* lNextBCB = _bufferHash->getBucketBCB(lHashIndex); //initialize search in hash chain
 
     while(lNextBCB != nullptr && lPageNotFound) //as long as there are allocated CBs
     {
-        TRACE("One step in the chain");
+        TRACE("One step in the chain (DELETE TRACE AFTER DEBUGGING)");
         if(lNextBCB->getPID() == aPageID) //is there a CB for the requested page
         {
             //page found
             lPageNotFound = false;
-            TRACE(" ");
+            TRACE("  (DELETE TRACE AFTER DEBUGGING)");
             while(lNextBCB->getFrameIndex() == INVALID) //page is being brought in
             {
                 //do nothing
-                TRACE(" ");
+                TRACE("  (DELETE TRACE AFTER DEBUGGING)");
             }
             
             _bufferHash->getBucketMtx(lHashIndex).unlock_shared(); //release
         }
         else
         {
-            TRACE(" ");
+            TRACE("  (DELETE TRACE AFTER DEBUGGING)");
             lNextBCB = lNextBCB->getNextInChain(); //follow hash chain
         }
     }
 
     if(lPageNotFound)
     {
-        TRACE( "Page not found");
+        TRACE("## fix: Page not found in buffer pool. Trying to get a free frame for the page...");
         //bucket has to be unlocked for further code.
         _bufferHash->getBucketMtx(lHashIndex).unlock_shared();
         /* page not in bufferpool. before it can be read, a free frame in the 
         * bufferpool must be found or a page must be replaced */
         lNextBCB = locatePage(aPageID); //get page in bufferpool
         readPageIn(lNextBCB,aPageID);
+        TRACE("## fix: Page is in the buffer pool now");
     }
-    TRACE("setting Lockmode");
-    if(aMode == kNOLOCK)
-    {
-        lNextBCB->setLockMode(aMode);
-        lNextBCB->incrFixCount();
-    }
-    else //some lock requested
-    {
-        if(aMode == kSHARED) // shared lock requested
-        {
-            lNextBCB->getMtx().lock_shared();
-            lNextBCB->setLockMode(aMode);  
-            lNextBCB->incrFixCount();
-        }
-        else if(aMode == kEXCLUSIVE) //exclusive lock requested
-        {
-            lNextBCB->getMtx().lock();
-            lNextBCB->setLockMode(aMode);
-            lNextBCB->setFixCount(1);
-        }
-        else std::cerr << "Lock type not supported." << std::endl;
-    }
+    TRACE("## fix: Setting the lock mode (" + lockModeToString(aMode) + ") for the BCB...");
+    lNextBCB->lock(aMode);
+    //if(aMode == kNOLOCK)
+    //{
+        //lNextBCB->setLockMode(aMode);
+        //lNextBCB->incrFixCount();
+    //}
+    //else //some lock requested
+    //{
+        //if(aMode == kSHARED) // shared lock requested
+        //{
+            //lNextBCB->lock_shared();
+            //lNextBCB->setLockMode(aMode);  
+            //lNextBCB->incrFixCount();
+        //}
+        //else if(aMode == kEXCLUSIVE) //exclusive lock requested
+        //{
+            //lNextBCB->lock();
+            //lNextBCB->setLockMode(aMode);
+            //lNextBCB->setFixCount(1);
+        //}
+        //else std::cerr << "Lock type not supported." << std::endl;
+    //}
 
     /* Now the requested page is in the bufferpool and the CB for it is pointed to by lNextBCB. It has the requested lock type applied */
+    TRACE("Page : " + aPageID.to_string() + " is fixed");
     return lNextBCB;
 }
 
 BCB* BufferManager::emptyfix(const PID& aPageID) //assumed to always request in X lock mode
 {
+    TRACE("Emptyfix on page : " + aPageID.to_string());
     BCB* lNextBCB = nullptr;
     lNextBCB = locatePage(aPageID);
-    lNextBCB->getMtx().lock();
-    lNextBCB->setLockMode(kEXCLUSIVE);
-    lNextBCB->setFixCount(1);
+    lNextBCB->lock();
     lNextBCB->setModified(true);
     initNewPage(lNextBCB,aPageID,1);
+    TRACE("Page : " + aPageID.to_string() + " is fixed");
     return lNextBCB;
 }
 
 //BCB has to be locked beforehand
 void BufferManager::unfix(BCB*& aBufferControlBlockPtr)
 {
-    aBufferControlBlockPtr->decrFixCount();
+    TRACE("Unfix BCB with PID : " + aBufferControlBlockPtr->getPID().to_string());
+    aBufferControlBlockPtr->unlock();
     aBufferControlBlockPtr = nullptr;
+    TRACE("BCB with PID : " + aBufferControlBlockPtr->getPID().to_string() + " is unfixed");
 }
 
 //BCB has to be locked beforehand
 void BufferManager::flush(BCB*& aBufferControlBlockPtr)
 {
+    TRACE("Flush the BCB with PID : " + aBufferControlBlockPtr->getPID().to_string());
     if(aBufferControlBlockPtr->getModified())
     {
         const PID lPageID = aBufferControlBlockPtr->getPID(); //page id of frame
@@ -174,18 +183,18 @@ void BufferManager::flush(BCB*& aBufferControlBlockPtr)
         lPart->open(); //open partition
         lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); //write page back to disk
         lPart->close(); //close partition
-        TRACE("flushed");
     }
+    TRACE("BCB with PID : " + aBufferControlBlockPtr->getPID().to_string() + " was flushed");
 }
 
 void BufferManager::flushAll()
 {
-    TRACE("Flushing complete Buffer");
+    TRACE("Flush of the complete buffer starts...");
     std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
     for (auto& lBCB : lBCBs){
-        TRACE("Partition: "+std::to_string(lBCB->getPID().fileID())+" Page: "+std::to_string(lBCB->getPID().pageNo()));
         flush(lBCB);
     }
+    TRACE("Finished flushing the complete buffer");
 }
 
 byte* BufferManager::getFramePtr(BCB* aBCB)
@@ -207,12 +216,11 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
     //BCB = Buffer Control Block
     getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
     BCB* lFBCB = getFreeBCBs().getFreeBCBList(); //get free BCB
-    if(!lFBCB) //if lFBCB == nullptr
-    {
-        throw ReturnException(FLF); 
-        //should not happen because we have more bcbs than frames.
-        //everytime a frame is reused, a BCB is freed and inserted back into the free bcb list
-    }
+
+    //should not happen because we have more bcbs than frames.
+    //everytime a frame is reused, a BCB is freed and inserted back into the free bcb list
+    assert(lFBCB != nullptr);
+
     getFreeBCBs().setFreeBCBList(lFBCB->getNextInChain()); //set free BCB list to next free BCB
     getFreeBCBs().decrNoFreeBCBs(); //decrement number of free BCBs
     getFreeBCBs().getFreeBCBListMtx().unlock(); //unlock mutex of free BCB list

@@ -195,17 +195,17 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
 
 const string_vt SegmentManager::getSegmentNames() {
     string_vt names;
-    for (const auto& [id, segt] : _segmentsByID) {
-        names.push_back(segt.name());
+    for (const auto& elem : _segmentsByID) {
+        names.push_back(elem.second.name());
     }
     return names;
 }
 
 const string_vt SegmentManager::getSegmentNamesForPartition(uint8_t aPID) {
     string_vt qsnames;
-    for (const auto& [id, segt] : _segmentsByID) {
-        if (segt.partID() == aPID)
-            qsnames.push_back(segt.name());
+    for (const auto& elem : _segmentsByID) {
+        if (elem.second.partID() == aPID)
+            qsnames.push_back(elem.second.name());
     }
     return qsnames;
 }

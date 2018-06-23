@@ -144,6 +144,8 @@ class Employee_T
         inline const std::string& name() noexcept { return _pName; }
         inline uint16_t salary() const noexcept { return _pSalary; }
         inline uint16_t salary() noexcept { return _pSalary; }
+        inline std::string to_string() const noexcept { return std::string("Employee (Name, Age, Salary) : '") + _pName + std::string("', ") + std::to_string(_pAge) + std::string(", ") + std::to_string(_pSalary); }
+        inline std::string to_string() noexcept { return static_cast<const Employee_T&>(*this).to_string(); }
         
     private:
         //size of class, with all the strings

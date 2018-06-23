@@ -56,11 +56,14 @@ class PartitionManager
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
         PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
         PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
-        PartitionBase*  getPartition(const uint8_t aID);
-        PartitionBase*  getPartition(const std::string& aName);
-        Partition_T&    getPartitionT(const std::string& aName);
+        PartitionBase*      getPartition(const uint8_t aID);
+        PartitionBase*      getPartition(const std::string& aName);
+        const Partition_T&  getPartitionT(const uint8_t aID) const;
+        Partition_T&        getPartitionT(const uint8_t aID);
+        const Partition_T&  getPartitionT(const std::string& aName) const;
+        Partition_T&        getPartitionT(const std::string& aName);
         uint8_t         getPartitionID(const std::string& aName);
-        const string_vt getPartitionNames();
+        string_vt getPartitionNames() noexcept;
         std::string     getPartitionName(const uint8_t aID);
         
         void            deletePartition(const uint8_t aID);
@@ -75,6 +78,10 @@ class PartitionManager
         /* install functionality */
         PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
         void            insertMasterPartitionTuple(const Partition_T& aMasterTuple);
+
+    private:
+        inline const std::string& masterPartName(){ return _masterPartName; }
+        inline const std::string& masterSegPartName(){ return _masterSegPartName; }
 
     private:
         uint8_t                                     _counterPartitionID;

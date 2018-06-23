@@ -11,9 +11,11 @@ Trace::~Trace()
 {
     if(_cb->trace())
     {
-        TRACE("Close log file");
+        TRACE("Closing the log file...");
         _logStream.close();
+        TRACE("Log file closed!");
     }
+    TRACE("'Trace' destructed");
 }
 
 void Trace::init(const CB& aControlBlock) noexcept
@@ -33,6 +35,7 @@ void Trace::init(const CB& aControlBlock) noexcept
             TRACE("Log file created and open");
         }
         _init = true;
+        TRACE("'Trace' initialized");
     }
 }
 

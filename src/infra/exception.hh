@@ -18,8 +18,10 @@
 #include <iostream>
 #include <cerrno>
 #include <cstring>
+#include <cassert>
 
 #define FLF __FILE__, __LINE__, __PRETTY_FUNCTION__
+#define ASSERT_MSG(MSG) assert(!MSG);  
 
 class BaseException : public std::runtime_error 
 {
@@ -92,6 +94,15 @@ class PartitionExistsException : public BaseException
 {
     public:
         PartitionExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
+class PartitionNotExistsException : public BaseException
+{
+    public:
+        PartitionNotExistsException(
                 const char*         aFileName,
                 const unsigned int  aLineNumber,
                 const char*         aFunctionName);

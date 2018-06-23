@@ -52,7 +52,7 @@ protected:
 template<typename Tuple_T>
 void SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 {
-    TRACE("trying to insert Tuple");
+    TRACE("Trying to insert tuple : " + aTuple.to_string());
 	// get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTuple.size(), emptyfix);
@@ -85,7 +85,6 @@ void SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
     aTuple.toDisk(lFreeTuplePointer);
 	lInterpreter.detach();
 	lBCB->setModified(true);
-	lBCB->getMtx().unlock();
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
 }
