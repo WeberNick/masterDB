@@ -38,9 +38,11 @@ class SegmentFSM_SP : public SegmentFSM
 
   public:
     template<typename Tuple_T>
-    void insertTuple(const Tuple_T& aTuple);
-    void insertTuple(byte* aTuple, const uint aTupleSize);
-    void insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
+    TID insertTuple(const Tuple_T& aTuple);
+    TID insertTuple(byte* aTuple, const uint aTupleSize);
+    tid_vt insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
+    template<typename Tuple_T>
+    Tuple_T getTuple(const TID& aTID);
     int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
@@ -50,7 +52,7 @@ protected:
 };
 
 template<typename Tuple_T>
-void SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
+TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 {
     TRACE("Trying to insert tuple : " + aTuple.to_string());
 	// get page with enough space for the tuple and load it into memory
@@ -74,18 +76,31 @@ void SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 	// attach page to sp interpreter
 	lInterpreter.attach(lBufferPage);
 	// if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
-	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTuple.size());
+	auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTuple.size()); //C++17 Syntax. Return is a pair, assign pair.first to tplPtr and pair.second to tplNo
+    const TID resultTID = {lPID.pageNo(), tplNo};
 	
-	if(lFreeTuplePointer == nullptr) // If true, not enough free space on nsm page => getFreePage buggy
+	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
         throw NSMException(FLF, lErrMsg);
 	}
-    aTuple.toDisk(lFreeTuplePointer);
+    aTuple.toDisk(tplPtr);
 	lInterpreter.detach();
 	lBCB->setModified(true);
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
+    return resultTID;
 }
 
+template<typename Tuple_T>
+Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
+{
+    byte* lPagePtr = getPage(aTID.pageNo(), kNOLOCK);
+    InterpreterSP lInterpreter;
+    lInterpreter.attach(lPagePtr);
+    byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());
+    Tuple_T result;
+    result.toMemory(lTuplePtr);
+    return result;
+}

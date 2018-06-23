@@ -122,7 +122,7 @@ class Employee_T
     public:
         Employee_T();
         Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary); 
-        explicit Employee_T(const Employee_T& aEmployeeTuple);
+        Employee_T(const Employee_T& aEmployeeTuple);
         explicit Employee_T(Employee_T&&) = delete;
         Employee_T& operator=(const Employee_T& aEmployeeTuple);
         Employee_T& operator=(Employee_T&&) = delete;

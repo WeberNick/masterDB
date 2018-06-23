@@ -2,13 +2,16 @@
 
 Partition_T::Partition_T() : 
     _size(0), _pID(0), _pName(""), _pPath(""), _pType(0), _pGrowth(0)
-{}
+{
+    TRACE("'Partition_T' object was default-constructed: " + to_string());
+}
 
 
 Partition_T::Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth) : 
     _size(0), _pID(aPID), _pName(aName), _pPath(aPath), _pType(aType), _pGrowth(aGrowth)
 {
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
+    TRACE("'Partition_T' object was constructed: " + to_string());
 }
 
 Partition_T::Partition_T(const Partition_T& aPartitionTuple) :
@@ -18,7 +21,9 @@ Partition_T::Partition_T(const Partition_T& aPartitionTuple) :
     _pPath(aPartitionTuple.path()),
     _pType(aPartitionTuple.type()),
     _pGrowth(aPartitionTuple.growth())
-{}
+{
+    TRACE("'Partition_T' object was copy-constructed: " + to_string());
+}
 
 Partition_T& Partition_T::operator=(const Partition_T& aPartitionTuple)
 {
@@ -43,6 +48,7 @@ void Partition_T::init(const uint8_t aPID, const std::string& aName, const std::
     _pType = aType;
     _pGrowth = aGrowth;
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
+    TRACE("'Partition_T' object was initialized: " + to_string());
 }
 
 void Partition_T::toDisk(byte* aPtr) const noexcept
@@ -101,14 +107,16 @@ std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple)
 
 Segment_T::Segment_T() : 
     _size(0), _sPID(0), _sID(0), _sName(""), _sType(0), _sFirstPage(0)
-{}
+{
+    TRACE("'Segment_T' object was default-constructed: " + to_string());
+}
 
 
 Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage) : 
     _size(0), _sPID(aPID), _sID(aSID), _sName(aName), _sType(aType), _sFirstPage(aFirstPage)
 {
     _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
-   // std::cout << "Size of class: " << _size << std::endl;
+    TRACE("'Segment_T' object was constructed: " + to_string());
 }
 
 Segment_T::Segment_T(const Segment_T& aSegmentTuple) :
@@ -118,7 +126,9 @@ Segment_T::Segment_T(const Segment_T& aSegmentTuple) :
     _sName(aSegmentTuple.name()),
     _sType(aSegmentTuple.type()),
     _sFirstPage(aSegmentTuple.firstPage())
-{}
+{
+    TRACE("'Segment_T' object was copy-constructed: " + to_string());
+}
 
 Segment_T& Segment_T::operator=(const Segment_T& aSegmentTuple)
 {
@@ -143,6 +153,7 @@ void Segment_T::init(const uint8_t aPID, const uint16_t aSID, const std::string&
     _sType = aType;
     _sFirstPage = aFirstPage;
     _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    TRACE("'Segment_T' object was initialized: " + to_string());
 }
 
 void Segment_T::toDisk(byte* aPtr) const noexcept
@@ -195,13 +206,16 @@ std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple)
 
 Employee_T::Employee_T() : 
     _size(0), _pAge(0), _pSalary(0), _pName("")
-{}
+{
+    TRACE("'Employee_T' object was default constructed: " + to_string());
+}
 
 
 Employee_T::Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary) : 
     _size(0), _pAge(aAge), _pSalary(aSalary), _pName(aName)
 {
     _size = sizeof(_pAge) + (_pName.size() + 1) + sizeof(_pSalary) ; //+1 for each string for \0
+    TRACE("'Employee_T' object was constructed: " + to_string());
 }
 
 Employee_T::Employee_T(const Employee_T& aEmployeeTuple) :
@@ -209,7 +223,9 @@ Employee_T::Employee_T(const Employee_T& aEmployeeTuple) :
     _pAge(aEmployeeTuple.age()),
     _pSalary(aEmployeeTuple.salary()),
     _pName(aEmployeeTuple.name())
-{}
+{
+    TRACE("'Employee_T' object was copy-constructed: " + to_string());
+}
 
 Employee_T& Employee_T::operator=(const Employee_T& aEmployeeTuple)
 {
@@ -230,6 +246,7 @@ void Employee_T::init(const uint8_t aAge, const std::string& aName, const uint16
     _pSalary = aSalary;
     _pName = aName;
     _size = sizeof(_pAge) + (_pName.size() + 1) + sizeof(_pSalary);
+    TRACE("'Employee_T' object was initialized: " + to_string());
 }
 
 void Employee_T::toDisk(byte* aPtr) const noexcept

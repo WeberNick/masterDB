@@ -11,7 +11,7 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock)
     SegmentFSM(aPartition, aControlBlock)
 {}
 
-void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
+TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	TRACE("trying to insert Tuple");
 	// get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
@@ -44,27 +44,31 @@ void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	// attach page to sp interpreter
 	lInterpreter.attach(lBufferPage);
 	// if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
-	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTupleSize);
+	auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTupleSize);
+    const TID resultTID = {lPID.pageNo(), tplNo};
 	
-	if(lFreeTuplePointer == nullptr) // If true, not enough free space on nsm page => getFreePage buggy
+	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
         throw NSMException(FLF, lErrMsg);
 	}
-	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); // copy the content of aTuple to the nsm page
+	std::memcpy(tplPtr, aTuple, aTupleSize); // copy the content of aTuple to the nsm page
 	lInterpreter.detach();
 	lBCB->setModified(true);
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
+    return resultTID;
 }
 
-void SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
+tid_vt SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
 {
+    tid_vt result;
 	for(byte* aTuple: aTuples)
 	{
-		insertTuple(aTuple, aTupleSize);
+		result.push_back(insertTuple(aTuple, aTupleSize));
 	}
+    return result;
 }
 
 void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {

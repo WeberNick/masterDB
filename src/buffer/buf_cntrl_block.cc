@@ -20,7 +20,7 @@ BufferControlBlock::BufferControlBlock() :
 
 void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
 {
-    TRACE("Trying to aquire lock '" + lockModeToString(aMode) + "' for BCB with PID : " + _pageID.to_string());
+    TRACE("Trying to aquire '" + lockModeToString(aMode) + "' lock for BCB with PID : " + _pageID.to_string());
     switch(aMode)
     {
         case kNOLOCK:
@@ -59,7 +59,7 @@ void BufferControlBlock::lock_shared() noexcept
 
 void BufferControlBlock::unlock() noexcept
 {
-    TRACE("Unlock BCB with lock '" + lockModeToString(getLockMode()) + "' and with PID : " + _pageID.to_string());
+    TRACE("Unlock BCB with '" + lockModeToString(getLockMode()) + "' lock and with PID : " + _pageID.to_string());
     switch(getLockMode())
     {
         case kNOLOCK:

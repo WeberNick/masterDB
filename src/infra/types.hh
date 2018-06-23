@@ -93,6 +93,19 @@ struct page_id_t
 using PID = page_id_t;
 using pid_vt = std::vector<PID>;
 
+struct tuple_identifier_t
+{
+    uint32_t _pageNo;
+    uint32_t _tupleNo;
+
+    uint32_t pageNo() const noexcept { return _pageNo; }
+    uint32_t pageNo() noexcept { return _pageNo; }
+    uint32_t tupleNo() const noexcept { return _tupleNo; }
+    uint32_t tupleNo() noexcept { return _tupleNo; }
+};
+using TID = tuple_identifier_t;
+using tid_vt = std::vector<TID>;
+
 enum class PageStatus 
 {
     kNoType = -1,

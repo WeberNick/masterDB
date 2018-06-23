@@ -15,6 +15,7 @@
 #include "../infra/header_structs.hh"
 
 #include <iostream>
+#include <utility>
 
 class InterpreterSP 
 {
@@ -43,7 +44,7 @@ class InterpreterSP
 
 	public:
 		void  initNewPage(byte* aPP) noexcept ; // combines initialization of fresh page with attach
-		byte* addNewRecord(const uint aRecordSize) noexcept ; // returns 0 if page is full
+        std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ; // returns 0 if page is full
 		int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable
 		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
 		byte* getRecord(const uint aRecordNo) noexcept ;

@@ -4,9 +4,7 @@ PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName,
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
-    std::string lMes = std::string("File partition instance created. _gI/agI ")+std::to_string(_growthIndicator)+std::to_string(aGrowthIndicator);
     create();
-    TRACE(lMes);
 }
 
 PartitionFile::PartitionFile(const Partition_T& aTuple, const CB& aControlBlock):
@@ -50,7 +48,7 @@ uint32_t PartitionFile::allocPage()
         const size_t lPagesPerFSIP = getMaxPagesPerFSIP();
         const uint lRemainingPages = lFSIP.grow(_growthIndicator, lPagesPerFSIP);
         writePage(ex.getBufferPtr(),ex.getIndexOfFSIP(),_pageSize);
-        TRACE("remaining pages after growing: "+lRemainingPages);
+        TRACE("remaining pages after growing: " + std::to_string(lRemainingPages));
         if(lRemainingPages > 0)
         {
             const uint lNextFSIP = ex.getIndexOfFSIP() + lPagesPerFSIP + 1;

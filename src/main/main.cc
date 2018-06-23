@@ -109,6 +109,7 @@ void testTupleToDIsk()
 
 void testNick()
 {
+    std::cout << "######  Nick's Test Method is Executed ##########" << std::endl;
     // ASSIGN APPROPRIATE TESTING PARAS
     const bool          C_INSTALL                   = true;
     const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
@@ -133,8 +134,27 @@ void testNick()
     BufferManager::getInstance().init(lCB);
     DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
+    PartitionManager& pm = PartitionManager::getInstance();
+    SegmentManager& sm = SegmentManager::getInstance();
+    BufferManager& bm = BufferManager::getInstance();
+    DatabaseInstanceManager& dbim = DatabaseInstanceManager::getInstance();
 
+    const std::string lPathToHome = std::string(std::getenv("HOME"));
 
+    TRACE("## TEST : Create Partition");
+    PartitionFile* myPart = pm.createPartitionFileInstance(lPathToHome + "/MyPartition", "MyPartition", 1000);
+    TRACE("## TEST : Create Segment");
+    SegmentFSM_SP* mySeg = sm.createNewSegmentFSM_SP(*myPart, "MySegment");
+    TRACE("## TEST : Create Tuple");
+    Employee_T empTmp(24, "Nick Weber", 2395);
+    TRACE("## TEST : Insert Tuple");
+    TID myTID = mySeg->insertTuple<Employee_T>(empTmp);
+    TRACE("## TEST : Get Tuple");
+    Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
+    std::cout << emp.to_string() << std::endl;
+
+    TRACE("## TEST : Shutdown");
+    dbim.shutdown();
     
 }
 

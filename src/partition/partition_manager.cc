@@ -246,14 +246,14 @@ PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)
 }
 
 PartitionFile* PartitionManager::createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple){
+    TRACE("Creation of master partition starts...");
      uint pType = 1;
     PartitionFile* lPartition = new PartitionFile(aPath, _masterPartName, aGrowthIndicator, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
-    TRACE(" ");
     Partition_T* t = new Partition_T(lPartition->getID(),_masterPartName,aPath,pType,aGrowthIndicator);
     aMasterTuple = *t;
 
-    TRACE("Master partition created successfully.");
+    TRACE("Creation of master partition finished");
     return lPartition;
 }
 
