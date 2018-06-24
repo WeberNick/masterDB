@@ -15,6 +15,7 @@
 
 #include <mutex>
 #include <shared_mutex>
+#include <string>
 
 class BufferControlBlock;
 using BCB = BufferControlBlock;
@@ -54,6 +55,7 @@ class BufferControlBlock final
         void lock_shared() noexcept; //lock shared
         void unlock() noexcept;
         void upgradeLock(LOCK_MODE aMode) noexcept;
+        inline std::string to_string() noexcept { return std::string("PID : '") + getPID().to_string() + "', Frame Index : " + std::to_string(getFrameIndex()) + ", Lock Mode : '" + lockModeToString(getLockMode()) + ", Modified : '" + (getModified() ? "True" : "False") + "', Fix Count : " + std::to_string(getFixCount()); }
 
     private:
         inline sMtx&    getMtx() noexcept { return _pageMtx; }

@@ -92,6 +92,7 @@ BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
         TRACE("One step in the chain (DELETE TRACE AFTER DEBUGGING)");
         if(lNextBCB->getPID() == aPageID) //is there a CB for the requested page
         {
+            TRACE("## fix: Page found in buffer pool.");
             //page found
             lPageNotFound = false;
             TRACE("  (DELETE TRACE AFTER DEBUGGING)");
@@ -123,28 +124,6 @@ BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
     }
     TRACE("## fix: Setting the lock mode (" + lockModeToString(aMode) + ") for the BCB...");
     lNextBCB->lock(aMode);
-    //if(aMode == kNOLOCK)
-    //{
-        //lNextBCB->setLockMode(aMode);
-        //lNextBCB->incrFixCount();
-    //}
-    //else //some lock requested
-    //{
-        //if(aMode == kSHARED) // shared lock requested
-        //{
-            //lNextBCB->lock_shared();
-            //lNextBCB->setLockMode(aMode);  
-            //lNextBCB->incrFixCount();
-        //}
-        //else if(aMode == kEXCLUSIVE) //exclusive lock requested
-        //{
-            //lNextBCB->lock();
-            //lNextBCB->setLockMode(aMode);
-            //lNextBCB->setFixCount(1);
-        //}
-        //else std::cerr << "Lock type not supported." << std::endl;
-    //}
-
     /* Now the requested page is in the bufferpool and the CB for it is pointed to by lNextBCB. It has the requested lock type applied */
     TRACE("Page : " + aPageID.to_string() + " is fixed");
     return lNextBCB;
@@ -157,7 +136,7 @@ BCB* BufferManager::emptyfix(const PID& aPageID) //assumed to always request in 
     lNextBCB = locatePage(aPageID);
     lNextBCB->lock();
     lNextBCB->setModified(true);
-    initNewPage(lNextBCB,aPageID,1);
+    initNewPage(lNextBCB, aPageID, 1);
     TRACE("Page : " + aPageID.to_string() + " is fixed");
     return lNextBCB;
 }
@@ -200,19 +179,14 @@ void BufferManager::flushAll()
 byte* BufferManager::getFramePtr(BCB* aBCB)
 {
     const size_t lFrameIndex = aBCB->getFrameIndex();   
-    if(lFrameIndex >= _noFrames)
-    {
-        const std::string lErrMsg = std::string("Invalid BCB provided: frame index is not in buffer pool"); 
-        TRACE(lErrMsg);
-        throw InvalidArgumentException(FLF, lErrMsg);
-        return nullptr;
-    }
+    assert(lFrameIndex < _noFrames); // otherwise BCB is somewhere else corrupted
     return _bufferpool + (lFrameIndex * _frameSize);
 }
 
 BCB* BufferManager::locatePage(const PID& aPageID) noexcept
 {
     TRACE("Try to locate page");
+    TRACE("");
     //BCB = Buffer Control Block
     getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
     BCB* lFBCB = getFreeBCBs().getFreeBCBList(); //get free BCB
@@ -231,16 +205,13 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
     lFBCB->setPID(aPageID); //store requested page
     lFBCB->setModified(false); //page is not modified
     lFBCB->setFixCount(0); //fix will be applied later
-       TRACE("step");
+    lFBCB->setNextInChain(nullptr); //BCB has no next BCB yet
     /* now the control block is linked to the hash table chain */
     const size_t lHashIndex = _bufferHash->hash(aPageID); //compute hash for this page
     _bufferHash->getBucketMtx(lHashIndex).lock(); //lock hash bucket
-    TRACE("step");
-
     if(_bufferHash->getBucketBCB(lHashIndex) == nullptr) //if hash chain is empty
     {
         _bufferHash->setBucketBCB(lHashIndex, lFBCB); //put pointer to BCB in chain
-        lFBCB->setNextInChain(nullptr);
     }
     else //there is at least one entry in hash chain
     {
@@ -256,44 +227,35 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
 }
 
 void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
+    TRACE("Read page '" + aPageID.to_string() + "' from disk into the buffer pool");
+    TRACE("The BCB is : " + lFBCB->to_string());
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
     lFBCB->getMtx().lock_shared();
-    try
+    byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
+    const size_t lNoTries = 3;
+    for(size_t i = 0; i < lNoTries; ++i)
     {
-        byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
-        const size_t lNoTries = 3;
-        for(size_t i = 0; i < lNoTries; ++i)
+        try
         {
-            try
-            {
-                lPart->open(); //open partition
-                break;
-            }
-            catch(const FileException& fex)
-            {
-                if(i == (lNoTries - 1))
-                {
-                    TRACE(std::to_string(lNoTries) + std::string(" unsuccessful tries to open partition"));
-                    throw; //throw catched exception
-                }
-                TRACE("Could not open partition. Retry in one second");
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
+            lPart->open(); //open partition
+            break;
         }
-        TRACE("Page read in");
-        lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
-        lPart->close(); //close partition
+        catch(const FileException& fex)
+        {
+            if(i == (lNoTries - 1))
+            {
+                TRACE(std::to_string(lNoTries) + std::string(" unsuccessful tries to open partition"));
+                throw; //throw catched exception
+            }
+            TRACE("Could not open partition. Retry in one second");
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
     }
-    /*******************************************************************************************************
-    *  Nick: Jonas, are you sure this is correct and the program can recover from the exception? Pls fix  *
-    *******************************************************************************************************/
-    catch(const InvalidArgumentException& ex) //BCB had an invalid frame index
-    {
-        TRACE(std::string("Cannot recover from exception: ") + std::string(ex.what()));
-        throw ReturnException(FLF);
-    }
+    TRACE("Reading the page from disk into the buffer pool...");
+    lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
+    lPart->close(); //close partition
     lFBCB->getMtx().unlock_shared();
-    TRACE("Page read in");
+    TRACE("Read in finished. Page is now in the buffer pool");
 }
 
 
@@ -355,7 +317,7 @@ size_t BufferManager::getFrame() noexcept
     return INVALID; //in theory, this can not be returned. always check for max value return
 }
 
-void BufferManager::initNewPage(BCB* aFBCB,const PID& aPageID, uint64_t aLSN){
+void BufferManager::initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN){
     byte* lFramePtr = getFramePtr(aFBCB);
     //LSN,PageIndex,PartitionID,Version, unused,unused
     basic_header_t lBH = {aLSN, aPageID.pageNo(), aPageID.fileID(), 1, 0, 0};

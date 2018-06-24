@@ -34,7 +34,7 @@ class BufferManager final
         class FreeFrames final
         {
             public:
-                explicit FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
+                FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
                 explicit FreeFrames(const FreeFrames&) = delete;
                 explicit FreeFrames(FreeFrames&&) = delete;
                 FreeFrames& operator=(const FreeFrames&) = delete;

@@ -24,7 +24,7 @@ class BufferHashTable final
         class HashBucket final
         {
             public:
-                explicit HashBucket() :
+                HashBucket() :
                     _bucketMtx(),
                     _firstBCB(nullptr)
                 {}
@@ -48,7 +48,7 @@ class BufferHashTable final
 
 
 	public:
-        explicit BufferHashTable() = delete;
+        BufferHashTable() = delete;
 		explicit BufferHashTable(const size_t aHashTableSize);
 		explicit BufferHashTable(const BufferHashTable&) = delete;
         explicit BufferHashTable(BufferHashTable&&) = delete;

@@ -24,8 +24,9 @@ void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
     switch(aMode)
     {
         case kNOLOCK:
-            setLockMode(aMode);
             incrFixCount();
+            if(getLockMode() > kNOLOCK){ break; } //BCB has a "higher" lock
+            else{ setLockMode(aMode); }
             break;
         case kSHARED:
             getMtx().lock_shared();

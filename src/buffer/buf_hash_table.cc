@@ -3,7 +3,10 @@
 BufferHashTable::BufferHashTable(const size_t aHashTableSize) :
 	_size(aHashTableSize),
 	_hashTable(nullptr)
-{ _hashTable = new HashBucket[_size]; }
+{ 
+    _hashTable = new HashBucket[_size]; 
+    TRACE("'BufferHashTable' constructed");
+}
 
 BufferHashTable::~BufferHashTable()
 {
@@ -19,13 +22,15 @@ BufferHashTable::~BufferHashTable()
 		//}
 	//}
 	delete[] _hashTable;
+    TRACE("'BufferHashTable' destructed");
 }
 
 
 size_t BufferHashTable::hash(const PID& aPageID) noexcept
 {
-    std::hash<uint> lHash;
-    return (lHash(aPageID.fileID()) + lHash(aPageID.pageNo())) % _size;
+    //std::hash<uint> lHash;
+    //return (lHash(aPageID.fileID()) + lHash(aPageID.pageNo())) % _size;
+    return (aPageID.fileID() + aPageID.pageNo()) % _size;
 }
 
 sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
