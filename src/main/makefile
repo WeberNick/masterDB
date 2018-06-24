@@ -17,19 +17,23 @@ LINKER = \
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh \
-	../infra/exception.hh \
-	../infra/trace.hh \
-	../infra/tuples.hh \
 	
 MAIN_HDR = \
 	../infra/args.hh \
-	../cli/parser.hh \
+	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
+	../infra/file_util.hh \
 	../infra/tuples.hh \
+	../cli/parser.hh \
 	db_instance_manager.hh \
 	\
 
 DBIM_HDR = \
+	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
+	../infra/tuples.hh \
 	../buffer/buf_mngr.hh \
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \

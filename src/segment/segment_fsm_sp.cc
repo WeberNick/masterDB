@@ -4,7 +4,7 @@ SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, c
     SegmentFSM(aSegID, aPartition, aControlBlock)
 {
     InterpreterSP::setPageSize(aControlBlock.pageSize());  
-	TRACE("SegmentFSM_SP successfully created.") ;
+	TRACE("'SegmentFSM_SP' constructed");
 }
 
 SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock) :

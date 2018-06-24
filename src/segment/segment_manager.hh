@@ -23,13 +23,13 @@
 #include "segment_fsm.hh"
 #include "segment_fsm_sp.hh"
 
-#include <map>
+#include <unordered_map>
 
 class SegmentManager
 {
 	private:
         friend class DatabaseInstanceManager;
-		explicit SegmentManager();
+		SegmentManager();
 		explicit SegmentManager(const SegmentManager&) = delete;
         explicit SegmentManager(SegmentManager&&) = delete;
 		SegmentManager& operator=(const SegmentManager&) = delete;
@@ -56,37 +56,39 @@ class SegmentManager
 	public:
 		SegmentFSM*     createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
 		SegmentFSM_SP*  createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
-		// for further segment types... SegmentA* createNewSegmentA();
         SegmentFSM_SP*  loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
-
-		SegmentBase*    getSegment(const uint16_t aSegmentID);
-		SegmentBase*    getSegment(const std::string& aSegmentName);
-        const string_vt getSegmentNames();
-        const string_vt getSegmentNamesForPartition(uint8_t aPID);
-
-        void deleteSegment(SegmentBase* aSegment) noexcept;
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string& aName);
         template<typename Tuple_T>
 		void deleteTuplePhysically (const std::string& aMasterName, uint16_t aID);
         void deleteSegements(const uint8_t aPartitionID);
 
-		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
-
-	public:
-        inline const Segment_T& getSegmentByName(std::string& aSegmentName) { return _segmentsByID.at(_segmentsByName.at(aSegmentName)); }
+    public:
+        //getter
+		SegmentBase*    getSegment(const uint16_t aSegmentID);
+		SegmentBase*    getSegment(const std::string& aSegmentName);
+        const Segment_T& getSegmentT(const uint16_t aID) const;
+        Segment_T& getSegmentT(const uint16_t aID);
+        const Segment_T& getSegmentT(const std::string& aName) const;
+        Segment_T& getSegmentT(const std::string& aName);
+        string_vt getSegmentNames() noexcept;
+        string_vt getSegmentNamesForPartition(uint8_t aPID) noexcept;
+		inline uint getNoSegments() const noexcept { return _segments.size(); }	
 		inline uint getNoSegments() noexcept { return _segments.size(); }	
 
 	private:
 		void storeSegments();
 		void createSegmentSub (const Segment_T& aSegT);
+        //wrapper needed as segment base destructor is private
+        void deleteSegment(SegmentFSM_SP*& aSegment);
+		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
 	private:
 		uint16_t                         _counterSegmentID; // ID Counter for Segments
-		std::map<uint16_t, SegmentBase*> _segments;         // Stores all managed segment objects by ID
+		std::unordered_map<uint16_t, SegmentBase*> _segments;         // Stores all managed segment objects by ID
 
-		std::map<uint16_t, Segment_T>    _segmentsByID;     // Stores all segment Tuples by ID in map
-		std::map<std::string, uint16_t>  _segmentsByName;   // Stores Name/ID pair used for lookup in next table
+		std::unordered_map<uint16_t, Segment_T>    _segmentsByID;     // Stores all segment Tuples by ID in map
+		std::unordered_map<std::string, uint16_t>  _segmentsByName;   // Stores Name/ID pair used for lookup in next table
 
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1
            TO BE DELETED */

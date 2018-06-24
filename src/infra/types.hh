@@ -102,6 +102,9 @@ struct tuple_identifier_t
     uint32_t pageNo() noexcept { return _pageNo; }
     uint32_t tupleNo() const noexcept { return _tupleNo; }
     uint32_t tupleNo() noexcept { return _tupleNo; }
+
+    std::string to_string() const noexcept { return std::string("Page : '") + std::to_string(_pageNo) + std::string("', Tuple No. : '") + std::to_string(_tupleNo) + "'"; }
+    std::string to_string() noexcept { return static_cast<const tuple_identifier_t&>(*this).to_string(); }
 };
 using TID = tuple_identifier_t;
 using tid_vt = std::vector<TID>;

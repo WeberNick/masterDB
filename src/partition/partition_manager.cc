@@ -24,7 +24,7 @@ PartitionManager::~PartitionManager()
     TRACE("'PartitionManager' destructed");
 }
 
-void PartitionManager::init(const CB& aControlBlock)
+void PartitionManager::init(const CB& aControlBlock) noexcept
 {
     if(!_cb)
     {
@@ -51,24 +51,29 @@ void PartitionManager::load(const part_vt& aTuples)
 
 PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator)
 {
-    if(!PartitionBase::exists(aPath))
+    if(aGrowthIndicator < 8){ throw InvalidArgumentException(FLF, "The growth indicator must be at least 8"); }
+    TRACE("Request to create file partition at path '" + aPath + "' with name '" + aName + "' with a growth of '" + std::to_string(aGrowthIndicator) + "'");
+    if(!FileUtil::hasValidDir(aPath)){ throw InvalidPathException(FLF, aPath); }
+    if(!FileUtil::exists(aPath))
     {
+        TRACE("## The path is valid and the file does not exist yet. Continue...");
         PartitionFile* lPartition = new PartitionFile(aPath, aName, aGrowthIndicator, _counterPartitionID++, *_cb);
         _partitions[lPartition->getID()] = lPartition;
         const uint8_t pType = 1; //file
         Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, lPartition->getGrowthIndicator());
         createPartitionSub(lPartTuple);
-        TRACE("File partition instance created.");
+        TRACE("## File partition created and successfully added to the PartitionManager");
         return static_cast<PartitionFile*>(_partitions.at(lPartition->getID()));
     }
     else
     {
-        for(const auto& parts : _partitionsByID)
+        TRACE("## The given path already contains a file. Check if a corresponding Partition_T tuple is maintained by the PartitionManager");
+        const auto& lByID = _partitionsByID;
+        auto it = std::find_if(lByID.cbegin(), lByID.cend(), [&aPath](const auto& elem){ return elem.second.path() == aPath; });
+        if(it != lByID.cend())
         {
-            if(parts.second.path() == aPath)
-            {
-                return static_cast<PartitionFile*>(getPartition(parts.first));
-            }
+            TRACE("## Partition_T tuple is maintained by the PartitionManager. Search for corresponding PartitionFile object...");
+            return static_cast<PartitionFile*>(getPartition(it->first));
         }
     }
     //if this line is reached, something went wrong
@@ -101,11 +106,11 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
     TRACE("Searching for the partition with ID '" + std::to_string(aID) + "'");
     //if the object has not been created before
     if (_partitions.find(aID) == _partitions.end()) {
-        TRACE("Partition instance with ID '" + std::to_string(aID) + "' not found in-memory. Looking on disk...");
-        const Partition_T& lTuple = _partitionsByID.at(aID);
+        TRACE("## Partition instance with ID '" + std::to_string(aID) + "' not found in-memory. Looking on disk...");
+        const Partition_T& lTuple = getPartitionT(aID);
         if(lTuple.ID() != aID)
         {
-            TRACE("Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk");
+            TRACE("## Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk (TODO: Can this happen?)");
             throw PartitionNotExistsException(FLF);
         }
         PartitionBase* s;
@@ -119,8 +124,9 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
             default: ASSERT_MSG("Invalid default-case of switch statement reached");
         }
         _partitions[lTuple.ID()] = s;
+        TRACE("## File partition created and successfully added to the PartitionManager");
     }
-    TRACE("Partition instance with ID '" + std::to_string(aID) + "' found");
+    else { TRACE("## Partition instance with ID '" + std::to_string(aID) + "' found"); }
     try
     {
         return _partitions.at(aID);

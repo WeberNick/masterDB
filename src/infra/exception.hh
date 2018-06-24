@@ -108,6 +108,15 @@ class PartitionNotExistsException : public BaseException
                 const char*         aFunctionName);
 };
 
+class SegmentNotExistsException : public BaseException
+{
+    public:
+        SegmentNotExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
 class PartitionFullException : public BaseException
 {
     public:
@@ -159,16 +168,6 @@ class InvalidArgumentException : public BaseException
                 const std::string&  aErrorMessage);
 };
 
-class SwitchException : public BaseException
-{
-	public:
-		SwitchException(
-                const char*         aFileName, 
-                const unsigned int  aLineNumber, 
-                const char*         aFunctionName,
-                const std::string&  aErrorMessage);
-};
-
 class FileException : public BaseException
 {
 	public:
@@ -178,4 +177,14 @@ class FileException : public BaseException
                 const char*         aFunctionName, 
                 const char*         aErrorFileName, 
                 const std::string&  aErrorMessage); 
+};
+
+class InvalidPathException : public BaseException
+{
+	public:
+		InvalidPathException(
+                const char*         aFileName, 
+                const unsigned int  aLineNumber, 
+                const char*         aFunctionName,
+                const std::string&  aPath);
 };

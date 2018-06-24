@@ -177,9 +177,16 @@ void PartitionBase::format()
 	delete[] lPagePointer;
 }
 
-
 uint PartitionBase::getMaxPagesPerFSIP() noexcept
 {
 	InterpreterFSIP fsip;
 	return (_pageSize - fsip.getHeaderSize()) * 8;
 }
+
+std::ostream& operator<< (std::ostream& stream, const PartitionBase& aPartition)
+{
+    stream << aPartition.to_string();
+    return stream;
+}
+
+

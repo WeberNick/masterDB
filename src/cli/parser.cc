@@ -281,7 +281,7 @@ int CP::com_show_parts(const char_vpt* args) const {
 int CP::com_show_seg(const char_vpt* args) const {
     std::string segName(args->at(0));
     try {
-        const Segment_T& seg = SegmentManager::getInstance().getSegmentByName(segName);
+        const Segment_T& seg = SegmentManager::getInstance().getSegmentT(segName);
         std::cout << "SegmentID:    " << seg.ID() << std::endl;
         std::cout << "Segment:      " << seg.name() << std::endl;
         std::cout << "Partition:    " << PartitionManager::getInstance().getPartitionName(seg.partID()) << std::endl;

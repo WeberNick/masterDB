@@ -146,12 +146,12 @@ void InterpreterFSIP::debug(const uint aPageIndex) {
 }
 
 uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP) noexcept {
-    //assert (aNumberOfPages >= 8)
+    TRACE("Updating FSIP's with new partition size starts...");
 
     //get how many pages fit on page
     uint freeOnThisPage = aMaxPagesPerFSIP - header()->_managedPages;
 
-    if(freeOnThisPage==0){
+    if(freeOnThisPage == 0){
         return aNumberOfPages;
     }
     int64_t ldist = freeOnThisPage - aNumberOfPages;

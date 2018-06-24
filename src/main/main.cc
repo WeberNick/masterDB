@@ -2,16 +2,13 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
-
+#include "../infra/file_util.hh"
 #include "../infra/tuples.hh"
-
-#include "db_instance_manager.hh"
 #include "../cli/parser.hh"
+#include "db_instance_manager.hh"
 
 #include <iostream>
 #include <cstdlib>
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
 
 void test(const control_block_t &aControlBlock) {
     // std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
@@ -111,7 +108,7 @@ void testNick()
 {
     std::cout << "######  Nick's Test Method is Executed ##########" << std::endl;
     // ASSIGN APPROPRIATE TESTING PARAS
-    const bool          C_INSTALL                   = true;
+    const bool          C_INSTALL                   = false;
     const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
     const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
     const size_t        C_PAGE_SIZE                 = 4096;
@@ -141,22 +138,84 @@ void testNick()
 
     const std::string lPathToHome = std::string(std::getenv("HOME"));
 
-    TRACE("## TEST : Create Partition");
-    PartitionFile* myPart = pm.createPartitionFileInstance(lPathToHome + "/MyPartition", "MyPartition", 1000);
-    TRACE("## TEST : Create Segment");
-    SegmentFSM_SP* mySeg = sm.createNewSegmentFSM_SP(*myPart, "MySegment");
-    TRACE("## TEST : Create Tuple");
-    Employee_T empTmp(24, "Nick Weber", 2395);
-    TRACE("## TEST : Insert Tuple");
-    TID myTID = mySeg->insertTuple<Employee_T>(empTmp);
-    TRACE("## TEST : Get Tuple");
-    //Does not work
-    Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
-    std::cout << emp.to_string() << std::endl;
+    if(C_INSTALL)
+    {
+        TRACE("### TEST FROM INSTALL ###");
+        TRACE("## TEST : Create Partition");
+        std::cout << "## TEST : Create Partition" << std::endl;
+        PartitionFile* myPart = pm.createPartitionFileInstance(lPathToHome + "/Desktop/MyPartition", "MyPartition", 1000);
+        std::cout << *myPart << std::endl;
+        TRACE("## TEST : Create Segment");
+        std::cout << "## TEST : Create Segment" << std::endl;
+        SegmentFSM_SP* mySeg = sm.createNewSegmentFSM_SP(*myPart, "MySegment");
+        std::cout << *mySeg << std::endl;
+        TRACE("## TEST : Create Tuple");
+        std::cout << "## TEST : Create Tuple" << std::endl;
+        Employee_T empTmp(24, "Nick Weber", 2395);
+        std::cout << "## TEST : Tuple Created : " << empTmp << std::endl;
+        TRACE("## TEST : Insert Tuple");
+        std::cout << "## TEST : Insert Tuple" << std::endl;
+        TID myTID = mySeg->insertTuple<Employee_T>(empTmp);
+        std::cout << "TID : " << myTID.to_string() << std::endl;
+        TRACE("## TEST : Get Tuple");
+        std::cout << "## TEST : Get Tuple" << std::endl;
+        //Does not work
+        Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
+        std::cout << emp.to_string() << std::endl;
 
-    TRACE("## TEST : Shutdown");
-    dbim.shutdown();
-    
+        TRACE("## TEST : Shutdown");
+        dbim.shutdown();
+    }
+    else
+    {
+        TRACE("### TEST FROM BOOT ###");
+        TRACE("## TEST : Boot and get loaded Partition");
+        std::cout << "## TEST : Boot and get loaded Partition" << std::endl;
+        PartitionFile* myPart = static_cast<PartitionFile*>(pm.getPartition("MyPartition"));
+        std::cout << *myPart << std::endl;
+
+        TRACE("## TEST : Boot and get loaded segment");
+        std::cout << "## TEST : Boot and get loaded segment" << std::endl;
+        SegmentFSM_SP* mySeg = static_cast<SegmentFSM_SP*>(sm.getSegment("MySegment"));
+        std::cout << *mySeg << std::endl;
+
+        TRACE("## TEST : Get Tuple from loaded segment");
+        std::cout << "## TEST : Get Tuple from loaded segment" << std::endl;
+        const TID myTID = {3,0};
+        Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
+        std::cout << emp.to_string() << std::endl;
+
+        TRACE("## TEST : Bulk Inserting new Tuples");
+        std::cout << "## TEST : Bulk Inserting new Tuples" << std::endl;
+        #include <array>
+        const std::array<std::string, 4>    forenames   = {"Nick", "Nicolas", "Jonas", "Aljoscha"};
+        const std::array<std::string, 4>    lastnames   = {"Weber", "Wipfler", "Thietke", "Narr"};
+        const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
+        const std::array<uint16_t, 4>       salaries    = {999, 2499, 4715, 2394};
+        const size_t                        noRuns      = 100000;
+
+        std::vector<TID> inserts;
+        for(size_t run = 0; run < noRuns; ++run)
+        {
+            const size_t i = rand() % (3 - 0 + 1) + 0;
+            const size_t ii = rand() % (3 - 0 + 1) + 0;
+            const size_t iii = rand() % (3 - 0 + 1) + 0;
+            const size_t iiii = rand() % (3 - 0 + 1) + 0;
+
+            const std::string name = forenames.at(i) + " " + lastnames.at(ii);
+            const uint8_t age = ages.at(iii);
+            const uint16_t salary = salaries.at(iiii);
+            Employee_T tmp(age, name, salary);
+            inserts.push_back(mySeg->insertTuple<Employee_T>(tmp));
+        }
+
+        for(const auto& tid : inserts)
+        {
+            std::cout << mySeg->getTuple<Employee_T>(tid).to_string() << std::endl;
+        }
+
+        dbim.shutdown();
+    }
 }
 
 
@@ -185,17 +244,22 @@ int main(const int argc, const char* argv[]) {
        print_usage(std::cout, argv[0], lArgDesc);
        return 0;
     }
- /*   if(!(fs::exists(lArgs.masterPartition())))
+/*    if(lArgs.install() && !FileUtil::hasValidDir(lArgs.masterPartition())) //for install
+    {
+        std::cerr << "Cannot create master partition at invalid path!" << std::endl;
+        //return -1; //wait until boot and so on works and uncomment this
+    }
+    if(!lArgs.install() && !(FileUtil::exists(lArgs.masterPartition()))) //for boot
     {
         std::cerr << "Given path to the master partition is invalid." << std::endl;
         //return -1; //wait until boot and so on works and uncomment this
-    }
-    if(lArgs.trace() && !fs::exists(lArgs.tracePath()))
+    }*/
+    if(lArgs.trace() && !FileUtil::hasValidDir(lArgs.tracePath()))
     {
         std::cerr << "The path where to store the trace file is invalid." << std::endl;
         return -1;
     }
-*/
+
 
     // DONT CHANGE THESE
     //const bool          C_INSTALL                   = lArgs.install();

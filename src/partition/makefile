@@ -9,6 +9,7 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	../infra/file_util.hh \
 	\
 
 PM_HDR = \

@@ -93,12 +93,18 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
     return resultTID;
 }
 
+//not fully tested. used as convinience functionality
 template<typename Tuple_T>
 Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
 {
+    TRACE("Looking for tuple with TID " + aTID.to_string());
     Tuple_T result;
     auto it = std::find_if(_pages.begin(), _pages.end(), [aTID] (const std::pair<PID, BCB*>& elem) { return elem.first.pageNo() == aTID.pageNo(); }); //get iterator to PID in page vector
-    if(it == _pages.cend()){ return result; }
+    if(it == _pages.cend())
+    { 
+        TRACE("Could not find tuple. Return default tuple");
+        return result; 
+    }
     size_t index = it - _pages.cbegin();
     byte* lPagePtr = getPage(index, kNOLOCK);
     InterpreterSP lInterpreter;

@@ -13,7 +13,7 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const
 	_indexPages.push_back((lSegmentIndex > 0) ? (uint32_t)lSegmentIndex : 0);
     TRACE("index page: "+std::to_string(_indexPages.at(0)));
 	_partition.close();
-    TRACE("SegmentBase successfully created.") ;
+    TRACE("'SegmentBase' constructed");
 
   //no need to init pages, will be done in store.
 }
@@ -171,4 +171,10 @@ void SegmentBase::printPageToFile(uint aPageNo, bool afromDisk ) {
     else{
         releasePage(aPageNo);
     }
+}
+
+std::ostream& operator<< (std::ostream& stream, const SegmentBase& aSegment)
+{
+    stream << aSegment.to_string();
+    return stream;
 }

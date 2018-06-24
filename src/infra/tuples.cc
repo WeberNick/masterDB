@@ -70,6 +70,7 @@ void Partition_T::toDisk(byte* aPtr) const noexcept
     aPtr += sizeof(_pType);
     *(uint16_t*)aPtr = _pGrowth;
     aPtr += sizeof(_pGrowth);
+    TRACE("Transformed 'Partition_T' object (" + to_string() + ") to its disk representation");
 }
 
 void Partition_T::toDisk(byte* aPtr) noexcept
@@ -91,16 +92,12 @@ void Partition_T::toMemory(byte* aPtr) noexcept
     _pGrowth = *(uint16_t*)aPtr;
     aPtr += sizeof(_pGrowth);
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
+    TRACE("Transformed 'Partition_T' object (" + to_string() + ") to its memory representation");
 }
 
 std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple)
 {
-    stream << "Size: " << aPartTuple.size()
-        << ", PID: " << aPartTuple.ID()
-        << ", Name: " << aPartTuple.name()
-        << ", Path: " << aPartTuple.path()
-        << ", Type: " << aPartTuple.type()
-        << ", Growth: " << aPartTuple.growth();
+    stream << aPartTuple.to_string();
     return stream;
 }
 
@@ -172,6 +169,7 @@ void Segment_T::toDisk(byte* aPtr) const noexcept
     aPtr += sizeof(_sType);
     *(uint32_t*)aPtr = _sFirstPage;
     aPtr += sizeof(_sFirstPage);
+    TRACE("Transformed 'Segment_T' object (" + to_string() + ") to its disk representation");
 }
 
 void Segment_T::toDisk(byte* aPtr) noexcept
@@ -191,16 +189,12 @@ void Segment_T::toMemory(byte* aPtr) noexcept
     aPtr += sizeof(_sType);
     _sFirstPage = *(uint32_t*)aPtr;
     _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    TRACE("Transformed 'Segment_T' object (" + to_string() + ") to its memory representation");
 }
 
 std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple)
 {
-    stream << "Size: " << aSegmentTuple.size()
-        << ", PID: " << aSegmentTuple.partID()
-        << ", SID: " << aSegmentTuple.ID()
-        << ", Name: " << aSegmentTuple.name()
-        << ", Type: " << aSegmentTuple.type()
-        << ", First Page: " << aSegmentTuple.firstPage();
+    stream << aSegmentTuple.to_string();
     return stream;
 }
 
@@ -262,6 +256,7 @@ void Employee_T::toDisk(byte* aPtr) const noexcept
         *(char*)aPtr = _pName.c_str()[i];
         ++aPtr;
     }
+    TRACE("Transformed 'Employee_T' object (" + to_string() + ") to its disk representation");
 }
 
 void Employee_T::toDisk(byte* aPtr) noexcept
@@ -281,13 +276,11 @@ void Employee_T::toMemory(byte* aPtr) noexcept
     _pName = std::string((const char*)aPtr);
     aPtr += _pName.size() + 1;
     _size = sizeof(_pAge) + (_pName.size() + 1) + sizeof(_pSalary); //+1 for each string for \0
+    TRACE("Transformed 'Employee_T' object (" + to_string() + ") to its memory representation");
 }
 
 std::ostream& operator<< (std::ostream& stream, const Employee_T& aEmployeeTuple)
 {
-    stream << "Size: " << aEmployeeTuple.size()
-        << ", Age: " << aEmployeeTuple.age()
-        << ", Name: " << aEmployeeTuple.name()
-        << ", Salary: " << aEmployeeTuple.salary();
+    stream << aEmployeeTuple.to_string();
     return stream;
 }

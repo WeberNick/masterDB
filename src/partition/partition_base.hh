@@ -11,6 +11,7 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../infra/file_util.hh"
 #include "../infra/header_structs.hh"
 #include "../interpreter/interpreter_fsip.hh"
 
@@ -38,9 +39,6 @@
 #include <string>
 #include <cerrno>
 #include <cstring>
-#include <experimental/filesystem>
-
-namespace fs = std::experimental::filesystem;
 
 const uint64_t LSN = 0;
 
@@ -124,6 +122,9 @@ class PartitionBase
         inline uint getSizeInPages() noexcept { return _sizeInPages; }
         inline uint8_t getID() const noexcept { return _partitionID; }
         inline uint8_t getID() noexcept { return _partitionID; }
+        inline std::string to_string() const noexcept { return std::string("Path : '") + getPath() + "', Name: '" + getName() + "', ID : " + std::to_string(getID()); }
+        inline std::string to_string() noexcept { return static_cast<const PartitionBase&>(*this).to_string(); }
+
 
     protected: 
         /**
@@ -144,10 +145,9 @@ class PartitionBase
         virtual void remove() = 0;
 
     protected:
-        static bool exists(const std::string& aPath) noexcept { return fs::exists(aPath); }
-        inline bool exists() noexcept { return PartitionBase::exists(_partitionPath); }
-        inline bool isFile() noexcept { return fs::is_regular_file(_partitionPath); }
-        inline bool isRawDevice() noexcept { return fs::is_block_file(_partitionPath); }
+        inline bool exists() noexcept { return FileUtil::exists(_partitionPath); }
+        inline bool isFile() noexcept { return FileUtil::isFile(_partitionPath); }
+        inline bool isRawDevice() noexcept { return FileUtil::isRawDevice(_partitionPath); }
         virtual size_t partSize() = 0;
         virtual size_t partSizeInPages() = 0;
         uint getMaxPagesPerFSIP() noexcept;
@@ -171,3 +171,5 @@ class PartitionBase
     /* Control block containing all specified parameters*/
     const CB& _cb;
 };
+
+std::ostream& operator<< (std::ostream& stream, const PartitionBase& aPartition);

@@ -17,14 +17,15 @@
 #include "../buffer/buf_mngr.hh"
 #include "segment_base.hh"
 #include <vector>
+#include <string>
 
 class SegmentFSM : public SegmentBase
 {
   protected:
     friend class SegmentManager;
-    explicit SegmentFSM() = delete;
-    explicit SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
-    explicit SegmentFSM(PartitionBase& aPartition, const CB& aCOntrolBlock);
+    SegmentFSM() = delete;
+    SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+    SegmentFSM(PartitionBase& aPartition, const CB& aCOntrolBlock);
     explicit SegmentFSM(const SegmentFSM&) = delete;
     explicit SegmentFSM(SegmentFSM&&) = delete;
     SegmentFSM& operator=(const SegmentFSM&) = delete;

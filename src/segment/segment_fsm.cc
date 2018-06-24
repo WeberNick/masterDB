@@ -23,8 +23,7 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const C
     _bufMan.unfix(lBCB);
     fsmp.detach();
     InterpreterFSM::setPageSize(_cb.pageSize());
-    TRACE("SegmentFSM successfully created.") ;
-
+    TRACE("'SegmentFSM' constructed ()");
 }
 
 SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
@@ -51,8 +50,8 @@ void SegmentFSM::erase(){
 
 //returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
 PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
-    TRACE("Trying to get free page");
-    uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
+    TRACE("Request for a page with " + std::to_string(aNoOfBytes) + " Bytes free");
+    const uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
     /* Check if page with enough space is available using FF algorithm. */
     byte *lPagePointer = nullptr;
     InterpreterFSM fsmp;

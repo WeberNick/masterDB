@@ -18,6 +18,7 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../infra/file_util.hh"
 #include "../infra/tuples.hh"
 #include "partition_base.hh"
 #include "partition_file.hh"
@@ -25,6 +26,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <algorithm>
 
 class PartitionManager
 {    
@@ -47,7 +49,7 @@ class PartitionManager
             static PartitionManager lPartitionManagerInstance;
             return lPartitionManagerInstance;
         }
-        void init(const CB& aControlBlock);
+        void init(const CB& aControlBlock) noexcept;
 
     public:
         void load(const part_vt& aTuples);
@@ -56,21 +58,22 @@ class PartitionManager
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
         PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
         PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
+        void            deletePartition(const uint8_t aID);
+        void            deletePartition(const std::string& aName);
+
+    public:
+        //getter
+        inline size_t       getNoPartitions() const noexcept { return _partitions.size(); }
+        inline size_t       getNoPartitions() noexcept { return _partitions.size(); }
         PartitionBase*      getPartition(const uint8_t aID);
         PartitionBase*      getPartition(const std::string& aName);
         const Partition_T&  getPartitionT(const uint8_t aID) const;
         Partition_T&        getPartitionT(const uint8_t aID);
         const Partition_T&  getPartitionT(const std::string& aName) const;
         Partition_T&        getPartitionT(const std::string& aName);
-        uint8_t         getPartitionID(const std::string& aName);
-        string_vt getPartitionNames() noexcept;
-        std::string     getPartitionName(const uint8_t aID);
-        
-        void            deletePartition(const uint8_t aID);
-        void            deletePartition(const std::string& aName);
-
-    public:
-        inline size_t   getNoPartitions() { return _partitions.size(); }
+        uint8_t             getPartitionID(const std::string& aName);
+        string_vt           getPartitionNames() noexcept;
+        std::string         getPartitionName(const uint8_t aID);
 
     private:
         void            createPartitionSub(const Partition_T& aParT); // has some issues if aParT is a const reference
