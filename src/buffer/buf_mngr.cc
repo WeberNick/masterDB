@@ -133,6 +133,14 @@ BCB* BufferManager::emptyfix(const PID& aPageID) //assumed to always request in 
 {
     TRACE("Emptyfix on page : " + aPageID.to_string());
     BCB* lNextBCB = nullptr;
+    const std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
+    for(auto bcb : lBCBs)
+    {
+        if(bcb->getPID() == aPageID)
+        {
+            throw ReturnException(FLF);
+        }
+    }
     lNextBCB = locatePage(aPageID);
     lNextBCB->lock();
     lNextBCB->setModified(true);
@@ -170,7 +178,7 @@ void BufferManager::flushAll()
 {
     TRACE("Flush of the complete buffer starts...");
     std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
-    for (auto& lBCB : lBCBs){
+    for(auto& lBCB : lBCBs){
         flush(lBCB);
     }
     TRACE("Finished flushing the complete buffer");
