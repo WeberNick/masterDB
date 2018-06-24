@@ -114,6 +114,7 @@ BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
     if(lPageNotFound)
     {
         TRACE("## fix: Page not found in buffer pool. Trying to get a free frame for the page...");
+        TRACE( "Page "+std::to_string(aPageID.pageNo())+" not found");
         //bucket has to be unlocked for further code.
         _bufferHash->getBucketMtx(lHashIndex).unlock_shared();
         /* page not in bufferpool. before it can be read, a free frame in the 
@@ -170,7 +171,11 @@ void BufferManager::flushAll()
 {
     TRACE("Flush of the complete buffer starts...");
     std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
-    for (auto& lBCB : lBCBs){
+    TRACE("number of Pages to flush: "+std::to_string(lBCBs.size()));
+    for (uint i = 0; i < lBCBs.size(); ++i){
+        TRACE("iteration: "+std::to_string(i));
+        BCB* lBCB = lBCBs.at(i);
+        TRACE("Partition: "+std::to_string(lBCB->getPID().fileID())+" Page: "+std::to_string(lBCB->getPID().pageNo()));
         flush(lBCB);
     }
     TRACE("Finished flushing the complete buffer");
@@ -253,6 +258,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     }
     TRACE("Reading the page from disk into the buffer pool...");
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
+    ((PartitionFile*) lPart)->printPage(aPageID.pageNo());
     lPart->close(); //close partition
     lFBCB->getMtx().unlock_shared();
     TRACE("Read in finished. Page is now in the buffer pool");

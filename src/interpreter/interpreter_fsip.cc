@@ -86,6 +86,7 @@ uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8
 
     _header->_nextFreePage = getNextFreePage();
     --(_header->_freeBlocksCount);
+    debug(_header->_basicHeader._pageIndex);
     return lPosFreeBlock + 1 + _header->_basicHeader._pageIndex;
 }
 

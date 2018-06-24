@@ -78,7 +78,7 @@ void DatabaseInstanceManager::shutdown()
     TRACE("Shutting down the database system starts...");
   //  if (isRunning()) {
         // stop transactions
-        _segMngr.storeSegments();
+        _segMngr.storeSegments();     
         BufferManager::getInstance().flushAll();
  //       _running = false;
   //  }

@@ -35,6 +35,9 @@ class PartitionFile : public PartitionBase
          *  @see    partition_base.hh
          */
         virtual uint32_t allocPage();
+
+        void printPage(uint aPageIndex);
+
         
         /**
         * @brief Retrieves the size of the file
@@ -50,7 +53,6 @@ class PartitionFile : public PartitionBase
     private:
         void create();
         void remove();
-        void printPage(uint aPageIndex);
 
     private:
         /* An indicator how the partition will grow (indicator * block size) */

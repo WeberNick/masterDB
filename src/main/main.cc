@@ -75,6 +75,7 @@ void testStartUp(const control_block_t &aControlBlock){
  //   TRACE("create a Segment");
   //  SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bliblablub");
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    ((PartitionFile*) PartitionManager::getInstance().getPartition(2))->printPage(2);
     TRACE("INSERT STUFF");
     for(size_t i =0; i<20;++i){
         Employee_T emp (1,"zwei",i);
@@ -312,9 +313,8 @@ int main(const int argc, const char* argv[]) {
 
         
 
-       //test(lCB);
-       testNick();
-      // testStartUp(lCB2);
+       test(lCB);
+    //  testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh
      /*   if (lArgs.test()) {

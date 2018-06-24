@@ -35,6 +35,7 @@ size_t BufferHashTable::hash(const PID& aPageID) noexcept
 
 sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
 { 
+	TRACE("got Bucket Mutex of "+std::to_string(aHash));
 	return _hashTable[aHash].getMtx(); 
 }
 
