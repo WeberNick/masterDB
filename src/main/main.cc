@@ -10,16 +10,24 @@
 #include <iostream>
 #include <cstdlib>
 
-void test(const control_block_t &aControlBlock) {
-    // std::cout << "\n" << aControlBlock._masterPartition <<   std::endl;
+void testJonas1() {
+    const control_block_t lCB = {
+            true,
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
+            4096,
+            100000,
+            true
+        };
+        std::cout << lCB;
+    
+    Trace::getInstance().init(lCB);
+    PartitionManager::getInstance().init(lCB);
+    SegmentManager::getInstance().init(lCB);
+    BufferManager::getInstance().init(lCB);
+    DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
-    // PartitionFile *lPartFile =
-    // PartitionManager::getInstance().createPartitionFileInstance("$HOME/Partition",
-    // "DefaultName", 1000);
-    //	std::cout << "## TEST: Size in Pages (should be 0): " <<
-    //lPartFile->getSizeInPages() << std::endl;
-
-    Trace::getInstance().log(FLF, "Trace works");
+    TRACE("Trace works");
     std::string lHome(std::getenv("HOME"));
     std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
     std::cout << "Path: " << lPath << std::endl;
@@ -30,8 +38,7 @@ void test(const control_block_t &aControlBlock) {
     //a test scenario
 
     //install    
-    DatabaseInstanceManager::getInstance().init(aControlBlock);
-    
+   
     TRACE("create a new Partition");
     PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     TRACE("create a Segment");
@@ -60,6 +67,36 @@ void test(const control_block_t &aControlBlock) {
   //  lSeg->printPageToFile(0,true);
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
+}
+void testJonas2(){
+    const control_block_t lCB = {
+            true,
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
+            4096,
+            100000,
+            true
+        };
+        std::cout << lCB;
+    
+    Trace::getInstance().init(lCB);
+    PartitionManager::getInstance().init(lCB);
+    SegmentManager::getInstance().init(lCB);
+    BufferManager::getInstance().init(lCB);
+    DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
+
+    TRACE("Trace works");
+    std::string lHome(std::getenv("HOME"));
+    std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
+    std::cout << "Path: " << lPath << std::endl;
+    TRACE("create a new Partition");
+    PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
+    lPart->open();
+    for (size_t i = 0;i<220;++i){
+        std::cout<<lPart->allocPage()<<std::endl;
+    }
+    ((PartitionFile*)lPart)->printPage(0);
+    lPart->close();
 }
 void testStartUp(const control_block_t &aControlBlock){
     
@@ -281,15 +318,7 @@ int main(const int argc, const char* argv[]) {
         const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
         const bool          C_TRACE_ACTIVATED           = true;
 
-        const control_block_t lCB = {
-            C_INSTALL,
-            C_MASTER_PARTITION_PATH,
-            C_TRACE_DIR_PATH,
-            C_PAGE_SIZE,
-            C_BUFFER_POOL_SIZE,
-            C_TRACE_ACTIVATED
-        };
-        std::cout << lCB;
+        
 
 
        // testTupleToDIsk();
@@ -313,7 +342,7 @@ int main(const int argc, const char* argv[]) {
 
         
 
-       test(lCB);
+       testJonas2();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh

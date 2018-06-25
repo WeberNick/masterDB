@@ -29,7 +29,10 @@ void InterpreterFSIP::initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t
     uint32_t lMask = 0;
     if (i < max) {
         lMask = ~lMask;
-        lMask = lMask >> (32 - (aNoBlocks % 32));
+        lMask = lMask << (aNoBlocks % 32);
+        //former line was this, seems to be wrong
+        //lMask = lMask >> (32-(aNoBlocks % 32));
+
         *(((uint32_t *)aPP) + i) = lMask;
         ++i;
     }
@@ -86,7 +89,7 @@ uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8
 
     _header->_nextFreePage = getNextFreePage();
     --(_header->_freeBlocksCount);
-    debug(_header->_basicHeader._pageIndex);
+   // debug(_header->_basicHeader._pageIndex);
     return lPosFreeBlock + 1 + _header->_basicHeader._pageIndex;
 }
 
@@ -136,12 +139,13 @@ void InterpreterFSIP::freePage(const uint aPageIndex) noexcept {
 }
 
 void InterpreterFSIP::debug(const uint aPageIndex) {
+    TRACE("debug");
     std::ofstream myfile;
     std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
     myfile.open(filename);
     uint32_t *lPP2 = (uint32_t *)_pp;
     for (uint a = 0; a < _pageSize / 4; ++a) {
-        myfile << std::hex << *(lPP2 + a) << std::endl;
+        myfile << std::hex << std::setw(8) << std::setfill('0')<< *(lPP2 + a) << std::endl;
     }
     myfile.close();
 }
@@ -171,39 +175,43 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     //free from _managedPages remainnigPages many
     header()->_freeBlocksCount += remainingPages; //mark how many new free pages there will be.
     //first byte aligned or not
+    //TRACE(std::to_string(header()->_managedPages));
         if(header()->_managedPages % 8 !=0){
-            lMask = (~lMask) << (8 - (header()->_managedPages % 8));
-            *(((uint8_t *)lPP) + (header()->_managedPages) / 8) = lMask;
+            //changed to shift right, negate result
+            lMask = (~lMask) << (header()->_managedPages % 8);
+            *(((uint8_t *)lPP) + (header()->_managedPages) / 8) = ~lMask;
             remainingPages -= header()->_managedPages % 8;
             start = header()->_managedPages/8 + 1;
         }
         else{
             start = header()->_managedPages/8;
         }
-
+       // TRACE(std::to_string(start));
         //free all aligned bytes
         size_t i = 0;
         size_t max = remainingPages/8;
+       // TRACE(std::to_string(max));
         while( i < max){
             *(((uint8_t *)lPP) + i + start) = 0;
             remainingPages -= 8;
             ++i;
         }
-
         //if there are some left
         if(remainingPages !=0 ){
             lMask = 0;
-            lMask = (~lMask) >> remainingPages;
+            //changed to shift left
+            lMask = (~lMask) << remainingPages;
            *(((uint8_t *)lPP) + i + start) &= lMask;
         }
         //next free page is position up to which pages were managed till now.
-        header()->_nextFreePage = header()->_managedPages+1;
+       header()->_nextFreePage = header()->_managedPages;
 
         //switch the return value
     if (ldist >=0) 
     {
         header()->_managedPages += aNumberOfPages;
         debug(header()->_basicHeader._pageIndex);
+
         return 0;
     }
     else{

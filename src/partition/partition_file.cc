@@ -29,6 +29,7 @@ uint32_t PartitionFile::allocPage()
     try
     {
         lPageIndex = PartitionBase::allocPage();
+       // printPage(0);
     }
     catch(const PartitionFullException& ex)
     {
@@ -125,11 +126,12 @@ void PartitionFile::remove()
 
 void PartitionFile::printPage(uint aPageIndex)
 {
+    TRACE("pagePrinted");
     open();
     byte *lPagePointer = new byte[_pageSize];
     readPage(lPagePointer, aPageIndex, _pageSize);
     std::ofstream myfile;
-    std::string filename = "page" + std::to_string(aPageIndex) + ".txt";
+    std::string filename = "page_alloc" + std::to_string(aPageIndex) + ".txt";
     myfile.open(filename);
     uint32_t *lPP2 = (uint32_t *)lPagePointer;
     for (uint a = 0; a < _pageSize / 4; ++a) {

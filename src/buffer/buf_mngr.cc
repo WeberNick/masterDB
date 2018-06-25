@@ -179,15 +179,11 @@ void BufferManager::flushAll()
 {
     TRACE("Flush of the complete buffer starts...");
     std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
-<<<<<<< HEAD
     TRACE("number of Pages to flush: "+std::to_string(lBCBs.size()));
     for (uint i = 0; i < lBCBs.size(); ++i){
         TRACE("iteration: "+std::to_string(i));
         BCB* lBCB = lBCBs.at(i);
         TRACE("Partition: "+std::to_string(lBCB->getPID().fileID())+" Page: "+std::to_string(lBCB->getPID().pageNo()));
-=======
-    for(auto& lBCB : lBCBs){
->>>>>>> 408e9b8c2dc06d7df161bb0536b36693ef3e7912
         flush(lBCB);
     }
     TRACE("Finished flushing the complete buffer");
