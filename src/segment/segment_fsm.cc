@@ -240,7 +240,7 @@ void SegmentFSM::storeSegment() {
     uint j = 0;
     uint k;
     uint managedPages = _pages.size();
-    uint maxPerPage = lPageSize - sizeof(segment_fsm_header_t);
+    uint maxPerPage = (lPageSize - sizeof(segment_fsm_header_t))/sizeof(uint32_t);
     segment_fsm_header_t lHeader;
     basic_header_t lBH;
     PID lPID;

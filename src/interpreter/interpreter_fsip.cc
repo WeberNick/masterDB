@@ -175,22 +175,23 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     //free from _managedPages remainnigPages many
     header()->_freeBlocksCount += remainingPages; //mark how many new free pages there will be.
     //first byte aligned or not
-    //TRACE(std::to_string(header()->_managedPages));
+    TRACE(std::to_string(header()->_managedPages));
         if(header()->_managedPages % 8 !=0){
             //changed to shift right, negate result
             lMask = (~lMask) << (header()->_managedPages % 8);
             *(((uint8_t *)lPP) + (header()->_managedPages) / 8) = ~lMask;
-            remainingPages -= header()->_managedPages % 8;
+            remainingPages -= 8 - (header()->_managedPages % 8);
             start = header()->_managedPages/8 + 1;
+            TRACE(std::to_string(lMask));
         }
         else{
             start = header()->_managedPages/8;
         }
-       // TRACE(std::to_string(start));
+        TRACE(std::to_string(start));
         //free all aligned bytes
         size_t i = 0;
         size_t max = remainingPages/8;
-       // TRACE(std::to_string(max));
+        TRACE(std::to_string(max));
         while( i < max){
             *(((uint8_t *)lPP) + i + start) = 0;
             remainingPages -= 8;
@@ -201,6 +202,7 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
             lMask = 0;
             //changed to shift left
             lMask = (~lMask) << remainingPages;
+            TRACE(std::to_string(remainingPages)+" mask to this: "+std::to_string(lMask));
            *(((uint8_t *)lPP) + i + start) &= lMask;
         }
         //next free page is position up to which pages were managed till now.

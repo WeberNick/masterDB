@@ -126,7 +126,7 @@ void PartitionFile::remove()
 
 void PartitionFile::printPage(uint aPageIndex)
 {
-    TRACE("pagePrinted");
+    TRACE("printing Page "+std::to_string(aPageIndex));
     open();
     byte *lPagePointer = new byte[_pageSize];
     readPage(lPagePointer, aPageIndex, _pageSize);

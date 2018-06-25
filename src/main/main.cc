@@ -52,6 +52,8 @@ void testJonas1() {
         Employee_T emp (1,"zwei",i);
         lSeg->insertTuple(emp);
     }
+        ((PartitionFile*)lPart)->printPage(0);
+
    // lSeg->insertTuple((byte*) &lTuple, sizeof(lTuple));
    // char lTuple2[] = "SomeMoreRandomChars";
    // lSeg->insertTuple((byte*) &lTuple2,20);
@@ -92,15 +94,33 @@ void testJonas2(){
     TRACE("create a new Partition");
     PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     lPart->open();
-    for (size_t i = 0;i<220;++i){
-        std::cout<<lPart->allocPage()<<std::endl;
+    for (size_t i = 0;i<5000;++i){
+        uint page = lPart->allocPage();
+        std::cout<<page<<std::endl;
+        if(page!=i+1){
+            break;
+        }
     }
     ((PartitionFile*)lPart)->printPage(0);
     lPart->close();
 }
-void testStartUp(const control_block_t &aControlBlock){
+void testJonas3(){
+    const control_block_t lCB = {
+            false,
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
+            4096,
+            100000,
+            true
+        };
+        std::cout << lCB;
     
-    DatabaseInstanceManager::getInstance().init(aControlBlock);
+    Trace::getInstance().init(lCB);
+    PartitionManager::getInstance().init(lCB);
+    SegmentManager::getInstance().init(lCB);
+    BufferManager::getInstance().init(lCB);
+    DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
+
     /*TRACE("GET SEGMENT");
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(1);
     TRACE("GET PAGE");
@@ -323,15 +343,6 @@ int main(const int argc, const char* argv[]) {
 
        // testTupleToDIsk();
 
-//second CB for start up.
-        const control_block_t lCB2 = {
-            false,
-            C_MASTER_PARTITION_PATH,
-            C_TRACE_DIR_PATH,
-            C_PAGE_SIZE,
-            C_BUFFER_POOL_SIZE,
-            C_TRACE_ACTIVATED
-        };
       //  CommandParser::getInstance().init(lCB);
         // init all global singletons
         //Trace::getInstance().init(lCB);
@@ -341,8 +352,8 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
-
-       testJonas2();
+       // testJonas1();
+      testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh
