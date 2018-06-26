@@ -63,7 +63,7 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     for (size_t i = 0; i < _fsmPages.size(); ++i) {
         uint32_t lFSMPage = _fsmPages[i];
         lPID._pageNo = lFSMPage;
-        lBcb = _bufMan.fix(lPID, kEXCLUSIVE); 
+        lBcb = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
         lPagePointer = _bufMan.getFramePtr(lBcb);
         fsmp.attach(lPagePointer);
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
@@ -196,7 +196,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     TRACE(" ");
     while (lnxIndex != 0) {
         lPID =  {_partition.getID(),lnxIndex};
-        lBCB = _bufMan.fix(lPID, kSHARED);
+        lBCB = _bufMan.fix(lPID, LOCK_MODE::kSHARED);
         lPageBuffer = _bufMan.getFramePtr(lBCB);
         lHeader = *((segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)));
         _indexPages.push_back(lnxIndex);
@@ -216,7 +216,7 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
     while (_fsmPages.at(_fsmPages.size() -1) != 0) {
         TRACE("Load FSMs");
         lPID._pageNo = _fsmPages.at(_fsmPages.size() -1);
-        lBCB = _bufMan.fix(lPID, kSHARED);
+        lBCB = _bufMan.fix(lPID, LOCK_MODE::kSHARED);
         lPageBuffer = _bufMan.getFramePtr(lBCB);
         lHeader2 = *(fsm_header_t *)(lPageBuffer + lPageSize - sizeof(fsm_header_t));
         _fsmPages.push_back(lHeader2._nextFSM);
@@ -252,7 +252,7 @@ void SegmentFSM::storeSegment() {
 
     while (j < _indexPages.size() - 1) {
         lPID={_partition.getID(),_indexPages.at(j)};
-        lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
+        lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
         lPageBuffer = _bufMan.getFramePtr(lBCB);
         k = 0;
         TRACE("i"+std::to_string(i)+" managedPages "+std::to_string(managedPages)+" k "+std::to_string(k)+" maxPerPage "+std::to_string(maxPerPage));

@@ -48,11 +48,11 @@ void SegmentBase::erase(){
 
 byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
 {
-    if(aMode == kNOLOCK)
+    if(toType(aMode) == toType(LOCK_MODE::kNOLOCK))
         return getPageF(aPageNo);
-    else if(aMode == kSHARED)
+    else if(toType(aMode) == toType(LOCK_MODE::kSHARED))
         return getPageS(aPageNo);
-    else if(aMode == kEXCLUSIVE)
+    else if(toType(aMode) == toType(LOCK_MODE::kEXCLUSIVE))
         return getPageX(aPageNo);
     else 
         return nullptr;
@@ -78,7 +78,7 @@ void SegmentBase::releasePage(const uint aPageNo, const bool aModified)
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
-        if(lBCB->getLockMode() == kEXCLUSIVE){ lBCB->setModified(aModified); }
+        if(toType(lBCB->getLockMode()) == toType(LOCK_MODE::kEXCLUSIVE)){ lBCB->setModified(aModified); }
         _bufMan.unfix(lBCB);
     }
     lBCB = nullptr;
@@ -91,11 +91,11 @@ byte* SegmentBase::getPageF(const uint aPageNo)
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
-        lBCB = _bufMan.fix(lPID, kNOLOCK);
+        lBCB = _bufMan.fix(lPID, LOCK_MODE::kNOLOCK);
         _pages.at(aPageNo).second = lBCB;
 
     }
-    else if(lBCB->getLockMode() < kNOLOCK) //should never occur
+    else if(toType(lBCB->getLockMode()) < toType(LOCK_MODE::kNOLOCK)) //should never occur
     {
         std::cerr << "BCB has lock type 'kNoType', this should not occur!" << std::endl;
         return nullptr;
@@ -113,13 +113,13 @@ byte* SegmentBase::getPageS(const uint aPageNo)
     {
             TRACE("Fix it");
 
-        lBCB = _bufMan.fix(lPID, kSHARED);
+        lBCB = _bufMan.fix(lPID, LOCK_MODE::kSHARED);
         _pages.at(aPageNo).second = lBCB;
     }
     else
     {
-        if(!(kNOLOCK < lBCB->getLockMode())) //check if we have at least a shared lock on BCB
-            lBCB->upgradeLock(kSHARED);
+        if(!(toType(LOCK_MODE::kNOLOCK) < toType(lBCB->getLockMode()))) //check if we have at least a shared lock on BCB
+            lBCB->upgradeLock(LOCK_MODE::kSHARED);
     }
     return _bufMan.getFramePtr(lBCB);
 }
@@ -131,13 +131,15 @@ byte* SegmentBase::getPageX(const uint aPageNo)
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) //no valid BCB -> this segment has to request the page again
     {
-        lBCB = _bufMan.fix(lPID, kEXCLUSIVE);
+        lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE);
         _pages.at(aPageNo).second = lBCB;
     }
     else
     {
-        if(lBCB->getLockMode() != kEXCLUSIVE) //check if we have at least a shared lock on BCB
-            lBCB->upgradeLock(kEXCLUSIVE);
+        if(toType(lBCB->getLockMode()) != toType(LOCK_MODE::kEXCLUSIVE)) //check if we have at least a shared lock on BCB
+        {   
+            lBCB->upgradeLock(LOCK_MODE::kEXCLUSIVE); 
+        }
     }
     return _bufMan.getFramePtr(lBCB);
 }
@@ -148,7 +150,7 @@ void SegmentBase::printPageToFile(uint aPageNo, bool afromDisk ) {
 
     byte* lPP2;
     if(!afromDisk){
-        lPP2 = getPage(aPageNo, kSHARED);
+        lPP2 = getPage(aPageNo, LOCK_MODE::kSHARED);
     }
     else{
         lPP2 = new byte[4096];

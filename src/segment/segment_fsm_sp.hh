@@ -63,7 +63,7 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 		lBCB = _bufMan.emptyfix(lPID);
 	}
 	else{
-		lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
+		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
@@ -106,7 +106,7 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
         return result; 
     }
     size_t index = it - _pages.cbegin();
-    byte* lPagePtr = getPage(index, kNOLOCK);
+    byte* lPagePtr = getPage(index, LOCK_MODE::kNOLOCK);
     InterpreterSP lInterpreter;
     lInterpreter.attach(lPagePtr);
     byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());

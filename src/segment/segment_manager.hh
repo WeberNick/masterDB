@@ -119,7 +119,7 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
     uint j;
     for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
-      lPage = lSegments->getPage(i, kSHARED);
+      lPage = lSegments->getPage(i, LOCK_MODE::kSHARED);
 
    	  lInterpreter.attach(lPage);
       j = 0;
@@ -130,7 +130,7 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
           TRACE(std::to_string(j)+" "+lTuple.to_string());
         if(lTuple.ID() == aID){
             //mark deleted
-            lSegments->getPage(i, kEXCLUSIVE);
+            lSegments->getPage(i, LOCK_MODE::kEXCLUSIVE);
             lInterpreter.deleteRecordSoft(j);
             lSegments->releasePage(i, true);
             TRACE("Tuple deleted successfully.");

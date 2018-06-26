@@ -21,7 +21,7 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 		lBCB = _bufMan.emptyfix(lPID);
 	}
 	else{
-		lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
+		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
     auto it = std::find_if(_pages.begin(), _pages.end(), [lPID] (const std::pair<PID, BCB*>& elem) { return elem.first == lPID; }); //get iterator to PID in page vector
     if(it != _pages.end())

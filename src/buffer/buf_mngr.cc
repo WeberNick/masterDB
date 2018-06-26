@@ -213,7 +213,7 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
     getFreeBCBs().getFreeBCBListMtx().unlock(); //unlock mutex of free BCB list
     /* init BCB */
     lFBCB->getMtx().lock(); //lock mutex of free BCB
-    lFBCB->setLockMode(kNoType); //indicate mutex has no lock type yet 
+    lFBCB->setLockMode(LOCK_MODE::kNoType); //indicate mutex has no lock type yet 
     lFBCB->setFrameIndex(INVALID); //INVALID defined in types.hh
     lFBCB->setPID(aPageID); //store requested page
     lFBCB->setModified(false); //page is not modified

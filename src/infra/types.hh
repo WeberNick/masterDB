@@ -15,10 +15,16 @@
 #include <mutex>
 #include <shared_mutex>
 #include <iostream>
-#include <sstream>
+#include <type_traits>
+#include <cassert>
 
 using byte = std::byte;
 using size_t = std::size_t;
+using uint8_t = std::uint8_t;
+using uint16_t = std::uint16_t;
+using uint32_t = std::uint32_t;
+using uint64_t = std::uint64_t;
+using int8_t = std::int8_t;
 using uint = unsigned int;
 using char_vpt = std::vector<char*>;
 using uint_vt = std::vector<uint>;
@@ -109,7 +115,7 @@ struct tuple_identifier_t
 using TID = tuple_identifier_t;
 using tid_vt = std::vector<TID>;
 
-enum class PageStatus 
+enum class PageStatus: int8_t
 {
     kNoType = -1,
     kBUCKET0 = 0,
@@ -131,7 +137,7 @@ enum class PageStatus
     kPageStatusSize = 16
 };
 
-enum LOCK_MODE
+enum class LOCK_MODE: int8_t
 {
     kNoType = -1,
     kNOLOCK = 0,
@@ -140,16 +146,34 @@ enum LOCK_MODE
     kLockModeSize = 3
 };
 
+template<typename E>
+constexpr auto toType(E enumerator) noexcept
+{
+    return static_cast<std::underlying_type_t<E>>(enumerator);
+}
+
 inline std::string lockModeToString(LOCK_MODE aMode)
 {
     switch(aMode)
     {
-        case kNoType: return std::string("kNoType"); break;
-        case kNOLOCK: return std::string ("kNOLOCK"); break;
-        case kSHARED: return std::string("kSHARED"); break;
-        case kEXCLUSIVE: return std::string("kEXCLUSIVE"); break;
-        case kLockModeSize: return std::string("Number of lock types: ") + std::to_string(kLockModeSize); break;
-        default: return std::string(""); break;
+        case LOCK_MODE::kNoType: 
+            return std::string("kNoType"); 
+            break;
+        case LOCK_MODE::kNOLOCK: 
+            return std::string ("kNOLOCK"); 
+            break;
+        case LOCK_MODE::kSHARED: 
+            return std::string("kSHARED"); 
+            break;
+        case LOCK_MODE::kEXCLUSIVE: 
+            return std::string("kEXCLUSIVE"); 
+            break;
+        case LOCK_MODE::kLockModeSize: 
+            return std::string("Number of lock types: ") + std::to_string(toType(LOCK_MODE::kLockModeSize)); 
+            break;
+        default: 
+            assert (!"Invalid default-case of switch statement reached"); 
+            break;
     }
 }
 
