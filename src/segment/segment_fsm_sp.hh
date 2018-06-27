@@ -55,7 +55,7 @@ class SegmentFSM_SP : public SegmentFSM
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
 
 protected:
-	void erase();
+	void erase() override;
 };
 
 template<typename Tuple_T>
@@ -153,6 +153,8 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
     else
     {
         TRACE("## This should not be printed");
+        //terminate and find bug
+        throw ReturnException(FLF);
     }
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 

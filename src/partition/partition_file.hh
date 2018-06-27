@@ -34,7 +34,7 @@ class PartitionFile : public PartitionBase
          *  @return an index to the allocated page
          *  @see    partition_base.hh
          */
-        virtual uint32_t allocPage();
+        uint32_t allocPage() override;
 
         void printPage(uint aPageIndex);
 
@@ -42,8 +42,8 @@ class PartitionFile : public PartitionBase
         /**
         * @brief Retrieves the size of the file
         */
-        virtual size_t partSize() noexcept;
-        virtual size_t partSizeInPages() noexcept;
+        size_t partSize() noexcept override;
+        size_t partSizeInPages() noexcept override;
         inline uint16_t getGrowthIndicator() const noexcept { return _growthIndicator; }
         inline uint16_t getGrowthIndicator() noexcept { return _growthIndicator; }
         inline std::string to_string() const noexcept { return PartitionBase::to_string() + std::string(", Growth : ") + std::to_string(getGrowthIndicator()); }
@@ -51,8 +51,8 @@ class PartitionFile : public PartitionBase
 
 
     private:
-        void create();
-        void remove();
+        void create() override;
+        void remove() override;
 
     private:
         /* An indicator how the partition will grow (indicator * block size) */
