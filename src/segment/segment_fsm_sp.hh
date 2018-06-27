@@ -48,6 +48,8 @@ class SegmentFSM_SP : public SegmentFSM
     template<typename Tuple_T>
     Tuple_T getTuple(const TID& aTID);
 
+    PID getFreePage(uint aNoOfBytes, bool& emptyfix);
+
     int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
@@ -109,7 +111,30 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
         lTotalSize += iter.size();
         lTotalSize += sizeof(InterpreterSP::slot_t);
     }
-	PID lPID = getFreePage(lTotalSize, emptyfix);
+    PID lPID;
+    try{
+	    lPID = SegmentFSM::getFreePage(lTotalSize, emptyfix);
+    }
+    //exception handling buggy, will be fixed tomorrow
+    catch(NSMException ex){
+        //lTotalSize is bigger than size of a page. 
+        //Now we try to approx the bin packing problem (NP hard) by a greedy algorithm...
+        uint lPageSize = getPageSize() - sizeof(fsm_header_t);
+        uint lPartSize;
+        uint start = 0;
+        uint end = 0;
+        while(start < aTupleVector.size()){
+            lPartSize = 0;
+            start = end;
+            while ((lPartSize < lPageSize) & (end < aTupleVector.size())){
+                lPartSize += aTupleVector.at(end).size() + sizeof(InterpreterSP::slot_t);
+                ++end;
+            }
+            std::vector<Tuple_T> temp (aTupleVector.begin()+start, aTupleVector.begin()+end);
+            tid_vt tempRes = insertTuples(temp);
+            result.insert( result.end(), tempRes.begin(), tempRes.end() );
+        }
+    }
 	BCB* lBCB;
     //fix page, if it is new, use different command on buffer
 	if(emptyfix){

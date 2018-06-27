@@ -50,12 +50,12 @@ void testJonas1() {
     //insert a tuple
      TRACE("INSERT STUFF");
      std::vector<Employee_T> emps;
-     for(uint i = 0;i<25;++i){
+     for(uint i = 0;i<500;++i){
             Employee_T emp ("zwei",i, 2);
             emps.push_back(emp);
      }
     tid_vt res;
-    for(size_t i =0; i<100;++i){
+    for(size_t i =0; i<3;++i){
         tid_vt temp = lSeg->insertTuples(emps);
         res.insert( res.end(), temp.begin(), temp.end() );
     }
@@ -190,7 +190,7 @@ void testNick()
     std::cout << "######  Nick's Test Method is Executed ##########" << std::endl;
     // ASSIGN APPROPRIATE TESTING PARAS
     const bool          C_INSTALL                   = true;
-    const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/Partitions/MasterPartition");
+    /*const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/Partitions/MasterPartition");
     const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
     const size_t        C_PAGE_SIZE                 = 4096;
     const size_t        C_BUFFER_POOL_SIZE          = 100000;
@@ -204,16 +204,16 @@ void testNick()
         C_BUFFER_POOL_SIZE,
         C_TRACE_ACTIVATED
     };
-    std::cout << lCB;
+    std::cout << lCB;*/
 
-    /*const control_block_t lCB = {
+    const control_block_t lCB = {
             true,
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
             4096,
             100000,
             true
-        };*/
+        };
 
     Trace::getInstance().init(lCB);
     PartitionManager::getInstance().init(lCB);
@@ -226,8 +226,8 @@ void testNick()
     BufferManager& bm = BufferManager::getInstance();
     DatabaseInstanceManager& dbim = DatabaseInstanceManager::getInstance();
 
-    const std::string lPathToPartitions = std::string(std::getenv("HOME") + std::string("/Desktop/Partitions/"));
-  //  const std::string lPathToPartitions = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
+  //  const std::string lPathToPartitions = std::string(std::getenv("HOME") + std::string("/Desktop/Partitions/"));
+    const std::string lPathToPartitions = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
 
     if(C_INSTALL)
     {
@@ -265,7 +265,7 @@ void testNick()
         const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
         const std::array<double, 4>       salaries    = {999.99, 2499.32, 4715.12, 2394.56};
 
-        constexpr size_t noPartitions = 5;
+        constexpr size_t noPartitions = 2;
         constexpr size_t noSegementsPerPartition = 5000;
         constexpr size_t noTuplesPerSegment = 50;
 
@@ -420,8 +420,8 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
-        testNick();
-      //  testJonas2();
+      //  testNick();
+        testJonas1();
       //testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);

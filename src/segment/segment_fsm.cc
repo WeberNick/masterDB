@@ -53,6 +53,11 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
     TRACE("Request for a page with " + std::to_string(aNoOfBytes) + " Bytes free");
     const uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
     /* Check if page with enough space is available using FF algorithm. */
+    if(aNoOfBytes > lPageSizeInBytes){
+        std::string errMsg = "requested more space than the size of a page.";
+        TRACE(errMsg);
+        throw NSMException(FLF,errMsg);
+    }
     byte *lPagePointer = nullptr;
     InterpreterFSM fsmp;
     emptyfix = false;

@@ -13,7 +13,7 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock)
 
 TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	TRACE("trying to insert Tuple");
-	// get page with enough space for the tuple and load it into memory
+    // get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTupleSize, emptyfix);
 	BCB* lBCB;
@@ -59,6 +59,10 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
     return resultTID;
+}
+
+PID SegmentFSM_SP::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
+    return SegmentFSM::getFreePage(aNoOfBytes + sizeof(InterpreterSP::slot_t),emptyfix);
 }
 
 tid_vt SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
