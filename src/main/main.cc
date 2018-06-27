@@ -193,7 +193,7 @@ void testNick()
     const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/Partitions/MasterPartition");
     const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
     const size_t        C_PAGE_SIZE                 = 4096;
-    const size_t        C_BUFFER_POOL_SIZE          = 100000;
+    const size_t        C_BUFFER_POOL_SIZE          = 100;
     const bool          C_TRACE_ACTIVATED           = true;
 
     const control_block_t lCB = {
@@ -229,6 +229,25 @@ void testNick()
     const std::string lPathToPartitions = std::string(std::getenv("HOME") + std::string("/Desktop/Partitions/"));
   //  const std::string lPathToPartitions = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
 
+
+    #include <array>
+    const std::array<std::string, 4>    forenames   = {"Nick", "Nicolas", "Jonas", "Aljoscha"};
+    const std::array<std::string, 4>    lastnames   = {"Weber", "Wipfler", "Thietke", "Narr"};
+    const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
+    const std::array<double, 4>       salaries    = {999.99, 2499.32, 4715.12, 2394.56};
+
+    constexpr size_t noPartitions = 5;
+    constexpr size_t noSegementsPerPartition = 1000;
+    constexpr size_t noTuplesPerSegment = 50;
+
+    TRACE(">> Test Setting: Partitions : " + std::to_string(noPartitions) + ", Segments : " + std::to_string(noSegementsPerPartition) + ", Tuples : " + std::to_string(noTuplesPerSegment));
+    std::cout << ">> Test Setting: Partitions : " + std::to_string(noPartitions) + ", Segments : " + std::to_string(noSegementsPerPartition) + ", Tuples : " + std::to_string(noTuplesPerSegment) << std::endl;
+
+    std::array<PartitionFile*, noPartitions> partitions;
+    std::array<std::array<SegmentFSM_SP*, noSegementsPerPartition>, noPartitions> segments;
+    std::array<std::array<std::array<TID, noTuplesPerSegment>, noSegementsPerPartition>, noPartitions> tids;
+
+
     if(C_INSTALL)
     {
         TRACE("### TEST FROM INSTALL ###");
@@ -257,21 +276,6 @@ void testNick()
 
         TRACE("## TEST : Bulk Insert");
         std::cout << "## TEST : Bulk Insert" << std::endl;
-        #include <array>
-        #include <vector>
-        #include <unordered_map>
-        const std::array<std::string, 4>    forenames   = {"Nick", "Nicolas", "Jonas", "Aljoscha"};
-        const std::array<std::string, 4>    lastnames   = {"Weber", "Wipfler", "Thietke", "Narr"};
-        const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
-        const std::array<double, 4>       salaries    = {999.99, 2499.32, 4715.12, 2394.56};
-
-        constexpr size_t noPartitions = 5;
-        constexpr size_t noSegementsPerPartition = 5000;
-        constexpr size_t noTuplesPerSegment = 50;
-
-        std::array<PartitionFile*, noPartitions> partitions;
-        std::array<std::array<SegmentFSM_SP*, noSegementsPerPartition>, noPartitions> segments;
-        std::array<std::array<std::array<TID, noTuplesPerSegment>, noSegementsPerPartition>, noPartitions> tids;
 
         for(size_t i = 0; i < noPartitions; ++i)
         {
@@ -283,10 +287,10 @@ void testNick()
             for(size_t j = 0; j < noSegementsPerPartition; ++j)
             {
                 const std::string segName = std::string("Segment") + std::to_string(j)/* + std::string("_") + partName*/;
-                //TRACE("## TEST : Create " + segName);
-                //std::cout << "## TEST : Create " << segName << std::endl;
+                TRACE("## TEST : Create " + segName);
+                std::cout << "## TEST : Create " << segName << std::endl;
                 segments[i][j] = sm.createNewSegmentFSM_SP(*partitions.at(i), segName);
-                std::cout << *segments[i][j] << std::endl;
+                if(j % (noSegementsPerPartition / 100) == 0){ std::cout << *segments[i][j] << std::endl; }
 
                 for(size_t k = 0; k < noTuplesPerSegment; ++k)
                 {

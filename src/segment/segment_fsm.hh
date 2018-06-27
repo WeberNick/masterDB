@@ -34,12 +34,12 @@ class SegmentFSM : public SegmentBase
 
   public:
     PID getFreePage(uint aNoOfBytes, bool& emptyfix);
-    PID getNewPage();
-    void erase();
+    PID getNewPage() override;
 
-  public:
-    void storeSegment();                         // serialization
-    void loadSegment(const uint32_t aPageIndex); // deserialization
+  protected:
+    void storeSegment() override;                         // serialization
+    void loadSegment(const uint32_t aPageIndex) override; // deserialization
+    void erase() override;
 
   protected:
     /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */
