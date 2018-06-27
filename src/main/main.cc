@@ -94,12 +94,12 @@ void testJonas2(){
     TRACE("create a new Partition");
     PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     lPart->open();
-    for (size_t i = 0;i<5000;++i){
+    for (size_t i = 0;i<200000;++i){
         uint page = lPart->allocPage();
         std::cout<<page<<std::endl;
-        if(page!=i+1){
+        /*if(page!=i+1){
             break;
-        }
+        }*/
     }
     ((PartitionFile*)lPart)->printPage(0);
     lPart->close();
@@ -387,8 +387,8 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
-        testNick();
-       // testJonas1();
+       // testNick();
+        testJonas2();
       //testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);

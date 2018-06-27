@@ -159,7 +159,8 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     if(freeOnThisPage == 0){
         return aNumberOfPages;
     }
-    int64_t ldist = freeOnThisPage - aNumberOfPages;
+    int64_t ldist = ((int64_t)freeOnThisPage) - ((int64_t)aNumberOfPages);
+    TRACE("ldist: "+std::to_string(ldist));
     byte* lPP = _pp;
     uint8_t lMask = 0;
     uint remainingPages; //to be set on this FSIP
@@ -172,10 +173,11 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
          //free rest of page by setting remainingPages to rest of bits.
         remainingPages = aMaxPagesPerFSIP - header()->_managedPages;
     }
+    TRACE("remainingPages "+std::to_string(remainingPages));
     //free from _managedPages remainnigPages many
     header()->_freeBlocksCount += remainingPages; //mark how many new free pages there will be.
     //first byte aligned or not
-    TRACE(std::to_string(header()->_managedPages));
+    TRACE("managedPages "+std::to_string(header()->_managedPages));
         if(header()->_managedPages % 8 !=0){
             //changed to shift right, negate result
             lMask = (~lMask) << (header()->_managedPages % 8);
@@ -187,16 +189,18 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
         else{
             start = header()->_managedPages/8;
         }
-        TRACE(std::to_string(start));
+        TRACE("start "+std::to_string(start));
         //free all aligned bytes
         size_t i = 0;
         size_t max = remainingPages/8;
-        TRACE(std::to_string(max));
+        TRACE("max "+std::to_string(max));
         while( i < max){
             *(((uint8_t *)lPP) + i + start) = 0;
             remainingPages -= 8;
             ++i;
         }
+        
+        TRACE("remainingPages "+std::to_string(remainingPages));
         //if there are some left
         if(remainingPages !=0 ){
             lMask = 0;
@@ -212,14 +216,15 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     if (ldist >=0) 
     {
         header()->_managedPages += aNumberOfPages;
-        //debug(header()->_basicHeader._pageIndex);
+  //      debug(header()->_basicHeader._pageIndex);
 
         return 0;
     }
     else{
          //free rest of page by setting remainingPages to rest of bits.
-        header()->_freeBlocksCount = 
+    //    header()->_freeBlocksCount = 
         header()->_managedPages = aMaxPagesPerFSIP;
+   //     debug(header()->_basicHeader._pageIndex);
         return static_cast<uint32_t>((-1)* ldist); //contains pages to be managed by next fsip
     }
 }
