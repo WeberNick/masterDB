@@ -119,10 +119,13 @@ void InterpreterFSIP::reservePage(const uint aPageIndex) noexcept {
 void InterpreterFSIP::freePage(const uint aPageIndex) noexcept {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
+    TRACE("lPageIndex "+std::to_string(lPageIndex));
+    TRACE("next free Page: "+std::to_string(_header->_nextFreePage));
 
     if (_header->_nextFreePage > lPageIndex) {
         _header->_nextFreePage = lPageIndex;
     }
+    TRACE("next free Page: "+std::to_string(_header->_nextFreePage));
 
     // uint8_t lBitindex = 7 - (lPageIndex % 8);
     // uint8_t lMask = 1;

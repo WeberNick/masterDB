@@ -132,6 +132,7 @@ void PartitionBase::freePage(const uint32_t aPageIndex)
 	//TRACE(std::to_string((aPageIndex % (getMaxPagesPerFSIP() +1)) -1));
 	fsip.freePage(aPageIndex);
 	fsip.detach();
+	writePage(lPagePointer, fsipIndex,_pageSize);
 	delete[] lPagePointer;
 }
 

@@ -42,15 +42,29 @@ void testJonas1() {
     TRACE("create a new Partition");
     PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     TRACE("create a Segment");
+    SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bli");
     SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bla");
-    char lTuple[] = "ThisDoesNotWork";
     TRACE("get segment and insert tuple");
-    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bli");
+    SegmentFSM_SP* lSeg2 = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
     //insert a tuple
      TRACE("INSERT STUFF");
-    for(size_t i =0; i<100000;++i){
-        Employee_T emp ("zwei",i, 2);
-        lSeg->insertTuple(emp);
+     std::vector<Employee_T> emps;
+     for(uint i = 0;i<25;++i){
+            Employee_T emp ("zwei",i, 2);
+            emps.push_back(emp);
+     }
+    tid_vt res;
+    for(size_t i =0; i<100;++i){
+        tid_vt temp = lSeg->insertTuples(emps);
+        res.insert( res.end(), temp.begin(), temp.end() );
+    }
+    size_t i = 0;
+    for (auto& a : res){
+
+        Employee_T e = lSeg->getTuple<Employee_T>(a);
+        std::cout<<i++<<"  " <<e.to_string()<<std::endl;
+
     }
         //((PartitionFile*)lPart)->printPage(0);
 
@@ -94,12 +108,13 @@ void testJonas2(){
     TRACE("create a new Partition");
     PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     lPart->open();
-    for (size_t i = 0;i<200000;++i){
+    for (size_t i = 0;i<50000;++i){
         uint page = lPart->allocPage();
         std::cout<<page<<std::endl;
-        /*if(page!=i+1){
-            break;
-        }*/
+        if(i>10 & (i % 11 == 0)){
+            std::cout<<"free: "<<i-10<<std::endl;
+            lPart->freePage(i-10);
+        }
     }
     ((PartitionFile*)lPart)->printPage(0);
     lPart->close();
@@ -131,8 +146,16 @@ void testJonas3(){
   //  PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(std::getenv("HOME") + std::string("/MasterTeamProjekt/Partition"),"whatsoever",100);
  //   TRACE("create a Segment");
   //  SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bliblablub");
-    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(6);
     ((PartitionFile*) PartitionManager::getInstance().getPartition(2))->printPage(2);
+    TRACE("INSERT STUFF");
+    for(size_t i =0; i<20;++i){
+        Employee_T emp ("zwei",i, 1);
+        lSeg->insertTuple(emp);
+    }
+
+    SegmentManager::getInstance().deleteSegment("Segment400");
+    lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(100);
     TRACE("INSERT STUFF");
     for(size_t i =0; i<20;++i){
         Employee_T emp ("zwei",i, 1);
@@ -183,6 +206,15 @@ void testNick()
     };
     std::cout << lCB;
 
+    /*const control_block_t lCB = {
+            true,
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
+            std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
+            4096,
+            100000,
+            true
+        };*/
+
     Trace::getInstance().init(lCB);
     PartitionManager::getInstance().init(lCB);
     SegmentManager::getInstance().init(lCB);
@@ -195,6 +227,7 @@ void testNick()
     DatabaseInstanceManager& dbim = DatabaseInstanceManager::getInstance();
 
     const std::string lPathToPartitions = std::string(std::getenv("HOME") + std::string("/Desktop/Partitions/"));
+  //  const std::string lPathToPartitions = std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/");
 
     if(C_INSTALL)
     {
@@ -232,9 +265,9 @@ void testNick()
         const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
         const std::array<double, 4>       salaries    = {999.99, 2499.32, 4715.12, 2394.56};
 
-        constexpr size_t noPartitions = 1;
-        constexpr size_t noSegementsPerPartition = 100;
-        constexpr size_t noTuplesPerSegment = 5000;
+        constexpr size_t noPartitions = 5;
+        constexpr size_t noSegementsPerPartition = 5000;
+        constexpr size_t noTuplesPerSegment = 50;
 
         std::array<PartitionFile*, noPartitions> partitions;
         std::array<std::array<SegmentFSM_SP*, noSegementsPerPartition>, noPartitions> segments;
@@ -249,7 +282,7 @@ void testNick()
             std::cout << *partitions.at(i) << std::endl;
             for(size_t j = 0; j < noSegementsPerPartition; ++j)
             {
-                const std::string segName = std::string("Segment") + std::to_string(j) + std::string("_") + partName;
+                const std::string segName = std::string("Segment") + std::to_string(j)/* + std::string("_") + partName*/;
                 //TRACE("## TEST : Create " + segName);
                 //std::cout << "## TEST : Create " << segName << std::endl;
                 segments[i][j] = sm.createNewSegmentFSM_SP(*partitions.at(i), segName);
@@ -387,8 +420,8 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
-       // testNick();
-        testJonas2();
+        testNick();
+      //  testJonas2();
       //testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);

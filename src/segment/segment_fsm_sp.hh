@@ -42,12 +42,12 @@ class SegmentFSM_SP : public SegmentFSM
     TID insertTuple(byte* aTuple, const uint aTupleSize);
 
     template<typename Tuple_T>
-    TID insetTuples(const std::vector<Tuple_T&> aTupleVector);
+    tid_vt insertTuples(const std::vector<Tuple_T>& aTupleVector);
     tid_vt insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
 
     template<typename Tuple_T>
     Tuple_T getTuple(const TID& aTID);
-    
+
     int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
@@ -99,7 +99,7 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 }
 
 template<typename Tuple_T>
-TID SegmentFSM_SP::insetTuples(const std::vector<Tuple_T&> aTupleVector){
+tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
     TRACE("trying to insert many Tuples");
 	// get page with enough space for the tuples and load it into memory
 	tid_vt result;
