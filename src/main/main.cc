@@ -52,7 +52,7 @@ void testJonas1() {
         Employee_T emp ("zwei",i, 2);
         lSeg->insertTuple(emp);
     }
-        ((PartitionFile*)lPart)->printPage(0);
+        //((PartitionFile*)lPart)->printPage(0);
 
    // lSeg->insertTuple((byte*) &lTuple, sizeof(lTuple));
    // char lTuple2[] = "SomeMoreRandomChars";

@@ -266,7 +266,6 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     }
     TRACE("Reading the page from disk into the buffer pool...");
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
-    ((PartitionFile*) lPart)->printPage(aPageID.pageNo());
     lPart->close(); //close partition
     lFBCB->getMtx().unlock_shared();
     TRACE("Read in finished. Page is now in the buffer pool");
