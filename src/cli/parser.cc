@@ -234,7 +234,7 @@ int CP::com_insert_tuple(const char_vpt* args) const {
             int emp_age = atoi(args->at(5));
             std::string emp_name(args->at(6));
             double emp_sal = atof(args->at(7));
-            Employee_T e(emp_age, emp_name, emp_sal);
+            Employee_T e(emp_name, emp_sal, emp_age);
             TRACE("INSERT TUPLE EMPLOYEE");
            ( (SegmentFSM_SP*) (SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
             return CP::CommandStatus::OK;

@@ -121,7 +121,7 @@ class Employee_T
 {
     public:
         Employee_T();
-        Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary); 
+        Employee_T(const std::string& aName, const double aSalary, const uint8_t aAge); 
         Employee_T(const Employee_T& aEmployeeTuple);
         explicit Employee_T(Employee_T&&) = delete;
         Employee_T& operator=(const Employee_T& aEmployeeTuple);
@@ -129,7 +129,7 @@ class Employee_T
         ~Employee_T() = default;
 
     public:
-        void init(const uint8_t aAge, const std::string& aName, const uint16_t aSalary) noexcept;
+        void init(const std::string& aName, const double aSalary, const uint8_t aAge) noexcept;
         void toDisk(byte* aPtr) const noexcept;
         void toDisk(byte* aPtr) noexcept;
         void toMemory(byte* aPtr) noexcept;
@@ -138,22 +138,26 @@ class Employee_T
         //getter
         inline size_t size() const noexcept { return _size; };
         inline size_t size() noexcept { return _size; }
-        inline uint8_t age() const noexcept { return _pAge; }
-        inline uint8_t age() noexcept { return _pAge; }
-        inline const std::string& name() const noexcept { return _pName; }
-        inline const std::string& name() noexcept { return _pName; }
-        inline uint16_t salary() const noexcept { return _pSalary; }
-        inline uint16_t salary() noexcept { return _pSalary; }
-        inline std::string to_string() const noexcept { return std::string("Employee (Name, Age, Salary) : '") + _pName + std::string("', ") + std::to_string(_pAge) + std::string(", ") + std::to_string(_pSalary); }
+        inline uint64_t ID() const noexcept { return _id; }
+        inline uint64_t ID() noexcept { return _id; }
+        inline uint8_t age() const noexcept { return _age; }
+        inline uint8_t age() noexcept { return _age; }
+        inline const std::string& name() const noexcept { return _name; }
+        inline const std::string& name() noexcept { return _name; }
+        inline double salary() const noexcept { return _salary; }
+        inline double salary() noexcept { return _salary; }
+        inline std::string to_string() const noexcept { return std::string("Employee (ID, Name, Age, Salary) : ") + std::to_string(_id) + std::string(", '") + _name + std::string("', ") + std::to_string(_age) + std::string(", ") + std::to_string(_salary); }
         inline std::string to_string() noexcept { return static_cast<const Employee_T&>(*this).to_string(); }
         
     private:
+        static uint64_t _idCount;
         //size of class, with all the strings
         size_t _size;
         /* content of the tuple */
-        uint8_t    _pAge;
-        uint16_t    _pSalary;
-        std::string _pName;
+        uint64_t    _id;
+        double    _salary;
+        uint8_t    _age;
+        std::string _name;
         
 };
 using emp_vt = std::vector<Employee_T>;

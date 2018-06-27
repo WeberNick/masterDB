@@ -49,7 +49,7 @@ void testJonas1() {
     //insert a tuple
      TRACE("INSERT STUFF");
     for(size_t i =0; i<100000;++i){
-        Employee_T emp (1,"zwei",i);
+        Employee_T emp ("zwei",i, 2);
         lSeg->insertTuple(emp);
     }
         ((PartitionFile*)lPart)->printPage(0);
@@ -135,7 +135,7 @@ void testJonas3(){
     ((PartitionFile*) PartitionManager::getInstance().getPartition(2))->printPage(2);
     TRACE("INSERT STUFF");
     for(size_t i =0; i<20;++i){
-        Employee_T emp (1,"zwei",i);
+        Employee_T emp ("zwei",i, 1);
         lSeg->insertTuple(emp);
     }
       
@@ -166,8 +166,8 @@ void testNick()
 {
     std::cout << "######  Nick's Test Method is Executed ##########" << std::endl;
     // ASSIGN APPROPRIATE TESTING PARAS
-    const bool          C_INSTALL                   = false;
-    const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/MasterPartition");
+    const bool          C_INSTALL                   = true;
+    const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/Desktop/Partitions/MasterPartition");
     const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/Desktop/");
     const size_t        C_PAGE_SIZE                 = 4096;
     const size_t        C_BUFFER_POOL_SIZE          = 100000;
@@ -194,14 +194,14 @@ void testNick()
     BufferManager& bm = BufferManager::getInstance();
     DatabaseInstanceManager& dbim = DatabaseInstanceManager::getInstance();
 
-    const std::string lPathToHome = std::string(std::getenv("HOME"));
+    const std::string lPathToPartitions = std::string(std::getenv("HOME") + std::string("/Desktop/Partitions/"));
 
     if(C_INSTALL)
     {
         TRACE("### TEST FROM INSTALL ###");
         TRACE("## TEST : Create Partition");
         std::cout << "## TEST : Create Partition" << std::endl;
-        PartitionFile* myPart = pm.createPartitionFileInstance(lPathToHome + "/Desktop/MyPartition", "MyPartition", 1000);
+        PartitionFile* myPart = pm.createPartitionFileInstance(lPathToPartitions + "MyPartition", "MyPartition", 1000);
         std::cout << *myPart << std::endl;
         TRACE("## TEST : Create Segment");
         std::cout << "## TEST : Create Segment" << std::endl;
@@ -209,7 +209,7 @@ void testNick()
         std::cout << *mySeg << std::endl;
         TRACE("## TEST : Create Tuple");
         std::cout << "## TEST : Create Tuple" << std::endl;
-        Employee_T empTmp(24, "Nick Weber", 2395);
+        Employee_T empTmp("Nick Weber", 2395, 24);
         std::cout << "## TEST : Tuple Created : " << empTmp << std::endl;
         TRACE("## TEST : Insert Tuple");
         std::cout << "## TEST : Insert Tuple" << std::endl;
@@ -220,6 +220,69 @@ void testNick()
         //Does not work
         Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
         std::cout << emp.to_string() << std::endl;
+
+
+        TRACE("## TEST : Bulk Insert");
+        std::cout << "## TEST : Bulk Insert" << std::endl;
+        #include <array>
+        #include <vector>
+        #include <unordered_map>
+        const std::array<std::string, 4>    forenames   = {"Nick", "Nicolas", "Jonas", "Aljoscha"};
+        const std::array<std::string, 4>    lastnames   = {"Weber", "Wipfler", "Thietke", "Narr"};
+        const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
+        const std::array<double, 4>       salaries    = {999.99, 2499.32, 4715.12, 2394.56};
+
+        constexpr size_t noPartitions = 1;
+        constexpr size_t noSegementsPerPartition = 100;
+        constexpr size_t noTuplesPerSegment = 5000;
+
+        std::array<PartitionFile*, noPartitions> partitions;
+        std::array<std::array<SegmentFSM_SP*, noSegementsPerPartition>, noPartitions> segments;
+        std::array<std::array<std::array<TID, noTuplesPerSegment>, noSegementsPerPartition>, noPartitions> tids;
+
+        for(size_t i = 0; i < noPartitions; ++i)
+        {
+            const std::string partName = std::string("Partition") + std::to_string(i);
+            TRACE("## TEST : Create " + partName);
+            std::cout << "## TEST : Create " << partName << std::endl;
+            partitions[i] = pm.createPartitionFileInstance(lPathToPartitions + partName, partName, 100);
+            std::cout << *partitions.at(i) << std::endl;
+            for(size_t j = 0; j < noSegementsPerPartition; ++j)
+            {
+                const std::string segName = std::string("Segment") + std::to_string(j) + std::string("_") + partName;
+                //TRACE("## TEST : Create " + segName);
+                //std::cout << "## TEST : Create " << segName << std::endl;
+                segments[i][j] = sm.createNewSegmentFSM_SP(*partitions.at(i), segName);
+                std::cout << *segments[i][j] << std::endl;
+
+                for(size_t k = 0; k < noTuplesPerSegment; ++k)
+                {
+                    const size_t r1 = rand() % (3 - 0 + 1) + 0;
+                    const size_t r2 = rand() % (3 - 0 + 1) + 0;
+                    const size_t r3 = rand() % (3 - 0 + 1) + 0;
+                    const size_t r4 = rand() % (3 - 0 + 1) + 0;
+
+                    const std::string name = forenames.at(r1) + " " + lastnames.at(r2);
+                    const uint8_t age = ages.at(r3);
+                    const double salary = salaries.at(r4);
+                    Employee_T tmp(name, salary, age);
+
+                    tids[i][j][k] = segments[i][j]->insertTuple<Employee_T>(tmp);
+                }
+            }
+        }
+
+        for(size_t i = 0; i < noPartitions; ++i)
+        {
+            for(size_t j = 0; j < noSegementsPerPartition; ++j)
+            {
+                for(size_t k = 0; k < noTuplesPerSegment; ++k)
+                {
+                    Employee_T emp = segments[i][j]->getTuple<Employee_T>(tids[i][j][k]);
+                    std::cout << emp.to_string() << std::endl;
+                }
+            }
+        }
 
         TRACE("## TEST : Shutdown");
         dbim.shutdown();
@@ -243,34 +306,6 @@ void testNick()
         Employee_T emp = mySeg->getTuple<Employee_T>(myTID);
         std::cout << emp.to_string() << std::endl;
 
-        TRACE("## TEST : Bulk Inserting new Tuples");
-        std::cout << "## TEST : Bulk Inserting new Tuples" << std::endl;
-        #include <array>
-        const std::array<std::string, 4>    forenames   = {"Nick", "Nicolas", "Jonas", "Aljoscha"};
-        const std::array<std::string, 4>    lastnames   = {"Weber", "Wipfler", "Thietke", "Narr"};
-        const std::array<uint8_t, 4>        ages        = {24, 22, 24, 22};
-        const std::array<uint16_t, 4>       salaries    = {999, 2499, 4715, 2394};
-        const size_t                        noRuns      = 100000;
-
-        std::vector<TID> inserts;
-        for(size_t run = 0; run < noRuns; ++run)
-        {
-            const size_t i = rand() % (3 - 0 + 1) + 0;
-            const size_t ii = rand() % (3 - 0 + 1) + 0;
-            const size_t iii = rand() % (3 - 0 + 1) + 0;
-            const size_t iiii = rand() % (3 - 0 + 1) + 0;
-
-            const std::string name = forenames.at(i) + " " + lastnames.at(ii);
-            const uint8_t age = ages.at(iii);
-            const uint16_t salary = salaries.at(iiii);
-            Employee_T tmp(age, name, salary);
-            inserts.push_back(mySeg->insertTuple<Employee_T>(tmp));
-        }
-
-        for(const auto& tid : inserts)
-        {
-            std::cout << mySeg->getTuple<Employee_T>(tid).to_string() << std::endl;
-        }
 
         dbim.shutdown();
     }
@@ -352,8 +387,9 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
+        testNick();
        // testJonas1();
-      testJonas3();
+      //testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh

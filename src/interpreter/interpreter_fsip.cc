@@ -212,7 +212,7 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     if (ldist >=0) 
     {
         header()->_managedPages += aNumberOfPages;
-        debug(header()->_basicHeader._pageIndex);
+        //debug(header()->_basicHeader._pageIndex);
 
         return 0;
     }
