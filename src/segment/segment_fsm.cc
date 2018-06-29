@@ -49,11 +49,11 @@ void SegmentFSM::erase(){
 }
 
 //returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
-PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
+PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfOverhead) {
     TRACE("Request for a page with " + std::to_string(aNoOfBytes) + " Bytes free");
-    const uint lPageSizeInBytes = getPageSize() - sizeof(fsm_header_t);
+    const uint lPageSizeInBytes = getPageSize() - aSizeOfOverhead;
     /* Check if page with enough space is available using FF algorithm. */
-    if(aNoOfBytes > lPageSizeInBytes){
+    if(aNoOfBytes > lPageSizeInBytes){//exception again caught some line later, try to clean this....
         std::string errMsg = "requested more space than the size of a page.";
         TRACE(errMsg);
         throw NSMException(FLF,errMsg);
@@ -72,6 +72,13 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
         lPagePointer = _bufMan.getFramePtr(lBcb);
         fsmp.attach(lPagePointer);
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
+        if (lPageStatus == PageStatus::kNoType){
+            //something went completely wrong
+            std::string errMsg = "asked the interpreter for more space than possible.";
+            TRACE(errMsg);
+            _bufMan.unfix(lBcb);
+            throw NSMException(FLF,errMsg);
+        }
         std::string lMes = std::string("loop iteration ")+std::to_string(i)+" calculated PageStatus: "+std::to_string(static_cast<uint>(lPageStatus));
         TRACE(lMes);
         uint32_t lIndex = fsmp.getFreePage(lPageStatus);

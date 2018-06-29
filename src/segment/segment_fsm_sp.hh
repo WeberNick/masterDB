@@ -113,13 +113,13 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
     }
     PID lPID;
     try{
-	    lPID = SegmentFSM::getFreePage(lTotalSize, emptyfix);
+	    lPID = SegmentFSM::getFreePage(lTotalSize, emptyfix, sizeof(sp_header_t));
     }
     //exception handling buggy, will be fixed tomorrow
     catch(NSMException ex){
         //lTotalSize is bigger than size of a page. 
         //Now we try to approx the bin packing problem (NP hard) by a greedy algorithm...
-        uint lPageSize = getPageSize() - sizeof(fsm_header_t);
+        uint lPageSize = std::ceil(((getPageSize() - sizeof(sp_header_t))/16)*15);
         uint lPartSize;
         uint start = 0;
         uint end = 0;
@@ -130,10 +130,16 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
                 lPartSize += aTupleVector.at(end).size() + sizeof(InterpreterSP::slot_t);
                 ++end;
             }
+            if(lPartSize > lPageSize){
+                end-=2;
+            }
+            TRACE("bin: Tuples from "+std::to_string(start)+" to "+std::to_string(end));
             std::vector<Tuple_T> temp (aTupleVector.begin()+start, aTupleVector.begin()+end);
             tid_vt tempRes = insertTuples(temp);
+            TRACE("partial insert completed");
             result.insert( result.end(), tempRes.begin(), tempRes.end() );
         }
+        return result;
     }
 	BCB* lBCB;
     //fix page, if it is new, use different command on buffer
@@ -209,5 +215,6 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
     lInterpreter.attach(lPagePtr);
     byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());
     if(lTuplePtr){ result.toMemory(lTuplePtr); }
+    releasePage(index); //crashed the buffer...
     return result;
 }

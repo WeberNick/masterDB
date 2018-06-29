@@ -33,7 +33,7 @@ class SegmentFSM : public SegmentBase
     ~SegmentFSM() = default;
 
   public:
-    PID getFreePage(uint aNoOfBytes, bool& emptyfix);
+    PID getFreePage(uint aNoOfBytes, bool& emptyfix, uint aSizeOfOverhead = sizeof(basic_header_t));
     PID getNewPage() override;
 
   protected:

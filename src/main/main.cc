@@ -16,7 +16,7 @@ void testJonas1() {
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
             4096,
-            100000,
+            10,
             true
         };
         std::cout << lCB;
@@ -49,16 +49,12 @@ void testJonas1() {
     SegmentFSM_SP* lSeg2 = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
     //insert a tuple
      TRACE("INSERT STUFF");
-     std::vector<Employee_T> emps;
-     for(uint i = 0;i<500;++i){
-            Employee_T emp ("zwei",i, 2);
-            emps.push_back(emp);
-     }
-    tid_vt res;
-    for(size_t i =0; i<3;++i){
-        tid_vt temp = lSeg->insertTuples(emps);
-        res.insert( res.end(), temp.begin(), temp.end() );
+     tid_vt res;
+     for(size_t i =0; i<200;++i){
+        Employee_T emp ("zwei",i, 1);
+        res.push_back(lSeg->insertTuple(emp));
     }
+
     size_t i = 0;
     for (auto& a : res){
 

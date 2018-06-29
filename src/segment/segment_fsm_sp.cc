@@ -62,7 +62,7 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 }
 
 PID SegmentFSM_SP::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
-    return SegmentFSM::getFreePage(aNoOfBytes + sizeof(InterpreterSP::slot_t),emptyfix);
+    return SegmentFSM::getFreePage(aNoOfBytes, emptyfix, sizeof(sp_header_t) + sizeof(InterpreterSP::slot_t));
 }
 
 tid_vt SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
