@@ -19,7 +19,7 @@
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
 #include "../infra/file_util.hh"
-#include "../infra/tuples.hh"
+#include "../infra/partition_t.hh"
 #include "partition_base.hh"
 #include "partition_file.hh"
 #include "partition_raw.hh"

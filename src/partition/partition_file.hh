@@ -10,7 +10,7 @@
 #pragma once
 
 #include "partition_base.hh"
-#include "../infra/tuples.hh"
+#include "../infra/partition_t.hh"
 #include "../interpreter/interpreter_fsip.hh"
 
 #include <string>

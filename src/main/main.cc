@@ -3,7 +3,7 @@
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
 #include "../infra/file_util.hh"
-#include "../infra/tuples.hh"
+#include "../infra/employee_t.hh"
 #include "../cli/parser.hh"
 #include "db_instance_manager.hh"
 
@@ -420,8 +420,8 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
-      //  testNick();
-        testJonas1();
+        testNick();
+        //testJonas1();
       //testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);

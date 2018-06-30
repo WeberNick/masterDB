@@ -9,16 +9,16 @@
 
 #pragma once
 
-#include "../buffer/buf_cntrl_block.hh"
-#include "../buffer/buf_mngr.hh"
-#include "../infra/exception.hh"
-#include "../infra/header_structs.hh"
-#include "../infra/trace.hh"
-#include "../infra/tuples.hh"
 #include "../infra/types.hh"
+#include "../infra/exception.hh"
+#include "../infra/trace.hh"
+#include "../infra/segment_t.hh"
+#include "../infra/header_structs.hh"
+#include "../partition/partition_manager.hh"
 #include "../partition/partition_base.hh"
 #include "../partition/partition_file.hh"
-#include "../partition/partition_manager.hh"
+#include "../buffer/buf_mngr.hh"
+#include "../buffer/buf_cntrl_block.hh"
 #include "segment_base.hh"
 #include "segment_fsm.hh"
 #include "segment_fsm_sp.hh"

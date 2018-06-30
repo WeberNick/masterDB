@@ -24,6 +24,10 @@ HDR = \
 	\
 	../infra/types.hh \
 	../infra/exception.hh \
+	../infra/trace.hh \
+	../infra/partition_t.hh \
+	../infra/segment_t.hh \
+	../infra/employee_t.hh \
 	\
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \
