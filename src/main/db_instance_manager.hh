@@ -73,32 +73,35 @@ class DatabaseInstanceManager final
 template<typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
- /*   part_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 };
+ /* part_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 };
     PartitionManager& lPartMan = PartitionManager::getInstance();
     lPartMan._partitionsByID[0]=lMasterPartitionTuple;
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);*/
-    Partition_T lMasterPartitionTuple(1, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 );
-    
+    Partition_T lMasterPartitionTuple(1, _partMngr._masterPartName, _cb->mstrPart(), 1, 20);
+
     TRACE("load");
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
     byte* lPage = new byte[lMasterPart->getPageSize()];
-    TRACE("getPageSize "+std::to_string(lMasterPart->getPageSize()));
+    TRACE("getPageSize " + std::to_string(lMasterPart->getPageSize()));
     InterpreterSP lInterpreter;
 
-    for (uint i = 0; i < lSegments->getNoPages(); ++i) {
-        lSegments->readPageUnbuffered(i,lPage,lMasterPart->getPageSize());
+    for (uint i = 0; i < lSegments->getNoPages(); ++i)
+    {
+        lSegments->readPageUnbuffered(i, lPage, lMasterPart->getPageSize());
         lInterpreter.attach(lPage);
         TRACE("step");
-        for (uint j = 0; j < lInterpreter.noRecords(); ++j) {
-            TRACE("step "+std::to_string(j)+std::to_string(lInterpreter.noRecords()));   
-             T_TupleType temp;
-             if(lInterpreter.getRecord(j)){
+        for (uint j = 0; j < lInterpreter.noRecords(); ++j)
+        {
+            TRACE("step " + std::to_string(j) + std::to_string(lInterpreter.noRecords()));
+            T_TupleType temp;
+            if (lInterpreter.getRecord(j))
+            {
                 temp.toMemory(lInterpreter.getRecord(j));
-            TRACE(" ");
-            aTuples.push_back(temp) ;
-             }
+                TRACE(" ");
+                aTuples.push_back(temp);
+            }
             TRACE(" ");
         }
     }
@@ -112,7 +115,7 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
 /*template<typename T_TupleType>
 void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex); 
+    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex);
     int lFreeBytesPerPage = lMasterSeg->getMaxFreeBytes();
     // get size of master segment
     int lCapazIst = lMasterSeg->getNoPages() * ( lFreeBytesPerPage / sizeof(T_TupleType) ) ;
@@ -141,7 +144,7 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
     {
         //lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
         lInterpreter.attach(lPage);
-        lInterpreter.initNewPage(lPage);   
+        lInterpreter.initNewPage(lPage);
         while(true){
            lPos = lInterpreter.addNewRecord(sizeof(T_TupleType));
            if (lPos == 0){
@@ -149,8 +152,8 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
            }
               *((T_TupleType*) lPos ) =  aTuples.at(lSegCounter);
             ++lSegCounter;
-        }   
+        }
     }
-	delete[] lPage;
+        delete[] lPage;
         _segMngr.deleteSegment(lMasterSeg);
 }*/

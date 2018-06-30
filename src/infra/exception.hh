@@ -77,6 +77,15 @@ class OutOfMemoryException : public BaseException
                 const char*         aFunctionName);
 };
 
+class SegmentExistsException : public BaseException
+{
+    public:
+        SegmentExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
 class PartitionException : public BaseException
 {
     public:

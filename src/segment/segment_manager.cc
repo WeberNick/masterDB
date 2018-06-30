@@ -59,19 +59,24 @@ SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, const
     return rtn;
 }
 
-SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName)
+SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName, bool& aCreated)
 {
+    aCreated = false;
+    if (_segmentsByName.find(aName) != _segmentsByName.end()) {
+        throw SegmentExistsException(FLF);
+    }
     SegmentFSM_SP* lSegment = new SegmentFSM_SP(_counterSegmentID++, aPartition, *_cb);
     _segments[lSegment->getID()] = lSegment;
     Segment_T lSegT(aPartition.getID(), lSegment->getID(), aName, 2, lSegment->getIndexPages().at(0));
 
     createSegmentSub(lSegT);
+    aCreated = true;
     TRACE("Created new Segment FSM SP successfully.");
     return (SegmentFSM_SP*)_segments.at(lSegment->getID());
 }
 
 void SegmentManager::createSegmentSub(const Segment_T& aSegT){
-    TRACE(std::string("trying to insert the following tuple:\n") +aSegT.to_string() );
+    TRACE(std::string("trying to insert the following tuple:\n") + aSegT.to_string());
     _segmentsByID[aSegT.ID()] = aSegT;
     _segmentsByName[aSegT.name()] = aSegT.ID();
 

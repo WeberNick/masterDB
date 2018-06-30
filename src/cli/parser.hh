@@ -47,10 +47,10 @@ class CommandParser {
     };
 
     enum CommandStatus {
-        EXIT = -1,     // regular exit
-        OK = 0,        // ok, continue with next command
-        WRONGTYPE = 1, // wrong type of an argument
-        ERROR = 2      // error, recover and continue
+        EXIT  = -1, // regular exit
+        OK    = 0,  // ok, continue with next command
+        WRONG = 1,  // wrong type of an argument
+        ERROR = 2   // error, recover and continue
     };
 
   public:
@@ -105,6 +105,5 @@ class CommandParser {
     size_t _maxCommandLength;
 
     LineReaderEdit _reader;
-    bool _init;
     const CB* _cb;
 };

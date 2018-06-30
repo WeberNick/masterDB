@@ -1,12 +1,21 @@
 #include "tuples.hh"
 
 Partition_T::Partition_T() : 
-    _size(0), _pID(0), _pName(""), _pPath(""), _pType(0), _pGrowth(0)
+    _size(0),
+    _pID(0),
+    _pName(""),
+    _pPath(""),
+    _pType(0),
+    _pGrowth(0)
 {}
 
-
 Partition_T::Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth) : 
-    _size(0), _pID(aPID), _pName(aName), _pPath(aPath), _pType(aType), _pGrowth(aGrowth)
+    _size(0),
+    _pID(aPID),
+    _pName(aName),
+    _pPath(aPath),
+    _pType(aType),
+    _pGrowth(aGrowth)
 {
     _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
 }
@@ -98,17 +107,25 @@ std::ostream& operator<< (std::ostream& stream, const Partition_T& aPartTuple)
     return stream;
 }
 
-
 Segment_T::Segment_T() : 
-    _size(0), _sPID(0), _sID(0), _sName(""), _sType(0), _sFirstPage(0)
+    _size(0),
+    _sPID(0),
+    _sID(0),
+    _sName(""),
+    _sType(0),
+    _sFirstPage(0)
 {}
 
 
 Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage) : 
-    _size(0), _sPID(aPID), _sID(aSID), _sName(aName), _sType(aType), _sFirstPage(aFirstPage)
+    _size(0),
+    _sPID(aPID),
+    _sID(aSID),
+    _sName(aName),
+    _sType(aType),
+    _sFirstPage(aFirstPage)
 {
-    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
-   // std::cout << "Size of class: " << _size << std::endl;
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); // +1 for each string for \0
 }
 
 Segment_T::Segment_T(const Segment_T& aSegmentTuple) :
@@ -124,7 +141,7 @@ Segment_T& Segment_T::operator=(const Segment_T& aSegmentTuple)
 {
     if(this != &aSegmentTuple)
     {
-        //exception safe copy assignment with swap would be overkill
+        // exception safe copy assignment with swap would be overkill
         _size       = aSegmentTuple.size();
         _sPID       = aSegmentTuple.partID();
         _sID        = aSegmentTuple.ID();
@@ -142,7 +159,7 @@ void Segment_T::init(const uint8_t aPID, const uint16_t aSID, const std::string&
     _sName = aName;
     _sType = aType;
     _sFirstPage = aFirstPage;
-    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); // +1 for each string for \0
 }
 
 void Segment_T::toDisk(byte* aPtr) const noexcept
@@ -194,12 +211,18 @@ std::ostream& operator<< (std::ostream& stream, const Segment_T& aSegmentTuple)
 }
 
 Employee_T::Employee_T() : 
-    _size(0), _pAge(0), _pSalary(0), _pName("")
+    _size(0),
+    _pAge(0),
+    _pSalary(0),
+    _pName("")
 {}
 
 
 Employee_T::Employee_T(const uint8_t aAge, const std::string& aName, const uint16_t aSalary) : 
-    _size(0), _pAge(aAge), _pSalary(aSalary), _pName(aName)
+    _size(0),
+    _pAge(aAge),
+    _pSalary(aSalary),
+    _pName(aName)
 {
     _size = sizeof(_pAge) + (_pName.size() + 1) + sizeof(_pSalary) ; //+1 for each string for \0
 }

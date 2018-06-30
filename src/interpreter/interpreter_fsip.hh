@@ -8,8 +8,7 @@
  *  @todos	Remove noManagedPages() and implement it correctly
  *  @section TBD
  */
-#ifndef INTERPRETER_FSIP_HH
-#define INTERPRETER_FSIP_HH
+#pragma once
 
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
@@ -125,5 +124,3 @@ void InterpreterFSIP::attach(byte *aPP) noexcept {
     _pp = aPP;
     _header = get_hdr_ptr();
 }
-
-#endif

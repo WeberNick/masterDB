@@ -8,9 +8,7 @@
  *          Class deprecated (no need anymore, store/load Segment has to be reworked, _maxSize deprecated, getNewPage may be also deprecated.)
  *  @section TBD
  */
-
-#ifndef SEGMENT_HH
-#define SEGMENT_HH
+#pragma once
 
 #include "infra/header_structs.hh"
 #include "infra/types.hh"
@@ -38,5 +36,3 @@ class Segment : public SegmentBase {
     /* The maximum number of pages a segment can manage */
     uint16_t _maxSize;
 };
-
-#endif

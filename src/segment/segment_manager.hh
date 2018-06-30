@@ -55,7 +55,7 @@ class SegmentManager
 
 	public:
 		SegmentFSM*     createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
-		SegmentFSM_SP*  createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
+		SegmentFSM_SP*  createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName, bool& aCreated); // create and add new segment (persistent), return it
 		// for further segment types... SegmentA* createNewSegmentA();
         SegmentFSM_SP*  loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
 
@@ -89,10 +89,10 @@ class SegmentManager
 		std::map<std::string, uint16_t>  _segmentsByName;   // Stores Name/ID pair used for lookup in next table
 
 		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1
-           TO BE DELETED */
+           TODO TO BE DELETED */
 		uint32_vt      _indexPages;		
 		uint32_t       _maxSegmentsPerPage; // Number of Pages that can be managed on one SegmentManager Page
-        std::string    _masterSegSegName; //name of Master segment containing all segments
+        std::string    _masterSegSegName;   // Name of Master segment containing all segments
 
         BufferManager& _BufMngr;
         const CB*      _cb;

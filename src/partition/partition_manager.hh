@@ -26,6 +26,8 @@
 #include <unordered_map>
 #include <string>
 
+constexpr uint16_t MIN_GROWTH_INDICATOR = 8;
+
 class PartitionManager
 {    
     private:
@@ -54,20 +56,22 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
-        PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
+        PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, bool& aCreated);
+        PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName, bool& aCreated);
         PartitionBase*  getPartition(const uint8_t aID);
         PartitionBase*  getPartition(const std::string& aName);
         Partition_T&    getPartitionT(const std::string& aName);
         uint8_t         getPartitionID(const std::string& aName);
         const string_vt getPartitionNames();
-        std::string     getPartitionName(const uint8_t aID);
+        std::string     getPartitionName(const uint8_t aID); 
         
         void            deletePartition(const uint8_t aID);
         void            deletePartition(const std::string& aName);
 
     public:
-        inline size_t   getNoPartitions() { return _partitions.size(); }
+        inline size_t             getNoPartitions() { return _partitions.size(); }
+        inline const std::string& getMasterPartName() { return _masterPartName; }
+        inline const std::string& getPathForPartition(const std::string& aName) { return _partitionsByID.at(_partitionsByName.at(aName)).path(); }
 
     private:
         void            createPartitionSub(const Partition_T& aParT); // has some issues if aParT is a const reference
@@ -82,8 +86,8 @@ class PartitionManager
         std::unordered_map<uint8_t, Partition_T>    _partitionsByID;
 		std::unordered_map<std::string, uint8_t>    _partitionsByName;
 
-        const std::string _masterPartName;
-        const std::string _masterSegPartName;
+        const std::string  _masterPartName;
+        const std::string  _masterSegPartName;
 
         const CB*   _cb;
 };

@@ -53,17 +53,9 @@ class LineReaderEdit {
     inline bool isEmpty() const { return (begin() == end()); }
     inline uint64_t no_bytes_read() const { return _no_bytes_read; }
     inline bool endswith(const char aEndChar) const { return last() == aEndChar; }
+    inline void removelast() { _line[--_linesize] = '\0'; }
     inline bool isdigit(const char ch) const { return std::isdigit(static_cast<unsigned char>(ch)); }
-    inline bool isnumber(const char* c) const {
-        while(*c)
-            if(!isdigit(*c++))
-                return false;
-        return true;
-    }
-    inline void removelast() { 
-        _linesize--;
-        _line[_linesize] = '\0';
-    }
+    bool isnumber(const char* c) const;
 
   public:
     /* utilities */
@@ -91,12 +83,13 @@ class LineReaderEdit {
     bool read_string_no_delim(const char*& x, char aSep, const char*& b, const char*& e);
     bool read_string_set(const char*& x, string_st& aSetOut, const char aStringSep, const char aSep);
     inline bool read_datejd(const char*& x, DateJd& out, bool aYearHigh, char aSep) { return out.set(x, aYearHigh, aSep); }
-    
+
     /* the following destructively splits the _line at aSep and may perform stripping blanks */
     int split_line(const char aSep, const bool aStrip);
     char_vpt split_line(const char aSep, const bool aStrip, const std::string& aLine);
     const std::vector<char*> splits() const { return _splits; }
-    void getNonCommentLine(char*& aLine);
+
+    void setNonCommentLine(char*& aLine);
 
   private:
     void getNonCommentLine();

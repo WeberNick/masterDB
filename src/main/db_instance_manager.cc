@@ -14,7 +14,7 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
     _cb(nullptr),
     _running(false)
 {
-  //think of reserver page.. 
+    // think of reserver page.. 
 }
 
 /**
@@ -56,13 +56,13 @@ void DatabaseInstanceManager::install()
 
 void DatabaseInstanceManager::boot()
 {
-    TRACE("booting");
+  TRACE("booting");
   part_vt aPartitionTuples;
   seg_vt aSegmentTuples;
   load<Partition_T>(aPartitionTuples, _partIndex);
   TRACE("partition Tuples loaded");
   load<Segment_T>(aSegmentTuples, _segIndex);
-    TRACE("Segment Tuples loaded");
+  TRACE("Segment Tuples loaded");
   _partMngr.load(aPartitionTuples);
   _segMngr.load(aSegmentTuples);
   _masterPartition = (PartitionFile*)_partMngr.getPartition(_partMngr._masterPartName);
@@ -71,10 +71,10 @@ void DatabaseInstanceManager::boot()
 void DatabaseInstanceManager::shutdown()
 {
     TRACE("storing Database");
-  //  if (isRunning()) {
+    //  if (isRunning()) {
         // stop transactions
-        _segMngr.storeSegments();
-        BufferManager::getInstance().flushAll();
- //       _running = false;
-  //  }
+    _segMngr.storeSegments();
+    BufferManager::getInstance().flushAll();
+        // _running = false;
+    //  }
 }

@@ -93,11 +93,11 @@ void PartitionFile::create()
     if(exists())
     {
         const size_t lFileSize = _growthIndicator * _pageSize;
-        fs::resize_file(_partitionPath, lFileSize); //will throw if fails
+        fs::resize_file(_partitionPath, lFileSize); // will throw if fails
         _sizeInPages = partSizeInPages(); 
         lTraceMsg = "File partition (with " + std::to_string(_sizeInPages) + " pages) was successfully created in the file system";
         TRACE(lTraceMsg); 
-        format(); //may throw
+        format(); // may throw
     }
     else
     {

@@ -39,7 +39,14 @@ bool LineReaderEdit::next() {
 void LineReaderEdit::close() {
 
 }
-void LineReaderEdit::getNonCommentLine(char*& aLine) {
+
+bool LineReaderEdit::isnumber(const char* c) const {
+    while (*c)
+        if (!isdigit(*c++)) return false;
+    return true;
+}
+
+void LineReaderEdit::setNonCommentLine(char*& aLine) {
     const char* x = "\0";
 
     do {
@@ -67,6 +74,7 @@ void LineReaderEdit::getNonCommentLine(char*& aLine) {
     add_history(_line);
     _ok = true;
 }
+
 void LineReaderEdit::getNonCommentLine() {
     const char* x = "\0";
 
@@ -294,7 +302,9 @@ bool LineReaderEdit::read_dval(const char*& x, dval_t& out) {
     return true;
 }
 
-bool LineReaderEdit::read_stimestamp(const char*& x, STimestamp& out, char sep) { return out.set(x, sep); }
+bool LineReaderEdit::read_stimestamp(const char*& x, STimestamp& out, char sep) {
+    return out.set(x, sep);
+}
 
 int LineReaderEdit::split_line(const char aSep, const bool aStrip) {
     _splits.clear();

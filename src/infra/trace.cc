@@ -30,7 +30,7 @@ void Trace::init(const CB& aControlBlock) noexcept
         if(_cb->trace())
         {
             _logStream.open(_logPath.c_str(), std::ofstream::out | std::ofstream::app);
-            TRACE("Log file created and open");
+            TRACE("Log file created and opened");
         }
         _init = true;
     }
