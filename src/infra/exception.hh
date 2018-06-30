@@ -88,6 +88,15 @@ class SegmentExistsException : public BaseException
                 const char*         aFunctionName);
 };
 
+class SegmentNotExistsException : public BaseException
+{
+    public:
+        SegmentNotExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
 class PartitionException : public BaseException
 {
     public:
@@ -112,15 +121,6 @@ class PartitionNotExistsException : public BaseException
 {
     public:
         PartitionNotExistsException(
-                const char*         aFileName,
-                const unsigned int  aLineNumber,
-                const char*         aFunctionName);
-};
-
-class SegmentNotExistsException : public BaseException
-{
-    public:
-        SegmentNotExistsException(
                 const char*         aFileName,
                 const unsigned int  aLineNumber,
                 const char*         aFunctionName);

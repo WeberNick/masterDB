@@ -26,12 +26,12 @@ CommandParser::CommandParser() :
         Command(*this, "CREATE PARTITION", true,  2,  3,       &CP::com_create_p,     "Create a partition at a given path to a partition file with a name and a growth indicator of at least 8.", "CREATE PARTITION [str:path_to_partfile] [str:name] [int:growth_indicator >= 8]"),
         Command(*this, "DROP PARTITION",   true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
         Command(*this, "CREATE SEGMENT",   true,  2,  2,       &CP::com_create_s,     "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
-        Command(*this, "DROP SEGMENT",     true,  2,  1,       &CP::com_drop_s,       "Drop a segmen by its name.", "DROP SEGMENT [str:segname]"),
+        Command(*this, "DROP SEGMENT",     true,  2,  1,       &CP::com_drop_s,       "Drop a segment by its name. Segment names are globally unique, thus no partition has to be provided.", "DROP SEGMENT [str:segname]"),
         Command(*this, "INSERT INTO",      true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment", "INSERT INTO [str:segname] [str:relation] [Args...]"),
         Command(*this, "SHOW PARTITION",   true,  2,  1,       &CP::com_show_part,    "Show detailed information for a partition.", "SHOW PARTITION [str:partname]"),
         Command(*this, "SHOW PARTITIONS",  false, 2,  0,       &CP::com_show_parts,   "Show all partitions.", "SHOW PARTITIONS"),
-        Command(*this, "SHOW SEGMENT",     true,  2,  2,       &CP::com_show_seg,     "Show detailed information for a segment.", "SHOW SEGMENT [str:partname] [str:segname]"),
-        Command(*this, "SHOW SEGMENTS",    false, 2,  1,       &CP::com_show_segs,    "Show all segments for a given partition.", "SHOW SEGMENTS [str:partname]"),
+        Command(*this, "SHOW SEGMENT",     true,  2,  1,       &CP::com_show_seg,     "Show detailed information for a segment.", "SHOW SEGMENT [str:segname]"),
+        Command(*this, "SHOW SEGMENTS",    false, 2,  0,       &CP::com_show_segs,    "Show all segments for a given partition.", "SHOW SEGMENTS"),
         Command(*this, "EXIT",             false, 1,  0,       &CP::com_exit,         "Shut down masterDB and exit.", "EXIT")
     },
     _maxCommandLength(0),
@@ -172,6 +172,7 @@ int CP::com_create_p(const char_vpt* args) const {
     try {
         bool created;
         PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd, created);
+        // Pool::Default::submitJob(&PartitionManager::createPartitionFileInstance, path, partName, growthInd, created);
         if (created) {
             std::cout << "Successfully created Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
         } else {
@@ -191,6 +192,9 @@ int CP::com_create_p(const char_vpt* args) const {
     } catch(const fs::filesystem_error& fse) {
         std::cout << "Filesystem Exception.\n" << std::endl;
         return CP::CommandStatus::ERROR;
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
+        return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
 }
@@ -200,10 +204,11 @@ int CP::com_drop_p(const char_vpt* args) const {
     try {
         PartitionManager::getInstance().deletePartition(partName);
         std::cout << "Partition \"" << partName << "\" was deleted.\n" << std::endl; 
-    } catch(const std::out_of_range& oore) {
+    } catch(const PartitionNotExistsException& pnee) {
         std::cout << "Partition \"" << partName << "\" does not exist. Nothing was dropped.\n" << std::endl;
         return CP::CommandStatus::OK;
-    } catch(...) {
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
@@ -223,10 +228,11 @@ int CP::com_create_s(const char_vpt* args) const {
     } catch(const SegmentExistsException& see) {
         std::cout << "Segment \"" << segName << "\" already exists for Partition \"" << partName << "\".\n" << std::endl;
         return CP::CommandStatus::OK;
-    } catch(const std::out_of_range& oore) {
+    } catch(const PartitionNotExistsException& pnee) {
         std::cout << "Partition \"" << partName << "\" does not exist. Segment \"" << segName << "\" could not be created.\n" << std::endl;
         return CP::CommandStatus::OK;
-    } catch(...) {
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
@@ -237,10 +243,11 @@ int CP::com_drop_s(const char_vpt* args) const {
     try {
         SegmentManager::getInstance().deleteSegment(segName);
         std::cout << "Segment \"" << segName << "\" was deleted.\n" << std::endl; 
-    } catch(const std::out_of_range& oore) {
+    } catch(const SegmentNotExistsException& snee) {
         std::cout << "Segment \"" << segName << "\" does not exist. Nothing was dropped.\n" << std::endl;
         return CP::CommandStatus::OK;
-    } catch(...) {
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
@@ -248,7 +255,7 @@ int CP::com_drop_s(const char_vpt* args) const {
 
 int CP::com_insert_tuple(const char_vpt* args) const {
     /* INSERT INTO Seg_Emp Employee 30 Mueller 8000 */
-    TRACE("START INSERT TUPLE EMPLOYEE");
+    TRACE("Start to insert Tuple");
     std::string segName(args->at(3));
     std::string type(args->at(4));
     std::cout << args->at(0) << " - " << args->at(1) << " - " << args->at(2) << " - " << segName << " - " << type << std::endl;
@@ -260,15 +267,21 @@ int CP::com_insert_tuple(const char_vpt* args) const {
                 int emp_age = atoi(args->at(5));
                 std::string emp_name(args->at(6));
                 double emp_sal = atof(args->at(7));
-                Employee_T e(emp_age, emp_name, emp_sal);
+                Employee_T e(emp_name, emp_sal, emp_age);
                 TRACE("INSERT TUPLE EMPLOYEE");
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
             }
         } else {
-            std::cout << "Type " << type << " could not be recognized." << std::endl;
+            std::cout << "Relation " << type << " is not supported." << std::endl;
             return CP::CommandStatus::WRONG;
         }
-    } catch (...) { return CP::CommandStatus::ERROR; } // TODO handle Seg does not exist?
+    } catch(const SegmentNotExistsException& snee) {
+        std::cout << "Segment \"" << segName << "\" does not exist. Could not insert Tuple.\n" << std::endl;
+        return CP::CommandStatus::OK;
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
+        return CP::CommandStatus::ERROR;
+    } // TODO handle Seg does not exist and others?
     return CP::CommandStatus::OK;
 }
 
@@ -280,17 +293,20 @@ int CP::com_show_part(const char_vpt* args) const {
         const string_vt& segNames = SegmentManager::getInstance().getSegmentNamesForPartition(partID);
         std::cout << "PartitionID:    " << partID << std::endl;
         std::cout << "Partition:      " << part.name() << std::endl;
-        std::cout << "Partition Type: " << part.type() << std::endl;
+        //std::cout << "Partition Type: " << part.type() << std::endl;
+        std::cout << "Segments:       ";
         if (segNames.size() == 0) {
             std::cout << "No Segments exist for Partition \"" << partName << "\".\n" << std::endl;
         } else {
+            std::cout << std::endl;
             pprints(partName, segNames);
         }
-    } catch(const std::out_of_range& oore) {
+    } catch(const PartitionNotExistsException& oore) {
         std::cout << "Partition \"" << partName << "\" does not exist.\n" << std::endl;
         return CP::CommandStatus::OK;
-    } catch(...) {
-        return CP::CommandStatus::ERROR;   
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
+        return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
 }
@@ -300,7 +316,8 @@ int CP::com_show_parts(const char_vpt* args) const {
         const string_vt& names = PartitionManager::getInstance().getPartitionNames();
         const std::string& cap = "Partitions";
         pprints(cap, names);
-    } catch(...) {
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
@@ -315,10 +332,12 @@ int CP::com_show_seg(const char_vpt* args) const {
         std::cout << "Partition:    " << PartitionManager::getInstance().getPartitionName(seg.partID()) << std::endl;
         std::cout << "PartitionID:  " << seg.partID() << std::endl;
         std::cout << "Segment Type: " << seg.type() << std::endl;
-    } catch(const std::out_of_range& oore) {
+        std::cout << std::endl;
+    } catch(const SegmentNotExistsException& oore) {
         std::cout << "Segment \"" << segName << "\" does not exist.\n" << std::endl;
         return CP::CommandStatus::OK;
-    } catch(...) {
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;
@@ -329,7 +348,8 @@ int CP::com_show_segs(const char_vpt* args) const {
         const string_vt& names = SegmentManager::getInstance().getSegmentNames();
         const std::string& cap = "Segments";
         pprints(cap, names);
-    } catch(...) {
+    } catch(const std::exception& e) {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
     }
     return CP::CommandStatus::OK;

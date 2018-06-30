@@ -115,7 +115,7 @@ PartitionNotExistsException::PartitionNotExistsException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("The requested partition does not exist"))
+            std::string("The requested partition does not exist."))
 {}
 
 SegmentNotExistsException::SegmentNotExistsException(
@@ -126,7 +126,7 @@ SegmentNotExistsException::SegmentNotExistsException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("The requested segment does not exist"))
+            std::string("The requested segment does not exist."))
 {}
 
 PartitionFullException::PartitionFullException(
@@ -197,7 +197,7 @@ FileException::FileException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("Problem with file ") + std::string(aErrorFileName) + std::string(" : ") + aErrorMessage)
+            std::string("Problem with file ") + std::string(aErrorFileName) + std::string(" : ") + aErrorMessage + ".")
 {}
 
 InvalidPathException::InvalidPathException(
@@ -209,5 +209,5 @@ InvalidPathException::InvalidPathException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("Path '") + aPath + std::string("' is invalid"))
+            std::string("Path '") + aPath + std::string("' is invalid."))
 {}

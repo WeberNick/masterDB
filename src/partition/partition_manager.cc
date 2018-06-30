@@ -122,32 +122,8 @@ void PartitionManager::createPartitionSub(const Partition_T& aParT)
 
 PartitionBase* PartitionManager::getPartition(const uint8_t aID)
 {
-<<<<<<< HEAD
-    TRACE("Trying to get partition " + std::to_string(aID));
-    // if the object has not been created before
-    if (_partitions.find(aID) == _partitions.end())
-    {
-        TRACE("Trying to get Partition from Disk");
-        const Partition_T& lTuple = _partitionsByID.at(aID);
-        PartitionBase* s;
-        switch (lTuple.type())
-        {
-            case 1: // PartitionFile
-                s = new PartitionFile(lTuple, *_cb);
-                break;
-            case 2: // PartitionRaw
-                s = new PartitionRaw(lTuple, *_cb);
-                break;
-            default:
-                return nullptr;
-        }
-        _partitions[lTuple.ID()] = s;
-    }
-    TRACE("Found Partition, its ID is " + std::to_string(aID));
-    return _partitions.at(aID);
-=======
     TRACE("Searching for the partition with ID '" + std::to_string(aID) + "'");
-    //if the object has not been created before
+    // if the object has not been created before
     if (_partitions.find(aID) == _partitions.end()) {
         TRACE("## Partition instance with ID '" + std::to_string(aID) + "' not found in-memory. Looking on disk...");
         const Partition_T& lTuple = getPartitionT(aID);
@@ -158,10 +134,10 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
         }
         PartitionBase* s;
         switch(lTuple.type()){
-            case 1://PartitionFile
+            case 1: // PartitionFile
                 s = new PartitionFile(lTuple, *_cb);
                 break;
-            case 2: //PartitionRaw
+            case 2: // PartitionRaw
                 s = new PartitionRaw(lTuple, *_cb);
                 break;
             default: ASSERT_MSG("Invalid default-case of switch statement reached");
@@ -179,7 +155,6 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
         TRACE("## Error ## The requested partition with ID '" + std::to_string(aID) + "' does not exist in map (" + std::string(oor.what()) + ")");
         throw PartitionNotExistsException(FLF);
     }
->>>>>>> 805abecd94eb595d041181d7d659b8a71bc509d3
 }
 
 PartitionBase* PartitionManager::getPartition(const std::string& aName)
@@ -231,29 +206,6 @@ Partition_T& PartitionManager::getPartitionT(const std::string& aName)
     return const_cast<Partition_T&>(static_cast<const PartitionManager&>(*this).getPartitionT(aName));
 }
 
-void PartitionManager::deletePartition(const uint8_t aID)
-{
-    TRACE("Deletion of partition with ID " + std::to_string(aID) + " starts...");
-    // delete all Segments on that partition
-    SegmentManager& lSegMan = SegmentManager::getInstance();
-    lSegMan.deleteSegements(aID);
-
-    // delete partition
-    PartitionBase* lPart = getPartition(aID);
-    lPart->remove();
-    //delete object
-    delete lPart; //## evtl raus
-    _partitions.erase(aID);
-    const Partition_T lpart(_partitionsByID.at(aID));
-    // delete tuple on disk
-    lSegMan.deleteTuplePhysically<Partition_T>(_masterSegPartName, aID);
-
-    // delete tuple in memory
-    _partitionsByName.erase(lpart.name());
-    _partitionsByID.erase(aID);
-    TRACE("Partition with ID " + std::to_string(aID) + " deleted successfully.");
-}
-
 uint8_t PartitionManager::getPartitionID(const std::string& aName)
 {
     try
@@ -289,6 +241,7 @@ std::string PartitionManager::getPartitionName(const uint8_t aID)
 
 void PartitionManager::deletePartition(const uint8_t aID)
 {
+    TRACE("Deletion of partition with ID " + std::to_string(aID) + " starts...");
     // delete all Segments on that partition
     SegmentManager& lSegMan = SegmentManager::getInstance();
     lSegMan.deleteSegements(aID);
@@ -306,12 +259,19 @@ void PartitionManager::deletePartition(const uint8_t aID)
     // delete tuple in memory
     _partitionsByName.erase(lpart.name());
     _partitionsByID.erase(aID);
-    TRACE("Partition deleted successfully.");
+    TRACE("Partition with ID " + std::to_string(aID) + " deleted successfully.");
 }
 
 void PartitionManager::deletePartition(const std::string& aName)
 {
-    deletePartition(_partitionsByName.at(aName));
+    try
+    {
+        deletePartition(_partitionsByName.at(aName));
+    }
+    catch(const std::out_of_range& oor)
+    {
+        throw PartitionNotExistsException(FLF);
+    }
 }
 
 PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)
