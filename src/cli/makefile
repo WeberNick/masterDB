@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -std=c++17 -static-libstdc++ -g
+CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
 CC = g++
 
 UNAME := $(shell uname)

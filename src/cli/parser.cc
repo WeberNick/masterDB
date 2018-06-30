@@ -170,10 +170,9 @@ int CP::com_create_p(const char_vpt* args) const {
         return CP::CommandStatus::WRONG;
     else growthInd = atoi(args->at(2));
     try {
-        bool created;
-        PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd, created);
+        PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd);
         // Pool::Default::submitJob(&PartitionManager::createPartitionFileInstance, path, partName, growthInd, created);
-        if (created) {
+        if (lFile) {
             std::cout << "Successfully created Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
         } else {
             std::cout << "PartitionFile at \"" << args->at(0) << "\" already exists, \"" << partName << "\" could not be created.\n" << std::endl;
@@ -218,9 +217,8 @@ int CP::com_create_s(const char_vpt* args) const {
     const std::string partName(args->at(0));
     const std::string segName(args->at(1));
     try {
-        bool created;
-        SegmentManager::getInstance().createNewSegmentFSM_SP(*PartitionManager::getInstance().getPartition(partName), segName, created);
-        if (created) {
+        SegmentFSM_SP* lSegment = SegmentManager::getInstance().createNewSegmentFSM_SP(*PartitionManager::getInstance().getPartition(partName), segName);
+        if (lSegment) {
             std::cout << "Successfully created Segment \"" << segName << "\" for Partition \"" << partName << "\".\n" << std::endl;
         } else {
             std::cout << "Segment \"" << segName << "\" for Partition \"" << partName << "\" could not be created.\n" << std::endl;

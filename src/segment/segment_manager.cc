@@ -63,10 +63,9 @@ SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, const
     return static_cast<SegmentFSM*>(getSegment(lSegment->getID()));
 }
 
-SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName, bool& aCreated)
+SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName)
 {
     TRACE("Request to create FSM_SP segment in partition '" + aPartition.to_string() + "' with name '" + aName + "'");
-    aCreated = false;
     if (_segmentsByName.find(aName) != _segmentsByName.end()) {
         throw SegmentExistsException(FLF);
     }
@@ -75,7 +74,6 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
     Segment_T lSegT(aPartition.getID(), lSegment->getID(), aName, 2, lSegment->getIndexPages().at(0));
 
     createSegmentSub(lSegT);
-    aCreated = true;
     TRACE("FSM_SP segment created and successfully added to the SegmentManager");
     return static_cast<SegmentFSM_SP*>(getSegment(lSegment->getID()));
 }
@@ -136,13 +134,19 @@ void SegmentManager::deleteSegment(const std::string& aName)
 }
 
 void SegmentManager::deleteSegements(const uint8_t aPartitionID) {
-    for (auto& america : _segmentsByID)
+
+    auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) { return elem.second.partID() == aPartitionID; }); 
+    if(america != _segmentsByID.cend())
     {
-        if (america.second.partID() == aPartitionID)
-        {
-            deleteSegment(america.first);
-        }
+        deleteSegment(america->first);
     }
+    //for (auto& america : _segmentsByID)
+    //{
+        //if (america.second.partID() == aPartitionID)
+        //{
+            //deleteSegment(america.first);
+        //}
+    //}
 }
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)

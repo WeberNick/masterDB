@@ -3,8 +3,7 @@
 Trace::Trace() :
     _logPath(),
     _logStream(),
-    _cb(nullptr),
-    _init(false)
+    _cb(nullptr)
 {}
 
 Trace::~Trace()
@@ -12,15 +11,14 @@ Trace::~Trace()
     if(_cb->trace())
     {
         TRACE("Closing the log file...");
+        TRACE("'Trace' destructed");
         _logStream.close();
-        TRACE("Log file closed!");
     }
-    TRACE("'Trace' destructed");
 }
 
 void Trace::init(const CB& aControlBlock) noexcept
 {
-    if(!_init)
+    if(!_cb)
     {
         _cb = &aControlBlock;
         _logPath = _cb->tracePath();
@@ -35,7 +33,6 @@ void Trace::init(const CB& aControlBlock) noexcept
             TRACE("'Trace' constructed"); //just for consistency with the other singletons
             TRACE("Log file created and opened");
         }
-        _init = true;
         TRACE("'Trace' initialized");
     }
 }

@@ -58,8 +58,8 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, bool& aCreated);
-        PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName, bool& aCreated);
+        PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
+        PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
 
         void            deletePartition(const uint8_t aID);
         void            deletePartition(const std::string& aName);

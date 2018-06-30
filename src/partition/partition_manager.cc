@@ -49,10 +49,9 @@ void PartitionManager::load(const part_vt& aTuples)
     _counterPartitionID = maxCounter + 1;
 }
 
-PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, bool& aCreated)
+PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator)
 {
     TRACE("Request to create file partition at path '" + aPath + "' with name '" + aName + "' with a growth of '" + std::to_string(aGrowthIndicator) + "'");
-    aCreated = false;
     if(!FileUtil::hasValidDir(aPath))
     {
         throw InvalidPathException(FLF, aPath);
@@ -88,7 +87,6 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& 
         _partitions[lPartition->getID()] = lPartition;
         Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, lPartition->getGrowthIndicator());
         createPartitionSub(lPartTuple);
-        aCreated = true;
         TRACE("## File partition created and successfully added to the PartitionManager");
         return static_cast<PartitionFile*>(_partitions.at(lPartition->getID()));   
     }
@@ -98,16 +96,14 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& 
 }
 
 // TODO
-PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName, bool& aCreated)
+PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
 {
-    aCreated = false;
     // currently reformats the raw partition with every call.. need to use the getPartition procedure as above
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
     const uint pType = 0;
     Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, MAX16); //MAX16 = invalid value to indicate 'no growth'
     createPartitionSub(lPartTuple);
-    aCreated = true;
     TRACE("Raw partition instance created.");
     return static_cast<PartitionRaw*>(_partitions.at(lPartition->getID()));
 }

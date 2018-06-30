@@ -24,6 +24,7 @@
 #include "segment_fsm_sp.hh"
 
 #include <unordered_map>
+#include <algorithm>
 
 class SegmentManager
 {
@@ -55,7 +56,7 @@ class SegmentManager
 
 	public:
 		SegmentFSM*    createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
-		SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName, bool& aCreated); // create and add new segment (persistent), return it
+		SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
         SegmentFSM_SP* loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
 		void deleteSegment(const uint16_t aID);
 		void deleteSegment(const std::string& aName);
