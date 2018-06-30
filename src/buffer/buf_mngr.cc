@@ -35,7 +35,8 @@ void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
     freeBCB(aBCB);
     aBCB->unlock();
 }
-void  BufferManager::FreeBCBs::freeBCB(BCB* aBCB) noexcept
+
+void BufferManager::FreeBCBs::freeBCB(BCB* aBCB) noexcept
 { 
     getFreeBCBListMtx().lock();
     aBCB->setNextInChain(getFreeBCBList()); 
@@ -58,8 +59,6 @@ BufferManager::BufferManager() :
 
 BufferManager::~BufferManager()
 {
-    delete _bufferHash;
-    delete[] _bufferpool;
     TRACE("'BufferManager' destructed");
 }
 
@@ -69,20 +68,11 @@ void BufferManager::init(const CB& aControlBlock)
     {
         _noFrames = aControlBlock.frames();
         _frameSize = aControlBlock.pageSize();
-        try
-        {
-            _bufferHash = new BufferHashTable(_noFrames);
-            _bufferpool = new byte[_noFrames * _frameSize];
-        }
-        catch(std::bad_alloc& ba)
-        {
-            TRACE(std::string("bad_alloc caught: ") + std::string(ba.what()));
-            throw;
-        }
+        _bufferHash = std::make_unique<BufferHashTable>(_noFrames);
+        _bufferpool = std::make_unique<byte[]>(_noFrames * _frameSize);
         _freeFrames.init(_noFrames);
         _freeBCBs.init(_noFrames * 1.2);
         _cb = &aControlBlock;
-        BufferControlBlock::setCB(_cb);
         TRACE("'BufferManager' initialized");
     }
 }
@@ -202,7 +192,7 @@ byte* BufferManager::getFramePtr(BCB* aBCB)
 {
     const size_t lFrameIndex = aBCB->getFrameIndex();   
     assert(lFrameIndex < _noFrames); // otherwise BCB is somewhere else corrupted
-    return _bufferpool + (lFrameIndex * _frameSize);
+    return _bufferpool.get() + (lFrameIndex * _frameSize);
 }
 
 BCB* BufferManager::locatePage(const PID& aPageID) noexcept

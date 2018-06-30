@@ -148,8 +148,8 @@ class BufferManager final
 	private:
 		size_t              _noFrames;
 		size_t 		        _frameSize;;
-		BufferHashTable*    _bufferHash;
-		byte* 			    _bufferpool;
+        std::unique_ptr<BufferHashTable>    _bufferHash;
+        std::unique_ptr<byte[]>             _bufferpool;
         FreeFrames          _freeFrames;
         FreeBCBs            _freeBCBs;
         const CB*           _cb;

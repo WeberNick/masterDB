@@ -72,5 +72,5 @@ class BufferHashTable final
         //the size of the hash table
 		size_t          _size;      		
         //the hash table maintaining the control blocks
-        HashBucket*     _hashTable; 
+        std::unique_ptr<HashBucket[]>   _hashTable;
 };

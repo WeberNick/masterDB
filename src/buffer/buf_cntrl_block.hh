@@ -25,7 +25,7 @@ class BufferControlBlock final
     private:
         friend class BufferManager;
         friend class BufferHashTable;
-        explicit BufferControlBlock();
+        BufferControlBlock();
         explicit BufferControlBlock(const BufferControlBlock&) = delete;
         explicit BufferControlBlock(BufferControlBlock&&) = delete;
         BufferControlBlock& operator=(const BufferControlBlock&) = delete;
@@ -60,10 +60,6 @@ class BufferControlBlock final
     private:
         inline sMtx&    getMtx() noexcept { return _pageMtx; }
         inline void     setLockMode(LOCK_MODE aMode) noexcept { _mode = aMode; }
-
-    private:
-        static const CB*  _cb;
-        static void setCB(const CB* aControlBlock) noexcept;
 
     private:
         PID         _pageID; 
