@@ -1,12 +1,5 @@
 #include "buf_cntrl_block.hh"
 
-const CB* BufferControlBlock::_cb = nullptr;
-
-void BufferControlBlock::setCB(const CB* aControlBlock) noexcept
-{
-    _cb = aControlBlock;
-}
-
 BufferControlBlock::BufferControlBlock() :
     _pageID(),
     _frameIndex(-1),
