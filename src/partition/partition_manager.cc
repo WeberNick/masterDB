@@ -225,13 +225,19 @@ string_vt PartitionManager::getPartitionNames() noexcept
 
 std::string PartitionManager::getPartitionName(const uint8_t aID)
 {
-    for(const auto& part : _partitionsByName)
+
+    auto it = std::find_if(_partitionsByName.cbegin(), _partitionsByName.cend(), [aID](const auto& elem) { return elem.second == aID; });
+    if(it != _partitionsByName.cend())
     {
-        if (aID == part.second)
-        {
-            return part.first;
-        }
+        return it->first;
     }
+    //for(const auto& part : _partitionsByName)
+    //{
+        //if (aID == part.second)
+        //{
+            //return part.first;
+        //}
+    //}
     throw PartitionNotExistsException(FLF);
 }
 
