@@ -1,6 +1,13 @@
-CXXFLAGS = -O3 -Wall -std=c++17
-
+CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
 CC = g++
+
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+READFLAG = -lreadline
+else
+READFLAG = -ledit
+endif
 
 LINKER = \
 	-lstdc++fs \
@@ -10,16 +17,24 @@ LINKER = \
 INCL = -I../.. -I..
 
 HDR = \
-	../infra/types.hh \
-	../infra/exception.hh \
-	../infra/trace.hh \
 	
 MAIN_HDR = \
 	../infra/args.hh \
+	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
+	../infra/file_util.hh \
+	../infra/employee_t.hh \
+	../cli/parser.hh \
 	db_instance_manager.hh \
 	\
 
 DBIM_HDR = \
+	../infra/types.hh \
+	../infra/exception.hh \
+	../infra/trace.hh \
+	../infra/partition_t.hh \
+	../infra/segment_t.hh \
 	../buffer/buf_mngr.hh \
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \
@@ -27,11 +42,20 @@ DBIM_HDR = \
 	../interpreter/interpreter_sp.hh \
 	\
 
-
 OBJ = \
 	../infra/args.o \
 	../infra/exception.o \
 	../infra/trace.o \
+	../infra/partition_t.o \
+	../infra/segment_t.o \
+	../infra/employee_t.o \
+	\
+	../cli/linereaderedit.o \
+	../cli/datejd.o \
+	../cli/stime.o \
+	../cli/stimestamp.o \
+	../cli/parser.o \
+	\
 	../partition/partition_manager.o \
 	../partition/partition_base.o \
 	../partition/partition_file.o \
@@ -58,10 +82,10 @@ ALL = main
 all : $(ALL)
 
 main : db_instance_manager.o main.o
-	$(CC) main.o $(OBJ) -o main $(LINKER)
+	$(CC) main.o $(OBJ) -o main $(LINKER) $(READFLAG)
 
 main.o : main.cc $(HDR) $(MAIN_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER) $(READFLAG)
 
 db_instance_manager.o : db_instance_manager.cc db_instance_manager.hh $(HDR) $(DBIM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc

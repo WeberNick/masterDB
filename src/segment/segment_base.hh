@@ -15,7 +15,6 @@
 #include "../buffer/buf_mngr.hh"
 #include "../buffer/buf_cntrl_block.hh"
 
-#include <map>
 #include <utility>
 
 class SegmentBase
@@ -33,7 +32,7 @@ class SegmentBase
         explicit SegmentBase(SegmentBase&&) = delete;
 		SegmentBase& operator=(const SegmentBase&) = delete;
         SegmentBase& operator=(SegmentBase&&) = delete;
-		virtual ~SegmentBase() = 0;
+		virtual ~SegmentBase() = default;
 
 	public:
         /**
@@ -58,24 +57,38 @@ class SegmentBase
          * @see     buf_mngr.hh
          */
         void releasePage(const uint aPageNo, const bool aModified = false);
+        /**
+         * @brief   Prints a data page of a segment to file coded in hex
+         * @param   aPageNo: the logical page number to print
+         * @param   afromDisk: if true, page is directly extracted from disk, if not, the page is buffered.
+         */
+        void printPageToFile(uint aPageNo,bool afromDisk = false);
 
 	public:
 		virtual PID getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
 		inline const PID& getPageID(uint aPageNo){ return _pages.at(aPageNo).first; }
 
 	public:
-		inline size_t           getPageSize(){ return _partition.getPageSize(); }
-		inline uint16_t         getID(){ return _segID; }
-		inline uint32_vt        getIndexPages(){ return _indexPages; }
+		inline size_t           getPageSize() const noexcept { return _partition.getPageSize(); }
+		inline size_t           getPageSize() noexcept { return _partition.getPageSize(); }
+		inline uint16_t         getID() const noexcept { return _segID; }
+		inline uint16_t         getID() noexcept { return _segID; }
+		inline uint32_vt        getIndexPages() const noexcept { return _indexPages; }
+		inline uint32_vt        getIndexPages() noexcept { return _indexPages; }
 		/* Return how many pages can be handled by one indexPage. */
-		inline int              getIndexPageCapacity(){ return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
-		inline size_t           getNoPages(){ return _pages.size(); }
-		inline PartitionBase&   getPartition(){ return _partition; }
-		
+		inline int              getIndexPageCapacity() const noexcept { return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
+		inline int              getIndexPageCapacity() noexcept { return static_cast<const SegmentBase&>(*this).getIndexPageCapacity(); }
+		inline size_t           getNoPages() const noexcept { return _pages.size(); }
+		inline size_t           getNoPages() noexcept { return _pages.size(); }
+		inline const PartitionBase&   getPartition() const noexcept { return _partition; }
+		inline PartitionBase&   getPartition() noexcept { return _partition; }
+        inline std::string to_string() const noexcept { return std::string("ID : ") + std::to_string(getID()); }
+        inline std::string to_string() noexcept { return static_cast<const SegmentBase&>(*this).to_string(); }
 
 	protected:
 		virtual void storeSegment() = 0;                          // serialization
 		virtual void loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
+        virtual void erase();                                     // deletes the segment
 
     private:
         byte* getPageF(const uint aPageNo);
@@ -94,3 +107,5 @@ class SegmentBase
         BufferManager&  _bufMan;
         const CB&       _cb;
 };
+
+std::ostream& operator<< (std::ostream& stream, const SegmentBase& aSegment);

@@ -1,3 +1,9 @@
+# Mac
+.DS_Store
+
+# Visual Studio Code
+.vscode/
+
 # Prerequisites
 *.d
 
@@ -10,8 +16,10 @@
 # Executable Main
 util/iomeasure/main
 src/main/main
-logs/
+logs/	
 src/logs/
+Partition
+MasterPartition
 
 # Precompiled Headers
 *.gch
@@ -45,9 +53,6 @@ src/logs/
 *.log
 *.gz
 *.toc
-
-# VSCode
-.vscode/
 
 # clang-format
 .clang-format

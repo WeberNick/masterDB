@@ -15,48 +15,51 @@
 
 #include <mutex>
 #include <shared_mutex>
+#include <string>
 
 class BufferControlBlock;
 using BCB = BufferControlBlock;
 
-class BufferControlBlock
+class BufferControlBlock final
 {
     private:
         friend class BufferManager;
         friend class BufferHashTable;
-        explicit BufferControlBlock();
+        BufferControlBlock();
         explicit BufferControlBlock(const BufferControlBlock&) = delete;
         explicit BufferControlBlock(BufferControlBlock&&) = delete;
         BufferControlBlock& operator=(const BufferControlBlock&) = delete;
         BufferControlBlock& operator=(BufferControlBlock&&) = delete;
-        ~BufferControlBlock();
-
+        ~BufferControlBlock() = default;
 
     public:
         //getter
-        inline PID&     getPID(){ return _pageID; }
-        inline size_t   getFrameIndex(){ return _frameIndex; }
-        inline sMtx&    getMtx(){ return _pageMtx; }
-        inline LOCK_MODE getLockMode(){ return _mode; }
-        inline bool     getModified(){ return _modified; }
-        inline size_t   getFixCount(){ return _fixCount; }
-        inline size_t   incrFixCount(){ return ++_fixCount; }
-        inline size_t   decrFixCount(){ return --_fixCount; }
-        inline BCB*     getNextInChain(){ return _nextInChain; }
+        inline PID&     getPID() noexcept { return _pageID; }
+        inline size_t   getFrameIndex() noexcept { return _frameIndex; }
+        inline LOCK_MODE getLockMode() noexcept { return _mode; }
+        inline bool     getModified() noexcept { return _modified; }
+        inline size_t   getFixCount() noexcept { return _fixCount; }
+        inline size_t   incrFixCount() noexcept { return ++_fixCount; }
+        inline size_t   decrFixCount() noexcept { return --_fixCount; }
+        inline BCB*     getNextInChain() noexcept { return _nextInChain; }
         //setter
-        inline void     setPID(const PID aPID){ _pageID = aPID; }
-        inline void     setFrameIndex(const size_t aFrameIndex){ _frameIndex = aFrameIndex; }
-        inline void     setLockMode(LOCK_MODE aMode){ _mode = aMode; }
-        inline void     setModified(const bool aModified){ _modified = aModified; }
-        inline void     setFixCount(const int aFixCount){ _fixCount = aFixCount; }
-        inline void     setNextInChain(BCB* aBCB){ _nextInChain = aBCB; }
+        inline void     setPID(const PID aPID) noexcept { _pageID = aPID; }
+        inline void     setFrameIndex(const size_t aFrameIndex) noexcept { _frameIndex = aFrameIndex; }
+        inline void     setModified(const bool aModified) noexcept { _modified = aModified; }
+        inline void     setFixCount(const int aFixCount) noexcept { _fixCount = aFixCount; }
+        inline void     setNextInChain(BCB* aBCB) noexcept { _nextInChain = aBCB; }
 
     public:
-        void upgradeLock(LOCK_MODE aMode);
+        void lock(LOCK_MODE aMode) noexcept; //lock for given mode
+        void lock() noexcept; //lock exclusive
+        void lock_shared() noexcept; //lock shared
+        void unlock() noexcept;
+        void upgradeLock(LOCK_MODE aMode) noexcept;
+        inline std::string to_string() noexcept { return std::string("PID : '") + getPID().to_string() + "', Frame Index : " + std::to_string(getFrameIndex()) + ", Lock Mode : '" + lockModeToString(getLockMode()) + ", Modified : '" + (getModified() ? "True" : "False") + "', Fix Count : " + std::to_string(getFixCount()); }
 
     private:
-        static const CB*  _cb;
-        static void setCB(const CB* aControlBlock);
+        inline sMtx&    getMtx() noexcept { return _pageMtx; }
+        inline void     setLockMode(LOCK_MODE aMode) noexcept { _mode = aMode; }
 
     private:
         PID         _pageID; 

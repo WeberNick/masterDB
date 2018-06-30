@@ -27,14 +27,14 @@
 #include <chrono>
 #include <thread>
 
-class BufferManager
+class BufferManager final
 {
     private:
          //list of free frame indexes. protected by a mutex
-        class FreeFrames
+        class FreeFrames final
         {
             public:
-                explicit FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
+                FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
                 explicit FreeFrames(const FreeFrames&) = delete;
                 explicit FreeFrames(FreeFrames&&) = delete;
                 FreeFrames& operator=(const FreeFrames&) = delete;
@@ -45,12 +45,12 @@ class BufferManager
                 void init(const size_t aNoFreeFrames);
                 
             public:
-                inline size_t*  getFreeFrameList(){ return _freeFrameList; }
-                inline sMtx&    getFreeFrameListMtx(){ return _freeFrameListMtx; }
-                inline size_t   getNoFreeFrames(){ return _noFreeFrames; }
-                inline size_t   incrNoFreeFrames(){ return ++_noFreeFrames; }
-                inline size_t   decrNoFreeFrames(){ return --_noFreeFrames; }
-                inline void     setNoFreeFrames(size_t aNoFreeFrames){ _noFreeFrames = aNoFreeFrames; }
+                inline size_t*  getFreeFrameList() noexcept { return _freeFrameList; }
+                inline sMtx&    getFreeFrameListMtx() noexcept { return _freeFrameListMtx; }
+                inline size_t   getNoFreeFrames() noexcept { return _noFreeFrames; }
+                inline size_t   incrNoFreeFrames() noexcept { return ++_noFreeFrames; }
+                inline size_t   decrNoFreeFrames() noexcept { return --_noFreeFrames; }
+                inline void     setNoFreeFrames(size_t aNoFreeFrames) noexcept { _noFreeFrames = aNoFreeFrames; }
 
             private:
                 size_t* _freeFrameList;
@@ -59,7 +59,7 @@ class BufferManager
 
         };
        //linked list of free control blocks. protected by a mutex
-        class FreeBCBs
+        class FreeBCBs final
         {
             public:
                 explicit FreeBCBs() : _BCBs(), _freeBCBList(nullptr), _freeBCBListMtx(), _noFreeBCBs(0){}
@@ -79,13 +79,15 @@ class BufferManager
                 void init(const size_t aNoFreeBCBs);
 
             public:
-                inline BCB*     getFreeBCBList(){ return _freeBCBList; }
-                inline sMtx&    getFreeBCBListMtx(){ return _freeBCBListMtx; }
-                inline size_t   getNoFreeBCBs(){ return _noFreeBCBs; }
-                inline size_t   incrNoFreeBCBs(){ return ++_noFreeBCBs; }
-                inline size_t   decrNoFreeBCBs(){ return --_noFreeBCBs; }
-                inline void     setFreeBCBList(BCB* aFreeBCB){ _freeBCBList = aFreeBCB; }
-                inline void     setNoFreeBCBs(size_t aNoFreeBCBs){ _noFreeBCBs = aNoFreeBCBs; }
+                inline BCB*     getFreeBCBList() noexcept { TRACE("first BCB in line is "+_freeBCBList->to_string());  return _freeBCBList; }
+                inline sMtx&    getFreeBCBListMtx() noexcept { TRACE("fbcb mtx"); return _freeBCBListMtx; }
+                inline size_t   getNoFreeBCBs() noexcept { return _noFreeBCBs; }
+                inline size_t   incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
+                inline size_t   decrNoFreeBCBs() noexcept { return --_noFreeBCBs; }
+                inline void     setFreeBCBList(BCB* aFreeBCB) noexcept { _freeBCBList = aFreeBCB; }
+                inline void     setNoFreeBCBs(size_t aNoFreeBCBs) noexcept { _noFreeBCBs = aNoFreeBCBs; }
+                void            freeBCB(BCB* aBCB) noexcept;
+                void            resetBCB(BCB* aBCB) noexcept; //used to reset a BCB after the page it corresponds to was deleted
 
             private:
                 //containing all BCB pointer. With this vector it is convenient to free the memory later
@@ -107,13 +109,13 @@ class BufferManager
         ~BufferManager();
 
     public:
-        inline static BufferManager& getInstance()
+        inline static BufferManager& getInstance() noexcept
         {
             static BufferManager lBufferManagerInstance; 
             return lBufferManagerInstance;
         }
 
-        void init(const CB& aCB);
+        void init(const CB& aControlBlock);
 
     public:
         /* request access to a page and fix it */
@@ -129,27 +131,26 @@ class BufferManager
         byte* getFramePtr(BCB* aBCB);
 
     public:
-        inline size_t   getNoFrames(){ return _noFrames; }
-        inline size_t   getFrameSize(){ return _frameSize; }
+        inline size_t   getNoFrames() noexcept { return _noFrames; }
+        inline size_t   getFrameSize() noexcept { return _frameSize; }
+        void            resetBCB(const PID& aPID) noexcept;
         
     private:
-        BCB*                locatePage(const PID& aPageID);
+        BCB*                locatePage(const PID& aPageID) noexcept;
         void                readPageIn(BCB* lFBCB, const PID& aPageID);
         void                initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
-        size_t              getFrame();
+        size_t              getFrame() noexcept;
 
     private:
-        inline FreeFrames&  getFreeFrames(){ return _freeFrames; }
-        inline FreeBCBs&    getFreeBCBs(){ return _freeBCBs; }
+        inline FreeFrames&  getFreeFrames() noexcept { return _freeFrames; }
+        inline FreeBCBs&    getFreeBCBs() noexcept { return _freeBCBs; }
 
 	private:
 		size_t              _noFrames;
 		size_t 		        _frameSize;;
-		BufferHashTable*    _bufferHash;
-		byte* 			    _bufferpool;
+        std::unique_ptr<BufferHashTable>    _bufferHash;
+        std::unique_ptr<byte[]>             _bufferpool;
         FreeFrames          _freeFrames;
         FreeBCBs            _freeBCBs;
         const CB*           _cb;
-        bool                _init; 
-
 };

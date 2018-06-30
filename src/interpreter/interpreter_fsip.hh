@@ -21,10 +21,10 @@
 #include <iostream>
 #include <string>
 
-class InterpreterFSIP {
+class InterpreterFSIP final {
   public:
     /* standard constructor */
-    explicit InterpreterFSIP();
+    InterpreterFSIP();
     /* If CC and AO are needed, implement them correctly */
     explicit InterpreterFSIP(const InterpreterFSIP&) = delete;
     explicit InterpreterFSIP(InterpreterFSIP&&) = delete;
@@ -34,13 +34,13 @@ class InterpreterFSIP {
 
   public:
     /*	Set page size */
-    static void setPageSize(const uint16_t aPageSize);
+    static void setPageSize(const uint16_t aPageSize) noexcept;
 
   public:
     /*	set the page pointer and header */
-    inline void attach(byte *aPP);
+    inline void attach(byte *aPP) noexcept;
     /*	unset the page pointer and header */
-    void detach();
+    void detach() noexcept;
 
   public:
     /**
@@ -53,7 +53,7 @@ class InterpreterFSIP {
      *	@param	aNoBlocks - Number of stored Pages in FSIP
      */
     void initNewFSIP(byte *aPP, const uint64_t aLSN, const uint32_t aOffset, const uint8_t aPID,
-                     const uint32_t aNoBlocks);
+                     const uint32_t aNoBlocks) noexcept;
 
     /**
      *	@brief	looks for the next free block in the FSIP and reserves the page
@@ -73,27 +73,29 @@ class InterpreterFSIP {
      *	@param	aPageIndex - Page index inside the partition
      *  @throws FSIPException on failure
      */
-    void reservePage(const uint aPageIndex);
+    void reservePage(const uint aPageIndex) noexcept;
 
     /**
      *	@brief	free the page at the given index position
      *
      *	@param	aPageIndex - Page index inside the partition
      */
-    void freePage(const uint aPageIndex);
+    void freePage(const uint aPageIndex) noexcept;
+
+    uint32_t grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP) noexcept;
 
     inline uint grow(const uint aGrowth, const uint aMaxPagesPerFSIP){ return aGrowth + aMaxPagesPerFSIP; }
 
   public:
-    /* Getters*/
-    inline byte *pagePtr() { return _pp; }
-    inline fsip_header_t *header() { return _header; }
-    inline uint noManagedPages() { return header()->_managedPages; } // Remove noManagedPages()
-    inline uint getHeaderSize() { return sizeof(fsip_header_t); }
+    /*  tters*/
+    inline byte *pagePtr() noexcept { return _pp; }
+    inline fsip_header_t *header() noexcept { return _header; }
+    inline uint noManagedPages() noexcept { return header()->_managedPages; } // Remove noManagedPages()
+    inline uint getHeaderSize() noexcept { return sizeof(fsip_header_t); }
 
   private:
     /* Getter*/
-    inline fsip_header_t *get_hdr_ptr() { return (fsip_header_t *)(_pp + _pageSize - sizeof(fsip_header_t)); }
+    inline fsip_header_t *get_hdr_ptr() noexcept { return (fsip_header_t *)(_pp + _pageSize - sizeof(fsip_header_t)); }
 
   private:
     /**
@@ -101,7 +103,7 @@ class InterpreterFSIP {
      *
      * 	@return either the position if successful or 0
      */
-    uint getNextFreePage();
+    uint getNextFreePage() noexcept;
 
     /*	create the page with the given index in a file for debugging purposes */
     void debug(const uint aPageIndex);
@@ -120,7 +122,7 @@ class InterpreterFSIP {
     fsip_header_t *_header;
 };
 
-void InterpreterFSIP::attach(byte *aPP) {
+void InterpreterFSIP::attach(byte *aPP) noexcept {
     _pp = aPP;
     _header = get_hdr_ptr();
 }

@@ -11,90 +11,111 @@
 #include <limits>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <mutex>
 #include <shared_mutex>
 #include <iostream>
+#include <type_traits>
+#include <cassert>
 
-
-using size_t = std::size_t;
 using byte = std::byte;
-using byte_vpt = std::vector<byte *>;
+using size_t = std::size_t;
+using uint8_t = std::uint8_t;
+using uint16_t = std::uint16_t;
+using uint32_t = std::uint32_t;
+using uint64_t = std::uint64_t;
+using int8_t = std::int8_t;
 using uint = unsigned int;
+using char_vpt = std::vector<char*>;
 using uint_vt = std::vector<uint>;
+using byte_vpt = std::vector<byte *>;
 using uint32_vt = std::vector<uint32_t>;
+using string_vt = std::vector<std::string>;
 using sMtx = std::shared_mutex;
 using mtx = std::mutex;
 
 constexpr size_t INVALID = std::numeric_limits<size_t>::max();
-constexpr uint32_t MAX32 =  std::numeric_limits<uint32_t>::max();
-
+constexpr uint32_t MAX32 = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t MAX16 = std::numeric_limits<uint16_t>::max();
 
 struct control_block_t
 {
-    const bool          _install;
-    const std::string   _masterPartition;
-    const std::string   _tracePath;
-    const size_t        _pageSize;
-    const size_t        _noBufFrames;
-    const bool          _trace;
+    const bool _install;
+    const std::string _masterPartition;
+    const std::string _tracePath;
+    const size_t _pageSize;
+    const size_t _noBufFrames;
+    const bool _trace;
 
-    bool                install() const { return _install; }
-    const std::string&  mstrPart() const { return _masterPartition; }
-    const std::string&  tracePath() const { return _tracePath; }
-    size_t              pageSize() const { return _pageSize; }
-    size_t              frames() const { return _noBufFrames; }
-    bool                trace() const { return _trace; }
-    void printParas() const 
-    {
-        std::cout << "The following parameters are set:\n"
-            << "Install: " << install() << "\n"
-            << "Master Partition Path: " << mstrPart() << "\n"
-            << "Path of Log File: " << tracePath() << "\n"
-            << "Page Size: " << pageSize() << "\n"
-            << "Buffer Frames: " << frames() << "\n"
-            << "Trace: " << trace() << "\n"
-            << std::endl;
-    }
+    bool install() const noexcept { return _install; }
+    const std::string& mstrPart() const noexcept { return _masterPartition; }
+    const std::string& tracePath() const noexcept { return _tracePath; }
+    size_t pageSize() const noexcept { return _pageSize; }
+    size_t frames() const noexcept { return _noBufFrames; }
+    bool trace() const noexcept { return _trace; }
 };
 using CB = control_block_t;
+
+inline std::ostream& operator<<(std::ostream& strm, const CB& cb) {
+    strm << "The following parameters are set:\n"
+         << "Install: " << cb.install() << "\n"
+         << "Master Partition Path: " << cb.mstrPart() << "\n"
+         << "Path of Log File: " << cb.tracePath() << "\n"
+         << "Page Size: " << cb.pageSize() << "\n"
+         << "Buffer Frames: " << cb.frames() << "\n"
+         << "Trace: " << cb.trace() << "\n";
+    return strm << std::endl;
+}
 
 struct page_id_t
 {
     uint8_t _fileID;
-    uint32_t _pageNo; //correct? 
+    uint32_t _pageNo; // correct? 
 
-    uint8_t fileID() const { return _fileID; }
-    uint32_t pageNo() const { return _pageNo; }
+    uint8_t fileID() const noexcept { return _fileID; }
+    uint32_t pageNo() const noexcept { return _pageNo; }
 
-    bool operator==(const page_id_t& aOther) 
+    bool operator==(const page_id_t& aOther) const noexcept
     {
         return (_fileID == aOther._fileID && _pageNo == aOther._pageNo);
     }
+
+    bool operator==(const page_id_t& aOther) noexcept
+    {
+        return static_cast<const page_id_t&>(*this).operator==(aOther);
+    }
+
+    std::string to_string() const noexcept
+    {
+        return std::string("File ID : '") + std::to_string(_fileID) + std::string("', Page : '") + std::to_string(_pageNo) + std::string("'");
+     }
+
+    std::string to_string()
+    {
+        return static_cast<const page_id_t&>(*this).to_string();
+    }
+
 };
 using PID = page_id_t;
 using pid_vt = std::vector<PID>;
 
-struct part_t
+struct tuple_identifier_t
 {
-	uint _pID;
-	std::string _pName;
-	std::string _pPath;
-	int _pType;//1:= PartitionFile, 2:=partitionRaw
-	uint _pGrowth;
-};
-using part_vt = std::vector<part_t>;
+    uint32_t _pageNo;
+    uint32_t _tupleNo;
 
-struct seg_t
-{
-	uint _sPID; //partition ID
-	uint _sID; //segment ID
-	std::string _sName; //segment name (unique)
-	int _sType; //segment type; 1:= SegmentFSM, 2:=SegmentFSM_SP
-	uint _sFirstPage; //first segment index ( (C) Nico) page in order to load segment into memory
-};
-using seg_vt = std::vector<seg_t>;
+    uint32_t pageNo() const noexcept { return _pageNo; }
+    uint32_t pageNo() noexcept { return _pageNo; }
+    uint32_t tupleNo() const noexcept { return _tupleNo; }
+    uint32_t tupleNo() noexcept { return _tupleNo; }
 
-enum class PageStatus 
+    std::string to_string() const noexcept { return std::string("Page : '") + std::to_string(_pageNo) + std::string("', Tuple No. : '") + std::to_string(_tupleNo) + "'"; }
+    std::string to_string() noexcept { return static_cast<const tuple_identifier_t&>(*this).to_string(); }
+};
+using TID = tuple_identifier_t;
+using tid_vt = std::vector<TID>;
+
+enum class PageStatus: int8_t
 {
     kNoType = -1,
     kBUCKET0 = 0,
@@ -116,7 +137,7 @@ enum class PageStatus
     kPageStatusSize = 16
 };
 
-enum LOCK_MODE
+enum class LOCK_MODE: int8_t
 {
     kNoType = -1,
     kNOLOCK = 0,
@@ -124,3 +145,37 @@ enum LOCK_MODE
     kEXCLUSIVE = 2,
     kLockModeSize = 3
 };
+
+template<typename E>
+constexpr auto toType(E enumerator) noexcept
+{
+    return static_cast<std::underlying_type_t<E>>(enumerator);
+}
+
+inline std::string lockModeToString(LOCK_MODE aMode)
+{
+    switch(aMode)
+    {
+        case LOCK_MODE::kNoType: 
+            return std::string("kNoType"); 
+            break;
+        case LOCK_MODE::kNOLOCK: 
+            return std::string ("kNOLOCK"); 
+            break;
+        case LOCK_MODE::kSHARED: 
+            return std::string("kSHARED"); 
+            break;
+        case LOCK_MODE::kEXCLUSIVE: 
+            return std::string("kEXCLUSIVE"); 
+            break;
+        case LOCK_MODE::kLockModeSize: 
+            return std::string("Number of lock types: ") + std::to_string(toType(LOCK_MODE::kLockModeSize)); 
+            break;
+        default: 
+            assert (!"Invalid default-case of switch statement reached"); 
+            break;
+    }
+}
+
+
+

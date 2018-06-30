@@ -1,5 +1,4 @@
-CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
-
+CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
 CC = g++
 
 LINKER = -lstdc++fs
@@ -10,6 +9,8 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	../infra/file_util.hh \
+	../infra/partition_t.hh \
 	\
 
 PM_HDR = \

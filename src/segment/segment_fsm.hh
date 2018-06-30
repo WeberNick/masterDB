@@ -17,27 +17,29 @@
 #include "../buffer/buf_mngr.hh"
 #include "segment_base.hh"
 #include <vector>
+#include <string>
 
 class SegmentFSM : public SegmentBase
 {
   protected:
     friend class SegmentManager;
-    explicit SegmentFSM() = delete;
-    explicit SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
-    explicit SegmentFSM(PartitionBase& aPartition, const CB& aCOntrolBlock);
+    SegmentFSM() = delete;
+    SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+    SegmentFSM(PartitionBase& aPartition, const CB& aCOntrolBlock);
     explicit SegmentFSM(const SegmentFSM&) = delete;
     explicit SegmentFSM(SegmentFSM&&) = delete;
     SegmentFSM& operator=(const SegmentFSM&) = delete;
     SegmentFSM& operator=(SegmentFSM&&) = delete;
-    ~SegmentFSM();
+    ~SegmentFSM() = default;
 
   public:
-    PID getFreePage(uint aNoOfBytes, bool& emptyfix);
-    PID getNewPage();
+    PID getFreePage(uint aNoOfBytes, bool& emptyfix, uint aSizeOfOverhead = sizeof(basic_header_t));
+    PID getNewPage() override;
 
-  public:
-    void storeSegment();                         // serialization
-    void loadSegment(const uint32_t aPageIndex); // deserialization
+  protected:
+    void storeSegment() override;                         // serialization
+    void loadSegment(const uint32_t aPageIndex) override; // deserialization
+    void erase() override;
 
   protected:
     /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */

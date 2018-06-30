@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
+CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
 
 CC = g++
 
@@ -8,11 +8,14 @@ HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
+	../infra/segment_t.hh \
+	../infra/header_structs.hh \
+	../buffer/buf_mngr.hh \
+	../buffer/buf_cntrl_block.hh \
 	\
 
 #Header needed by 'segment_manager'
 SM_HDR = \
-	../infra/header_structs.hh \
 	../partition/partition_manager.hh \
 	../partition/partition_base.hh \
 	../partition/partition_file.hh \
@@ -26,23 +29,15 @@ SB_HDR = \
 	\
 #Header needed by 'segment_fsm'
 SFSM_HDR = \
-        ../infra/header_structs.hh \
-        segment_base.hh \
-        ../partition/partition_file.hh \
         ../interpreter/interpreter_fsm.hh \
+        segment_base.hh \
         \
 #Header needed by 'segment_fsm_sp'
 SSP_HDR = \
-		   segment_fsm.hh \
 		   ../interpreter/interpreter_sp.hh \
+		   segment_fsm.hh \
+		   segment_base.hh \
 		   \
-			
-#Header needed by 'segment'
-S_HDR = \
-	../infra/header_structs.hh \
-	segment_base.hh \
-	../partition/partition_file.hh \
-	\
 
 OBJ = \
 	segment_manager.o \

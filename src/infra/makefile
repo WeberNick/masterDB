@@ -1,18 +1,23 @@
-CXXFLAGS = -O3 -Wall -Weffc++ -std=c++17
-CFLAGS   = -O3 -Wall -std=c++17
+CXXFLAGS = -O3 -Wall -std=c++17 -g
 
 CC = g++
 
 INCL = -I../.. -I..
 
+TPL_HDR = \
+	types.hh \
+	exception.hh \
+	trace.hh \
+	tuple.hh \
+	\
+
 OBJ = \
 	args.o \
 	exception.o \
 	trace.o \
-	stime.o \
-	datejd.o \
-	linereaderedit.o \
-	stimestamp.o \
+	partition_t.o \
+	segment_t.o \
+	employee_t.o \
 	\
 
 all : $(OBJ)
@@ -26,17 +31,14 @@ exception.o : exception.cc exception.hh types.hh
 trace.o : trace.cc trace.hh types.hh exception.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) trace.cc
 
-stime.o : stime.cc stime.hh
-	$(CC) -c $(CFLAGS) $(INCL) stime.cc
+partition_t.o : partition_t.cc partition_t.hh $(TPL_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_t.cc
 
-datejd.o : datejd.cc datejd.hh
-	$(CC) -c $(CXXFLAGS) $(INCL) datejd.cc
+segment_t.o : segment_t.cc segment_t.hh $(TPL_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_t.cc
 
-linereaderedit.o : linereaderedit.cc linereaderedit.hh datejd.hh val_tt.hh stime.hh stimestamp.hh
-	$(CC) -c $(CFLAGS) $(INCL) linereaderedit.cc
-
-stimestamp.o : stimestamp.cc stimestamp.hh datejd.hh stime.hh
-	$(CC) -c $(CXXFLAGS) $(INCL) stimestamp.cc
+employee_t.o : employee_t.cc employee_t.hh $(TPL_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) employee_t.cc
 
 clean :
 	rm -f *.o a.out

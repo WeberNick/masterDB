@@ -3,40 +3,41 @@
 Trace::Trace() :
     _logPath(),
     _logStream(),
-    _cb(nullptr),
-    _init(false)
+    _cb(nullptr)
 {}
 
 Trace::~Trace()
 {
     if(_cb->trace())
     {
-        TRACE("Close log file");
+        TRACE("Closing the log file...");
+        TRACE("'Trace' destructed");
         _logStream.close();
     }
 }
 
-void Trace::init(const CB& aCB)
+void Trace::init(const CB& aControlBlock) noexcept
 {
-    if(!_init)
+    if(!_cb)
     {
-        _cb = &aCB;
+        _cb = &aControlBlock;
         _logPath = _cb->tracePath();
         _logPath.append("logs/");
         fs::create_directory(_logPath);
         std::time_t lCurrTime = std::time(nullptr);
         std::string lTime = std::string(std::ctime(&lCurrTime));
-        _logPath.append(lTime.substr(0, lTime.size() - 1).append(".txt"));
+        _logPath.append(lTime.substr(0, lTime.size() - 1).append(".log"));
         if(_cb->trace())
         {
             _logStream.open(_logPath.c_str(), std::ofstream::out | std::ofstream::app);
-            TRACE("Log file created and open");
+            TRACE("'Trace' constructed"); //just for consistency with the other singletons
+            TRACE("Log file created and opened");
         }
-        _init = true;
+        TRACE("'Trace' initialized");
     }
 }
 
-void Trace::log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage)
+void Trace::log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage) noexcept
 {
     if(_cb->trace())
     {

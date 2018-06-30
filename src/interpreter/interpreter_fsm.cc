@@ -7,15 +7,15 @@ void InterpreterFSM::setPageSize(const size_t aPageSize) {
     _pageSize = aPageSize;
 }
 
-InterpreterFSM::InterpreterFSM() : _pp(NULL), _header(NULL) {}
+InterpreterFSM::InterpreterFSM() : _pp(nullptr), _header(nullptr) {}
 
-void InterpreterFSM::detach() {
-    _pp = NULL;
-    _header = NULL;
+void InterpreterFSM::detach() noexcept {
+    _pp = nullptr;
+    _header = nullptr;
 }
 
 void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID,
-                                const uint32_t aNoPages) {
+                                const uint32_t aNoPages) noexcept {
     // alles 0, header updaten
     uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
     for (uint i = 0; i < max; ++i) {
@@ -30,37 +30,37 @@ void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t a
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 
-uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) {
+uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept {
+    // search for page with sufficient free space
+    // calculate new occupation
+    // change status
     uint32_t i = 0;
     while (i < _header->_noPages) {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
         bool fits = 0;
         PageStatus max = PageStatus::kPageStatusSize;
-        if (static_cast<int>(lPageStatus) + static_cast<int>(aPageStatus) <= static_cast<int>(max)) {
+        if (static_cast<uint>(lPageStatus) + static_cast<uint>(aPageStatus) < static_cast<uint>(max)) {
             fits = true;
         }
         if (fits) {
-            lPageStatus = static_cast<PageStatus>(static_cast<int>(aPageStatus) + static_cast<int>(aPageStatus));
+            lPageStatus = static_cast<PageStatus>(static_cast<uint>(lPageStatus) + static_cast<uint>(aPageStatus));
+            //TRACE("fits, new PageStatus is "+std::to_string(static_cast<uint>(lPageStatus)));
             changePageStatus(i, lPageStatus);
             return i;
         }
         ++i;
     }
-    if (i < (_pageSize - sizeof(fsm_header_t)) * 2) { // add new page to segment
+    if (i < (_pageSize - sizeof(fsm_header_t)) * 2) { // add new data page to segment
         changePageStatus(i, aPageStatus);
         _header->_noPages++;
         return i;
     } else {
         return MAX32; // no free space on this fsm, load or create next
     }
-
-    // search for page with sufficient free space
-    // calculate new occupation
-    // change status
 }
 
-void InterpreterFSM::changePageStatus(const uint aPageNo, const PageStatus aStatus) {
+void InterpreterFSM::changePageStatus(const uint aPageNo, const PageStatus aStatus) noexcept {
     uint8_t *currByte = ((uint8_t *)_pp + aPageNo / 2);
     uint8_t lStatus = static_cast<uint8_t>(aStatus);
     if (aPageNo % 2 == 0) {
@@ -73,24 +73,25 @@ void InterpreterFSM::changePageStatus(const uint aPageNo, const PageStatus aStat
     }
 }
 
-PageStatus InterpreterFSM::getPageStatus(const uint aPageNo) {
+PageStatus InterpreterFSM::getPageStatus(const uint aPageNo) noexcept {
     uint8_t currByte = *((uint8_t *)_pp + aPageNo / 2);
     if (aPageNo % 2 == 0) {
         currByte &= 15;
-        return static_cast<PageStatus>(currByte);
-    } else {
+    } 
+    else {
         currByte >>= 4;
-        return static_cast<PageStatus>(currByte);
     }
+    return static_cast<PageStatus>(currByte);
 }
 
 
-PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes)
+PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes) noexcept
 {
     if (aSizeWithoutOverhead < aNoBytes) {
         return PageStatus::kNoType;
     }
     const uint lBucketSize = std::floor(aSizeWithoutOverhead / 16.0); // remove magic number, (numb buckets)
     const uint lBucketNo = std::ceil(aNoBytes / (double)lBucketSize);
+    //changed to <= have to think about this
     return (lBucketNo < (uint)PageStatus::kPageStatusSize) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
 }

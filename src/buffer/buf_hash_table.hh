@@ -1,5 +1,5 @@
 /**
- *  @file 	buf_mngr.hh
+ *  @file 	buf_hash_table.hh
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief 	Class implementieng the hash table of the buffer manager
  *  @bugs	Currently no bugs known
@@ -18,13 +18,13 @@
 #include <mutex>
 #include <shared_mutex>
 
-class BufferHashTable
+class BufferHashTable final
 {
     private:
-        class HashBucket
+        class HashBucket final
         {
             public:
-                explicit HashBucket() :
+                HashBucket() :
                     _bucketMtx(),
                     _firstBCB(nullptr)
                 {}
@@ -32,12 +32,12 @@ class BufferHashTable
                 explicit HashBucket(HashBucket&&) = delete;
                 HashBucket& operator=(const HashBucket&) = delete;
                 HashBucket& operator=(HashBucket&&) = delete;
-                ~HashBucket(){}
+                ~HashBucket() = default;
 
             public:
-                inline sMtx&    getMtx(){ return _bucketMtx; }
-                inline BCB*     getBCB(){ return _firstBCB; }
-                inline void     setBCB(BCB* aBCB){ _firstBCB = aBCB; }
+                inline sMtx&    getMtx() noexcept { return _bucketMtx; }
+                inline BCB*     getBCB() noexcept { return _firstBCB; }
+                inline void     setBCB(BCB* aBCB) noexcept { _firstBCB = aBCB; }
 
             private:
                 //each bucket is protected by a mutex while being used
@@ -48,7 +48,7 @@ class BufferHashTable
 
 
 	public:
-        explicit BufferHashTable() = delete;
+        BufferHashTable() = delete;
 		explicit BufferHashTable(const size_t aHashTableSize);
 		explicit BufferHashTable(const BufferHashTable&) = delete;
         explicit BufferHashTable(BufferHashTable&&) = delete;
@@ -57,17 +57,20 @@ class BufferHashTable
         ~BufferHashTable();
 
     public:
-        inline size_t   getTableSize(){ return _size; }
-        inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
-        inline BCB*     getBucketBCB(const size_t aHash){ return _hashTable[aHash].getBCB(); }
-        inline void     setBucketBCB(const size_t aHash, BCB* aBCB){ _hashTable[aHash].setBCB(aBCB); }
+        inline size_t   getTableSize() noexcept { return _size; }
+       // inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
+        inline BCB*     getBucketBCB(const size_t aHash) noexcept { return _hashTable[aHash].getBCB(); }
+        inline void     setBucketBCB(const size_t aHash, BCB* aBCB) noexcept { _hashTable[aHash].setBCB(aBCB); }
+        std::vector<BCB*> getAllValidBCBs();
 
 	public:
-		size_t hash(const PID& aPageID);
+		size_t hash(const PID& aPageID) noexcept;
+        sMtx&    getBucketMtx(const size_t aHash) noexcept;
+
 
 	private:
         //the size of the hash table
 		size_t          _size;      		
         //the hash table maintaining the control blocks
-        HashBucket*     _hashTable; 
+        std::unique_ptr<HashBucket[]>   _hashTable;
 };

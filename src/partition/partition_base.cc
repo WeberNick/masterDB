@@ -1,6 +1,6 @@
 #include "partition_base.hh"
 
-PartitionBase::PartitionBase(const std::string aPath, const std::string aName, const uint aPartitionID, const CB& aControlBlock) : 
+PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
 	_pageSize(aControlBlock.pageSize()),
@@ -12,8 +12,6 @@ PartitionBase::PartitionBase(const std::string aPath, const std::string aName, c
 {
     InterpreterFSIP::init(aControlBlock);
 }
-
-PartitionBase::~PartitionBase(){}
 
 void PartitionBase::open()
 {
@@ -60,19 +58,24 @@ uint32_t PartitionBase::allocPage()
 	do
 	{
 		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
+		TRACE(std::to_string(lIndexOfFSIP));
         try
         {
 		    lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
         }
         catch(const FSIPException& ex)
         {
-			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
-		    if(lIndexOfFSIP >= _sizeInPages) //Next offset is bigger than the partition
+			uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
+		    if(lIndexOfNextFSIP >= _sizeInPages) //Next offset is bigger than the partition
             {
-                const std::string lErrMsg("The partition is full. Can not allocate any new pages.");
+                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: "+std::to_string(lIndexOfFSIP));
                 TRACE(lErrMsg);
-                throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP);
+				close();
+                throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
             }
+			else{
+				lIndexOfFSIP=lIndexOfNextFSIP;
+			}
             continue;
         }
 		writePage(lPagePointer, lIndexOfFSIP, _pageSize);
@@ -81,6 +84,7 @@ uint32_t PartitionBase::allocPage()
 	}
 	while(true); //if a free page is found, break will be executed. If not, an exception is thrown
 	delete[] lPagePointer;
+	TRACE(std::string("Page ")+std::to_string(lAllocatedPageIndex)+std::string(" of Partition ")+std::to_string(getID())+std::string(" allocated."));
 	return lAllocatedPageIndex;	//return offset to free block
 	/*
 	byte* lPagePointer;
@@ -116,18 +120,23 @@ uint32_t PartitionBase::allocPage()
 */
 }
 
-void PartitionBase::freePage(const uint aPageIndex)
+void PartitionBase::freePage(const uint32_t aPageIndex)
 {
 	byte* lPagePointer = new byte[_pageSize];
-	readPage(lPagePointer, aPageIndex, _pageSize);
+	uint32_t fsipIndex = (aPageIndex / (getMaxPagesPerFSIP()+1))*getMaxPagesPerFSIP();
+	TRACE(std::to_string(fsipIndex));
+	readPage(lPagePointer, fsipIndex , _pageSize);//fsip auf der aPageIndex verwaltet wird
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);
+	TRACE(std::to_string(aPageIndex));
+	//TRACE(std::to_string((aPageIndex % (getMaxPagesPerFSIP() +1)) -1));
 	fsip.freePage(aPageIndex);
 	fsip.detach();
+	writePage(lPagePointer, fsipIndex,_pageSize);
 	delete[] lPagePointer;
 }
 
-void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
+void PartitionBase::readPage(byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize)
 {
 	if(pread(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1)
 	{
@@ -137,7 +146,7 @@ void PartitionBase::readPage(byte* aBuffer, const uint aPageIndex, const uint aB
 	}
 }
 
-void PartitionBase::writePage(const byte* aBuffer, const uint aPageIndex, const uint aBufferSize)
+void PartitionBase::writePage(const byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize)
 {
 	if(pwrite(_fileDescriptor, aBuffer, aBufferSize, (aPageIndex * _pageSize)) == -1 && _cb.trace())
 	{
@@ -173,9 +182,16 @@ void PartitionBase::format()
 	delete[] lPagePointer;
 }
 
-
-uint PartitionBase::getMaxPagesPerFSIP()
+uint PartitionBase::getMaxPagesPerFSIP() noexcept
 {
 	InterpreterFSIP fsip;
 	return (_pageSize - fsip.getHeaderSize()) * 8;
 }
+
+std::ostream& operator<< (std::ostream& stream, const PartitionBase& aPartition)
+{
+    stream << aPartition.to_string();
+    return stream;
+}
+
+
