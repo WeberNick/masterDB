@@ -69,14 +69,21 @@ class SegmentBase
 		inline const PID& getPageID(uint aPageNo){ return _pages.at(aPageNo).first; }
 
 	public:
+		inline size_t           getPageSize() const noexcept { return _partition.getPageSize(); }
 		inline size_t           getPageSize() noexcept { return _partition.getPageSize(); }
+		inline uint16_t         getID() const noexcept { return _segID; }
 		inline uint16_t         getID() noexcept { return _segID; }
+		inline uint32_vt        getIndexPages() const noexcept { return _indexPages; }
 		inline uint32_vt        getIndexPages() noexcept { return _indexPages; }
 		/* Return how many pages can be handled by one indexPage. */
-		inline int              getIndexPageCapacity() noexcept { return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
+		inline int              getIndexPageCapacity() const noexcept { return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
+		inline int              getIndexPageCapacity() noexcept { return static_cast<const SegmentBase&>(*this).getIndexPageCapacity(); }
+		inline size_t           getNoPages() const noexcept { return _pages.size(); }
 		inline size_t           getNoPages() noexcept { return _pages.size(); }
+		inline const PartitionBase&   getPartition() const noexcept { return _partition; }
 		inline PartitionBase&   getPartition() noexcept { return _partition; }
-		
+        inline std::string to_string() const noexcept { return std::string("ID : ") + std::to_string(getID()); }
+        inline std::string to_string() noexcept { return static_cast<const SegmentBase&>(*this).to_string(); }
 
 	protected:
 		virtual void storeSegment() = 0;                          // serialization
@@ -100,3 +107,5 @@ class SegmentBase
         BufferManager&  _bufMan;
         const CB&       _cb;
 };
+
+std::ostream& operator<< (std::ostream& stream, const SegmentBase& aSegment);

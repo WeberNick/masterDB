@@ -33,24 +33,25 @@ void InterpreterSP::initNewPage(byte* aPP) noexcept
 }
 
 /* Give record size as parameter, determine where to write the record and return location as a pointer */
-byte* InterpreterSP::addNewRecord(const uint aRecordSize) noexcept
+std::pair<byte*, uint16_t> InterpreterSP::addNewRecord(const uint aRecordSize) noexcept
 {
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment
 	const uint lTotalSize = lRecordSize + sizeof(slot_t);        // add space for one new slot 
 
-	byte* lResultRecord = nullptr;
+    std::pair<byte*, uint16_t> result;
+    result.first = nullptr;
 
 	if(lTotalSize <= freeSpace()) 
 	{
-		lResultRecord = pagePtr() + header()->_nextFreeSpace;
+		result.first = pagePtr() + header()->_nextFreeSpace;
                 //wie viel platz genau da?
 		header()->_nextFreeSpace += lRecordSize;               // remember pointer to next free record
 		header()->_freeSpace -= lTotalSize;
-		slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
-		slot(noRecords())._size =lRecordSize;
+		slot(noRecords())._offset = result.first - pagePtr();  // store offset of new record in slot
+		slot(noRecords())._size = lRecordSize;
 		slot(noRecords())._status=1;
                 //rest des slots setzen
-		header()->_noRecords += 1;
+		result.second = header()->_noRecords++; //First return, then increment
 	}
 /*
 	if(lTotalSize <= freeSpace()) 
@@ -94,7 +95,7 @@ byte* InterpreterSP::addNewRecord(const uint aRecordSize) noexcept
                 //rest des slots setzen
 		header()->_noRecords += 1;
 	}*/
-	return lResultRecord;
+	return result;
 }
 
 //just mark deleted

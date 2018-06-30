@@ -4,16 +4,16 @@ SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, c
     SegmentFSM(aSegID, aPartition, aControlBlock)
 {
     InterpreterSP::setPageSize(aControlBlock.pageSize());  
-	TRACE("SegmentFSM_SP successfully created.") ;
+	TRACE("'SegmentFSM_SP' constructed");
 }
 
 SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock) :
     SegmentFSM(aPartition, aControlBlock)
 {}
 
-void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
+TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	TRACE("trying to insert Tuple");
-	// get page with enough space for the tuple and load it into memory
+    // get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTupleSize, emptyfix);
 	BCB* lBCB;
@@ -21,7 +21,7 @@ void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 		lBCB = _bufMan.emptyfix(lPID);
 	}
 	else{
-		lBCB = _bufMan.fix(lPID, kEXCLUSIVE); 
+		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
     auto it = std::find_if(_pages.begin(), _pages.end(), [lPID] (const std::pair<PID, BCB*>& elem) { return elem.first == lPID; }); //get iterator to PID in page vector
     if(it != _pages.end())
@@ -44,28 +44,35 @@ void SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	// attach page to sp interpreter
 	lInterpreter.attach(lBufferPage);
 	// if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
-	byte* lFreeTuplePointer = lInterpreter.addNewRecord(aTupleSize);
+	auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTupleSize);
+    const TID resultTID = {lPID.pageNo(), tplNo};
 	
-	if(lFreeTuplePointer == nullptr) // If true, not enough free space on nsm page => getFreePage buggy
+	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
         throw NSMException(FLF, lErrMsg);
 	}
-	std::memcpy(lFreeTuplePointer, aTuple, aTupleSize); // copy the content of aTuple to the nsm page
+	std::memcpy(tplPtr, aTuple, aTupleSize); // copy the content of aTuple to the nsm page
 	lInterpreter.detach();
 	lBCB->setModified(true);
-	lBCB->getMtx().unlock();
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
+    return resultTID;
 }
 
-void SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
+PID SegmentFSM_SP::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
+    return SegmentFSM::getFreePage(aNoOfBytes, emptyfix, sizeof(sp_header_t) + sizeof(InterpreterSP::slot_t));
+}
+
+tid_vt SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)
 {
+    tid_vt result;
 	for(byte* aTuple: aTuples)
 	{
-		insertTuple(aTuple, aTupleSize);
+		result.push_back(insertTuple(aTuple, aTupleSize));
 	}
+    return result;
 }
 
 void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {

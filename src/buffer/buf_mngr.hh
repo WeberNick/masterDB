@@ -34,7 +34,7 @@ class BufferManager final
         class FreeFrames final
         {
             public:
-                explicit FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
+                FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
                 explicit FreeFrames(const FreeFrames&) = delete;
                 explicit FreeFrames(FreeFrames&&) = delete;
                 FreeFrames& operator=(const FreeFrames&) = delete;
@@ -79,14 +79,14 @@ class BufferManager final
                 void init(const size_t aNoFreeBCBs);
 
             public:
-                inline BCB*     getFreeBCBList() noexcept { return _freeBCBList; }
-                inline sMtx&    getFreeBCBListMtx() noexcept { return _freeBCBListMtx; }
+                inline BCB*     getFreeBCBList() noexcept { TRACE("first BCB in line is "+_freeBCBList->to_string());  return _freeBCBList; }
+                inline sMtx&    getFreeBCBListMtx() noexcept { TRACE("fbcb mtx"); return _freeBCBListMtx; }
                 inline size_t   getNoFreeBCBs() noexcept { return _noFreeBCBs; }
                 inline size_t   incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
                 inline size_t   decrNoFreeBCBs() noexcept { return --_noFreeBCBs; }
                 inline void     setFreeBCBList(BCB* aFreeBCB) noexcept { _freeBCBList = aFreeBCB; }
                 inline void     setNoFreeBCBs(size_t aNoFreeBCBs) noexcept { _noFreeBCBs = aNoFreeBCBs; }
-                inline void     freeBCB(BCB* aBCB) noexcept { aBCB->setNextInChain(getFreeBCBList()); setFreeBCBList(aBCB); };
+                void            freeBCB(BCB* aBCB) noexcept;
                 void            resetBCB(BCB* aBCB) noexcept; //used to reset a BCB after the page it corresponds to was deleted
 
             private:

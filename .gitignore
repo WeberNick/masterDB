@@ -18,6 +18,8 @@ util/iomeasure/main
 src/main/main
 logs/	
 src/logs/
+Partition
+MasterPartition
 
 # Precompiled Headers
 *.gch

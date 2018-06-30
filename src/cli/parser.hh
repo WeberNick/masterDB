@@ -9,7 +9,9 @@
 
 #include "linereaderedit.hh"
 #include "../infra/types.hh"
-#include "../infra/tuples.hh"
+#include "../infra/partition_t.hh"
+#include "../infra/segment_t.hh"
+#include "../infra/employee_t.hh"
 #include "../infra/exception.hh"
 
 #include "../main/db_instance_manager.hh"

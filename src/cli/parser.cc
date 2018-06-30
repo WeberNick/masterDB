@@ -265,6 +265,7 @@ int CP::com_insert_tuple(const char_vpt* args) const {
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
             }
         } else {
+            std::cout << "Type " << type << " could not be recognized." << std::endl;
             return CP::CommandStatus::WRONG;
         }
     } catch (...) { return CP::CommandStatus::ERROR; } // TODO handle Seg does not exist?
@@ -308,7 +309,7 @@ int CP::com_show_parts(const char_vpt* args) const {
 int CP::com_show_seg(const char_vpt* args) const {
     std::string segName(args->at(0));
     try {
-        const Segment_T& seg = SegmentManager::getInstance().getSegmentByName(segName);
+        const Segment_T& seg = SegmentManager::getInstance().getSegmentT(segName);
         std::cout << "SegmentID:    " << seg.ID() << std::endl;
         std::cout << "Segment:      " << seg.name() << std::endl;
         std::cout << "Partition:    " << PartitionManager::getInstance().getPartitionName(seg.partID()) << std::endl;

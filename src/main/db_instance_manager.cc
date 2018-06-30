@@ -15,6 +15,7 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
     _running(false)
 {
     // think of reserver page.. 
+    TRACE("'DatabaseInstanceManager' constructed");
 }
 
 /**
@@ -23,8 +24,8 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
  */
 DatabaseInstanceManager::~DatabaseInstanceManager()
 {
-    TRACE("DB Instance manager destructed.");
-   // shutdown();
+    // shutdown();
+    TRACE("'DatabaseInstanceManager' destructed");
 }
 
 void DatabaseInstanceManager::init(const CB& aControlBlock)
@@ -41,40 +42,45 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
             boot();
         }
         _running = true;
+        TRACE("'DatabaseInstanceManager' initialized");
     }
 }
 
 
 void DatabaseInstanceManager::install()
 {
-    TRACE("installing database");
-  Partition_T lMasterPartitionTuple;
-  _masterPartition =   _partMngr.createMasterPartition(_cb->mstrPart(), 1000,lMasterPartitionTuple);
-  _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
-  _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
+    TRACE("Installation of the database system starts...");
+    Partition_T lMasterPartitionTuple;
+    const size_t lMstrPartGrowth = 1000;
+    _masterPartition = _partMngr.createMasterPartition(_cb->mstrPart(), lMstrPartGrowth, lMasterPartitionTuple);
+    _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
+    _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
+    TRACE("Finished the installation of the database system!");
 }
 
 void DatabaseInstanceManager::boot()
 {
-  TRACE("booting");
-  part_vt aPartitionTuples;
-  seg_vt aSegmentTuples;
-  load<Partition_T>(aPartitionTuples, _partIndex);
-  TRACE("partition Tuples loaded");
-  load<Segment_T>(aSegmentTuples, _segIndex);
-  TRACE("Segment Tuples loaded");
-  _partMngr.load(aPartitionTuples);
-  _segMngr.load(aSegmentTuples);
-  _masterPartition = (PartitionFile*)_partMngr.getPartition(_partMngr._masterPartName);
+    TRACE("Booting the database system starts...");
+    part_vt lPartitionTuples;
+    seg_vt lSegmentTuples;
+    load<Partition_T>(lPartitionTuples, _partIndex);
+    TRACE("## Boot: All partition tuples have been loaded");
+    load<Segment_T>(lSegmentTuples, _segIndex);
+    TRACE("## Boot: All segment tuples have been loaded");
+    _partMngr.load(lPartitionTuples);
+    _segMngr.load(lSegmentTuples);
+    _masterPartition = (PartitionFile*)_partMngr.getPartition(_partMngr._masterPartName);
+    TRACE("Finished booting the database system!");
 }
 
 void DatabaseInstanceManager::shutdown()
 {
-    TRACE("storing Database");
-    //  if (isRunning()) {
+    TRACE("Shutting down the database system starts...");
+    // if (isRunning()) {
         // stop transactions
-    _segMngr.storeSegments();
-    BufferManager::getInstance().flushAll();
+        _segMngr.storeSegments();     
+        BufferManager::getInstance().flushAll();
         // _running = false;
-    //  }
+    // }
+    TRACE("Finished shutting down the database system!");
 }

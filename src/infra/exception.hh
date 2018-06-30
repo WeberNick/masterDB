@@ -18,8 +18,10 @@
 #include <iostream>
 #include <cerrno>
 #include <cstring>
+#include <cassert>
 
 #define FLF __FILE__, __LINE__, __PRETTY_FUNCTION__
+#define ASSERT_MSG(MSG) assert(!MSG);  
 
 class BaseException : public std::runtime_error 
 {
@@ -106,6 +108,24 @@ class PartitionExistsException : public BaseException
                 const char*         aFunctionName);
 };
 
+class PartitionNotExistsException : public BaseException
+{
+    public:
+        PartitionNotExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
+class SegmentNotExistsException : public BaseException
+{
+    public:
+        SegmentNotExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
 class PartitionFullException : public BaseException
 {
     public:
@@ -157,16 +177,6 @@ class InvalidArgumentException : public BaseException
                 const std::string&  aErrorMessage);
 };
 
-class SwitchException : public BaseException
-{
-	public:
-		SwitchException(
-                const char*         aFileName, 
-                const unsigned int  aLineNumber, 
-                const char*         aFunctionName,
-                const std::string&  aErrorMessage);
-};
-
 class FileException : public BaseException
 {
 	public:
@@ -176,4 +186,14 @@ class FileException : public BaseException
                 const char*         aFunctionName, 
                 const char*         aErrorFileName, 
                 const std::string&  aErrorMessage); 
+};
+
+class InvalidPathException : public BaseException
+{
+	public:
+		InvalidPathException(
+                const char*         aFileName, 
+                const unsigned int  aLineNumber, 
+                const char*         aFunctionName,
+                const std::string&  aPath);
 };
