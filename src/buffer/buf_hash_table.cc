@@ -35,7 +35,7 @@ std::vector<BCB*> BufferHashTable::getAllValidBCBs(){
 		while(lBCB)
 		{
 			rtn.push_back(lBCB);
-			lBCB = lBCB->_nextInChain;
+			lBCB = lBCB->getNextInChain();
 		}
 	}
 	return rtn;

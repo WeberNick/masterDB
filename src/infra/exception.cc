@@ -211,3 +211,14 @@ InvalidPathException::InvalidPathException(
             aFunctionName,
             std::string("Path '") + aPath + std::string("' is invalid."))
 {}
+
+NoFreeBCBsException::NoFreeBCBsException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            std::string("Request for free BCB failed as there are no free BCBs."))
+{}

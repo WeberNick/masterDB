@@ -1,30 +1,52 @@
 #include "buf_mngr.hh"
 
-void BufferManager::FreeFrames::init(const size_t aNoFreeFrames)
+
+BufferManager::FreeFrames::FreeFrames() : 
+    _freeFrameList(), 
+    _freeFrameListMtx(), 
+    _noFreeFrames(0)
+{}
+
+void BufferManager::FreeFrames::init(const size_t aNoFreeFrames) noexcept
 {
-    _freeFrameList = new size_t[aNoFreeFrames];
-    _noFreeFrames = aNoFreeFrames;
-    for(size_t i = 0; i < _noFreeFrames; ++i)
+    if(!_freeFrameList.get())
     {
-        _freeFrameList[i] = i;
+        _freeFrameList = std::make_unique<size_t[]>(aNoFreeFrames); 
+        _noFreeFrames = aNoFreeFrames;
+        for(size_t i = 0; i < _noFreeFrames; ++i)
+        {
+            _freeFrameList[i] = i;
+        }
+        TRACE("The free frames list is initialized. All frames are free.");
     }
 }
 
-void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs)
+BufferManager::FreeBCBs::FreeBCBs() : 
+    _BCBs(), 
+    _freeBCBList(nullptr), 
+    _freeBCBListMtx(), 
+    _noFreeBCBs(0)
+{}
+
+void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs) noexcept
 {
-    _noFreeBCBs = aNoFreeBCBs;
-    _BCBs.resize(_noFreeBCBs, nullptr);
-    for(size_t i = 0; i < _noFreeBCBs; ++i)
+    if(!_freeBCBList)
     {
-        _BCBs[i] = new BCB;
-    }
-    BCB* newBCB = _BCBs[0];
-    _freeBCBList = newBCB;
-    //create the initial list of free BCBs
-    for(BCB* ptr : _BCBs)
-    {
-        newBCB->_nextInChain = ptr;
-        newBCB = newBCB->_nextInChain;
+        _noFreeBCBs = aNoFreeBCBs;
+        _BCBs.resize(_noFreeBCBs);
+        for(size_t i = 0; i < _noFreeBCBs; ++i)
+        {
+            _BCBs[i] = std::make_unique<BCB>();
+        }
+        BCB* newBCB = _BCBs[0].get();
+        _freeBCBList = newBCB;
+        //create the initial list of free BCBs
+        for(const auto& u_ptr : _BCBs)
+        {
+            newBCB->setNextInChain(u_ptr.get());
+            newBCB = newBCB->getNextInChain();
+        }
+        TRACE("The free BCB list is initialized.");
     }
 }
 
@@ -38,18 +60,17 @@ void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
 
 void BufferManager::FreeBCBs::freeBCB(BCB* aBCB) noexcept
 { 
-    getFreeBCBListMtx().lock();
-    aBCB->setNextInChain(getFreeBCBList()); 
-    setFreeBCBList(aBCB);
+    lock();
+    insertToFreeBCBs(aBCB);
     incrNoFreeBCBs();
-    getFreeBCBListMtx().unlock();
+    unlock();
  }
 
 BufferManager::BufferManager() :
 	_noFrames(0),
 	_frameSize(0),
-	_bufferHash(nullptr),
-	_bufferpool(nullptr),
+	_bufferHash(),
+	_bufferpool(),
 	_freeFrames(),
     _freeBCBs(),
     _cb(nullptr)
@@ -199,15 +220,7 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
 {
     TRACE("Try to locate page");
     //BCB = Buffer Control Block
-    getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
-    BCB* lFBCB = getFreeBCBs().getFreeBCBList(); //get free BCB
-
-    //should not happen because we have more bcbs than frames.
-    //everytime a frame is reused, a BCB is freed and inserted back into the free bcb list
-    assert(lFBCB != nullptr);
-    getFreeBCBs().setFreeBCBList(lFBCB->getNextInChain()); //set free BCB list to next free BCB
-    getFreeBCBs().decrNoFreeBCBs(); //decrement number of free BCBs
-    getFreeBCBs().getFreeBCBListMtx().unlock(); //unlock mutex of free BCB list
+    BCB* lFBCB = getFreeBCBs().popFromList(); //get free BCB
 
     /* init BCB */
     lFBCB->getMtx().lock(); //lock mutex of free BCB
@@ -438,11 +451,7 @@ size_t BufferManager::getFrame() noexcept
                 //kick out from bucket
                 _bufferHash->setBucketBCB(lRandomIndex, lHashChainEntry->getNextInChain());
                 //insert into free BCB list
-                getFreeBCBs().getFreeBCBListMtx().lock(); //lock free BCB list
-                lHashChainEntry->setNextInChain(_freeBCBs.getFreeBCBList());
-                _freeBCBs.setFreeBCBList(lHashChainEntry);
-                _freeBCBs.incrNoFreeBCBs();
-                 getFreeBCBs().getFreeBCBListMtx().unlock(); //lock free BCB list
+                getFreeBCBs().insertToFreeBCBs(lHashChainEntry);
                 lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
                 _bufferHash->getBucketMtx(lRandomIndex).unlock();
                 return lVictimIndex;

@@ -197,3 +197,13 @@ class InvalidPathException : public BaseException
                 const char*         aFunctionName,
                 const std::string&  aPath);
 };
+
+class NoFreeBCBsException : public BaseException
+{
+	public:
+		NoFreeBCBsException(
+                const char*         aFileName, 
+                const unsigned int  aLineNumber, 
+                const char*         aFunctionName);
+};
+

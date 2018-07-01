@@ -22,9 +22,7 @@ using BCB = BufferControlBlock;
 
 class BufferControlBlock final
 {
-    private:
-        friend class BufferManager;
-        friend class BufferHashTable;
+    public:
         BufferControlBlock();
         explicit BufferControlBlock(const BufferControlBlock&) = delete;
         explicit BufferControlBlock(BufferControlBlock&&) = delete;
@@ -57,7 +55,7 @@ class BufferControlBlock final
         void upgradeLock(LOCK_MODE aMode) noexcept;
         inline std::string to_string() noexcept { return std::string("PID : '") + getPID().to_string() + "', Frame Index : " + std::to_string(getFrameIndex()) + ", Lock Mode : '" + lockModeToString(getLockMode()) + ", Modified : '" + (getModified() ? "True" : "False") + "', Fix Count : " + std::to_string(getFixCount()); }
 
-    private:
+    public:
         inline sMtx&    getMtx() noexcept { return _pageMtx; }
         inline void     setLockMode(LOCK_MODE aMode) noexcept { _mode = aMode; }
 

@@ -34,18 +34,18 @@ class BufferManager final
         class FreeFrames final
         {
             public:
-                FreeFrames() : _freeFrameList(nullptr), _freeFrameListMtx(), _noFreeFrames(0){}
+                FreeFrames();
                 explicit FreeFrames(const FreeFrames&) = delete;
                 explicit FreeFrames(FreeFrames&&) = delete;
                 FreeFrames& operator=(const FreeFrames&) = delete;
                 FreeFrames& operator=(FreeFrames&&) = delete;
-                ~FreeFrames(){ delete[] _freeFrameList; }
+                ~FreeFrames() = default;
 
             public:
-                void init(const size_t aNoFreeFrames);
+                void init(const size_t aNoFreeFrames) noexcept;
                 
             public:
-                inline size_t*  getFreeFrameList() noexcept { return _freeFrameList; }
+                inline const auto& getFreeFrameList() noexcept { return _freeFrameList; }
                 inline sMtx&    getFreeFrameListMtx() noexcept { return _freeFrameListMtx; }
                 inline size_t   getNoFreeFrames() noexcept { return _noFreeFrames; }
                 inline size_t   incrNoFreeFrames() noexcept { return ++_noFreeFrames; }
@@ -53,7 +53,7 @@ class BufferManager final
                 inline void     setNoFreeFrames(size_t aNoFreeFrames) noexcept { _noFreeFrames = aNoFreeFrames; }
 
             private:
-                size_t* _freeFrameList;
+                std::unique_ptr<size_t[]> _freeFrameList;
                 sMtx    _freeFrameListMtx;
 		        size_t 	_noFreeFrames;
 
@@ -62,36 +62,34 @@ class BufferManager final
         class FreeBCBs final
         {
             public:
-                explicit FreeBCBs() : _BCBs(), _freeBCBList(nullptr), _freeBCBListMtx(), _noFreeBCBs(0){}
+                FreeBCBs();
                 explicit FreeBCBs(const FreeBCBs&) = delete;
                 explicit FreeBCBs(FreeBCBs&&) = delete;
                 FreeBCBs& operator=(const FreeBCBs&) = delete;
                 FreeBCBs& operator=(FreeBCBs&&) = delete;
-                ~FreeBCBs()
-                {
-                    for(BCB* ptr : _BCBs)
-                    {
-                        delete ptr; 
-                    }
-                }
+                ~FreeBCBs() = default;
 
             public:
-                void init(const size_t aNoFreeBCBs);
+                void init(const size_t aNoFreeBCBs) noexcept;
 
             public:
                 inline BCB*     getFreeBCBList() noexcept { TRACE("first BCB in line is "+_freeBCBList->to_string());  return _freeBCBList; }
-                inline sMtx&    getFreeBCBListMtx() noexcept { TRACE("fbcb mtx"); return _freeBCBListMtx; }
+                inline void     lock() noexcept { _freeBCBListMtx.lock(); }
+                inline void     unlock() noexcept { _freeBCBListMtx.lock(); }
                 inline size_t   getNoFreeBCBs() noexcept { return _noFreeBCBs; }
-                inline size_t   incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
-                inline size_t   decrNoFreeBCBs() noexcept { return --_noFreeBCBs; }
-                inline void     setFreeBCBList(BCB* aFreeBCB) noexcept { _freeBCBList = aFreeBCB; }
-                inline void     setNoFreeBCBs(size_t aNoFreeBCBs) noexcept { _noFreeBCBs = aNoFreeBCBs; }
+                inline BCB*     popFromList();
+                inline void     insertToFreeBCBs(BCB* aBCB) noexcept;
+                //inline void     setNoFreeBCBs(size_t aNoFreeBCBs) noexcept { _noFreeBCBs = aNoFreeBCBs; }
                 void            freeBCB(BCB* aBCB) noexcept;
                 void            resetBCB(BCB* aBCB) noexcept; //used to reset a BCB after the page it corresponds to was deleted
 
             private:
+                inline size_t   incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
+                inline size_t   decrNoFreeBCBs() noexcept { return --_noFreeBCBs; }
+
+            private:
                 //containing all BCB pointer. With this vector it is convenient to free the memory later
-                std::vector<BCB*> _BCBs;
+                std::vector<std::unique_ptr<BCB>> _BCBs;
                 //pointer to first element in the list of free buffer control blocks
                 BCB*    _freeBCBList;
                 //Mutex protecting the list of free buffer control blocks
@@ -101,7 +99,7 @@ class BufferManager final
         };
 
     private:
-        explicit BufferManager();
+        BufferManager();
         explicit BufferManager(const BufferManager&) = delete;
         explicit BufferManager(BufferManager&&) = delete;
         BufferManager& operator=(const BufferManager&) = delete;
@@ -154,3 +152,28 @@ class BufferManager final
         FreeBCBs            _freeBCBs;
         const CB*           _cb;
 };
+
+
+BCB* BufferManager::FreeBCBs::popFromList()
+{
+    if(!_freeBCBList)
+    {
+        lock();
+        BCB* result = _freeBCBList;
+        _freeBCBList = result->getNextInChain();
+        result->setNextInChain(nullptr);
+        decrNoFreeBCBs(); //decrement number of free BCBs
+        unlock();
+        return result;
+    }
+    throw NoFreeBCBsException(FLF);
+}
+
+void BufferManager::FreeBCBs::insertToFreeBCBs(BCB* aBCB) noexcept 
+{ 
+    lock();
+    aBCB->setNextInChain(_freeBCBList);
+    _freeBCBList = aBCB; 
+    incrNoFreeBCBs();
+    unlock();
+}
