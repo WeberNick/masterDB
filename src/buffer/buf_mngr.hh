@@ -113,7 +113,7 @@ class BufferManager final
             return lBufferManagerInstance;
         }
 
-        void init(const CB& aControlBlock);
+        void init(const CB& aControlBlock) noexcept;
 
     public:
         /* request access to a page and fix it */

@@ -22,12 +22,12 @@ void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
             else{ setLockMode(aMode); }
             break;
         case LOCK_MODE::kSHARED:
-            getMtx().lock_shared();
+            _pageMtx.lock_shared();
             setLockMode(aMode);  
             incrFixCount();
             break;
         case LOCK_MODE::kEXCLUSIVE:
-            getMtx().lock();
+            _pageMtx.lock();
             setLockMode(aMode);
             setFixCount(1);
             break;
@@ -39,16 +39,6 @@ void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
     TRACE("Lock '" + lockModeToString(aMode) + "' for BCB with PID : " + _pageID.to_string() + " aquired");
 }
 
-void BufferControlBlock::lock() noexcept
-{
-    lock(LOCK_MODE::kEXCLUSIVE);
-}
-
-void BufferControlBlock::lock_shared() noexcept
-{
-    lock(LOCK_MODE::kSHARED);
-}
-
 
 void BufferControlBlock::unlock() noexcept
 {
@@ -58,10 +48,10 @@ void BufferControlBlock::unlock() noexcept
         case LOCK_MODE::kNOLOCK:
             break;
         case LOCK_MODE::kSHARED:
-            getMtx().unlock_shared();
+            _pageMtx.unlock_shared();
             break;
         case LOCK_MODE::kEXCLUSIVE:
-            getMtx().unlock();
+            _pageMtx.unlock();
             break;
         default:
             TRACE("Lock type not supported");
@@ -83,17 +73,17 @@ void BufferControlBlock::upgradeLock(LOCK_MODE aMode) noexcept
                 setLockMode(aMode);
                 break;
             case LOCK_MODE::kSHARED:
-                getMtx().lock_shared();
+                _pageMtx.lock_shared();
                 setLockMode(aMode);  
                 incrFixCount();
                 break;
             case LOCK_MODE::kEXCLUSIVE:
                 if(toType(getLockMode()) == toType(LOCK_MODE::kSHARED))
                 {
-                    getMtx().unlock_shared();
+                    _pageMtx.unlock_shared();
                     decrFixCount();
                 }
-                getMtx().lock();
+                _pageMtx.lock();
                 setLockMode(aMode);
                 setFixCount(1);
                 break;
@@ -108,4 +98,11 @@ void BufferControlBlock::upgradeLock(LOCK_MODE aMode) noexcept
         }
     }
     TRACE("Successfully upgraded lock for BCB with PID : " + _pageID.to_string());
+}
+
+
+std::ostream& operator<< (std::ostream& stream, BCB* aBCB)
+{
+    stream << aBCB->to_string();
+    return stream;
 }

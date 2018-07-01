@@ -83,7 +83,7 @@ BufferManager::~BufferManager()
     TRACE("'BufferManager' destructed");
 }
 
-void BufferManager::init(const CB& aControlBlock)
+void BufferManager::init(const CB& aControlBlock) noexcept
 {
     if(!_cb)
     {
@@ -223,7 +223,7 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
     BCB* lFBCB = getFreeBCBs().popFromList(); //get free BCB
 
     /* init BCB */
-    lFBCB->getMtx().lock(); //lock mutex of free BCB
+    lFBCB->lock(); //lock mutex of free BCB
     lFBCB->setLockMode(LOCK_MODE::kNoType); //indicate mutex has no lock type yet 
     lFBCB->setFrameIndex(INVALID); //INVALID defined in types.hh
     lFBCB->setPID(aPageID); //store requested page
@@ -246,7 +246,7 @@ const size_t lHashIndex = _bufferHash->hash(aPageID); //compute hash for this pa
     _bufferHash->getBucketMtx(lHashIndex).unlock(); //unlock hash bucket
     const size_t lFrameNo = getFrame(); //get a free frame
     lFBCB->setFrameIndex(lFrameNo);     
-    lFBCB->getMtx().unlock(); //lock mutex of free BCB
+    lFBCB->unlock(); //lock mutex of free BCB
     TRACE("Page located");
     return lFBCB;
 }
@@ -255,7 +255,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     TRACE("Read page '" + aPageID.to_string() + "' from disk into the buffer pool");
     TRACE("The BCB is : " + lFBCB->to_string());
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
-    lFBCB->getMtx().lock_shared();
+    lFBCB->lock_shared();
     byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
     const size_t lNoTries = 3;
     for(size_t i = 0; i < lNoTries; ++i)
@@ -279,7 +279,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     TRACE("Reading the page from disk into the buffer pool...");
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
     lPart->close(); //close partition
-    lFBCB->getMtx().unlock_shared();
+    lFBCB->unlock();
     TRACE("Read in finished. Page is now in the buffer pool");
 }
 
@@ -439,7 +439,7 @@ size_t BufferManager::getFrame() noexcept
         {//is this enough to work exclusively on hash chain?? maybe need to lock the BCB in chain??
             TRACE("there is something in that bucket");
             //if the first one was free
-            if(lHashChainEntry->getFixCount() == 0 && lHashChainEntry->getMtx().try_lock())
+            if(lHashChainEntry->getFixCount() == 0 && lHashChainEntry->try_lock())
             {
                 TRACE("was first in bucket");
                 const size_t lVictimIndex = lHashChainEntry->getFrameIndex(); //frame index of victim
@@ -452,7 +452,7 @@ size_t BufferManager::getFrame() noexcept
                 _bufferHash->setBucketBCB(lRandomIndex, lHashChainEntry->getNextInChain());
                 //insert into free BCB list
                 getFreeBCBs().insertToFreeBCBs(lHashChainEntry);
-                lHashChainEntry->getMtx().unlock(); //unlock chain entry and continue with next
+                lHashChainEntry->unlock(); //unlock chain entry and continue with next
                 _bufferHash->getBucketMtx(lRandomIndex).unlock();
                 return lVictimIndex;
             }
@@ -463,7 +463,7 @@ size_t BufferManager::getFrame() noexcept
                 TRACE("one step in the chain");
                 BCB* lNext = lHashChainEntry->getNextInChain();
                 //if the next one is free
-                if(lNext->getFixCount() == 0 && lNext->getMtx().try_lock()) //is there a CB for the requested page
+                if(lNext->getFixCount() == 0 && lNext->try_lock()) //is there a CB for the requested page
                 {
                     TRACE("found a victim");
                     BCB* tmp = lNext->getNextInChain();
@@ -476,7 +476,7 @@ size_t BufferManager::getFrame() noexcept
                     //exclude BCB from chain (linked list)
                     lHashChainEntry->setNextInChain(tmp);                 
                     //insert BCB into free BCB list
-                    lNext->getMtx().unlock();//resetBCB will lock itself
+                    lNext->unlock();//resetBCB will lock itself
                     _freeBCBs.resetBCB(lNext);
                     
                     _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release
