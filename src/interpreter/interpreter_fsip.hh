@@ -84,8 +84,6 @@ class InterpreterFSIP final {
 
     uint32_t grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP) noexcept;
 
-    inline uint grow(const uint aGrowth, const uint aMaxPagesPerFSIP){ return aGrowth + aMaxPagesPerFSIP; }
-
   public:
     /*  tters*/
     inline byte *pagePtr() noexcept { return _pp; }
