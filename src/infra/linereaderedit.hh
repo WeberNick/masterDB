@@ -1,20 +1,19 @@
 #pragma once
 
+#include <fstream>
+#include <iostream>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 
 #include <readline/history.h>
 #include <readline/readline.h>
+#include <stdio.h>
 
-#include <fstream>
-#include <iostream>
 #include <set>
+#include <string.h>
 #include <string>
 #include <vector>
 
-#include "../infra/types.hh"
 #include "stimestamp.hh"
 #include "val_tt.hh"
 
@@ -28,8 +27,7 @@ class LineReaderEdit {
     LineReaderEdit& operator=(const LineReaderEdit&);
 
   public:
-    explicit LineReaderEdit();
-    explicit LineReaderEdit(const char* aPrompt, char aCommentChar = '#');
+    LineReaderEdit(const char* aPrompt, char aCommentChar = '#');
     ~LineReaderEdit();
 
   public:
@@ -39,9 +37,7 @@ class LineReaderEdit {
 
   public:
     inline const char* prompt() const { return _prompt; }
-    inline void set_prompt(const char* prompt) { _prompt = prompt; }
     inline char commentchar() const { return _commentchar; }
-    inline void set_commentchar(const char commentchar) { _commentchar = commentchar; }
     inline const char* line() const { return _line; }
     inline uint linesize() const { return _linesize; }
     inline uint commentlinecount() const { return _commentlinecount; }
@@ -49,13 +45,8 @@ class LineReaderEdit {
     inline bool ok() const { return _ok; }
     inline const char* begin() const { return _line; }
     inline const char* end() const { return (_line + _linesize); }
-    inline const char last() const { return *(_line + _linesize - 1); }
     inline bool isEmpty() const { return (begin() == end()); }
     inline uint64_t no_bytes_read() const { return _no_bytes_read; }
-    inline bool endswith(const char aEndChar) const { return last() == aEndChar; }
-    inline void removelast() { _line[--_linesize] = '\0'; }
-    inline bool isdigit(const char ch) const { return std::isdigit(static_cast<unsigned char>(ch)); }
-    bool isnumber(const char* c) const;
 
   public:
     /* utilities */
@@ -81,28 +72,27 @@ class LineReaderEdit {
     /* the string may not contain the delimiter!, not even with a backslash in front */
     bool read_string(const char*& x, char aDelimiter, const char*& b, const char*& e);
     bool read_string_no_delim(const char*& x, char aSep, const char*& b, const char*& e);
+
     bool read_string_set(const char*& x, string_st& aSetOut, const char aStringSep, const char aSep);
+
     inline bool read_datejd(const char*& x, DateJd& out, bool aYearHigh, char aSep) { return out.set(x, aYearHigh, aSep); }
 
-    /* the following destructively splits the _line at aSep and may perform stripping blanks */
+    // the following destructively splits the _line at aSep and may perform stripping blanks
     int split_line(const char aSep, const bool aStrip);
-    char_vpt split_line(const char aSep, const bool aStrip, const std::string& aLine);
     const std::vector<char*> splits() const { return _splits; }
-
-    void setNonCommentLine(char*& aLine);
 
   private:
     void getNonCommentLine();
 
   private:
-    const char*        _prompt;
-    char               _commentchar;
-    char*              _line;
-    bool               _ok;
-    uint               _linesize; // for successfully read lines: line()[linesize()] == '\0'
-    uint               _linecount;
-    uint               _commentlinecount;
-    uint64_t           _no_bytes_read;
-    uint               _noSplit;              // current number of splits
+    const char* _prompt;
+    char _commentchar;
+    char* _line;
+    bool _ok;
+    uint _linesize; // for successfully read lines: line()[linesize()] == '\0'
+    uint _linecount;
+    uint _commentlinecount;
+    uint64_t _no_bytes_read;
+    uint _noSplit;              // current number of splits
     std::vector<char*> _splits; // array for splits
 };

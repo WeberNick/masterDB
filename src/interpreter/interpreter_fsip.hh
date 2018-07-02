@@ -1,15 +1,14 @@
 /**
  *  @file	interpreter_fsip.hh
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de),
-                        Jonas Thietke (jthietke@mail.uni-mannheim.de),
-                        Aljoscha Narr (alnarr@mail.uni-mannheim.de)
+            Jonas Thietke (jthietke@mail.uni-mannheim.de),
+            Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	A class implementing a Free Space Indicator Page (FSIP) interpreter for little Endian
  *  @bugs	might not work for big Endian
  *  @todos	Remove noManagedPages() and implement it correctly
  *  @section TBD
  */
-#ifndef INTERPRETER_FSIP_HH
-#define INTERPRETER_FSIP_HH
+#pragma once
 
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
@@ -125,5 +124,3 @@ void InterpreterFSIP::attach(byte *aPP) noexcept {
     _pp = aPP;
     _header = get_hdr_ptr();
 }
-
-#endif

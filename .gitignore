@@ -45,7 +45,6 @@ MasterPartition
 *.out
 *.app
 
-
 # Text Files, Gnuplot Files and CSV-Files
 *.txt
 *.plt

@@ -1,17 +1,5 @@
 #include "linereaderedit.hh"
 
-LineReaderEdit::LineReaderEdit() :
-    _prompt(">"),
-    _commentchar('#'), // for comments until end of line, must occur at beginning of line
-    _line(0),
-    _ok(false),
-    _linesize(0),
-    _linecount(0),
-    _commentlinecount(0),
-    _no_bytes_read(0),
-    _splits()
-{}
-
 LineReaderEdit::LineReaderEdit(const char* aPrompt, char aCommentChar) :
     _prompt(aPrompt),
     _commentchar(aCommentChar), // for comments until end of line, must occur at beginning of line
@@ -36,44 +24,7 @@ bool LineReaderEdit::next() {
     return ok();
 }
 
-void LineReaderEdit::close() {
-
-}
-
-bool LineReaderEdit::isnumber(const char* c) const {
-    while (*c)
-        if (!isdigit(*c++)) return false;
-    return true;
-}
-
-void LineReaderEdit::setNonCommentLine(char*& aLine) {
-    const char* x = "\0";
-
-    do {
-        _line = aLine;
-
-        if (0 == _line) {
-            _ok = false;
-            return;
-        }
-
-        ++_linecount;
-        _linesize = strlen(line());
-
-        if (0 == _linesize) { continue; }
-
-        _no_bytes_read += (uint64_t)linesize();
-
-        x = line();
-        while (isspace(*x)) {
-            ++x;
-        }
-        if (_commentchar == (*x)) { ++_commentlinecount; }
-    } while ((0 == linesize()) || ('\0' == *x) || (commentchar() == (*_line)));
-
-    add_history(_line);
-    _ok = true;
-}
+void LineReaderEdit::close() {}
 
 void LineReaderEdit::getNonCommentLine() {
     const char* x = "\0";
@@ -302,9 +253,7 @@ bool LineReaderEdit::read_dval(const char*& x, dval_t& out) {
     return true;
 }
 
-bool LineReaderEdit::read_stimestamp(const char*& x, STimestamp& out, char sep) {
-    return out.set(x, sep);
-}
+bool LineReaderEdit::read_stimestamp(const char*& x, STimestamp& out, char sep) { return out.set(x, sep); }
 
 int LineReaderEdit::split_line(const char aSep, const bool aStrip) {
     _splits.clear();

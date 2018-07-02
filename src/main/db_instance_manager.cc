@@ -14,8 +14,8 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
     _cb(nullptr),
     _running(false)
 {
-  //think of reserver page.. 
-  TRACE("'DatabaseInstanceManager' constructed");
+    // think of reserver page.. 
+    TRACE("'DatabaseInstanceManager' constructed");
 }
 
 /**
@@ -76,11 +76,11 @@ void DatabaseInstanceManager::boot()
 void DatabaseInstanceManager::shutdown()
 {
     TRACE("Shutting down the database system starts...");
-  //  if (isRunning()) {
+    // if (isRunning()) {
         // stop transactions
         _segMngr.storeSegments();     
         BufferManager::getInstance().flushAll();
- //       _running = false;
-  //  }
+        // _running = false;
+    // }
     TRACE("Finished shutting down the database system!");
 }

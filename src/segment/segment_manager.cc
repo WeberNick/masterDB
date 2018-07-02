@@ -66,6 +66,9 @@ SegmentFSM* SegmentManager::createNewSegmentFSM(PartitionBase& aPartition, const
 SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName)
 {
     TRACE("Request to create FSM_SP segment in partition '" + aPartition.to_string() + "' with name '" + aName + "'");
+    if (_segmentsByName.find(aName) != _segmentsByName.end()) {
+        throw SegmentExistsException(FLF);
+    }
     SegmentFSM_SP* lSegment = new SegmentFSM_SP(_counterSegmentID++, aPartition, *_cb);
     _segments[lSegment->getID()] = lSegment;
     Segment_T lSegT(aPartition.getID(), lSegment->getID(), aName, 2, lSegment->getIndexPages().at(0));
@@ -103,69 +106,90 @@ void SegmentManager::deleteSegment(const uint16_t aID)
     TRACE("Deletion of Segment " + getSegment(aID)->to_string() + " starts...");
     SegmentBase* lSeg = getSegment(aID);
     lSeg->erase();
-    //delete object if exists
+    // delete object if exists
     delete lSeg;
     _segments.erase(aID);
 
     const Segment_T seg(_segmentsByID.at(aID));
-    //delete tuple on disk
+    // delete tuple on disk
     deleteTuplePhysically<Segment_T>(_masterSegSegName,aID);
 
-    //delete tuple in memory
+    // delete tuple in memory
     _segmentsByName.erase(seg.name());
     _segmentsByID.erase(aID);
-    TRACE("Deletion of segment successfully finished");
+    TRACE("Deletion of segment successfully finished.");
 }
 
 void SegmentManager::deleteSegment(const std::string& aName)
 {
-    //get ID and delete by ID
-    deleteSegment(_segmentsByName.at(aName));
+    // get ID and delete by ID
+    try
+    {
+        deleteSegment(_segmentsByName.at(aName));
+    }
+    catch(const std::out_of_range& oor)
+    {
+        throw SegmentNotExistsException(FLF);
+    }
 }
 
-void SegmentManager::deleteSegements(const uint8_t aPartitionID){
-    for (auto& america : _segmentsByID){
-        if(america.second.partID()==aPartitionID){
-            deleteSegment(america.first);
-        }
+void SegmentManager::deleteSegements(const uint8_t aPartitionID) {
+
+    auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) { return elem.second.partID() == aPartitionID; }); 
+    if(america != _segmentsByID.cend())
+    {
+        deleteSegment(america->first);
     }
+    //for (auto& america : _segmentsByID)
+    //{
+        //if (america.second.partID() == aPartitionID)
+        //{
+            //deleteSegment(america.first);
+        //}
+    //}
 }
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 {
-    //if the object has not been created before, create it and store it
-    if (_segments.find(aSegmentID) == _segments.end()) {
-        TRACE("trying to load the segment from disk");
+    // if the object has not been created before, create it and store it
+    if (_segments.find(aSegmentID) == _segments.end())
+    {
+        TRACE("Trying to load the segment from disk.");
         //find out which type
         const Segment_T lTuple(_segmentsByID.at(aSegmentID));
         PartitionManager& partMngr = PartitionManager::getInstance();
         PartitionBase& part = *(partMngr.getPartition(lTuple.partID()));
         SegmentBase* s;
-        switch(lTuple.type()){
-            //DOES NOT WORK BECAUSE: partition muss noch geladen werden, und zwar die, auf der Segment steht.
-            case 1://SegmentFSM
-            s = new SegmentFSM(part,*_cb);
-            break;
-            case 2: //segmentFSM NSM
-            s = new SegmentFSM_SP(part,*_cb);
-            break;
-            //more to come
-
-            default: return nullptr;
+        switch (lTuple.type())
+        {
+            // DOES NOT WORK BECAUSE: partition muss noch geladen werden, und zwar die, auf der Segment steht.
+            case 1: // SegmentFSM
+                s = new SegmentFSM(part, *_cb);
+                break;
+            case 2: // SegmentFSM NSM
+                s = new SegmentFSM_SP(part, *_cb);
+                break;
+            // more to come
+            default:
+                return nullptr;
         }
         s->loadSegment(lTuple.firstPage());
         _segments[lTuple.ID()] = s;
     }
-    //now it is created and can be retrieved
+    // now it is created and can be retrieved
     // else it is in the map, you can just pass it
-    TRACE("found the segment, SegmentID "+std::to_string(aSegmentID));
+    TRACE("found the segment, SegmentID " + std::to_string(aSegmentID));
     return _segments.at(aSegmentID);
 }
 
 SegmentBase* SegmentManager::getSegment(const std::string& aSegmentName){
-   // TRACE("trying to get Segment by Name, Name: " + aSegmentName + " its ID is " +std::to_string(_segmentsByName[aSegmentName]));
    TRACE("trying to get Segment by Name, Name: " + aSegmentName);
-   return (SegmentBase*) getSegment(_segmentsByName.at(aSegmentName));
+   try {
+       return (SegmentBase*)getSegment(_segmentsByName.at(aSegmentName));
+   } catch(const std::out_of_range& oor) {
+       TRACE("## Error ## The requested segment with name '" + aSegmentName + "' does not exist in map (" + std::string(oor.what()) + ")");
+       throw SegmentNotExistsException(FLF);
+   }
 }
 
 const Segment_T& SegmentManager::getSegmentT(const uint16_t aID) const

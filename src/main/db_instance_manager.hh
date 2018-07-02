@@ -12,7 +12,8 @@
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
-#include "../infra/tuples.hh"
+#include "../infra/partition_t.hh"
+#include "../infra/segment_t.hh"
 #include "../buffer/buf_mngr.hh"
 #include "../partition/partition_manager.hh"
 #include "../segment/segment_manager.hh"
@@ -71,42 +72,45 @@ class DatabaseInstanceManager final
         bool              _running;
 };
 
-template<typename T_TupleType>
+template <typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
     TRACE("Loading tuples from the master partition starts...");
- /*   part_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 };
-    PartitionManager& lPartMan = PartitionManager::getInstance();
-    lPartMan._partitionsByID[0]=lMasterPartitionTuple;
-    PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
-    SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);*/
+    /* part_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 };
+       PartitionManager& lPartMan = PartitionManager::getInstance();
+       lPartMan._partitionsByID[0]=lMasterPartitionTuple;
+       PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
+       SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex); */
 
-    //Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth); 
-    const uint8_t lPartitionID          = 1;
-    const std::string& lName            = _partMngr.masterPartName();
-    const std::string& lPathToMaster    = _cb->mstrPart();
-    const uint8_t lPartitionType        = 1; //file
-    const uint16_t lPartitionGrowth     = 20;
+    // Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth);
+    const uint8_t lPartitionID = 1;
+    const std::string& lName = _partMngr.masterPartName();
+    const std::string& lPathToMaster = _cb->mstrPart();
+    const uint8_t lPartitionType = 1; // file
+    const uint16_t lPartitionGrowth = 20;
     Partition_T lMasterPartitionTuple(lPartitionID, lName, lPathToMaster, lPartitionType, lPartitionGrowth);
-    
+
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
     byte* lPage = new byte[lMasterPart->getPageSize()];
-    TRACE(" getPageSize "+std::to_string(lMasterPart->getPageSize()) + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
+    TRACE(" getPageSize " + std::to_string(lMasterPart->getPageSize()) + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
     InterpreterSP lInterpreter;
 
-    for (size_t i = 0; i < lSegments->getNoPages(); ++i) {
-        lSegments->readPageUnbuffered(i,lPage,lMasterPart->getPageSize());
+    for (size_t i = 0; i < lSegments->getNoPages(); ++i)
+    {
+        lSegments->readPageUnbuffered(i, lPage, lMasterPart->getPageSize());
         lInterpreter.attach(lPage);
         TRACE("step" + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
-        for (uint j = 0; j < lInterpreter.noRecords(); ++j) {
-            TRACE("step "+std::to_string(j)+std::to_string(lInterpreter.noRecords()) + std::string(" (DELETE TRACE AFTER DEBUGGING)"));   
-             T_TupleType temp;
-             if(lInterpreter.getRecord(j)){
+        for (uint j = 0; j < lInterpreter.noRecords(); ++j)
+        {
+            TRACE("step " + std::to_string(j) + std::to_string(lInterpreter.noRecords()) + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
+            T_TupleType temp;
+            if (lInterpreter.getRecord(j))
+            {
                 temp.toMemory(lInterpreter.getRecord(j));
-            TRACE(" " + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
-            aTuples.push_back(temp) ;
-             }
+                TRACE(" " + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
+                aTuples.push_back(temp);
+            }
             TRACE(" " + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
         }
     }
@@ -120,7 +124,7 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
 /*template<typename T_TupleType>
 void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
-    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex); 
+    SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex);
     int lFreeBytesPerPage = lMasterSeg->getMaxFreeBytes();
     // get size of master segment
     int lCapazIst = lMasterSeg->getNoPages() * ( lFreeBytesPerPage / sizeof(T_TupleType) ) ;
@@ -149,7 +153,7 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
     {
         //lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
         lInterpreter.attach(lPage);
-        lInterpreter.initNewPage(lPage);   
+        lInterpreter.initNewPage(lPage);
         while(true){
            lPos = lInterpreter.addNewRecord(sizeof(T_TupleType));
            if (lPos == 0){
@@ -157,8 +161,8 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
            }
               *((T_TupleType*) lPos ) =  aTuples.at(lSegCounter);
             ++lSegCounter;
-        }   
+        }
     }
-	delete[] lPage;
+        delete[] lPage;
         _segMngr.deleteSegment(lMasterSeg);
 }*/

@@ -73,6 +73,17 @@ OutOfMemoryException::OutOfMemoryException(
             "There was insufficient memory to fulfill the allocation request.")
 {}
 
+SegmentExistsException::SegmentExistsException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            std::string("Cannot create existing segment or remove non existing segment."))
+{}
+
 PartitionException::PartitionException(
         const char*         aFileName,
         const unsigned int  aLineNumber,
@@ -93,7 +104,7 @@ PartitionExistsException::PartitionExistsException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("Cannot create existing partition or remove non existing partition"))
+            std::string("Cannot create existing partition or remove non existing partition."))
 {}
 
 PartitionNotExistsException::PartitionNotExistsException(
@@ -104,7 +115,7 @@ PartitionNotExistsException::PartitionNotExistsException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("The requested partition does not exist"))
+            std::string("The requested partition does not exist."))
 {}
 
 SegmentNotExistsException::SegmentNotExistsException(
@@ -115,7 +126,7 @@ SegmentNotExistsException::SegmentNotExistsException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("The requested segment does not exist"))
+            std::string("The requested segment does not exist."))
 {}
 
 PartitionFullException::PartitionFullException(
@@ -186,7 +197,7 @@ FileException::FileException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("Problem with file ") + std::string(aErrorFileName) + std::string(" : ") + aErrorMessage)
+            std::string("Problem with file ") + std::string(aErrorFileName) + std::string(" : ") + aErrorMessage + ".")
 {}
 
 InvalidPathException::InvalidPathException(
@@ -198,5 +209,16 @@ InvalidPathException::InvalidPathException(
             aFileName,
             aLineNumber,
             aFunctionName,
-            std::string("Path '") + aPath + std::string("' is invalid"))
+            std::string("Path '") + aPath + std::string("' is invalid."))
+{}
+
+NoFreeBCBsException::NoFreeBCBsException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            std::string("Request for free BCB failed as there are no free BCBs."))
 {}

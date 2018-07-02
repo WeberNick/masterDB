@@ -24,7 +24,7 @@ MAIN_HDR = \
 	../infra/exception.hh \
 	../infra/trace.hh \
 	../infra/file_util.hh \
-	../infra/tuples.hh \
+	../infra/employee_t.hh \
 	../cli/parser.hh \
 	db_instance_manager.hh \
 	\
@@ -33,7 +33,8 @@ DBIM_HDR = \
 	../infra/types.hh \
 	../infra/exception.hh \
 	../infra/trace.hh \
-	../infra/tuples.hh \
+	../infra/partition_t.hh \
+	../infra/segment_t.hh \
 	../buffer/buf_mngr.hh \
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \
@@ -45,7 +46,9 @@ OBJ = \
 	../infra/args.o \
 	../infra/exception.o \
 	../infra/trace.o \
-	../infra/tuples.o \
+	../infra/partition_t.o \
+	../infra/segment_t.o \
+	../infra/employee_t.o \
 	\
 	../cli/linereaderedit.o \
 	../cli/datejd.o \

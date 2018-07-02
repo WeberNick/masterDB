@@ -9,12 +9,15 @@
 
 #include "linereaderedit.hh"
 #include "../infra/types.hh"
-#include "../infra/tuples.hh"
+#include "../infra/partition_t.hh"
+#include "../infra/segment_t.hh"
+#include "../infra/employee_t.hh"
 #include "../infra/exception.hh"
 
 #include "../main/db_instance_manager.hh"
 #include "../partition/partition_manager.hh"
 #include "../segment/segment_manager.hh"
+// #include "../threading/pool.hh"
 
 #include <array>
 
@@ -47,10 +50,10 @@ class CommandParser {
     };
 
     enum CommandStatus {
-        EXIT = -1,     // regular exit
-        OK = 0,        // ok, continue with next command
-        WRONGTYPE = 1, // wrong type of an argument
-        ERROR = 2      // error, recover and continue
+        EXIT  = -1, // regular exit
+        OK    = 0,  // ok, continue with next command
+        WRONG = 1,  // wrong type of an argument
+        ERROR = 2   // error, recover and continue
     };
 
   public:
@@ -105,6 +108,5 @@ class CommandParser {
     size_t _maxCommandLength;
 
     LineReaderEdit _reader;
-    bool _init;
     const CB* _cb;
 };

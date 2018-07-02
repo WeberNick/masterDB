@@ -79,6 +79,24 @@ class OutOfMemoryException : public BaseException
                 const char*         aFunctionName);
 };
 
+class SegmentExistsException : public BaseException
+{
+    public:
+        SegmentExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
+class SegmentNotExistsException : public BaseException
+{
+    public:
+        SegmentNotExistsException(
+                const char*         aFileName,
+                const unsigned int  aLineNumber,
+                const char*         aFunctionName);
+};
+
 class PartitionException : public BaseException
 {
     public:
@@ -103,15 +121,6 @@ class PartitionNotExistsException : public BaseException
 {
     public:
         PartitionNotExistsException(
-                const char*         aFileName,
-                const unsigned int  aLineNumber,
-                const char*         aFunctionName);
-};
-
-class SegmentNotExistsException : public BaseException
-{
-    public:
-        SegmentNotExistsException(
                 const char*         aFileName,
                 const unsigned int  aLineNumber,
                 const char*         aFunctionName);
@@ -188,3 +197,13 @@ class InvalidPathException : public BaseException
                 const char*         aFunctionName,
                 const std::string&  aPath);
 };
+
+class NoFreeBCBsException : public BaseException
+{
+	public:
+		NoFreeBCBsException(
+                const char*         aFileName, 
+                const unsigned int  aLineNumber, 
+                const char*         aFunctionName);
+};
+

@@ -4,11 +4,20 @@ CC = g++
 
 INCL = -I../.. -I..
 
+TPL_HDR = \
+	types.hh \
+	exception.hh \
+	trace.hh \
+	tuple.hh \
+	\
+
 OBJ = \
 	args.o \
 	exception.o \
 	trace.o \
-	tuples.o \
+	partition_t.o \
+	segment_t.o \
+	employee_t.o \
 	\
 
 all : $(OBJ)
@@ -22,8 +31,14 @@ exception.o : exception.cc exception.hh types.hh
 trace.o : trace.cc trace.hh types.hh exception.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) trace.cc
 
-tuples.o : tuples.cc tuples.hh types.hh exception.hh trace.hh
-	$(CC) -c $(CXXFLAGS) $(INCL) tuples.cc
+partition_t.o : partition_t.cc partition_t.hh $(TPL_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_t.cc
+
+segment_t.o : segment_t.cc segment_t.hh $(TPL_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) segment_t.cc
+
+employee_t.o : employee_t.cc employee_t.hh $(TPL_HDR)
+	$(CC) -c $(CXXFLAGS) $(INCL) employee_t.cc
 
 clean :
 	rm -f *.o a.out

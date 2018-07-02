@@ -22,10 +22,8 @@ using BCB = BufferControlBlock;
 
 class BufferControlBlock final
 {
-    private:
-        friend class BufferManager;
-        friend class BufferHashTable;
-        explicit BufferControlBlock();
+    public:
+        BufferControlBlock();
         explicit BufferControlBlock(const BufferControlBlock&) = delete;
         explicit BufferControlBlock(BufferControlBlock&&) = delete;
         BufferControlBlock& operator=(const BufferControlBlock&) = delete;
@@ -45,25 +43,19 @@ class BufferControlBlock final
         //setter
         inline void     setPID(const PID aPID) noexcept { _pageID = aPID; }
         inline void     setFrameIndex(const size_t aFrameIndex) noexcept { _frameIndex = aFrameIndex; }
+        inline void     setLockMode(LOCK_MODE aMode) noexcept { _mode = aMode; }
         inline void     setModified(const bool aModified) noexcept { _modified = aModified; }
         inline void     setFixCount(const int aFixCount) noexcept { _fixCount = aFixCount; }
         inline void     setNextInChain(BCB* aBCB) noexcept { _nextInChain = aBCB; }
 
     public:
         void lock(LOCK_MODE aMode) noexcept; //lock for given mode
-        void lock() noexcept; //lock exclusive
-        void lock_shared() noexcept; //lock shared
+        inline void lock() noexcept; //lock exclusive
+        inline bool try_lock() noexcept;
+        inline void lock_shared() noexcept; //lock shared
         void unlock() noexcept;
         void upgradeLock(LOCK_MODE aMode) noexcept;
-        inline std::string to_string() noexcept { return std::string("PID : '") + getPID().to_string() + "', Frame Index : " + std::to_string(getFrameIndex()) + ", Lock Mode : '" + lockModeToString(getLockMode()) + ", Modified : '" + (getModified() ? "True" : "False") + "', Fix Count : " + std::to_string(getFixCount()); }
-
-    private:
-        inline sMtx&    getMtx() noexcept { return _pageMtx; }
-        inline void     setLockMode(LOCK_MODE aMode) noexcept { _mode = aMode; }
-
-    private:
-        static const CB*  _cb;
-        static void setCB(const CB* aControlBlock) noexcept;
+        inline std::string to_string() noexcept;
 
     private:
         PID         _pageID; 
@@ -75,3 +67,35 @@ class BufferControlBlock final
         //LSN infos
         BCB*        _nextInChain;   //hash overflow chain forward pointer
 };
+
+void BufferControlBlock::lock() noexcept
+{
+    lock(LOCK_MODE::kEXCLUSIVE);
+}
+
+bool BufferControlBlock::try_lock() noexcept
+{
+    const bool ret = _pageMtx.try_lock();
+    if(ret)
+    {
+        setLockMode(LOCK_MODE::kEXCLUSIVE);
+        setFixCount(1);
+    }
+    return ret;
+}
+
+void BufferControlBlock::lock_shared() noexcept
+{
+    lock(LOCK_MODE::kSHARED);
+}
+
+std::string BufferControlBlock::to_string() noexcept 
+{ 
+    return std::string("PID : '") + getPID().to_string() 
+        + "', Frame Index : " + std::to_string(getFrameIndex()) 
+        + ", Lock Mode : '" + lockModeToString(getLockMode()) 
+        + ", Modified : '" + (getModified() ? "True" : "False") 
+        + "', Fix Count : " + std::to_string(getFixCount()); 
+}
+
+std::ostream& operator<< (std::ostream& stream, BCB* aBCB);

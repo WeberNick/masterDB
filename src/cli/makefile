@@ -1,4 +1,4 @@
-CXXFLAGS = -Wall -std=c++17 -static-libstdc++ -g
+CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
 CC = g++
 
 UNAME := $(shell uname)
@@ -24,6 +24,10 @@ HDR = \
 	\
 	../infra/types.hh \
 	../infra/exception.hh \
+	../infra/trace.hh \
+	../infra/partition_t.hh \
+	../infra/segment_t.hh \
+	../infra/employee_t.hh \
 	\
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \

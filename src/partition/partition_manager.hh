@@ -19,7 +19,7 @@
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
 #include "../infra/file_util.hh"
-#include "../infra/tuples.hh"
+#include "../infra/partition_t.hh"
 #include "partition_base.hh"
 #include "partition_file.hh"
 #include "partition_raw.hh"
@@ -27,6 +27,8 @@
 #include <unordered_map>
 #include <string>
 #include <algorithm>
+
+constexpr uint16_t MIN_GROWTH_INDICATOR = 8;
 
 class PartitionManager
 {    
@@ -58,13 +60,11 @@ class PartitionManager
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
         PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
         PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
+
         void            deletePartition(const uint8_t aID);
         void            deletePartition(const std::string& aName);
 
     public:
-        //getter
-        inline size_t       getNoPartitions() const noexcept { return _partitions.size(); }
-        inline size_t       getNoPartitions() noexcept { return _partitions.size(); }
         PartitionBase*      getPartition(const uint8_t aID);
         PartitionBase*      getPartition(const std::string& aName);
         const Partition_T&  getPartitionT(const uint8_t aID) const;
@@ -75,6 +75,11 @@ class PartitionManager
         string_vt           getPartitionNames() noexcept;
         std::string         getPartitionName(const uint8_t aID);
 
+        inline size_t       getNoPartitions() const noexcept { return _partitions.size(); }
+        inline size_t       getNoPartitions() noexcept { return _partitions.size(); }
+        inline const std::string& getPathForPartition(const std::string& aName) const { return _partitionsByID.at(_partitionsByName.at(aName)).path(); }
+        inline const std::string& getMasterPartName() const noexcept { return _masterPartName; }
+        
     private:
         void            createPartitionSub(const Partition_T& aParT); // has some issues if aParT is a const reference
         PartitionFile*  createMasterPartition(const Partition_T& aPart);
@@ -92,8 +97,8 @@ class PartitionManager
         std::unordered_map<uint8_t, Partition_T>    _partitionsByID;
 		std::unordered_map<std::string, uint8_t>    _partitionsByName;
 
-        const std::string _masterPartName;
-        const std::string _masterSegPartName;
+        const std::string  _masterPartName;
+        const std::string  _masterSegPartName;
 
         const CB*   _cb;
 };

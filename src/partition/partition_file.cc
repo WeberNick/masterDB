@@ -4,6 +4,11 @@ PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName,
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
 {
+    if(_growthIndicator < 8)
+    {
+        TRACE("A growth indicator smaller than 8 was provided. As the system needs a growth factor of at least 8, it is set accordingly");
+        _growthIndicator = 8;
+    }
     create();
     TRACE("'PartitionFile' object constructed (For a new partition)");
 }
@@ -89,8 +94,8 @@ void PartitionFile::create()
         const size_t lFileSize = _growthIndicator * _pageSize;
         FileUtil::resize(_partitionPath, lFileSize);
         _sizeInPages = partSizeInPages(); 
-        TRACE("File partition (with " + std::to_string(_sizeInPages) + " pages) was successfully created in the file system"); 
-        format(); //may throw
+        TRACE("File partition (with " + std::to_string(_sizeInPages) + " pages) was successfully created in the file system");
+        format(); // may throw
     }
     else
     {
