@@ -62,6 +62,24 @@ void testJonas1() {
         std::cout<<i++<<"  " <<e.to_string()<<std::endl;
 
     }
+    TRACE("REMOVE STUFF");
+    SegmentManager::getInstance().deleteSegment("bli");
+    TRACE("INSERT STUFF");
+    res.clear();
+     for(i =0; i<200;++i){
+        Employee_T emp ("zwei",i, 1);
+        res.push_back(lSeg2->insertTuple(emp));
+    }
+
+    i = 0;
+    TRACE("get it back!");
+    for (auto& a : res){
+
+        Employee_T e = lSeg->getTuple<Employee_T>(a);
+        std::cout<<i++<<"  " <<e.to_string()<<std::endl;
+
+    }
+
         //((PartitionFile*)lPart)->printPage(0);
 
    // lSeg->insertTuple((byte*) &lTuple, sizeof(lTuple));
@@ -420,8 +438,8 @@ int main(const int argc, const char* argv[]) {
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
         
-        testNick();
-        //testJonas1();
+       // testNick();
+        testJonas1();
       //testJonas3();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);

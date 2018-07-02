@@ -210,7 +210,7 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
         return result; 
     }
     size_t index = it - _pages.cbegin();
-    byte* lPagePtr = getPage(index, LOCK_MODE::kNOLOCK);
+    byte* lPagePtr = getPage(index, LOCK_MODE::kSHARED);
     InterpreterSP lInterpreter;
     lInterpreter.attach(lPagePtr);
     byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());

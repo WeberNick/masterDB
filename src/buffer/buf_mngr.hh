@@ -31,6 +31,7 @@ class BufferManager final
 {
     private:
          //list of free frame indexes. protected by a mutex
+         //changed into a stack
         class FreeFrames final
         {
             public:
@@ -43,8 +44,10 @@ class BufferManager final
 
             public:
                 void init(const size_t aNoFreeFrames) noexcept;
+                size_t pop();
+                void push(size_t aFrameNo);
                 
-            public:
+            private:
                 inline const auto& getFreeFrameList() noexcept { return _freeFrameList; }
                 inline sMtx&    getFreeFrameListMtx() noexcept { return _freeFrameListMtx; }
                 inline size_t   getNoFreeFrames() noexcept { return _noFreeFrames; }
@@ -75,12 +78,11 @@ class BufferManager final
             public:
                 inline BCB*     getFreeBCBList() noexcept { TRACE("first BCB in line is "+_freeBCBList->to_string());  return _freeBCBList; }
                 inline void     lock() noexcept { _freeBCBListMtx.lock(); }
-                inline void     unlock() noexcept { _freeBCBListMtx.lock(); }
+                inline void     unlock() noexcept { _freeBCBListMtx.unlock(); }
                 inline size_t   getNoFreeBCBs() noexcept { return _noFreeBCBs; }
                 inline BCB*     popFromList();
                 inline void     insertToFreeBCBs(BCB* aBCB) noexcept;
                 //inline void     setNoFreeBCBs(size_t aNoFreeBCBs) noexcept { _noFreeBCBs = aNoFreeBCBs; }
-                void            freeBCB(BCB* aBCB) noexcept;
                 void            resetBCB(BCB* aBCB) noexcept; //used to reset a BCB after the page it corresponds to was deleted
 
             private:
@@ -156,7 +158,7 @@ class BufferManager final
 
 BCB* BufferManager::FreeBCBs::popFromList()
 {
-    if(!_freeBCBList)
+    if(_freeBCBList)
     {
         lock();
         BCB* result = _freeBCBList;

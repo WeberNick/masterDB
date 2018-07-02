@@ -29,13 +29,13 @@ SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) :
 
 void SegmentBase::erase(){
     _partition.open();
-    //Remove all data pages
+    TRACE("Remove all data pages");
     for (const auto& iter : _pages){
         const auto& lPID = iter.first;
         _bufMan.resetBCB(lPID);
         _partition.freePage(lPID.pageNo());
     }
-     //Remove all index Pages
+     TRACE("Remove all index Pages");
      PID lPID;
     lPID._fileID=_partition.getID();
     for (auto iter : _indexPages){

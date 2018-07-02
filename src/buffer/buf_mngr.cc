@@ -20,6 +20,24 @@ void BufferManager::FreeFrames::init(const size_t aNoFreeFrames) noexcept
         TRACE("The free frames list is initialized. All frames are free.");
     }
 }
+size_t BufferManager::FreeFrames::pop(){
+    getFreeFrameListMtx().lock(); //protect free frames array
+    size_t lFrameNo = INVALID;
+    if(getNoFreeFrames() > 0) //are there any free frames?
+    {
+        lFrameNo = getFreeFrameList()[getNoFreeFrames() - 1]; //get free frame number
+        decrNoFreeFrames(); //decrease free frame counter
+    } //no free frame in array
+    getFreeFrameListMtx().unlock();
+    return lFrameNo;
+}
+void BufferManager::FreeFrames::push(size_t aFrameNo){
+    getFreeFrameListMtx().lock(); //protect free frames array
+    getFreeFrameList()[getNoFreeFrames()] = aFrameNo;
+    incrNoFreeFrames();
+    getFreeFrameListMtx().unlock();
+}
+
 
 BufferManager::FreeBCBs::FreeBCBs() : 
     _BCBs(), 
@@ -54,17 +72,9 @@ void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
 {
     TRACE("FU");
     aBCB->lock();
-    freeBCB(aBCB);
+    insertToFreeBCBs(aBCB);
     aBCB->unlock();
 }
-
-void BufferManager::FreeBCBs::freeBCB(BCB* aBCB) noexcept
-{ 
-    lock();
-    insertToFreeBCBs(aBCB);
-    incrNoFreeBCBs();
-    unlock();
- }
 
 BufferManager::BufferManager() :
 	_noFrames(0),
@@ -224,11 +234,11 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
 
     /* init BCB */
     lFBCB->lock(); //lock mutex of free BCB
-    lFBCB->setLockMode(LOCK_MODE::kNoType); //indicate mutex has no lock type yet 
+   // lFBCB->setLockMode(LOCK_MODE::kNoType); //indicate mutex has no lock type yet 
     lFBCB->setFrameIndex(INVALID); //INVALID defined in types.hh
     lFBCB->setPID(aPageID); //store requested page
     lFBCB->setModified(false); //page is not modified
-    lFBCB->setFixCount(0); //fix will be applied later
+    //lFBCB->setFixCount(0); //fix will be applied later
     lFBCB->setNextInChain(nullptr); //BCB has no next BCB yet
     /* now the control block is linked to the hash table chain */
         TRACE("");
@@ -255,7 +265,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     TRACE("Read page '" + aPageID.to_string() + "' from disk into the buffer pool");
     TRACE("The BCB is : " + lFBCB->to_string());
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
-    lFBCB->lock_shared();
+    lFBCB->lock_shared();//why shared?
     byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
     const size_t lNoTries = 3;
     for(size_t i = 0; i < lNoTries; ++i)
@@ -377,9 +387,11 @@ void BufferManager::resetBCB(const PID& aPID) noexcept
     else if(lCurBCB->getPID() == aPID)
     {
         TRACE("was first in bucket");
-        _bufferHash->setBucketBCB(lHashIndex, lCurBCB->getNextInChain());
-        _freeBCBs.freeBCB(lCurBCB);
+        _bufferHash->setBucketBCB(lHashIndex, lCurBCB->getNextInChain()); //delete from bucket
+        getFreeFrames().push(lCurBCB->getFrameIndex()); //free frame
+        _freeBCBs.resetBCB(lCurBCB);    //free BCB
         _bufferHash->getBucketMtx(lHashIndex).unlock();
+        return;
     }
 
     while(lCurBCB->getNextInChain()) //as long as there are allocated CBs
@@ -389,8 +401,9 @@ void BufferManager::resetBCB(const PID& aPID) noexcept
         {
             TRACE("page found");
             BCB* tmp = lCurBCB->getNextInChain()->getNextInChain();
-            _freeBCBs.resetBCB(lCurBCB->getNextInChain());
-            lCurBCB->setNextInChain(tmp);
+            getFreeFrames().push(lCurBCB->getNextInChain()->getFrameIndex()); //free frame
+            _freeBCBs.resetBCB(lCurBCB->getNextInChain()); //free BCB
+            lCurBCB->setNextInChain(tmp);   //link exclude from chain
             _bufferHash->getBucketMtx(lHashIndex).unlock(); //release
             return;
         }
@@ -399,22 +412,21 @@ void BufferManager::resetBCB(const PID& aPID) noexcept
             lCurBCB = lCurBCB->getNextInChain(); //follow hash chain
         }
     }
+    _bufferHash->getBucketMtx(lHashIndex).unlock();
+    TRACE("PID was not in Buffer");
 }
 
 
 size_t BufferManager::getFrame() noexcept
 {
-    size_t lFrameNo;
-    getFreeFrames().getFreeFrameListMtx().lock(); //protect free frames array
-    const size_t lNoFreeFrames = getFreeFrames().getNoFreeFrames();
-    if(lNoFreeFrames > 0) //are there any free frames?
-    {
-        lFrameNo = getFreeFrames().getFreeFrameList()[lNoFreeFrames - 1]; //get free frame number
-        getFreeFrames().decrNoFreeFrames(); //decrease free frame counter
-        getFreeFrames().getFreeFrameListMtx().unlock(); //release mutex on free frame array
-        return lFrameNo; //return free frame index
-    } //no free frame in array
-    getFreeFrames().getFreeFrameListMtx().unlock(); //release mutex on free frame array
+    
+    //look pop() implemented, look at old getFrame() to see what was before
+    size_t lFrameNo = getFreeFrames().pop();
+    if(lFrameNo != INVALID){
+        return lFrameNo;
+    }
+    //if INVALID, there is no free frame in the list, try to get rid of one.
+
     //pick random frame to evict
     std::random_device lSeeder; //the random device that will seed the generator
     std::mt19937 lRNG(lSeeder()); //then make a mersenne twister engine
@@ -475,9 +487,9 @@ size_t BufferManager::getFrame() noexcept
                     //exclude BCB from chain (linked list)
                     lHashChainEntry->setNextInChain(tmp);                 
                     //insert BCB into free BCB list
+                    _freeBCBs.insertToFreeBCBs(lNext);
                     lNext->unlock();//resetBCB will lock itself
-                    _freeBCBs.resetBCB(lNext);
-                    
+
                     _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release
                     return lVictimIndex;
                 }
