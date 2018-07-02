@@ -83,6 +83,11 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& 
 
 PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
 {
+    if(_partitionsByName.find(aName)!=_partitionsByName.end()){
+        std::string errMes = "Partition with same name exists and cannot be created.";
+        TRACE(errMes);
+        throw InvalidArgumentException(FLF,errMes);
+    }
     //currently reformats the raw partition with every call.. need to use the getPartition procedure as above
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;

@@ -375,9 +375,8 @@ void BufferManager::resetBCB(const PID& aPID) noexcept
     {
         TRACE("was first in bucket");
         _bufferHash->setBucketBCB(lHashIndex, lCurBCB->getNextInChain());
+        _freeBCBs.freeBCB(lCurBCB);
         _bufferHash->getBucketMtx(lHashIndex).unlock();
-        //put into free BCB List! ####
-        return;
     }
 
     while(lCurBCB->getNextInChain()) //as long as there are allocated CBs
