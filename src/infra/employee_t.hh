@@ -58,11 +58,10 @@ class Employee_T : public Tuple
     private:
         static uint64_t _idCount;
         /* content of the tuple */
-        uint64_t    _id;
-        double    _salary;
-        uint8_t    _age;
-        std::string _name;
-        
+        uint64_t        _id;
+        double          _salary;
+        uint8_t         _age;
+        std::string     _name;  
 };
 
 std::string Employee_T::to_string() const noexcept 

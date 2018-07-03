@@ -7,19 +7,20 @@
  */
 #pragma once
 
-#include "linereaderedit.hh"
-#include "../infra/types.hh"
-#include "../infra/partition_t.hh"
-#include "../infra/segment_t.hh"
 #include "../infra/employee_t.hh"
 #include "../infra/exception.hh"
-
+#include "../infra/partition_t.hh"
+#include "../infra/segment_t.hh"
+#include "../infra/types.hh"
 #include "../main/db_instance_manager.hh"
 #include "../partition/partition_manager.hh"
 #include "../segment/segment_manager.hh"
 #include "../threading/pool.hh"
+#include "linereaderedit.hh"
 
+#include <algorithm>
 #include <array>
+#include <string>
 
 class CommandParser;
 using CP = CommandParser;

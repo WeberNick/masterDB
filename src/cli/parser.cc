@@ -262,17 +262,21 @@ int CP::com_insert_tuple(const char_vpt* args) const {
     TRACE("Start to insert Tuple");
     std::string segName(args->at(0));
     std::string type(args->at(1));
+    std::transform(type.begin(), type.end(), type.begin(), ::toupper);
     try {
-        if (type == "EMPLOYEE") {   
-            //if (args->size() != (5)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
-            //else {
+        if (type == "EMPLOYEE") {
+            if (args->size() != (2 + 3)) { // hard coded because we only consider one relation
+                std::cout << "Wrong number of arguments."
+                return CP::CommandStatus::OK;
+            }
+            else {
                 int emp_age = atoi(args->at(2));
                 std::string emp_name(args->at(3));
                 double emp_sal = atof(args->at(4));
                 Employee_T e(emp_name, emp_sal, emp_age);
                 TRACE("INSERT TUPLE EMPLOYEE");
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
-            //}
+            }
         } else {
             std::cout << "Relation " << type << " is not supported." << std::endl;
             return CP::CommandStatus::WRONG;
@@ -283,7 +287,7 @@ int CP::com_insert_tuple(const char_vpt* args) const {
     } catch(const std::exception& e) {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
         return CP::CommandStatus::ERROR;
-    } // TODO handle Seg does not exist and others?
+    }
     return CP::CommandStatus::OK;
 }
 

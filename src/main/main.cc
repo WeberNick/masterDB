@@ -113,22 +113,26 @@ void testJonas1() {
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bli");
     SegmentFSM_SP* lSeg2 = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bla");
     //insert a tuple
-     TRACE("INSERT STUFF");
      tid_vt res;
-     for(size_t i =0; i<200;++i){
+     std::vector<Employee_T> emps;
+     for(size_t i =0; i<1000;++i){
         Employee_T emp ("zwei",i, 1);
-        res.push_back(lSeg->insertTuple(emp));
+        emps.push_back(emp);
     }
-
+     TRACE("INSERT STUFF");
+    res = lSeg->insertTuples(emps);
+    TRACE("get it back");
     size_t i = 0;
     for (auto& a : res){
 
         Employee_T e = lSeg->getTuple<Employee_T>(a);
         std::cout<<i++<<"  " <<e.to_string()<<std::endl;
 
-    }
+    }/*
     TRACE("REMOVE STUFF");
     SegmentManager::getInstance().deleteSegment("bli");
+    lSeg2 = SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bli");
+
     TRACE("INSERT STUFF");
     res.clear();
      for(i =0; i<200;++i){
@@ -140,7 +144,7 @@ void testJonas1() {
     TRACE("get it back!");
     for (auto& a : res){
 
-        Employee_T e = lSeg->getTuple<Employee_T>(a);
+        Employee_T e = lSeg2->getTuple<Employee_T>(a);
         std::cout<<i++<<"  " <<e.to_string()<<std::endl;
 
     }
@@ -204,7 +208,7 @@ void testJonas3(){
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
             4096,
-            100000,
+            10,
             true
         };
         std::cout << lCB;
@@ -225,22 +229,15 @@ void testJonas3(){
   //  PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(std::getenv("HOME") + std::string("/MasterTeamProjekt/Partition"),"whatsoever",100);
  //   TRACE("create a Segment");
   //  SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bliblablub");
-    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(6);
-    ((PartitionFile*) PartitionManager::getInstance().getPartition(2))->printPage(2);
+    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bli");
     TRACE("INSERT STUFF");
     for(size_t i =0; i<20;++i){
         Employee_T emp ("zwei",i, 1);
         lSeg->insertTuple(emp);
     }
 
-    SegmentManager::getInstance().deleteSegment("Segment400");
-    lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(100);
-    TRACE("INSERT STUFF");
-    for(size_t i =0; i<20;++i){
-        Employee_T emp ("zwei",i, 1);
-        lSeg->insertTuple(emp);
-    }
-      
+    SegmentManager::getInstance().deleteSegment("bla");
+
     DatabaseInstanceManager::getInstance().shutdown();
     TRACE("SHUTDOWN COMPLETED");
 }
@@ -504,9 +501,9 @@ int main(const int argc, const char* argv[]) {
 
         
        // testNick();
-       // testJonas1();
-      //testJonas3();
-      createEmployees();
+        testJonas1();
+    //  testJonas3();
+     // createEmployees();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh

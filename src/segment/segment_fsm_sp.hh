@@ -108,7 +108,8 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
     bool emptyfix = false;
     size_t lTotalSize = 0;
     for (auto& iter : aTupleVector){
-        lTotalSize += iter.size();
+        //slotted page is 8byte aligned, allign tuple size
+        lTotalSize += std::ceil(((double) iter.size() )/8.0)*8;
         lTotalSize += sizeof(InterpreterSP::slot_t);
     }
     PID lPID;
@@ -127,11 +128,13 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
             lPartSize = 0;
             start = end;
             while ((lPartSize < lPageSize) & (end < aTupleVector.size())){
-                lPartSize += aTupleVector.at(end).size() + sizeof(InterpreterSP::slot_t);
+                //slotted page is 8byte aligned, allign tuple size
+                lPartSize += std::ceil(((double) aTupleVector.at(end).size() )/8.0)*8;
+                lPartSize += sizeof(InterpreterSP::slot_t);
                 ++end;
             }
             if(lPartSize > lPageSize){
-                end-=2;
+                end-=1;
             }
             TRACE("bin: Tuples from "+std::to_string(start)+" to "+std::to_string(end));
             std::vector<Tuple_T> temp (aTupleVector.begin()+start, aTupleVector.begin()+end);
