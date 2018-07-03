@@ -83,7 +83,7 @@ void SegmentManager::createSegmentSub(const Segment_T& aSegT){
     _segmentsByID[aSegT.ID()] = aSegT;
     _segmentsByName[aSegT.name()] = aSegT.ID();
 
-    SegmentFSM_SP* lSegments = (SegmentFSM_SP*) getSegment(_masterSegSegName);
+    SegmentFSM_SP* lSegments = (SegmentFSM_SP*)getSegment(_masterSegSegName);
     lSegments->insertTuple<Segment_T>(aSegT);
 }
 

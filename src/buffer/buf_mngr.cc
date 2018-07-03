@@ -169,6 +169,7 @@ BCB* BufferManager::emptyfix(const PID& aPageID) //assumed to always request in 
     {
         if(bcb->getPID() == aPageID)
         {
+            #pragma message ("TODO: Jonas, is this still needed? Please remove if not.")
             throw ReturnException(FLF);
         }
     }

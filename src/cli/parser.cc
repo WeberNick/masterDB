@@ -167,18 +167,15 @@ int CP::com_exit(const char_vpt* args) const {
 }
 
 int CP::com_create_p(const char_vpt* args) const {
-    std::string partName(args->at(1));
     std::string path(args->at(0));
+    std::string partName(args->at(1));
     uint growthInd;
     if (!_reader.isnumber(args->at(2)))
         return CP::CommandStatus::WRONG;
     else growthInd = atoi(args->at(2));
     try {
-        PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd);
-        //PartitionManager pm;
-        //auto fp = std::bind(, pm, path, partName, growthInd);
-        //PartitionFile* lFile = Pool::Default::submitJob(&PartitionManager::createPartitionFileInstance, path, partName, growthInd, created);
-        if (lFile) {
+        const bool created = PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd).second;
+        if (created) {
             std::cout << "Successfully created Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
         } else {
             std::cout << "PartitionFile at \"" << args->at(0) << "\" already exists, \"" << partName << "\" could not be created.\n" << std::endl;
@@ -189,6 +186,10 @@ int CP::com_create_p(const char_vpt* args) const {
          return CP::CommandStatus::OK;
     } catch(const InvalidArgumentException& iaex) {
         std::cout << "Invalid argument was provided:" << std::endl;
+        std::cout << iaex.what() << "\n" << std::endl;
+        return CP::CommandStatus::WRONG;
+    } catch(const InvalidPathException& ipex) {
+        std::cout << "The provided path is invalid:" << std::endl;
         std::cout << iaex.what() << "\n" << std::endl;
         return CP::CommandStatus::WRONG;
     } catch(const PartitionFullException& ex) {

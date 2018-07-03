@@ -1,10 +1,9 @@
 /**
  *  @file    partition_file.hh
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *  @brief   A class implementing the interface of a partition stored on disk (currently a file)
+ *  @brief   A class implementing the interface of a partition stored in a file
  *  @bugs    Currently no bugs known
  *  @todos   -Update LSN?
- *           -implement extend of file
  *  @section TBD
  */
 #pragma once
@@ -44,9 +43,12 @@ class PartitionFile : public PartitionBase
         */
         size_t partSize() noexcept override;
         size_t partSizeInPages() noexcept override;
+
+    public:
+        //getter
         inline uint16_t getGrowthIndicator() const noexcept { return _growthIndicator; }
         inline uint16_t getGrowthIndicator() noexcept { return _growthIndicator; }
-        inline std::string to_string() const noexcept { return PartitionBase::to_string() + std::string(", Growth : ") + std::to_string(getGrowthIndicator()); }
+        inline std::string to_string() const noexcept;
         inline std::string to_string() noexcept { return static_cast<const PartitionFile&>(*this).to_string(); }
 
 
@@ -58,5 +60,8 @@ class PartitionFile : public PartitionBase
         /* An indicator how the partition will grow (indicator * block size) */
         uint16_t _growthIndicator;
 };
+
+
+std::string PartitionFile::to_string() const noexcept { return PartitionBase::to_string() + std::string(", Growth : ") + std::to_string(getGrowthIndicator()); }
 
 std::ostream& operator<< (std::ostream& stream, const PartitionFile& aPartition);

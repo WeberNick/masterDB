@@ -3,7 +3,7 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief	An abstract class implementing the interface for every partition
  *  @bugs	Currently no bugs known
- *  @todos	-add exceptions to free/alloc page and think generally about their functionality with buffer manager
+ *  @todos	-
  *  @section TBD
  */
 #pragma once
@@ -33,6 +33,7 @@
 	// unsupported
   #define P_NO_BLOCKS 0 
   #define P_BLOCK_SIZE 0 
+  #error SYSTEM IS NOT COMPATIBLE WITH NON-UNIX OPERATING SYSTEMS
 #endif
 
 #include <iostream>
@@ -40,7 +41,8 @@
 #include <cerrno>
 #include <cstring>
 
-const uint64_t LSN = 0;
+//placeholder
+constexpr uint64_t LSN = 0;
 
 class PartitionBase 
 {
@@ -54,7 +56,7 @@ class PartitionBase
     PartitionBase& operator=(PartitionBase&&) = delete;
 
   public:
-    virtual ~PartitionBase() = default;
+    virtual ~PartitionBase();
 
   public:
     /**
@@ -110,6 +112,7 @@ class PartitionBase
     void writePage(const byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize);
 
   public:
+    //getter
     inline const std::string& getPath() const noexcept { return _partitionPath; }
     inline const std::string& getPath() noexcept { return _partitionPath; }
     inline const std::string& getName() const noexcept { return _partitionName; }
@@ -120,7 +123,7 @@ class PartitionBase
     inline uint getSizeInPages() noexcept { return _sizeInPages; }
     inline uint8_t getID() const noexcept { return _partitionID; }
     inline uint8_t getID() noexcept { return _partitionID; }
-    inline std::string to_string() const noexcept { return std::string("Path : '") + getPath() + "', Name: '" + getName() + "', ID : " + std::to_string(getID()); }
+    inline std::string to_string() const noexcept;
     inline std::string to_string() noexcept { return static_cast<const PartitionBase&>(*this).to_string(); }
 
   protected:
@@ -142,8 +145,11 @@ class PartitionBase
     virtual void remove() = 0;
 
   protected:
+    //Wrapper call. Checks if a file exists at the partition path
     inline bool exists() noexcept { return FileUtil::exists(_partitionPath); }
+    //Wrapper call. Checks if the partition path is a regular file
     inline bool isFile() noexcept { return FileUtil::isFile(_partitionPath); }
+    //Wrapper call. Checks if the partition path is a raw device
     inline bool isRawDevice() noexcept { return FileUtil::isRawDevice(_partitionPath); }
     virtual size_t partSize() = 0;
     virtual size_t partSizeInPages() = 0;
@@ -167,5 +173,7 @@ class PartitionBase
     /* Control block containing all specified parameters*/
     const CB& _cb;
 };
+
+std::string PartitionBase::to_string() const noexcept { return std::string("Path : '") + getPath() + "', Name: '" + getName() + "', ID : " + std::to_string(getID()); }
 
 std::ostream& operator<< (std::ostream& stream, const PartitionBase& aPartition);

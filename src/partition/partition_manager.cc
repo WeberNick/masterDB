@@ -49,11 +49,13 @@ void PartitionManager::load(const part_vt& aTuples)
     _counterPartitionID = maxCounter + 1;
 }
 
-PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator)
+std::pair<PartitionFile*, bool> PartitionManager::createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator)
 {
     TRACE("Request to create file partition at path '" + aPath + "' with name '" + aName + "' with a growth of '" + std::to_string(aGrowthIndicator) + "'");
     if(!FileUtil::hasValidDir(aPath))
     {
+        // return to caller and inform about invalid path
+        TRACE("## The given path ('" + aPath  + "') is invalid");
         throw InvalidPathException(FLF, aPath);
     }
     // e.g. PartitionFile at /home/username/partitions/filename exists, return corresponding partition
@@ -61,11 +63,11 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& 
     {
         TRACE("## The given path already contains a file. Check if a corresponding Partition_T tuple is maintained by the PartitionManager");
         const auto& lByID = _partitionsByID;
-        auto it = std::find_if(lByID.cbegin(), lByID.cend(), [&aPath](const auto& elem) { return elem.second.path() == aPath; });
+        const auto it = std::find_if(lByID.cbegin(), lByID.cend(), [&aPath](const auto& elem) { return elem.second.path() == aPath; });
         if(it != lByID.cend())
         {
             TRACE("## Partition_T tuple is maintained by the PartitionManager. Search for corresponding PartitionFile object.");
-            return static_cast<PartitionFile*>(getPartition(it->first));
+            return std::make_pair(static_cast<PartitionFile*>(getPartition(it->first)), false);
         }
     }
     /* e.g. PartitionFile at /home/username/otherfolder/filename does not exist, but partition with name aName does already exist at another path
@@ -88,16 +90,16 @@ PartitionFile* PartitionManager::createPartitionFileInstance(const std::string& 
         Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, lPartition->getGrowthIndicator());
         createPartitionSub(lPartTuple);
         TRACE("## File partition created and successfully added to the PartitionManager");
-        return static_cast<PartitionFile*>(_partitions.at(lPartition->getID()));   
+        return std::make_pair(static_cast<PartitionFile*>(_partitions.at(lPartition->getID())), true);   
     }
     // if this line is reached, something went wrong
     // examples are a given path to existing file which is not a partition
     throw PartitionException(FLF, "Given path to file exists, but file is not a Partition.");
 }
 
-// TODO
-PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
+std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
 {
+    #pragma message ("TODO: Implement PartitionRaw functionality!")
     // currently reformats the raw partition with every call.. need to use the getPartition procedure as above
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
@@ -105,7 +107,7 @@ PartitionRaw* PartitionManager::createPartitionRawInstance(const std::string& aP
     Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, MAX16); //MAX16 = invalid value to indicate 'no growth'
     createPartitionSub(lPartTuple);
     TRACE("Raw partition instance created.");
-    return static_cast<PartitionRaw*>(_partitions.at(lPartition->getID()));
+    return std::make_pair(static_cast<PartitionRaw*>(_partitions.at(lPartition->getID())), true);
 }
 
 void PartitionManager::createPartitionSub(const Partition_T& aParT)
@@ -125,6 +127,7 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
         const Partition_T& lTuple = getPartitionT(aID);
         if(lTuple.ID() != aID)
         {
+            #pragma message ("TODO: Can this happen? If not: Delete if-statement and exception")
             TRACE("## Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk (TODO: Can this happen?)");
             throw PartitionNotExistsException(FLF);
         }

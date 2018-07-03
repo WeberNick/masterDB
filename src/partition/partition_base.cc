@@ -13,6 +13,8 @@ PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName,
     InterpreterFSIP::init(aControlBlock);
 }
 
+PartitionBase::~PartitionBase() = default;
+
 void PartitionBase::open()
 {
 	if(_openCount == 0)
@@ -49,7 +51,6 @@ void PartitionBase::close()
 
 uint32_t PartitionBase::allocPage()
 {
-
 	byte* lPagePointer = new byte[_pageSize];
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);
@@ -71,6 +72,7 @@ uint32_t PartitionBase::allocPage()
                 const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: "+std::to_string(lIndexOfFSIP));
                 TRACE(lErrMsg);
 				close();
+                //if file partition: can recover by growing file
                 throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
             }
 			else{
@@ -129,7 +131,6 @@ void PartitionBase::freePage(const uint32_t aPageIndex)
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);
 	TRACE(std::to_string(aPageIndex));
-	//TRACE(std::to_string((aPageIndex % (getMaxPagesPerFSIP() +1)) -1));
 	fsip.freePage(aPageIndex);
 	fsip.detach();
 	writePage(lPagePointer, fsipIndex,_pageSize);
@@ -184,8 +185,7 @@ void PartitionBase::format()
 
 uint PartitionBase::getMaxPagesPerFSIP() noexcept
 {
-	InterpreterFSIP fsip;
-	return (_pageSize - fsip.getHeaderSize()) * 8;
+	return (_pageSize - InterpreterFSIP::getHeaderSize()) * 8;
 }
 
 std::ostream& operator<< (std::ostream& stream, const PartitionBase& aPartition)
