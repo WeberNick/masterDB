@@ -64,6 +64,8 @@ void testJonas1() {
     }
     TRACE("REMOVE STUFF");
     SegmentManager::getInstance().deleteSegment("bli");
+    lSeg2 = SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bli");
+
     TRACE("INSERT STUFF");
     res.clear();
      for(i =0; i<200;++i){
@@ -75,7 +77,7 @@ void testJonas1() {
     TRACE("get it back!");
     for (auto& a : res){
 
-        Employee_T e = lSeg->getTuple<Employee_T>(a);
+        Employee_T e = lSeg2->getTuple<Employee_T>(a);
         std::cout<<i++<<"  " <<e.to_string()<<std::endl;
 
     }
