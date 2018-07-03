@@ -105,7 +105,17 @@ void CommandParser::runcli() {
                 int rec;
                 if (com->_hasParams) {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                    rec = (this->*com->_func)(&args);
+                    using fp = int (CommandParser::* const&&)(const char_vpt*) const;
+                    fp funcptr = com->_func;
+                    fp&& f2 = std::move(funcptr);
+                    //((*this).*com->_func)(&args);
+                    //HashJoinSimple::build_fun_t aBuildFun // member function pointer parameter
+                    //HJSimple::build_fun_t  lBuildFuns[9] = {&HJSimple::build1 // zeiger auf member function
+                    //(lHashJoin.*aBuildFun)(lBunBuild);
+                    //rec = (this->*com->_func)(&args);
+                    //auto t = std::move(funcptr);
+                    rec = Pool::Default::submitJob<fp, char_vpt>(f2, args);
+                    
                     //CommandParser cp;
                     //auto fp = std::bind(&CommandParser::com_help, cp, args);
                     //rec = Pool::Default::submitJob(this->*com->_func, &args);
@@ -190,7 +200,7 @@ int CP::com_create_p(const char_vpt* args) const {
         return CP::CommandStatus::WRONG;
     } catch(const InvalidPathException& ipex) {
         std::cout << "The provided path is invalid:" << std::endl;
-        std::cout << iaex.what() << "\n" << std::endl;
+        std::cout << ipex.what() << "\n" << std::endl;
         return CP::CommandStatus::WRONG;
     } catch(const PartitionFullException& ex) {
         std::cout << "Partition Full.\n" << std::endl;
@@ -267,7 +277,7 @@ int CP::com_insert_tuple(const char_vpt* args) const {
     try {
         if (type == "EMPLOYEE") {
             if (args->size() != (2 + 3)) { // hard coded because we only consider one relation
-                std::cout << "Wrong number of arguments."
+                std::cout << "Wrong number of arguments." << std::endl;
                 return CP::CommandStatus::OK;
             }
             else {
@@ -340,6 +350,7 @@ int CP::com_show_seg(const char_vpt* args) const {
         std::cout << "PartitionID:  " << seg.partID() << std::endl;
         std::cout << "Segment Type: " << seg.type() << std::endl;
         std::cout << std::endl;
+        // TODO tuples
     } catch(const SegmentNotExistsException& oore) {
         std::cout << "Segment \"" << segName << "\" does not exist.\n" << std::endl;
         return CP::CommandStatus::OK;
@@ -381,6 +392,10 @@ void CommandParser::printh() const {
 void CommandParser::printe() const {
     std::cout << "Good Bye.\n" << std::endl;
 }
+
+/*void CommandParser::pprinttups(const std::string& caption, ) const {
+
+}*/
 
 void CommandParser::pprints(const std::string& caption, const string_vt& list) const {
     uint8_t longestStr = PartitionManager::getInstance().getMasterPartName().size();

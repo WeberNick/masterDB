@@ -204,7 +204,7 @@ namespace Pool
     {
         inline ThreadPool& getInstance()
         {
-            static ThreadPool defaultPool();
+            static ThreadPool defaultPool;
             return defaultPool;
         }
 
