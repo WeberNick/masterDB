@@ -89,7 +89,7 @@ class InterpreterFSIP final {
     inline byte *pagePtr() noexcept { return _pp; }
     inline fsip_header_t *header() noexcept { return _header; }
     inline uint noManagedPages() noexcept { return header()->_managedPages; } // Remove noManagedPages()
-    inline uint getHeaderSize() noexcept { return sizeof(fsip_header_t); }
+    static uint getHeaderSize() noexcept { return sizeof(fsip_header_t); }
 
   private:
     /* Getter*/

@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <string>
 #include <algorithm>
+#include <utility>
 
 constexpr uint16_t MIN_GROWTH_INDICATOR = 8;
 
@@ -58,8 +59,8 @@ class PartitionManager
 
     public:
         /* creates instance of partition; creation of partition on disk happens in the respective partition class */
-        PartitionFile*  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
-        PartitionRaw*   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
+        std::pair<PartitionFile*, bool>  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
+        std::pair<PartitionRaw*, bool>   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
 
         void            deletePartition(const uint8_t aID);
         void            deletePartition(const std::string& aName);

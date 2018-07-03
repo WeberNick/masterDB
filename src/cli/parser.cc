@@ -170,9 +170,10 @@ int CP::com_create_p(const char_vpt* args) const {
         return CP::CommandStatus::WRONG;
     else growthInd = atoi(args->at(2));
     try {
-        PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd);
+        #pragma message ("TODO: Nico, if you don't need this ptr variable, change assignment of this to a pair! Also: Please check in createPartitionFileInstance if the truth values are correctly assigned to the pair and remove this message afterwards!")
+        const auto [ptr, created] = PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd);
         // Pool::Default::submitJob(&PartitionManager::createPartitionFileInstance, path, partName, growthInd, created);
-        if (lFile) {
+        if (created) {
             std::cout << "Successfully created Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
         } else {
             std::cout << "PartitionFile at \"" << args->at(0) << "\" already exists, \"" << partName << "\" could not be created.\n" << std::endl;

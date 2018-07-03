@@ -1,7 +1,7 @@
 /**
  *  @file 	partition_raw.hh
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *  @brief	A abstract class implementing the interface for every partition
+ *  @brief	Implementation of a raw device partition
  *  @bugs	Currently no bugs known
  *  @todos	Implement all functionalities
  *  @section TBD
@@ -24,7 +24,7 @@ class PartitionRaw : public PartitionBase
         PartitionRaw& operator=(PartitionRaw&&) = delete;
 
     public:
-		~PartitionRaw() = default;
+		~PartitionRaw();
 
     public:
         /**

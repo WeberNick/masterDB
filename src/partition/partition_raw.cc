@@ -4,6 +4,7 @@ PartitionRaw::PartitionRaw(const std::string& aPath, const std::string& aName, c
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock)
 {
     create();
+    TRACE("'PartitionRaw' constructed");
 }
 
 PartitionRaw::PartitionRaw(const Partition_T& aTuple, const CB& aControlBlock):
@@ -13,13 +14,21 @@ PartitionRaw::PartitionRaw(const Partition_T& aTuple, const CB& aControlBlock):
     else _sizeInPages = 0;
 }
 
+PartitionRaw::~PartitionRaw()
+{
+    TRACE("'PartitionRaw' object destructed");
+}
+
 uint32_t PartitionRaw::allocPage()
 {
+
+    #pragma message ("TODO: If the alloc page fails because of a full partition, an exception will be thrown. As this is a raw device, it is not possible to grow the partition. Therefore, this needs to be catched from some higher level (CLI? Segments?) and the allocation (prob. a result of an tuple insertion) must fail gracefully.")
     return PartitionBase::allocPage();
 }
 
 size_t PartitionRaw::partSize()
 {
+    #pragma message ("TODO: Test if functionality actually works for raw devices")
 	if(isRawDevice())
 	{
 		int lFileDescriptor = ::open(_partitionPath.c_str(), O_RDONLY);
@@ -62,6 +71,7 @@ size_t PartitionRaw::partSizeInPages()
 
 void PartitionRaw::create()
 {
+    #pragma message ("TODO: Test if functionality actually works for raw devices")
 	if(exists())
 	{
 		if(isRawDevice())		

@@ -34,7 +34,6 @@ uint32_t PartitionFile::allocPage()
     try
     {
         lPageIndex = PartitionBase::allocPage();
-       // printPage(0);
     }
     catch(const PartitionFullException& ex)
     {
@@ -54,7 +53,6 @@ uint32_t PartitionFile::allocPage()
         const size_t lPagesPerFSIP = getMaxPagesPerFSIP();
         const uint lRemainingPages = lFSIP.grow(_growthIndicator, lPagesPerFSIP);
         writePage(ex.getBufferPtr(),ex.getIndexOfFSIP(),_pageSize);
-        TRACE("remaining pages after growing: " + std::to_string(lRemainingPages));
         if(lRemainingPages > 0)
         {
             const uint lNextFSIP = ex.getIndexOfFSIP() + lPagesPerFSIP + 1;
@@ -62,6 +60,7 @@ uint32_t PartitionFile::allocPage()
             lFSIP.initNewFSIP(ex.getBufferPtr(), LSN, lNextFSIP, _partitionID, lNumberOfPagesToManage);
 		    writePage(ex.getBufferPtr(), lNextFSIP, _pageSize);
         }
+        //in the partition_base part of alloc, a buffer was allocated but not deleted before throwing the exception..
         delete[] ex.getBufferPtr();
         TRACE("FSIP's were successfully updated with the new partition size");
         lPageIndex = PartitionBase::allocPage();

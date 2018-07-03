@@ -96,7 +96,7 @@ void testJonas1() {
     std::string lHome(std::getenv("HOME"));
     std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
     std::cout << "Path: " << lPath << std::endl;
-    //PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
+    //auto [lFile, created] = PartitionManager::getInstance().createPartitionFileInstance(lPath, "MyPartition", 100); 
   //  if(lFile==nullptr) std::cout<<"fail"<<std::endl;
   //  SegmentManager::getInstance().createNewSegmentFSM(*lFile,"blub");
     
@@ -105,7 +105,7 @@ void testJonas1() {
     //install    
    
     TRACE("create a new Partition");
-    PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
+    auto [lPart, created] = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     TRACE("create a Segment");
     SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bli");
     SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bla");
@@ -189,12 +189,12 @@ void testJonas2(){
     std::string lPath = lHome + std::string("/MasterTeamProjekt/Partition");
     std::cout << "Path: " << lPath << std::endl;
     TRACE("create a new Partition");
-    PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
+    auto [lPart, created] = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
     lPart->open();
     for (size_t i = 0;i<50000;++i){
         uint page = lPart->allocPage();
         std::cout<<page<<std::endl;
-        if(i>10 & (i % 11 == 0)){
+        if(i>10 && (i % 11 == 0)){
             std::cout<<"free: "<<i-10<<std::endl;
             lPart->freePage(i-10);
         }
@@ -329,7 +329,7 @@ void testNick()
         TRACE("### TEST FROM INSTALL ###");
         TRACE("## TEST : Create Partition");
         std::cout << "## TEST : Create Partition" << std::endl;
-        PartitionFile* myPart = pm.createPartitionFileInstance(lPathToPartitions + "MyPartition", "MyPartition", 1000);
+        auto [myPart, created] = pm.createPartitionFileInstance(lPathToPartitions + "MyPartition", "MyPartition", 1000);
         std::cout << *myPart << std::endl;
         TRACE("## TEST : Create Segment");
         std::cout << "## TEST : Create Segment" << std::endl;
@@ -358,7 +358,7 @@ void testNick()
             const std::string partName = std::string("Partition") + std::to_string(i);
             TRACE("## TEST : Create " + partName);
             std::cout << "## TEST : Create " << partName << std::endl;
-            partitions[i] = pm.createPartitionFileInstance(lPathToPartitions + partName, partName, 100);
+            partitions[i] = pm.createPartitionFileInstance(lPathToPartitions + partName, partName, 100).first;
             std::cout << *partitions.at(i) << std::endl;
             for(size_t j = 0; j < noSegementsPerPartition; ++j)
             {
