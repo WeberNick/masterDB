@@ -62,7 +62,11 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 }
 
 PID SegmentFSM_SP::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
-    return SegmentFSM::getFreePage(aNoOfBytes, emptyfix, sizeof(sp_header_t) + sizeof(InterpreterSP::slot_t));
+    //overhead on page for one tuple insert
+    uint aOverhead= sizeof(sp_header_t) + sizeof(InterpreterSP::slot_t);
+    //slotted Page is 8byte aligned per tuple. Allign aNoBytes
+    uint lNoOfBytes = std::ceil( ( (double)aNoOfBytes)/8.0)*8;
+    return SegmentFSM::getFreePage(lNoOfBytes, emptyfix, aOverhead);
 }
 
 tid_vt SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSize)

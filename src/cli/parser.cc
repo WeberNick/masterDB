@@ -258,7 +258,7 @@ int CP::com_insert_tuple(const char_vpt* args) const {
     std::string type(args->at(1));
     try {
         if (type == "EMPLOYEE") {   
-            //if (args->size() != (5)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
+            if (args->size() != (5)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
             else {
                 int emp_age = atoi(args->at(2));
                 std::string emp_name(args->at(3));

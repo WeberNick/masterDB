@@ -117,6 +117,7 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
 
     //search all pages for tuple
     uint j;
+    byte* lTuplePointer;
     for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
       lPage = lSegments->getPage(i, LOCK_MODE::kSHARED);
@@ -126,16 +127,23 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
    	  while( j < lInterpreter.noRecords())
    	  {
           Tuple_T lTuple;
-          lTuple.toMemory(lInterpreter.getRecord(j));
-          TRACE(std::to_string(j)+" "+lTuple.to_string());
-        if(lTuple.ID() == aID){
-            //mark deleted
-            lSegments->getPage(i, LOCK_MODE::kEXCLUSIVE);
-            lInterpreter.deleteRecordSoft(j);
-            lSegments->releasePage(i, true);
-            TRACE("Tuple deleted successfully.");
-            return;
-        }
+          lTuplePointer = lInterpreter.getRecord(j);
+          if(lTuplePointer){
+            lTuple.toMemory(lInterpreter.getRecord(j));
+            TRACE(std::to_string(j)+" "+lTuple.to_string());
+
+            if(lTuple.ID() == aID){
+                //mark deleted
+                lSegments->getPage(i, LOCK_MODE::kEXCLUSIVE);
+                lInterpreter.deleteRecordSoft(j);
+                lSegments->releasePage(i, true);
+                TRACE("Tuple deleted successfully.");
+                return;
+            }
+          }
+          else{
+              TRACE(std::to_string(j)+ " deleted tuple");
+          }
         ++j;
         lSegments->releasePage(i);
     }
