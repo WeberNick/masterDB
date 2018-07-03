@@ -24,9 +24,11 @@
 class CommandParser;
 using CP = CommandParser;
 
-class CommandParser {
+class CommandParser
+{
   private:
-    class Command {
+    class Command
+    {
       public:
         explicit Command(const CP& aCP,
                          const char* aName,
@@ -49,7 +51,8 @@ class CommandParser {
         const char* _usageInfo;                  // "Usage - str: partname .." - A detailed message on how to use the command
     };
 
-    enum CommandStatus {
+    enum CommandStatus
+    {
         EXIT  = -1, // regular exit
         OK    = 0,  // ok, continue with next command
         WRONG = 1,  // wrong type of an argument
@@ -94,7 +97,8 @@ class CommandParser {
     int com_exit(const char_vpt* args) const;
 
   public:
-    static CommandParser& getInstance() {
+    static CommandParser& getInstance()
+    {
         static CommandParser lComPars;
         return lComPars;
     }
