@@ -32,6 +32,7 @@ HDR = \
 	../partition/partition_manager.hh \
 	../segment/segment_manager.hh \
 	../main/db_instance_manager.hh \
+	../threading/pool.hh \
 	\
 
 OBJ = \

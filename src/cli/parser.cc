@@ -106,6 +106,10 @@ void CommandParser::runcli() {
                 if (com->_hasParams) {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
                     rec = (this->*com->_func)(&args);
+                    //CommandParser cp;
+                    //auto fp = std::bind(&CommandParser::com_help, cp, args);
+                    //rec = Pool::Default::submitJob(this->*com->_func, &args);
+                    //rec = Pool::Default::submitJob(fp, &args);
                 } else
                     rec = (this->*com->_func)(nullptr);
                 if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR) {
@@ -171,7 +175,9 @@ int CP::com_create_p(const char_vpt* args) const {
     else growthInd = atoi(args->at(2));
     try {
         PartitionFile* lFile = PartitionManager::getInstance().createPartitionFileInstance(path, partName, growthInd);
-        // Pool::Default::submitJob(&PartitionManager::createPartitionFileInstance, path, partName, growthInd, created);
+        //PartitionManager pm;
+        //auto fp = std::bind(, pm, path, partName, growthInd);
+        //PartitionFile* lFile = Pool::Default::submitJob(&PartitionManager::createPartitionFileInstance, path, partName, growthInd, created);
         if (lFile) {
             std::cout << "Successfully created Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
         } else {
@@ -259,14 +265,14 @@ int CP::com_insert_tuple(const char_vpt* args) const {
     try {
         if (type == "EMPLOYEE") {   
             //if (args->size() != (5)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
-            else {
+            //else {
                 int emp_age = atoi(args->at(2));
                 std::string emp_name(args->at(3));
                 double emp_sal = atof(args->at(4));
                 Employee_T e(emp_name, emp_sal, emp_age);
                 TRACE("INSERT TUPLE EMPLOYEE");
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
-            }
+            //}
         } else {
             std::cout << "Relation " << type << " is not supported." << std::endl;
             return CP::CommandStatus::WRONG;

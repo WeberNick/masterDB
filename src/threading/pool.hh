@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "../infra/types.hh"
 #include "../infra/exception.hh"
 #include "../infra/trace.hh"
+#include "../infra/types.hh"
 #include "queue.hh"
 
 #include <algorithm>
@@ -25,10 +25,13 @@
 #include <utility>
 #include <vector>
 
-namespace Pool {
-    class ThreadPool {
+namespace Pool
+{
+    class ThreadPool
+    {
       private:
-        class IThreadTask {
+        class IThreadTask
+        {
           public:
             IThreadTask() = default;
             virtual ~IThreadTask() = default;
@@ -41,9 +44,10 @@ namespace Pool {
         };
 
         template <typename Func>
-        class ThreadTask : public IThreadTask {
+        class ThreadTask : public IThreadTask
+        {
           public:
-            ThreadTask(Func&& func) : 
+            ThreadTask(Func&& func) :
                 _func(std::move(func))
             {}
 
@@ -53,36 +57,41 @@ namespace Pool {
             ThreadTask(ThreadTask&& other) = default;
             ThreadTask& operator=(ThreadTask&& other) = default;
 
-            void execute() override { _func(); }
+            void execute() override
+            {
+                _func();
+            }
 
           private:
             Func _func;
         };
 
-    public:
+      public:
         /**
          * A wrapper around a std::future that adds the behavior of futures returned from std::async.
          * Specifically, this object will block and wait for execution to finish before going out of scope.
          */
         template <typename T>
-        class TaskFuture
-        {
-        public:
-            TaskFuture(std::future<T>&& future)
-                :_future(std::move(future))
+        class TaskFuture {
+          public:
+            TaskFuture(std::future<T>&& future) : 
+                _future(std::move(future))
             {}
 
             TaskFuture(const TaskFuture& rhs) = delete;
             TaskFuture& operator=(const TaskFuture& rhs) = delete;
             TaskFuture(TaskFuture&& other) = default;
             TaskFuture& operator=(TaskFuture&& other) = default;
-            ~TaskFuture() {
-                if(_future.valid()) {
+            ~TaskFuture()
+            {
+                if (_future.valid()) 
+                {
                     _future.get();
                 }
             }
 
-            auto get() {
+            auto get() 
+            {
                 return _future.get();
             }
 
@@ -90,31 +99,32 @@ namespace Pool {
             std::future<T> _future;
         };
 
-    public:
+      public:
         /**
-         * Constructor 
+         * Constructor
          */
-        ThreadPool(const CB& aControlBlock):
-            ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u, aControlBlock)
-        {}
-        
+        ThreadPool() : ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u) {}
+
         /**
          * Creates all threads for pool
          */
-        explicit ThreadPool(const std::uint32_t numThreads, const CB& aControlBlock):
+        explicit ThreadPool(const std::uint32_t numThreads) : 
             _done(false),
             _workQueue(),
-            _threads(),
-            _cb(aControlBlock)
+            _threads()
         {
-            try {
-                for (std::uint32_t i = 0u; i < numThreads; ++i) {
+            try 
+            {
+                for (std::uint32_t i = 0u; i < numThreads; ++i) 
+                {
                     _threads.emplace_back(&ThreadPool::worker, this);
                 }
                 TRACE("All threads started successfully.");
-            } catch(...) {
+            }
+            catch (...)
+            {
                 destroy_all();
-                TRACE("Creation of threadpool went wrong - all threads destroyed.");
+                TRACE("Creation of threadpool did not succeed - all threads destroyed.");
                 throw;
             }
         }
@@ -138,7 +148,8 @@ namespace Pool {
          * Submit a job to be run by the thread pool.
          */
         template <typename Func, typename... Args>
-        auto submit(Func&& func, Args&&... args) {
+        auto submit(Func&& func, Args&&... args)
+        {
             auto boundTask = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
             using ResultType = std::result_of_t<decltype(boundTask)()>;
             using PackagedTask = std::packaged_task<ResultType()>;
@@ -155,10 +166,13 @@ namespace Pool {
         /**
          * Constantly running function each thread uses to acquire work items from the queue.
          */
-        void worker() {
-            while (!_done) {
+        void worker()
+        {
+            while (!_done)
+            {
                 std::unique_ptr<IThreadTask> pTask(nullptr);
-                if (_workQueue.waitPop(pTask)) {
+                if (_workQueue.waitPop(pTask))
+                {
                     pTask->execute();
                 }
             }
@@ -167,11 +181,14 @@ namespace Pool {
         /**
          * Invalidates the queue and joins all running threads.
          */
-        void destroy_all() {
+        void destroy_all()
+        {
             _done = true;
             _workQueue.invalidate();
-            for (auto& thread : _threads) {
-                if (thread.joinable()) {
+            for (auto& thread : _threads)
+            {
+                if (thread.joinable())
+                {
                     thread.join();
                 }
             }
@@ -181,17 +198,19 @@ namespace Pool {
         std::atomic_bool _done;
         ThreadQueue<std::unique_ptr<IThreadTask>> _workQueue;
         std::vector<std::thread> _threads;
-        const CB& _cb;
     };
 
-    namespace Default {
-        inline ThreadPool& getInstance() {
-            static ThreadPool defaultPool;
+    namespace Default
+    {
+        inline ThreadPool& getInstance()
+        {
+            static ThreadPool defaultPool();
             return defaultPool;
         }
 
         template <typename Func, typename... Args>
-        inline auto submitJob(Func&& func, Args&&... args) {
+        inline auto submitJob(Func&& func, Args&&... args)
+        {
             return getInstance().submit(std::forward<Func>(func), std::forward<Args>(args)...);
         }
     } // namespace Default
