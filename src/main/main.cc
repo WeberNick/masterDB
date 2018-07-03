@@ -10,6 +10,71 @@
 #include <iostream>
 #include <cstdlib>
 
+
+ void createEmployees(){
+
+        const bool          C_INSTALL                   = true;
+        const std::string   C_MASTER_PARTITION_PATH     = std::string(std::getenv("HOME")) + std::string("/MasterPartition");
+        const std::string   C_PARTITION_PATH            = std::string(std::getenv("HOME")) + std::string("/Partition");
+        const std::string   C_TRACE_DIR_PATH            = std::string(std::getenv("HOME")) + std::string("/");
+        const size_t        C_PAGE_SIZE                 = 4096;
+        const size_t        C_BUFFER_POOL_SIZE          = 100000;
+        const bool          C_TRACE_ACTIVATED           = true;
+
+        std::string         lPartName                   = "PARTITION_EMP_A";
+        std::string         lSegName                   = "SEGMENT_EMP_A";
+        std::string         lTupleName                   = "EMPLOYEE";
+        uint8_t             lGrowthFactor               = 100;
+
+        const control_block_t lCB = {
+            C_INSTALL,
+            C_MASTER_PARTITION_PATH,
+            C_TRACE_DIR_PATH,
+            C_PAGE_SIZE,
+            C_BUFFER_POOL_SIZE,
+            C_TRACE_ACTIVATED
+        };
+
+
+        std::cout << "START" << std::endl;
+
+         //CommandParser::getInstance().init(lCB);
+         std::cout << "START Parser" << lCB << std::endl;
+         Trace::getInstance().init(lCB);
+        PartitionManager::getInstance().init(lCB);
+        SegmentManager::getInstance().init(lCB);
+        BufferManager::getInstance().init(lCB);
+        DatabaseInstanceManager::getInstance().init(lCB);
+         
+        std::string lStrPart = "CREATE PARTITION " + C_PARTITION_PATH + " " + lPartName +  " " + std::to_string(lGrowthFactor);
+        std::string lStrSeg = "CREATE SEGMENT " + lPartName + " " + lSegName;
+
+        CommandParser lParser;
+        std::cout << lStrPart << " - " << lStrSeg << std::endl;
+         string_vt lVec = {lStrPart,lStrSeg};
+         lParser.multiexec(lVec);
+
+        //InterpreterFSIP fsip;
+       // fsip.debug(0);
+
+        lVec.clear();
+         uint8_t lAge;
+         uint16_t lSalary;
+         std::string lName;
+         string_vt lFirstName = {"Bernd","Hans","Peter","Marie","Susi","Gerd","Gustav","Gerd","Sabine","Silke"};
+         string_vt lLastName = {"Maier","Mayer","Stahl","Koch","Mustermann","Brandt","Mueller","Lehmann","Kahn","Kurt"};
+         for(size_t i=0;i<2000;i++){
+             lAge = rand() % 100 + 14;
+             lSalary = rand() % 60000;
+             lName = lFirstName[rand() % 10] + lLastName[rand() % 10];
+             Employee_T emp(lName,lSalary,lAge);
+             std::string lStrTup = "INSERT INTO " + lSegName + " " + lTupleName + " " + std::to_string(lAge) + " " + lName + " " + std::to_string(lSalary);
+             lVec.push_back(lStrTup);
+         }
+         lParser.multiexec(lVec);
+
+    }
+
 void testJonas1() {
     const control_block_t lCB = {
             true,
@@ -441,8 +506,9 @@ int main(const int argc, const char* argv[]) {
 
         
        // testNick();
-        testJonas1();
+       // testJonas1();
       //testJonas3();
+      createEmployees();
     //  testStartUp(lCB2);
         // testStartUp(lCB2);
 	    // Test call in test.hh

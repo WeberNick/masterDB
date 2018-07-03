@@ -254,17 +254,15 @@ int CP::com_drop_s(const char_vpt* args) const {
 int CP::com_insert_tuple(const char_vpt* args) const {
     /* INSERT INTO Seg_Emp Employee 30 Mueller 8000 */
     TRACE("Start to insert Tuple");
-    std::string segName(args->at(3));
-    std::string type(args->at(4));
-    std::cout << args->at(0) << " - " << args->at(1) << " - " << args->at(2) << " - " << segName << " - " << type << std::endl;
-    // TODO rewrite this with templates
+    std::string segName(args->at(0));
+    std::string type(args->at(1));
     try {
-        if (type == "Employee") {
-            if (args->size() != (4 + 4)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
+        if (type == "EMPLOYEE") {   
+            //if (args->size() != (5)) { /*handle*/ } // change to check for num args of Employee_T and num args of command INSERT INTO
             else {
-                int emp_age = atoi(args->at(5));
-                std::string emp_name(args->at(6));
-                double emp_sal = atof(args->at(7));
+                int emp_age = atoi(args->at(2));
+                std::string emp_name(args->at(3));
+                double emp_sal = atof(args->at(4));
                 Employee_T e(emp_name, emp_sal, emp_age);
                 TRACE("INSERT TUPLE EMPLOYEE");
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
