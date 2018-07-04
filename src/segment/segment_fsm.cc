@@ -100,11 +100,10 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfO
         uint32_t lIndex = fsmp.getFreePage(lPageStatus);
         lMes=std::string("Interpreter getFreePage returns: ") + std::to_string(lIndex)+" at Segment " + std::to_string(_segID) + std::string(" _pages.size() is ") + std::to_string(_pages.size());
         TRACE(lMes);
-        if (lIndex != MAX32)
+        if (lIndex != INVALID_32)
         {
             // If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet, otherwise the page already exists)
-            if (lIndex + i * fsmp.getMaxPagesPerFSM() >= _pages.size())
-            {
+            if (lIndex + i * fsmp.getMaxPagesPerFSM() >= _pages.size()) {
                 _partition.open();
                 uint lPageIndex = _partition.allocPage();
                 lPID._pageNo = lPageIndex;

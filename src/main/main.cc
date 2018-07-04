@@ -115,18 +115,25 @@ void testJonas1() {
     //insert a tuple
      tid_vt res;
      std::vector<Employee_T> emps;
-     for(size_t i =0; i<1000;++i){
+     for(size_t i =1; i<1000;++i){
         Employee_T emp ("zwei",i, 1);
         emps.push_back(emp);
     }
      TRACE("INSERT STUFF");
     res = lSeg->insertTuples(emps);
+    /*for(auto& a : emps){
+        res.push_back(lSeg->insertTuple(a));
+    }*/
     TRACE("get it back");
     size_t i = 0;
+
     for (auto& a : res){
 
         Employee_T e = lSeg->getTuple<Employee_T>(a);
         std::cout<<i++<<"  " <<e.to_string()<<std::endl;
+        if(e.age() == 200){
+            break;
+        }
 
     }/*
     TRACE("REMOVE STUFF");

@@ -75,7 +75,7 @@ uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept
     }
     else
     {
-        return MAX32; // no free space on this fsm, load or create next
+        return INVALID_32; // no free space on this fsm, load or create next
     }
 }
 
@@ -119,5 +119,5 @@ PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const
     const uint lBucketSize = std::floor(aSizeWithoutOverhead / 16.0); // remove magic number, (numb buckets)
     const uint lBucketNo = std::ceil(aNoBytes / (double)lBucketSize);
     // changed to <= have to think about this
-    return (lBucketNo < (uint)PageStatus::kPageStatusSize) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
+    return (lBucketNo <= (uint)PageStatus::kPageStatusSize) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
 }

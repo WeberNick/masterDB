@@ -1,6 +1,6 @@
 #include "partition_base.hh"
 
-/**
+/** TODO
  * @brief Construct a new PartitionBase::PartitionBase object
  * 
  * @param aPath 
@@ -31,7 +31,7 @@ void PartitionBase::open()
 {
 	if(_openCount == 0)
 	{
-		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); //call open in global namespace
+		_fileDescriptor = ::open(_partitionPath.c_str(), O_RDWR); // call open in global namespace
 		if(_fileDescriptor == -1)
 		{
             const std::string lErrMsg = std::string("An error occured while opening the file: '") + std::string(std::strerror(errno));
@@ -46,7 +46,7 @@ void PartitionBase::close()
 {
 	if(_openCount == 1)
 	{
-		if(::close(_fileDescriptor) == -1) //call close in global namespace
+		if(::close(_fileDescriptor) == -1) // call close in global namespace
 		{
             const std::string lErrMsg = std::string("An error occured while closing the file: '") + std::string(std::strerror(errno));
             TRACE(lErrMsg);
@@ -70,13 +70,36 @@ uint32_t PartitionBase::allocPage()
 	uint32_t lAllocatedPageIndex;
 	do
 	{
-		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	// Read FSIP into buffer
+		readPage(lPagePointer, lIndexOfFSIP, _pageSize); // Read FSIP into buffer
 		TRACE(std::to_string(lIndexOfFSIP));
+        /*
         try
         {
-		    lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
+            lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
         }
         catch(const FSIPException& ex)
+        {
+            uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); // Prepare next offset to FSIP
+            if(lIndexOfNextFSIP >= _sizeInPages) // Next offset is bigger than the partition
+            {
+                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: " + std::to_string(lIndexOfFSIP));
+                TRACE(lErrMsg);
+                close();
+                // if file partition: can recover by growing file
+                throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
+            }
+            else
+			{
+                lIndexOfFSIP=lIndexOfNextFSIP;
+            }
+            continue;
+        }
+        */
+        
+        // replacement of try/catch from here..
+        #pragma message ("TODO: Jonas: I replaced the throwing of exceptions in FSIP Interpreter with an Invalid return if no free pages on FSIP. Reason: Moerkotte's comment on exceptions in normal program flow. Can you please double check if the replacement of the commented try/catch with the following if-check is equivalent?")
+		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
+        if(lAllocatedPageIndex == INVALID_32)
         {
 			uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); // Prepare next offset to FSIP
 		    if(lIndexOfNextFSIP >= _sizeInPages) // Next offset is bigger than the partition
@@ -88,7 +111,7 @@ uint32_t PartitionBase::allocPage()
                 throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
             }
 			else{
-				lIndexOfFSIP=lIndexOfNextFSIP;
+				lIndexOfFSIP = lIndexOfNextFSIP;
 			}
             continue;
         }
@@ -130,7 +153,7 @@ uint32_t PartitionBase::allocPage()
 	}
 	while(lAllocatedPageIndex == -1); // if 'lAllocatedPageIndex != -1' a free block was found
 	return lAllocatedPageIndex;	// return offset to free block
-*/
+	*/
 }
 
 void PartitionBase::freePage(const uint32_t aPageIndex)

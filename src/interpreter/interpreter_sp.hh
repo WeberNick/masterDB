@@ -54,15 +54,15 @@ class InterpreterSP
 		 * @param aPP the page pointer
 		 */
 		void  initNewPage(byte* aPP) noexcept ;
-		/**
-		 * @brief determine where to write the new record and return location as a pointer
+        /**
+		 * @brief return ptr where to insert tpl and its offset in the slots
 		 * 
 		 * @param aRecordSize the record size
 		 * @return std::pair<byte*, uint16_t> the location where to write the new record
 		 */
-        std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ; // returns 0 if page is full
-		int   deleteRecordHard (uint16_t aRecordNo) noexcept ; // actually delete record so that it is not restorable
-		int   deleteRecordSoft (uint16_t aRecordNo) noexcept ; // just mark as deleted
+		std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ;
+		int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable
+		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
 		byte* getRecord(const uint aRecordNo) noexcept ;
 
 	public:

@@ -130,8 +130,15 @@ byte* SegmentBase::getPageS(const uint aPageNo)
     }
     else
     {
-        if(!(toType(LOCK_MODE::kNOLOCK) < toType(lBCB->getLockMode()))) // check if we have at least a shared lock on BCB
+        TRACE("still got it, in mode " + lockModeToString(lBCB->getLockMode()));
+        if(toType(lBCB->getLockMode()) < toType(LOCK_MODE::kSHARED))
+        { // check if we have at least a shared lock on BCB
             lBCB->upgradeLock(LOCK_MODE::kSHARED);
+        }
+        else if (toType(lBCB->getLockMode()) > toType(LOCK_MODE::kSHARED)){
+            TRACE("you locked this page exclusively and are probably not aware of it...");
+            // how do we deal with this?
+        }
     }
     return _bufMan.getFramePtr(lBCB);
 }

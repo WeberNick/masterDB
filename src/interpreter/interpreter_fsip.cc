@@ -90,7 +90,9 @@ uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8
     {
         const std::string lErrMsg = std::string("No free pages on this FSIP");
         TRACE(lErrMsg);
-        throw FSIPException(FLF, lErrMsg);
+        return INVALID_32;
+        #pragma message ("TODO: Jonas: This was replaced with an return value instead of an exception throw. Delete the throw comment and this message as soon as Jonas double checked the code in partition base")
+        //throw FSIPException(FLF, lErrMsg);
     }
     attach(aPP);
     uint32_t lPosFreeBlock = _header->_nextFreePage;
