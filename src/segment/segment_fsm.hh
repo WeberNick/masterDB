@@ -21,27 +21,35 @@
 
 class SegmentFSM : public SegmentBase
 {
-  protected:
-    friend class SegmentManager;
-    SegmentFSM() = delete;
-    SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
-    SegmentFSM(PartitionBase& aPartition, const CB& aCOntrolBlock);
-    explicit SegmentFSM(const SegmentFSM&) = delete;
-    explicit SegmentFSM(SegmentFSM&&) = delete;
-    SegmentFSM& operator=(const SegmentFSM&) = delete;
-    SegmentFSM& operator=(SegmentFSM&&) = delete;
-    ~SegmentFSM() = default;
+    protected:
+        friend class SegmentManager;
+        SegmentFSM() = delete;
+        SegmentFSM(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+        SegmentFSM(PartitionBase& aPartition, const CB& aCOntrolBlock);
+        explicit SegmentFSM(const SegmentFSM&) = delete;
+        explicit SegmentFSM(SegmentFSM&&) = delete;
+        SegmentFSM& operator=(const SegmentFSM&) = delete;
+        SegmentFSM& operator=(SegmentFSM&&) = delete;
+        ~SegmentFSM() = default;
 
-  public:
-    PID getFreePage(uint aNoOfBytes, bool& emptyfix, uint aSizeOfOverhead = sizeof(basic_header_t));
-    PID getNewPage() override;
+    public:
+        /** TODO
+         * @brief Returns flag if page empty or not.
+                  (Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.)
+         * 
+         * @param aNoOfBytes 
+         * @param emptyfix the flag indicating whether the page is empty or not
+         * @param aSizeOfOverhead 
+         * @return PID 
+         */
+        PID getFreePage(uint aNoOfBytes, bool& emptyfix, uint aSizeOfOverhead = sizeof(basic_header_t));
+        PID getNewPage() override;
 
-  protected:
-    void storeSegment() override;                         // serialization
-    void loadSegment(const uint32_t aPageIndex) override; // deserialization
-    void erase() override;
+    protected:
+        void storeSegment() override;                         // serialization
+        void loadSegment(const uint32_t aPageIndex) override; // deserialization
+        void erase() override;
 
-  protected:
-    /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */
-    uint32_vt _fsmPages;
+    protected:
+        uint32_vt _fsmPages; // Free Space Management pages of this segment, indicating the remaining space of every page in _pages.
 };

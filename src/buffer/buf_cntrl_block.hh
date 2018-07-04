@@ -49,23 +49,23 @@ class BufferControlBlock final
         inline void     setNextInChain(BCB* aBCB) noexcept { _nextInChain = aBCB; }
 
     public:
-        void lock(LOCK_MODE aMode) noexcept; //lock for given mode
-        inline void lock() noexcept; //lock exclusive
+        void lock(LOCK_MODE aMode) noexcept; // lock for given mode
+        inline void lock() noexcept;         // lock exclusive
         inline bool try_lock() noexcept;
-        inline void lock_shared() noexcept; //lock shared
+        inline void lock_shared() noexcept;  // lock shared
         void unlock() noexcept;
         void upgradeLock(LOCK_MODE aMode) noexcept;
         inline std::string to_string() noexcept;
 
     private:
         PID         _pageID; 
-        size_t      _frameIndex;    //buffer pool index where page now stored
-        sMtx        _pageMtx;       //semaphore to protect page
+        size_t      _frameIndex;    // buffer pool index where page now stored
+        sMtx        _pageMtx;       // semaphore to protect page
         LOCK_MODE   _mode;
         bool        _modified;
         size_t      _fixCount;
         //LSN infos
-        BCB*        _nextInChain;   //hash overflow chain forward pointer
+        BCB*        _nextInChain;   // hash overflow chain forward pointer
 };
 
 void BufferControlBlock::lock() noexcept

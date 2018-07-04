@@ -8,6 +8,7 @@
  *  @section DESCRIPTION
  *  TODO
  */
+
 #pragma once
 #include "../infra/types.hh"
 #include "../infra/exception.hh"
@@ -23,13 +24,17 @@ class InterpreterSP
 		struct slot_t 
 		{
 			uint16_t _offset; // offset to record
-            uint16_t _size; // of record contained
-            uint8_t _status; //1 valid, 0 deleted
+            uint16_t _size;   // of record contained
+            uint8_t _status;  // 1 valid, 0 deleted
 		};
-		struct freeSpaceList_t{
-			uint16_t _offset; //from beginning of page to next free space, 0 if invalid
-			uint16_t _size; //size of this free space
+		struct freeSpaceList_t
+		{
+			uint16_t _offset; // from beginning of page to next free space, 0 if invalid
+			uint16_t _size;   // size of this free space
 		};
+
+	private:
+        friend class SegmentFSM_SP;
 
 	public:
 		InterpreterSP();
@@ -39,42 +44,54 @@ class InterpreterSP
         InterpreterSP& operator=(InterpreterSP&&) = delete;
 
 	public:
-		inline void  attach(byte* aPP) noexcept;
-		void  detach() noexcept;
+		inline void attach(byte* aPP) noexcept;
+		void        detach() noexcept;
 
 	public:
-		void  initNewPage(byte* aPP) noexcept ; // combines initialization of fresh page with attach
+		/**
+		 * @brief combines initialization of fresh page with attach
+		 * 
+		 * @param aPP the page pointer
+		 */
+		void  initNewPage(byte* aPP) noexcept ;
+		/**
+		 * @brief determine where to write the new record and return location as a pointer
+		 * 
+		 * @param aRecordSize the record size
+		 * @return std::pair<byte*, uint16_t> the location where to write the new record
+		 */
         std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ; // returns 0 if page is full
-		int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable
-		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
+		int   deleteRecordHard (uint16_t aRecordNo) noexcept ; // actually delete record so that it is not restorable
+		int   deleteRecordSoft (uint16_t aRecordNo) noexcept ; // just mark as deleted
 		byte* getRecord(const uint aRecordNo) noexcept ;
 
-
-
 	public:
-		inline byte*     		pagePtr() noexcept { return _pp; }
-		inline sp_header_t* 	header() noexcept { return _header; }
-		inline uint 	 		freeSpace() noexcept { return header()->_freeSpace; }
-		inline uint 	 		noRecords() noexcept { return header()->_noRecords; }
+		inline byte*     	pagePtr() noexcept { return _pp; }
+		inline sp_header_t* header() noexcept { return _header; }
+		inline uint 	 	freeSpace() noexcept { return header()->_freeSpace; }
+		inline uint 	 	noRecords() noexcept { return header()->_noRecords; }
 
-		inline slot_t& 	 		slot(const uint i) noexcept { return _slots[- (int) i]; }
-		inline size_t  	 		getPageSize() noexcept { return _pageSize; }
-
-	private:
-		inline sp_header_t* 	get_hdr_ptr() noexcept { return ((sp_header_t*) (_pp + _pageSize - sizeof(sp_header_t))); }
-		inline slot_t*   		get_slot_base_ptr() noexcept { return ((slot_t*) (_pp + _pageSize - sizeof(sp_header_t) - sizeof(slot_t))); }
-
-    private:
-        friend class SegmentFSM_SP;
-        /*	size of the page */
-        static size_t _pageSize;
-        /*	Set page size */
-        static void setPageSize(const size_t aPageSize) noexcept;
+		inline slot_t& 	 	slot(const uint i) noexcept { return _slots[- (int) i]; }
+		inline size_t  	 	getPageSize() noexcept { return _pageSize; }
 
 	private:
-		byte*     _pp;
+		/**
+		 * @brief Set the Page Size object
+		 * 
+		 * @param aPageSize 
+		 */
+		static void setPageSize(const size_t aPageSize) noexcept; // Set page size
+
+		// Getter
+		inline sp_header_t* get_hdr_ptr() noexcept { return ((sp_header_t*) (_pp + _pageSize - sizeof(sp_header_t))); }
+		inline slot_t*   	get_slot_base_ptr() noexcept { return ((slot_t*) (_pp + _pageSize - sizeof(sp_header_t) - sizeof(slot_t))); }
+
+	private:
+	    static size_t _pageSize; // size of the page 
+
+		byte*        _pp;
 		sp_header_t* _header;
-		slot_t*   _slots;  // new
+		slot_t*      _slots;
 };
 
 void InterpreterSP::attach(byte* aPP) noexcept

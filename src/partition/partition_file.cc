@@ -1,5 +1,14 @@
 #include "partition_file.hh"
 
+/** TODO
+ * @brief Construct a new PartitionFile::PartitionFile object
+ * 
+ * @param aPath 
+ * @param aName 
+ * @param aGrowthIndicator 
+ * @param aPartitionID 
+ * @param aControlBlock 
+ */
 PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
@@ -13,11 +22,21 @@ PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName,
     TRACE("'PartitionFile' object constructed (For a new partition)");
 }
 
+/**
+ * @brief Destroy the PartitionFile::PartitionFile object
+ * 
+ */
 PartitionFile::~PartitionFile()
 {
     TRACE("'PartitionFile' object destructed");
 }
 
+/** TODO
+ * @brief Construct a new Partition File:: Partition File object
+ * 
+ * @param aTuple 
+ * @param aControlBlock 
+ */
 PartitionFile::PartitionFile(const Partition_T& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple.path(), aTuple.name(), aTuple.ID(), aControlBlock),
 	_growthIndicator(aTuple.growth())
@@ -37,17 +56,17 @@ uint32_t PartitionFile::allocPage()
     }
     catch(const PartitionFullException& ex)
     {
-        //Before the exception is thrown, the partition (file) will be clossed by the alloc call in partition base...
-        //Open file again for recovering from the exception
+        // Before the exception is thrown, the partition (file) will be clossed by the alloc call in partition base...
+        // Open file again for recovering from the exception
         open();
-        //extend
+        // extend
         TRACE("Extending the file partition. Grow by " + std::to_string(_growthIndicator) + " pages (currently " + std::to_string(_sizeInPages) + " pages)");
         const size_t lNewSize = (_sizeInPages + _growthIndicator) * _pageSize;
         FileUtil::resize(_partitionPath, lNewSize);
         _sizeInPages = lNewSize / _pageSize;
         TRACE("Extending the file partition was successful. New size is " + std::to_string(_sizeInPages) + " pages");
-        //extend finished
-        //grow fsip
+        // extend finished
+        // grow fsip
         InterpreterFSIP lFSIP;
         lFSIP.attach(ex.getBufferPtr());
         const size_t lPagesPerFSIP = getMaxPagesPerFSIP();
@@ -60,7 +79,7 @@ uint32_t PartitionFile::allocPage()
             lFSIP.initNewFSIP(ex.getBufferPtr(), LSN, lNextFSIP, _partitionID, lNumberOfPagesToManage);
 		    writePage(ex.getBufferPtr(), lNextFSIP, _pageSize);
         }
-        //in the partition_base part of alloc, a buffer was allocated but not deleted before throwing the exception..
+        // in the partition_base part of alloc, a buffer was allocated but not deleted before throwing the exception..
         delete[] ex.getBufferPtr();
         TRACE("FSIP's were successfully updated with the new partition size");
         lPageIndex = PartitionBase::allocPage();
@@ -130,7 +149,7 @@ void PartitionFile::remove()
 
 void PartitionFile::printPage(uint aPageIndex)
 {
-    TRACE("printing Page "+std::to_string(aPageIndex));
+    TRACE("printing Page " + std::to_string(aPageIndex));
     open();
     byte *lPagePointer = new byte[_pageSize];
     readPage(lPagePointer, aPageIndex, _pageSize);
@@ -138,7 +157,8 @@ void PartitionFile::printPage(uint aPageIndex)
     std::string filename = "page_alloc" + std::to_string(aPageIndex) + ".txt";
     myfile.open(filename);
     uint32_t *lPP2 = (uint32_t *)lPagePointer;
-    for (uint a = 0; a < _pageSize / 4; ++a) {
+    for (uint a = 0; a < _pageSize / 4; ++a)
+    {
         myfile << std::hex << std::setw(8) << std::setfill('0') << *(lPP2 + a) << std::endl;
     }
     myfile.close();

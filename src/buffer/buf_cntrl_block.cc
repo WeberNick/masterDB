@@ -1,5 +1,9 @@
 #include "buf_cntrl_block.hh"
 
+/** TODO
+ * @brief Construct a new Buffer Control Block:: Buffer Control Block object
+ * 
+ */
 BufferControlBlock::BufferControlBlock() :
     _pageID(),
     _frameIndex(-1),
@@ -10,7 +14,6 @@ BufferControlBlock::BufferControlBlock() :
     _nextInChain(nullptr)
 {}
 
-
 void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
 {
     TRACE("Trying to aquire '" + lockModeToString(aMode) + "' lock for BCB with PID : " + _pageID.to_string());
@@ -19,7 +22,7 @@ void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
         case LOCK_MODE::kNOLOCK:
             incrFixCount();
             if(toType(getLockMode()) > toType(LOCK_MODE::kNOLOCK)){ break; } //BCB has a "higher" lock
-            else{ setLockMode(aMode); }
+            else { setLockMode(aMode); }
             break;
         case LOCK_MODE::kSHARED:
             _pageMtx.lock_shared();
@@ -38,7 +41,6 @@ void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
     }
     TRACE("Lock '" + lockModeToString(aMode) + "' for BCB with PID : " + _pageID.to_string() + " aquired");
 }
-
 
 void BufferControlBlock::unlock() noexcept
 {
@@ -99,7 +101,6 @@ void BufferControlBlock::upgradeLock(LOCK_MODE aMode) noexcept
     }
     TRACE("Successfully upgraded lock for BCB with PID : " + _pageID.to_string());
 }
-
 
 std::ostream& operator<< (std::ostream& stream, BCB* aBCB)
 {

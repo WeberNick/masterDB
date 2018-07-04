@@ -2,6 +2,10 @@
 #include "../segment/segment_manager.hh"
 #include "../segment/segment_fsm_sp.hh"
 
+/**
+ * @brief Construct a new PartitionManager::PartitionManager object
+ * 
+ */
 PartitionManager::PartitionManager() :
     _counterPartitionID(1),
     _partitions(),
@@ -14,10 +18,15 @@ PartitionManager::PartitionManager() :
     TRACE("'PartitionManager' constructed");
 }
 
+/**
+ * @brief Destroy the PartitionManager::PartitionManager object
+ * 
+ */
 PartitionManager::~PartitionManager()
 {
     // iterate over map and delete every map item (PartitionBase)
-    for(const auto& it : _partitions) {
+    for(const auto& it : _partitions)
+    {
         delete it.second;
     }
     TRACE("'PartitionManager' destructed");

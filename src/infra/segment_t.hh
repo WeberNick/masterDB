@@ -38,12 +38,32 @@ class Segment_T : public Tuple
         ~Segment_T() = default;
 
     public:
+        /** TODO
+         * @brief 
+         * 
+         * @param aPID 
+         * @param aSID 
+         * @param aName 
+         * @param aType 
+         * @param aFirstPage 
+         */
         void init(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage) noexcept;
+        /** TODO
+         * @brief 
+         * 
+         * @param aPtr 
+         */
         void toDisk(byte* aPtr) const noexcept override;
         void toDisk(byte* aPtr) noexcept override;
+        /** TODO
+         * @brief 
+         * 
+         * @param aPtr 
+         */
         void toMemory(byte* aPtr) noexcept override;
     
     public:
+        // Getter
         inline uint8_t partID() const noexcept { return _sPID; }
         inline uint8_t partID() noexcept { return _sPID; }
         inline uint16_t ID() const noexcept { return _sID; }
@@ -54,6 +74,11 @@ class Segment_T : public Tuple
         inline uint8_t type() noexcept { return _sType; }
         inline uint32_t firstPage() const noexcept { return _sFirstPage; } 
         inline uint32_t firstPage() noexcept { return _sFirstPage; } 
+        /** TODO
+         * @brief 
+         * 
+         * @return std::string 
+         */
         inline std::string to_string() const noexcept override;
         inline std::string to_string() noexcept override;
      

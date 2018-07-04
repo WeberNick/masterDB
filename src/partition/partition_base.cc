@@ -1,5 +1,13 @@
 #include "partition_base.hh"
 
+/**
+ * @brief Construct a new PartitionBase::PartitionBase object
+ * 
+ * @param aPath 
+ * @param aName 
+ * @param aPartitionID 
+ * @param aControlBlock 
+ */
 PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
@@ -13,6 +21,10 @@ PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName,
     InterpreterFSIP::init(aControlBlock);
 }
 
+/**
+ * @brief Destroy the PartitionBase::PartitionBase object
+ * 
+ */
 PartitionBase::~PartitionBase() = default;
 
 void PartitionBase::open()
@@ -58,21 +70,21 @@ uint32_t PartitionBase::allocPage()
 	uint32_t lAllocatedPageIndex;
 	do
 	{
-		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
+		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	// Read FSIP into buffer
 		TRACE(std::to_string(lIndexOfFSIP));
         try
         {
-		    lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+		    lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
         }
         catch(const FSIPException& ex)
         {
-			uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
-		    if(lIndexOfNextFSIP >= _sizeInPages) //Next offset is bigger than the partition
+			uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); // Prepare next offset to FSIP
+		    if(lIndexOfNextFSIP >= _sizeInPages) // Next offset is bigger than the partition
             {
-                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: "+std::to_string(lIndexOfFSIP));
+                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: " + std::to_string(lIndexOfFSIP));
                 TRACE(lErrMsg);
 				close();
-                //if file partition: can recover by growing file
+                // if file partition: can recover by growing file
                 throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
             }
 			else{
@@ -82,12 +94,12 @@ uint32_t PartitionBase::allocPage()
         }
 		writePage(lPagePointer, lIndexOfFSIP, _pageSize);
         break;
-        //continue will jump here
+        // continue will jump here
 	}
-	while(true); //if a free page is found, break will be executed. If not, an exception is thrown
+	while(true); // if a free page is found, break will be executed. If not, an exception is thrown
 	delete[] lPagePointer;
-	TRACE(std::string("Page ")+std::to_string(lAllocatedPageIndex)+std::string(" of Partition ")+std::to_string(getID())+std::string(" allocated."));
-	return lAllocatedPageIndex;	//return offset to free block
+	TRACE(std::string("Page ") + std::to_string(lAllocatedPageIndex) + std::string(" of Partition ") + std::to_string(getID()) + std::string(" allocated."));
+	return lAllocatedPageIndex;	// return offset to free block
 	/*
 	byte* lPagePointer;
 	BufferManager lBufMan;
@@ -97,28 +109,27 @@ uint32_t PartitionBase::allocPage()
 	uint lIndexOfFSIP = 0;
 	int lAllocatedPageIndex;
 	do
-	{ //does lock exclusive although not always needed.
+	{ // does lock exclusive although not always needed.
 		lPID = {getID(),lIndexOfFSIP};
 		lBCB = lBufMan.fix(lPID);
 		lPagePointer = lBufMan.getFramePrt(lBCB);
-	//	readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
-		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+	    // readPage(lPagePointer, lIndexOfFSIP, _pageSize);	// Read FSIP into buffer
+		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
 		if(lAllocatedPageIndex == -1)
 		{
-			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
+			lIndexOfFSIP += (1 + getMaxPagesPerFSIP()); // Prepare next offset to FSIP
 		} 
 		else
 		{
 			lBCB->setModified(true);
-			//writePage(lPagePointer, lIndexOfFSIP, _pageSize);
+			// writePage(lPagePointer, lIndexOfFSIP, _pageSize);
 		} 
 		lBCB->getMtx().unlock();
 		lBufMan.unfix(lBCB);
-		if(lIndexOfFSIP >= _sizeInPages) return -1;						//Next offset is bigger than the partition
+		if(lIndexOfFSIP >= _sizeInPages) return -1; // Next offset is bigger than the partition
 	}
-	while(lAllocatedPageIndex == -1);	//if 'lAllocatedPageIndex != -1' a free block was found
-
-	return lAllocatedPageIndex;	//return offset to free block
+	while(lAllocatedPageIndex == -1); // if 'lAllocatedPageIndex != -1' a free block was found
+	return lAllocatedPageIndex;	// return offset to free block
 */
 }
 
@@ -127,7 +138,7 @@ void PartitionBase::freePage(const uint32_t aPageIndex)
 	byte* lPagePointer = new byte[_pageSize];
 	uint32_t fsipIndex = (aPageIndex / (getMaxPagesPerFSIP()+1))*getMaxPagesPerFSIP();
 	TRACE(std::to_string(fsipIndex));
-	readPage(lPagePointer, fsipIndex , _pageSize);//fsip auf der aPageIndex verwaltet wird
+	readPage(lPagePointer, fsipIndex , _pageSize); // fsip auf der aPageIndex verwaltet wird
 	InterpreterFSIP fsip;
 	fsip.attach(lPagePointer);
 	TRACE(std::to_string(aPageIndex));

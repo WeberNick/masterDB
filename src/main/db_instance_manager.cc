@@ -1,7 +1,7 @@
 #include "db_instance_manager.hh"
 
 /**
- * @brief Construct a new Database Instance Manager:: Database Instance Manager object
+ * @brief Construct a new DatabaseInstanceManager::DatabaseInstanceManager object
  * 
  */
 DatabaseInstanceManager::DatabaseInstanceManager() :
@@ -19,7 +19,7 @@ DatabaseInstanceManager::DatabaseInstanceManager() :
 }
 
 /**
- * @brief Destroy the Database Instance Manager:: Database Instance Manager object
+ * @brief Destroy the DatabaseInstanceManager::DatabaseInstanceManager object
  * 
  */
 DatabaseInstanceManager::~DatabaseInstanceManager()
@@ -45,7 +45,6 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
         TRACE("'DatabaseInstanceManager' initialized");
     }
 }
-
 
 void DatabaseInstanceManager::install()
 {
