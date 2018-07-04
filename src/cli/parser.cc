@@ -48,41 +48,8 @@ void CommandParser::init(const CB& aControlBlock, const char* aPrompt, const cha
         for (size_t i = 0; i < _commands.size(); ++i) {
             _maxCommandLength = strlen(_commands[i]._name) > _maxCommandLength ? strlen(_commands[i]._name) : _maxCommandLength;
         }
-        _cb = &aControlBlock;
-        //start thread
         runcli();
     }
-}
-
-void CommandParser::multiexec(const string_vt& commands) {
-    for (const auto& line : commands) {
-        char* cstr = new char[line.length() + 1];
-        std::strcpy(cstr, line.c_str());
-        _reader.setNonCommentLine(cstr);
-        _reader.split_line(' ', true);
-        const char_vpt& splits = _reader.splits();
-        const Command* com = findCommand(&splits);
-        if (com != NULL) {
-            if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID)) {
-                std::cout << "Wrong number of args.\n"
-                          << "Usage:\n  " << com->_usageInfo << "\n"
-                          << std::endl;
-            } else {
-                int rec;
-                if (com->_hasParams) {
-                    const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                    rec = (this->*com->_func)(&args);
-                } else
-                    rec = (this->*com->_func)(nullptr);
-                if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR) {
-                    delete[] cstr;
-                    break;
-                }
-            }
-        } else std::cout << "Invalid command" << std::endl;
-        delete[] cstr;
-    }
-    DatabaseInstanceManager::getInstance().shutdown();
 }
 
 void CommandParser::runcli() {
@@ -105,23 +72,12 @@ void CommandParser::runcli() {
                 int rec;
                 if (com->_hasParams) {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                    using fp = int (CommandParser::* const&&)(const char_vpt*) const;
-                    fp funcptr = com->_func;
-                    fp&& f2 = std::move(funcptr);
-                    //((*this).*com->_func)(&args);
-                    //HashJoinSimple::build_fun_t aBuildFun // member function pointer parameter
-                    //HJSimple::build_fun_t  lBuildFuns[9] = {&HJSimple::build1 // zeiger auf member function
-                    //(lHashJoin.*aBuildFun)(lBunBuild);
-                    //rec = (this->*com->_func)(&args);
-                    //auto t = std::move(funcptr);
-                    rec = Pool::Default::submitJob<fp, char_vpt>(f2, args);
-                    
-                    //CommandParser cp;
-                    //auto fp = std::bind(&CommandParser::com_help, cp, args);
-                    //rec = Pool::Default::submitJob(this->*com->_func, &args);
-                    //rec = Pool::Default::submitJob(fp, &args);
-                } else
-                    rec = (this->*com->_func)(nullptr);
+                    auto future = Pool::Default::submitJob(com->_func, this, &args);
+                    rec = future.get();
+                } else {
+                    auto future = Pool::Default::submitJob(com->_func, this, nullptr);
+                    rec = future.get();
+                }
                 if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR) {
                     break;
                 } else if (rec == CP::CommandStatus::WRONG) {
@@ -393,9 +349,10 @@ void CommandParser::printe() const {
     std::cout << "Good Bye.\n" << std::endl;
 }
 
-/*void CommandParser::pprinttups(const std::string& caption, ) const {
+// TODO
+/* void CommandParser::pprinttups(const std::string& caption, ) const {
 
-}*/
+} */
 
 void CommandParser::pprints(const std::string& caption, const string_vt& list) const {
     uint8_t longestStr = PartitionManager::getInstance().getMasterPartName().size();
@@ -428,4 +385,38 @@ void CommandParser::printp(uint8_t length) const {
         std::cout << "-";
     std::cout << "+";
     std::cout << std::endl;
+}
+
+void CommandParser::multiexec(const string_vt& commands) {
+    for (const auto& line : commands) {
+        char* cstr = new char[line.length() + 1];
+        std::strcpy(cstr, line.c_str());
+        _reader.setNonCommentLine(cstr);
+        _reader.split_line(' ', true);
+        const char_vpt& splits = _reader.splits();
+        const Command* com = findCommand(&splits);
+        if (com != NULL) {
+            if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID)) {
+                std::cout << "Wrong number of args.\n"
+                          << "Usage:\n  " << com->_usageInfo << "\n"
+                          << std::endl;
+            } else {
+                int rec;
+                if (com->_hasParams) {
+                    const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
+                    auto future = Pool::Default::submitJob(com->_func, this, &args);
+                    rec = future.get();
+                } else {
+                    auto future = Pool::Default::submitJob(com->_func, this, nullptr);
+                    rec = future.get();
+                }
+                if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR) {
+                    delete[] cstr;
+                    break;
+                }
+            }
+        } else std::cout << "Invalid command" << std::endl;
+        delete[] cstr;
+    }
+    DatabaseInstanceManager::getInstance().shutdown();
 }

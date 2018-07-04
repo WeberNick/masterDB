@@ -20,8 +20,8 @@
 #include <cstdlib>
 #include <string>
 
-
-class Args {
+class Args
+{
   public:
     Args();
 
@@ -50,15 +50,14 @@ class Args {
     inline const std::string tracePath() noexcept { return _tracePath; }
     inline void tracePath(const std::string &x) noexcept { _tracePath = x; }
 
-
   private:
-    bool _help;
-    bool _test;
-	bool _install;
-    bool _trace;
-    uint _segmentIndexPage;
-    uint _noBufFrames;
-	std::string _masterPartition;
+    bool        _help;
+    bool        _test;
+	  bool        _install;
+    bool        _trace;
+    uint        _segmentIndexPage;
+    uint        _noBufFrames;
+	  std::string _masterPartition;
     std::string _tracePath;
 };
 

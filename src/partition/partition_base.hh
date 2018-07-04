@@ -112,7 +112,7 @@ class PartitionBase
     void writePage(const byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize);
 
   public:
-    //getter
+    // Getter
     inline const std::string& getPath() const noexcept { return _partitionPath; }
     inline const std::string& getPath() noexcept { return _partitionPath; }
     inline const std::string& getName() const noexcept { return _partitionName; }

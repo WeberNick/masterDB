@@ -34,13 +34,13 @@ class Tuple
         virtual void toMemory(byte* aPtr) noexcept = 0;
     
     public:
-        //getter
+        // Getter
         inline size_t size() const noexcept { return _size; };
         inline size_t size() noexcept { return _size; }
         virtual std::string to_string() const noexcept = 0;
         virtual std::string to_string() noexcept = 0;
 
     protected:
-        size_t      _size; // size of class
+        size_t _size; // size of class
 };
 

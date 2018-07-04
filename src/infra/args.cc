@@ -25,7 +25,7 @@ Args::Args() :
 	_install(false),
     _trace(false),
 	_segmentIndexPage(1),
-    _noBufFrames(100000), //100,000 Frames * 4KB Pages = 400MB Bufferpool
+    _noBufFrames(100000), // 100,000 Frames * 4KB Pages = 400MB Bufferpool
 	_masterPartition("no default"),
     _tracePath("./")
 {}

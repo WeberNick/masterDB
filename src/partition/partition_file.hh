@@ -45,7 +45,7 @@ class PartitionFile : public PartitionBase
         size_t partSizeInPages() noexcept override;
 
     public:
-        //getter
+        // Getter
         inline uint16_t getGrowthIndicator() const noexcept { return _growthIndicator; }
         inline uint16_t getGrowthIndicator() noexcept { return _growthIndicator; }
         inline std::string to_string() const noexcept;

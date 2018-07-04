@@ -38,12 +38,26 @@ class Trace final
             return lInstance;
         }
 
+        /**
+         * @brief 
+         * 
+         * @param aControlBlock 
+         */
         void init(const CB& aControlBlock) noexcept;
 
     public:
+        /**
+         * @brief 
+         * 
+         * @param aFileName 
+         * @param aLineNumber 
+         * @param aFunctionName 
+         * @param aMessage 
+         */
         void log(const char* aFileName, const uint aLineNumber, const char* aFunctionName, const std::string& aMessage) noexcept;
 
     public:
+        // Getter
         inline const std::string&   getLogPath() noexcept { return _logPath; }
         inline const std::ofstream& getLogStream() noexcept { return _logStream; }
 

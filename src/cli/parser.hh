@@ -2,8 +2,7 @@
  * @file   parser.hh
  * @author Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  * @brief  Class implementing the parser for the command line interface
- * @bugs   TBD
- * @todos  TBD
+ * @bugs   Currently no bugs known
  */
 #pragma once
 
@@ -21,6 +20,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <functional>
 
 class CommandParser;
 using CP = CommandParser;
@@ -41,7 +41,7 @@ class CommandParser
                          const char* aUsageInfo);
         Command& operator=(const Command& aCommand);
 
-      public:                                    //          Example
+      public:                                    // Examples:
         const CP& _cp;                           //                            - Reference to the Command Parser instance
         const char* _name;                       // "CREATE SEGMENT"           - The name of the command
         bool _hasParams;                         // true                       - Whether the command has parameters
@@ -57,7 +57,7 @@ class CommandParser
         EXIT  = -1, // regular exit
         OK    = 0,  // ok, continue with next command
         WRONG = 1,  // wrong type of an argument
-        ERROR = 2   // error, recover and continue
+        ERROR = 2   // error (not fatal), recover and continue
     };
 
   public:
@@ -69,13 +69,47 @@ class CommandParser
     ~CommandParser() = default;
 
   private:
+    /**
+     * @brief 
+     * 
+     */
     void runcli();
+    /**
+     * @brief 
+     * 
+     * @param splits 
+     * @return const Command* 
+     */
     const Command* findCommand(const char_vpt* splits);
+    /**
+     * @brief 
+     * 
+     * @param arg 
+     * @return std::string 
+     */
     std::string findCommand(const std::string& arg) const;
 
+    /**
+     * @brief 
+     * 
+     */
     void printw() const;
+    /**
+     * @brief 
+     * 
+     */
     void printh() const;
+    /**
+     * @brief 
+     * 
+     */
     void printe() const;
+    /**
+     * @brief 
+     * 
+     * @param caption 
+     * @param list 
+     */
     void pprints(const std::string& caption, const string_vt& list) const;
     /**
      * @brief Print one line of + of size length+2
@@ -85,33 +119,116 @@ class CommandParser
     void printp(uint8_t length) const;
 
   private:
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_help(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_create_p(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_drop_p(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_create_s(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_drop_s(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_insert_tuple(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_show_part(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_show_parts(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_show_seg(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_show_segs(const char_vpt* args) const;
+    /**
+     * @brief 
+     * 
+     * @param args 
+     * @return int 
+     */
     int com_exit(const char_vpt* args) const;
 
   public:
+    /**
+     * @brief Get the Instance object
+     * 
+     * @return CommandParser& 
+     */
     static CommandParser& getInstance()
     {
         static CommandParser lComPars;
         return lComPars;
     }
 
+    /**
+     * @brief 
+     * 
+     * @param aControlBlock 
+     * @param aPrompt 
+     * @param aCommentChar 
+     */
     void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
+    /**
+     * @brief 
+     * 
+     * @param commands 
+     */
     void multiexec(const string_vt& commands);
 
   private:
-    static const char* _HELP_FLAG;
+    static const char*                  _HELP_FLAG;
     const std::array<const Command, 11> _commands;
-    size_t _maxCommandLength;
+    size_t                              _maxCommandLength;
 
     LineReaderEdit _reader;
-    const CB* _cb;
+    const CB*      _cb;
 };
