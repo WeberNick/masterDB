@@ -87,7 +87,7 @@ void CommandParser::multiexec(const string_vt& commands) {
 
 void CommandParser::runcli() {
     printw();
-    for (_reader.open(); _reader.ok(); _reader.next()) {
+    /*for (_reader.open(); _reader.ok(); _reader.next()) {
         _reader.split_line(' ', true);
         const char_vpt& splits = _reader.splits();
         const Command* com = findCommand(&splits);
@@ -138,7 +138,7 @@ void CommandParser::runcli() {
                       << "  [COMMAND] " << _HELP_FLAG << " for information on a single command.\n"
                       << std::endl;
         }
-    }
+    }*/
     DatabaseInstanceManager::getInstance().shutdown();
 }
 

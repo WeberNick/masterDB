@@ -124,3 +124,22 @@ void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBu
 void SegmentFSM_SP::erase(){
 	SegmentFSM::erase();
 }
+
+tid_vt SegmentFSM_SP::scan(){
+    tid_vt res;
+    InterpreterSP lInterpreter;
+    byte* lPagePointer;
+    TID lTID;
+    for (size_t i = 0; i<_pages.size();++i){
+        lPagePointer = getPage(i,LOCK_MODE::kSHARED);
+        lInterpreter.attach(lPagePointer);
+        lTID._pageNo = _pages.at(i).first.pageNo();
+        for(size_t j=0; j < lInterpreter.noRecords(); ++j){
+            if(lInterpreter.getRecord(j)){
+                lTID._tupleNo = j;                
+                res.push_back(lTID);
+            }
+        }
+    }
+    return res;
+}

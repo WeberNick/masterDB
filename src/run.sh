@@ -1,3 +1,5 @@
-rm ./main/main.o
+rm MasterPartition
+rm Partition
+rm ./src/main/main.o
 make
-./main/main
+gdb ./src/main/main

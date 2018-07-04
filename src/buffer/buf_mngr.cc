@@ -111,7 +111,7 @@ void BufferManager::init(const CB& aControlBlock) noexcept
 //the following is not tested at all, expect major bugs
 BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 {
-    TRACE("Trying to fix page : " + aPageID.to_string());
+    TRACE("Trying to fix page : " + aPageID.to_string()+ "in lockmode "+lockModeToString(aMode));
     bool lPageNotFound = true;
     const size_t lHashIndex = _bufferHash->hash(aPageID); //determine hash of requested page
     _bufferHash->getBucketMtx(lHashIndex).lock_shared(); //lock shared 
