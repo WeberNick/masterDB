@@ -200,7 +200,8 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
     catch(NSMException ex){
         //lTotalSize is bigger than size of a page. 
         //Now we try to approx the bin packing problem (NP hard) by a greedy algorithm...
-        uint lPageSize = std::ceil(((getPageSize() - sizeof(sp_header_t))/16)*15);
+        const uint lNoBucks = toType(PageStatus::kMAX); //how many buckets does the fsm use? just to make code more readable
+        const uint lPageSize = ((getPageSize() - sizeof(sp_header_t))/lNoBucks)*lNoBucks;
         uint lPartSize;
         uint begin = 0;
         uint end = 0;

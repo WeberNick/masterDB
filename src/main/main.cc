@@ -120,10 +120,10 @@ void testJonas1() {
         emps.push_back(emp);
     }
      TRACE("INSERT STUFF");
-    res = lSeg->insertTuples(emps);
-    /*for(auto& a : emps){
+   // res = lSeg->insertTuples(emps);
+    for(auto& a : emps){
         res.push_back(lSeg->insertTuple(a));
-    }*/
+    }
     TRACE("get it back");
     size_t i = 0;
 

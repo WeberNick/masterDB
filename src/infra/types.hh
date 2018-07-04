@@ -136,7 +136,8 @@ enum class PageStatus: int8_t
     kBUCKET13 = 13,
     kBUCKET14 = 14,
     kBUCKET15 = 15,
-    kPageStatusSize = 16
+    kPageStatusSize = 16,
+    kMAX = 15
 };
 
 enum class LOCK_MODE: int8_t

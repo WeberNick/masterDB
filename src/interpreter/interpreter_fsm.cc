@@ -54,13 +54,9 @@ uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept
         // if fits on page
         bool fits = 0;
         PageStatus max = PageStatus::kPageStatusSize;
-        if (static_cast<uint>(lPageStatus) + static_cast<uint>(aPageStatus) < static_cast<uint>(max))
+        if (toType(lPageStatus) + toType(aPageStatus) < toType(max))
         {
-            fits = true;
-        }
-        if (fits)
-        {
-            lPageStatus = static_cast<PageStatus>(static_cast<uint>(lPageStatus) + static_cast<uint>(aPageStatus));
+            lPageStatus = static_cast<PageStatus>(toType(lPageStatus) + toType(aPageStatus));
             // TRACE("fits, new PageStatus is "+std::to_string(static_cast<uint>(lPageStatus)));
             changePageStatus(i, lPageStatus);
             return i;
@@ -116,8 +112,12 @@ PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const
     {
         return PageStatus::kNoType;
     }
-    const uint lBucketSize = std::floor(aSizeWithoutOverhead / 16.0); // remove magic number, (numb buckets)
+
+    /* old version, let's try something shorter and easier
+    const uint lBucketSize = std::floor(aSizeWithoutOverhead / (double) toType(PageStatus::kPageStatusSize)); */
+    
+    const uint lBucketSize = aSizeWithoutOverhead / toType(PageStatus::kMAX);
     const uint lBucketNo = std::ceil(aNoBytes / (double)lBucketSize);
-    // changed to <= have to think about this
-    return (lBucketNo <= (uint)PageStatus::kPageStatusSize) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
+    // ????
+    return (lBucketNo <= (uint)PageStatus::kMAX) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
 }
