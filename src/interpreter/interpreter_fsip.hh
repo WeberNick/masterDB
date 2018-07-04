@@ -62,16 +62,13 @@ class InterpreterFSIP final {
      *	@param	aLSN - Log Sequence Number
      *	@param	aPID - The ID of the partition this page is stored in
      *
-     * 	@return an offset to the free block 
-     * 	@throws FSIPException on failure
-     * 	@see    infra/exception.hh
+     * 	@return an offset to the free block or an INVALID value if no free pages are present
      */
     uint32_t getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID);
 
     /**
      *	@brief	reserve the page at the given index position
      *	@param	aPageIndex - Page index inside the partition
-     *  @throws FSIPException on failure
      */
     void reservePage(const uint aPageIndex) noexcept;
 

@@ -147,16 +147,6 @@ class PartitionFullException : public BaseException
         uint    _index;
 };
 
-class FSIPException : public BaseException
-{
-    public:
-        FSIPException(
-                const char*         aFileName,
-                const unsigned int  aLineNumber,
-                const char*         aFunctionName,
-                const std::string&  aErrorMessage);
-};
-
 class NSMException : public BaseException
 {
     public:
@@ -206,4 +196,14 @@ class NoFreeBCBsException : public BaseException
                 const unsigned int  aLineNumber, 
                 const char*         aFunctionName);
 };
+
+class TupleNotFoundOrInvalidException : public BaseException
+{
+	public:
+		TupleNotFoundOrInvalidException(
+                const char*         aFileName, 
+                const unsigned int  aLineNumber, 
+                const char*         aFunctionName);
+};
+
 

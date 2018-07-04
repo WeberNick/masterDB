@@ -53,7 +53,7 @@ uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept {
         _header->_noPages++;
         return i;
     } else {
-        return MAX32; // no free space on this fsm, load or create next
+        return INVALID_32; // no free space on this fsm, load or create next
     }
 }
 

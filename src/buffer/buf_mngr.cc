@@ -164,15 +164,6 @@ BCB* BufferManager::emptyfix(const PID& aPageID) //assumed to always request in 
 {
     TRACE("Emptyfix on page : " + aPageID.to_string());
     BCB* lNextBCB = nullptr;
-    const std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
-    for(auto bcb : lBCBs)
-    {
-        if(bcb->getPID() == aPageID)
-        {
-            #pragma message ("TODO: Jonas, is this still needed? Please remove if not.")
-            throw ReturnException(FLF);
-        }
-    }
     lNextBCB = locatePage(aPageID);
     lNextBCB->lock();
     lNextBCB->setModified(true);
@@ -229,7 +220,7 @@ byte* BufferManager::getFramePtr(BCB* aBCB)
 
 BCB* BufferManager::locatePage(const PID& aPageID) noexcept
 {
-    TRACE("Try to locate page");
+    TRACE("Locating page '" + aPageID.to_string() + "'...");
     //BCB = Buffer Control Block
     BCB* lFBCB = getFreeBCBs().popFromList(); //get free BCB
 
@@ -242,8 +233,7 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
     //lFBCB->setFixCount(0); //fix will be applied later
     lFBCB->setNextInChain(nullptr); //BCB has no next BCB yet
     /* now the control block is linked to the hash table chain */
-        TRACE("");
-const size_t lHashIndex = _bufferHash->hash(aPageID); //compute hash for this page
+    const size_t lHashIndex = _bufferHash->hash(aPageID); //compute hash for this page
     _bufferHash->getBucketMtx(lHashIndex).lock(); //lock hash bucket
     if(_bufferHash->getBucketBCB(lHashIndex) == nullptr) //if hash chain is empty
     {
@@ -268,25 +258,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID){
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
     lFBCB->lock_shared();//why shared?
     byte* lFramePtr = getFramePtr(lFBCB); //get pointer to the free frame in the bufferpool
-    const size_t lNoTries = 3;
-    for(size_t i = 0; i < lNoTries; ++i)
-    {
-        try
-        {
-            lPart->open(); //open partition
-            break;
-        }
-        catch(const FileException& fex)
-        {
-            if(i == (lNoTries - 1))
-            {
-                TRACE(std::to_string(lNoTries) + std::string(" unsuccessful tries to open partition"));
-                throw; //throw catched exception
-            }
-            TRACE("Could not open partition. Retry in one second");
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-    }
+    lPart->open(); //open partition
     TRACE("Reading the page from disk into the buffer pool...");
     lPart->readPage(lFramePtr, aPageID.pageNo(), getFrameSize());//read page from partition into free frame
     lPart->close(); //close partition
@@ -440,9 +412,6 @@ size_t BufferManager::getFrame() noexcept
      * tested at all. Nick and Jonas have to think about this*/
     while(true)
     {
-
-        size_t debug = 0;
-
         lRandomIndex = lDistr(lRNG); //generate random index
         lHashChainEntry = _bufferHash->getBucketBCB(lRandomIndex);
         /* if chosen hash bucket is not empty, try to get exclusive lock on hash bucket */
@@ -471,7 +440,6 @@ size_t BufferManager::getFrame() noexcept
             //if it was not the first one to be cleared out
             while(lHashChainEntry->getNextInChain()) //as long as there are allocated CBs
             {
-                ++debug;
                 TRACE("one step in the chain");
                 BCB* lNext = lHashChainEntry->getNextInChain();
                 //if the next one is free
@@ -498,9 +466,6 @@ size_t BufferManager::getFrame() noexcept
                 {
                     //continue;
                     lHashChainEntry = lNext; //follow hash chain
-                }
-                if(debug==20){
-                    throw ReturnException(FLF);
                 }
             }
            _bufferHash->getBucketMtx(lRandomIndex).unlock(); //release 

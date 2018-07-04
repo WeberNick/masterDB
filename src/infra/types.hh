@@ -35,8 +35,8 @@ using sMtx = std::shared_mutex;
 using mtx = std::mutex;
 
 constexpr size_t INVALID = std::numeric_limits<size_t>::max();
-constexpr uint32_t MAX32 = std::numeric_limits<uint32_t>::max();
-constexpr uint32_t MAX16 = std::numeric_limits<uint16_t>::max();
+constexpr uint32_t INVALID_32 = std::numeric_limits<uint32_t>::max();
+constexpr uint16_t INVALID_16 = std::numeric_limits<uint16_t>::max();
 
 struct control_block_t
 {

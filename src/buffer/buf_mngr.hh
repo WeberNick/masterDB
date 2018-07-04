@@ -24,9 +24,10 @@
 #include <shared_mutex>
 #include <random>
 #include <new>
-#include <chrono>
-#include <thread>
 
+/**
+ * @brief Singleton class implementing 
+ */
 class BufferManager final
 {
     private:

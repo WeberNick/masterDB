@@ -150,19 +150,6 @@ PartitionFullException::PartitionFullException(const PartitionFullException& aOt
     _index(aOther.getIndexOfFSIP())
 {}
 
-
-FSIPException::FSIPException(
-        const char*         aFileName,
-        const unsigned int  aLineNumber,
-        const char*         aFunctionName,
-        const std::string&  aErrorMessage) :
-	BaseException(
-            aFileName,
-            aLineNumber,
-            aFunctionName,
-            aErrorMessage)
-{}
-
 NSMException::NSMException(
         const char*         aFileName,
         const unsigned int  aLineNumber,
@@ -221,4 +208,15 @@ NoFreeBCBsException::NoFreeBCBsException(
             aLineNumber,
             aFunctionName,
             std::string("Request for free BCB failed as there are no free BCBs."))
+{}
+
+TupleNotFoundOrInvalidException::TupleNotFoundOrInvalidException(
+        const char*         aFileName,
+        const unsigned int  aLineNumber,
+        const char*         aFunctionName) :
+	BaseException(
+            aFileName,
+            aLineNumber,
+            aFunctionName,
+            std::string("The requested tuple could not be found or is invalid (i.e, set as deleted)"))
 {}
