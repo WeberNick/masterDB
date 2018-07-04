@@ -105,16 +105,29 @@ void CommandParser::runcli() {
                 int rec;
                 if (com->_hasParams) {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                    using fp = int (CommandParser::* const&&)(const char_vpt*) const;
-                    fp funcptr = com->_func;
-                    fp&& f2 = std::move(funcptr);
+                    
+                    //std::function<int(const char_vpt*)> caller = std::bind(com->_func, std::placeholders::_1);
+                    
+                    //using fp = int (CommandParser::* const&&)(const char_vpt*) const;
+                    //fp funcptr = com->_func;
+                    /*fp&& f2 = std::move(funcptr);*/
+                    
                     //((*this).*com->_func)(&args);
                     //HashJoinSimple::build_fun_t aBuildFun // member function pointer parameter
                     //HJSimple::build_fun_t  lBuildFuns[9] = {&HJSimple::build1 // zeiger auf member function
                     //(lHashJoin.*aBuildFun)(lBunBuild);
                     //rec = (this->*com->_func)(&args);
                     //auto t = std::move(funcptr);
-                    rec = Pool::Default::submitJob<fp, char_vpt>(f2, args);
+                    
+                    //auto rec = Pool::Default::submitJob<fp, char_vpt>(funcptr, args);
+                    //auto rec = Pool::Default::submitJob(caller, args);
+                    /*auto rec = Pool::Default::submitJob([](const char_vpt* args){
+                        com_help(args);
+                        return 0;
+                    }, this, args);*/
+                    auto res = Pool::Default::submitJob(com->_func, this, &args);
+                    rec = res.get();
+
                     
                     //CommandParser cp;
                     //auto fp = std::bind(&CommandParser::com_help, cp, args);

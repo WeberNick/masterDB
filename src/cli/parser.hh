@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <functional>
 
 class CommandParser;
 using CP = CommandParser;
