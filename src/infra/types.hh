@@ -4,6 +4,7 @@
  *           Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *
  */
+ 
 #pragma once
 
 #include <cstddef>
@@ -89,7 +90,7 @@ struct page_id_t
     std::string to_string() const noexcept
     {
         return std::string("File ID : '") + std::to_string(_fileID) + std::string("', Page : '") + std::to_string(_pageNo) + std::string("'");
-     }
+    }
 
     std::string to_string()
     {
