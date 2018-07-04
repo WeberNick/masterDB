@@ -60,23 +60,45 @@ uint32_t PartitionBase::allocPage()
 	{
 		readPage(lPagePointer, lIndexOfFSIP, _pageSize);	//Read FSIP into buffer
 		TRACE(std::to_string(lIndexOfFSIP));
+        /*
         try
         {
-		    lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+            lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
         }
         catch(const FSIPException& ex)
+        {
+            uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
+            if(lIndexOfNextFSIP >= _sizeInPages) //Next offset is bigger than the partition
+            {
+                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: "+std::to_string(lIndexOfFSIP));
+                TRACE(lErrMsg);
+                close();
+                //if file partition: can recover by growing file
+                throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
+            }
+            else{
+                lIndexOfFSIP=lIndexOfNextFSIP;
+            }
+            continue;
+        }
+        */
+        
+        //replacement of try/catch from here..
+        #pragma message ("TODO: Jonas: I replaced the throwing of exceptions in FSIP Interpreter with an Invalid return if no free pages on FSIP. Reason: Moerkotte's comment on exceptions in normal program flow. Can you please double check if the replacement of the commented try/catch with the following if-check is equivalent?")
+		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	//Request free block from FSIP
+        if(lAllocatedPageIndex == INVALID_32)
         {
 			uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); //Prepare next offset to FSIP
 		    if(lIndexOfNextFSIP >= _sizeInPages) //Next offset is bigger than the partition
             {
-                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: "+std::to_string(lIndexOfFSIP));
+                const std::string lErrMsg("The partition is full. Can not allocate any new pages on fsip: " + std::to_string(lIndexOfFSIP));
                 TRACE(lErrMsg);
 				close();
                 //if file partition: can recover by growing file
                 throw PartitionFullException(FLF, lPagePointer, lIndexOfFSIP); 
             }
 			else{
-				lIndexOfFSIP=lIndexOfNextFSIP;
+				lIndexOfFSIP = lIndexOfNextFSIP;
 			}
             continue;
         }

@@ -38,21 +38,57 @@ std::pair<byte*, uint16_t> InterpreterSP::addNewRecord(const uint aRecordSize) n
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment
 	const uint lTotalSize = lRecordSize + sizeof(slot_t);        // add space for one new slot 
 
-    std::pair<byte*, uint16_t> result;
-    result.first = nullptr;
+    byte* lResultRecord = nullptr;
 
 	if(lTotalSize <= freeSpace()) 
 	{
-		result.first = pagePtr() + header()->_nextFreeSpace;
+		lResultRecord = pagePtr() + header()->_nextFreeSpace;
                 //wie viel platz genau da?
 		header()->_nextFreeSpace += lRecordSize;               // remember pointer to next free record
 		header()->_freeSpace -= lTotalSize;
-		slot(noRecords())._offset = result.first - pagePtr();  // store offset of new record in slot
+		slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
 		slot(noRecords())._size = lRecordSize;
 		slot(noRecords())._status=1;
                 //rest des slots setzen
-		result.second = header()->_noRecords++; //First return, then increment
+        ++(header()->_noRecords);
 	}
+	return std::make_pair(lResultRecord, header()->_noRecords - 1);
+}
+
+//just mark deleted
+int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo) noexcept {
+	slot(aRecordNo)._status=0;
+	return 1;
+}
+//actually delete it
+int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept {
+    #pragma message ("TODO: @Jonas, this is not used anyway, right? If so, please comment this function out, move it to the bottom of this file and delete its declaration in the header")
+	//TODO
+	//put free in front of Free Space List by
+		//check if there is list entry behind this record
+			//if yes, move this one at beginning and increment size
+			//if no, create new entry, put _header._nextFreeSpace as new offset
+		//do something with the slot...
+		//return 1
+	return -1;
+
+}
+byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
+	if(aRecordNo >= noRecords()) { 
+		return nullptr;
+	}
+	else{
+		if(slot(aRecordNo)._status==0){
+			return nullptr;
+		}
+		else{
+			return _pp+slot(aRecordNo)._offset;
+		}
+	}
+}
+
+//Old Code from Jonas. Beginning of proper free space management on slotted pages
+
 /*
 	if(lTotalSize <= freeSpace()) 
 	{
@@ -95,37 +131,3 @@ std::pair<byte*, uint16_t> InterpreterSP::addNewRecord(const uint aRecordSize) n
                 //rest des slots setzen
 		header()->_noRecords += 1;
 	}*/
-	return result;
-}
-
-//just mark deleted
-int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo) noexcept {
-	slot(aRecordNo)._status=0;
-	return 1;
-}
-//actually delete it
-int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept {
-	//TODO
-
-	//put free in front of Free Space List by
-		//check if there is list entry behind this record
-			//if yes, move this one at beginning and increment size
-			//if no, create new entry, put _header._nextFreeSpace as new offset
-		//do something with the slot...
-		//return 1
-	return -1;
-
-}
-byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
-	if(aRecordNo >= noRecords()) { 
-		return nullptr;
-	}
-	else{
-		if(slot(aRecordNo)._status==0){
-			return nullptr;
-		}
-		else{
-			return _pp+slot(aRecordNo)._offset;
-		}
-	}
-}

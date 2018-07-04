@@ -104,7 +104,7 @@ std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(cons
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
     const uint pType = 0;
-    Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, MAX16); //MAX16 = invalid value to indicate 'no growth'
+    Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, INVALID_16); //MAX16 = invalid value to indicate 'no growth'
     createPartitionSub(lPartTuple);
     TRACE("Raw partition instance created.");
     return std::make_pair(static_cast<PartitionRaw*>(_partitions.at(lPartition->getID())), true);

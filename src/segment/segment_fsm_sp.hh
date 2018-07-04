@@ -54,8 +54,15 @@ class SegmentFSM_SP : public SegmentFSM
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
 
-protected:
-	void erase() override;
+  public:
+    const tid_vt& getTIDs() const noexcept { return _tids; }
+    const tid_vt& getTIDs() noexcept { return _tids; }
+
+    protected:
+	    void erase() override;
+
+    private:
+        tid_vt _tids;
 };
 
 template<typename Tuple_T>
@@ -97,6 +104,7 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 	lBCB->setModified(true);
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
+    _tids.push_back(resultTID);
     return resultTID;
 }
 
@@ -153,7 +161,7 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
 		lBCB = _bufMan.fix(lPID,  LOCK_MODE::kEXCLUSIVE); 
 	}
     //get iterator to PID in page vector
-    auto it = std::find_if(_pages.begin(), _pages.end(), [lPID] (const std::pair<PID, BCB*>& elem) { return elem.first == lPID; }); 
+    auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); 
     if(it != _pages.end())
     {
         TRACE("## Page found! Assign BCB Pointer to _pages vector");
@@ -161,6 +169,7 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
     }
     else
     {
+        #pragma message ("TODO: @segment guys: same story as usual, can this be deleted? bug ever occured? Think about how this can happen!")
         TRACE("## This should not be printed");
         //terminate and find bug
         throw ReturnException(FLF);
@@ -197,6 +206,7 @@ tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
 	lBCB->setModified(true);
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuples successfully.");
+    _tids.insert(_tids.cend(), result.cbegin(), result.cend());
     return result;
 }
 
@@ -206,18 +216,22 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
 {
     TRACE("Looking for tuple with TID " + aTID.to_string());
     Tuple_T result;
-    auto it = std::find_if(_pages.begin(), _pages.end(), [aTID] (const std::pair<PID, BCB*>& elem) { return elem.first.pageNo() == aTID.pageNo(); }); //get iterator to PID in page vector
-    if(it == _pages.cend())
+    const auto it = std::find_if(_pages.begin(), _pages.end(), [&aTID] (const auto& elem) { return elem.first.pageNo() == aTID.pageNo(); }); //get iterator to PID in page vector
+    if(it != _pages.cend())
     { 
-        TRACE("Could not find tuple. Return default tuple");
-        return result; 
+        const size_t index = it - _pages.cbegin();
+        byte* lPagePtr = getPage(index, LOCK_MODE::kSHARED);
+        InterpreterSP lInterpreter;
+        lInterpreter.attach(lPagePtr);
+        byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());
+        if(lTuplePtr)
+        { 
+            result.toMemory(lTuplePtr); 
+            #pragma message ("TODO: @Jonas is this comment still valid? Was this a bug elsewhere? Is it fixed?")
+            releasePage(index); //crashed the buffer...
+            return result;
+        }
+        releasePage(index); //crashed the buffer...
     }
-    size_t index = it - _pages.cbegin();
-    byte* lPagePtr = getPage(index, LOCK_MODE::kSHARED);
-    InterpreterSP lInterpreter;
-    lInterpreter.attach(lPagePtr);
-    byte* lTuplePtr = lInterpreter.getRecord(aTID.tupleNo());
-    if(lTuplePtr){ result.toMemory(lTuplePtr); }
-    releasePage(index); //crashed the buffer...
-    return result;
+    throw TupleNotFoundOrInvalidException(FLF);
 }

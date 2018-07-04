@@ -1,7 +1,8 @@
 #include "segment_fsm_sp.hh"
 
 SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock) :
-    SegmentFSM(aSegID, aPartition, aControlBlock)
+    SegmentFSM(aSegID, aPartition, aControlBlock),
+    _tids()
 {
     InterpreterSP::setPageSize(aControlBlock.pageSize());  
 	TRACE("'SegmentFSM_SP' constructed");
@@ -49,6 +50,7 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	
 	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
+        #pragma message ("TODO: @segment guys: Can this happen? The comment states it will only occur if getFreePage is buggy. Test getFreePage, make it as bug free as possible and remove this if-check and its throw-statement (I guess we can not recover from this anyway)")
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
         throw NSMException(FLF, lErrMsg);
@@ -58,6 +60,7 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	lBCB->setModified(true);
 	_bufMan.unfix(lBCB);
     TRACE("Inserted tuple successfully.");
+    _tids.push_back(resultTID);
     return resultTID;
 }
 
