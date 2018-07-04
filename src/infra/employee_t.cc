@@ -2,20 +2,43 @@
 
 uint64_t Employee_T::_idCount = 1;
 
+/**
+ * @brief Construct a new Employee_T::Employee_T object
+ * 
+ */
 Employee_T::Employee_T() : 
-    Tuple(0), _id(0), _salary(0.0), _age(0), _name("")
+    Tuple(0),
+    _id(0),
+    _salary(0.0),
+    _age(0),
+    _name("")
 {
     TRACE("'Employee_T' object was default constructed: " + to_string());
 }
 
-
+/**
+ * @brief Construct a new Employee_T::Employee_T object
+ * 
+ * @param aName the name
+ * @param aSalary the salary
+ * @param aAge the age
+ */
 Employee_T::Employee_T(const std::string& aName, const double aSalary, const uint8_t aAge) : 
-    Tuple(0), _id(_idCount++), _salary(aSalary), _age(aAge), _name(aName)
+    Tuple(0),
+    _id(_idCount++),
+    _salary(aSalary),
+    _age(aAge),
+    _name(aName)
 {
     _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; //+1 for each string for \0
     TRACE("'Employee_T' object was constructed: " + to_string());
 }
 
+/**
+ * @brief Copy-Construct a new Employee_T::Employee_T object
+ * 
+ * @param aEmployeeTuple the object to copy
+ */
 Employee_T::Employee_T(const Employee_T& aEmployeeTuple) :
     Tuple(aEmployeeTuple.size()),
     _id(aEmployeeTuple.ID()),

@@ -31,7 +31,7 @@ class BufferControlBlock final
         ~BufferControlBlock() = default;
 
     public:
-        //getter
+        // Getter
         inline PID&     getPID() noexcept { return _pageID; }
         inline size_t   getFrameIndex() noexcept { return _frameIndex; }
         inline LOCK_MODE getLockMode() noexcept { return _mode; }
@@ -40,7 +40,7 @@ class BufferControlBlock final
         inline size_t   incrFixCount() noexcept { return ++_fixCount; }
         inline size_t   decrFixCount() noexcept { return --_fixCount; }
         inline BCB*     getNextInChain() noexcept { return _nextInChain; }
-        //setter
+        // Setter
         inline void     setPID(const PID aPID) noexcept { _pageID = aPID; }
         inline void     setFrameIndex(const size_t aFrameIndex) noexcept { _frameIndex = aFrameIndex; }
         inline void     setLockMode(LOCK_MODE aMode) noexcept { _mode = aMode; }

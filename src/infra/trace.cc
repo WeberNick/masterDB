@@ -1,11 +1,19 @@
 #include "trace.hh"
 
+/**
+ * @brief Construct a new Trace::Trace object
+ * 
+ */
 Trace::Trace() :
     _logPath(),
     _logStream(),
     _cb(nullptr)
 {}
 
+/**
+ * @brief Destroy the Trace::Trace object
+ * 
+ */
 Trace::~Trace()
 {
     if(_cb->trace())
