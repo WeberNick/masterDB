@@ -37,13 +37,32 @@ class Partition_T : public Tuple
         ~Partition_T() = default;
 
     public:
+        /**
+         * @brief 
+         * 
+         * @param aPID 
+         * @param aName 
+         * @param aPath 
+         * @param aType 
+         * @param aGrowth 
+         */
         void init(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth) noexcept;
+        /**
+         * @brief 
+         * 
+         * @param aPtr 
+         */
         void toDisk(byte* aPtr) const noexcept override;
         void toDisk(byte* aPtr) noexcept override;
+        /**
+         * @brief 
+         * 
+         * @param aPtr 
+         */
         void toMemory(byte* aPtr) noexcept override;
     
     public:
-        //getter
+        // Getter
         inline uint8_t ID() const noexcept { return _pID; }
         inline uint8_t ID() noexcept { return _pID; }
         inline const std::string& name() const noexcept { return _pName; }
@@ -54,6 +73,11 @@ class Partition_T : public Tuple
         inline uint8_t type() noexcept { return _pType; }
         inline uint16_t growth() const noexcept { return _pGrowth; }
         inline uint16_t growth() noexcept { return _pGrowth; }
+        /**
+         * @brief 
+         * 
+         * @return std::string 
+         */
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override; 
 

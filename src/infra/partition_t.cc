@@ -1,19 +1,46 @@
 #include "partition_t.hh"
 
+/**
+ * @brief Construct a new Partition_T::Partition_T object
+ * 
+ */
 Partition_T::Partition_T() : 
-    Tuple(0), _pID(0), _pName(""), _pPath(""), _pType(0), _pGrowth(0)
+    Tuple(0),
+    _pID(0),
+    _pName(""),
+    _pPath(""),
+    _pType(0),
+    _pGrowth(0)
 {
     TRACE("'Partition_T' object was default-constructed: " + to_string());
 }
 
-
+/**
+ * @brief Construct a new Partition_T::Partition_T object
+ * 
+ * @param aPID 
+ * @param aName 
+ * @param aPath 
+ * @param aType 
+ * @param aGrowth 
+ */
 Partition_T::Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth) : 
-    Tuple(0), _pID(aPID), _pName(aName), _pPath(aPath), _pType(aType), _pGrowth(aGrowth)
+    Tuple(0),
+    _pID(aPID),
+    _pName(aName),
+    _pPath(aPath),
+    _pType(aType),
+    _pGrowth(aGrowth)
 {
-    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
+    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); // +1 for each string for \0
     TRACE("'Partition_T' object was constructed: " + to_string());
 }
 
+/**
+ * @brief Construct a new Partition_T::Partition_T object
+ * 
+ * @param aPartitionTuple 
+ */
 Partition_T::Partition_T(const Partition_T& aPartitionTuple) :
     Tuple(aPartitionTuple.size()),
     _pID(aPartitionTuple.ID()),
@@ -77,7 +104,6 @@ void Partition_T::toDisk(byte* aPtr) noexcept
 {
     static_cast<const Partition_T&>(*this).toDisk(aPtr);
 }
-
 
 void Partition_T::toMemory(byte* aPtr) noexcept
 {

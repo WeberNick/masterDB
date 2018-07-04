@@ -1,19 +1,46 @@
 #include "segment_t.hh"
 
+/**
+ * @brief Construct a new Segment_T::Segment_T object
+ * 
+ */
 Segment_T::Segment_T() : 
-    Tuple(0), _sPID(0), _sID(0), _sName(""), _sType(0), _sFirstPage(0)
+    Tuple(0),
+    _sPID(0),
+    _sID(0),
+    _sName(""),
+    _sType(0),
+    _sFirstPage(0)
 {
     TRACE("'Segment_T' object was default-constructed: " + to_string());
 }
 
-
+/**
+ * @brief Construct a new Segment_T::Segment_T object
+ * 
+ * @param aPID 
+ * @param aSID 
+ * @param aName 
+ * @param aType 
+ * @param aFirstPage 
+ */
 Segment_T::Segment_T(const uint8_t aPID, const uint16_t aSID, const std::string& aName, const uint8_t aType, const uint32_t aFirstPage) : 
-    Tuple(0), _sPID(aPID), _sID(aSID), _sName(aName), _sType(aType), _sFirstPage(aFirstPage)
+    Tuple(0),
+    _sPID(aPID),
+    _sID(aSID),
+    _sName(aName),
+    _sType(aType),
+    _sFirstPage(aFirstPage)
 {
-    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); // +1 for each string for \0
     TRACE("'Segment_T' object was constructed: " + to_string());
 }
 
+/**
+ * @brief Construct a new Segment_T::Segment_T object
+ * 
+ * @param aSegmentTuple 
+ */
 Segment_T::Segment_T(const Segment_T& aSegmentTuple) :
     Tuple(aSegmentTuple.size()),
     _sPID(aSegmentTuple.partID()),
@@ -29,7 +56,7 @@ Segment_T& Segment_T::operator=(const Segment_T& aSegmentTuple)
 {
     if(this != &aSegmentTuple)
     {
-        //exception safe copy assignment with swap would be overkill
+        // exception safe copy assignment with swap would be overkill
         _size       = aSegmentTuple.size();
         _sPID       = aSegmentTuple.partID();
         _sID        = aSegmentTuple.ID();
@@ -47,7 +74,7 @@ void Segment_T::init(const uint8_t aPID, const uint16_t aSID, const std::string&
     _sName = aName;
     _sType = aType;
     _sFirstPage = aFirstPage;
-    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); // +1 for each string for \0
     TRACE("'Segment_T' object was initialized: " + to_string());
 }
 

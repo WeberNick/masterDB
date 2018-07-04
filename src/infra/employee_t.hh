@@ -20,10 +20,10 @@
 #include "trace.hh"
 
 #include <cstring>
-#include <string>
 #include <iostream>
-#include <vector>
+#include <string>
 #include <utility>
+#include <vector>
 
 class Employee_T : public Tuple
 {
@@ -37,13 +37,30 @@ class Employee_T : public Tuple
         ~Employee_T() = default;
 
     public:
+        /** TODO
+         * @brief 
+         * 
+         * @param aName 
+         * @param aSalary 
+         * @param aAge 
+         */
         void init(const std::string& aName, const double aSalary, const uint8_t aAge) noexcept;
+        /** TODO
+         * @brief 
+         * 
+         * @param aPtr 
+         */
         void toDisk(byte* aPtr) const noexcept override;
         void toDisk(byte* aPtr) noexcept override;
+        /** TODO
+         * @brief 
+         * 
+         * @param aPtr 
+         */
         void toMemory(byte* aPtr) noexcept override;
     
     public:
-        //getter
+        // Getter
         inline uint64_t ID() const noexcept { return _id; }
         inline uint64_t ID() noexcept { return _id; }
         inline uint8_t age() const noexcept { return _age; }
@@ -52,6 +69,11 @@ class Employee_T : public Tuple
         inline const std::string& name() noexcept { return _name; }
         inline double salary() const noexcept { return _salary; }
         inline double salary() noexcept { return _salary; }
+        /** TODO
+         * @brief 
+         * 
+         * @return std::string 
+         */
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override;
         
