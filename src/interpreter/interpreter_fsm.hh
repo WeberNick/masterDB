@@ -20,25 +20,30 @@
 #include <string>
 #include <cmath>
 
-class InterpreterFSM final {
-
-  public:
-    /* standard constructor */
-    InterpreterFSM();
-    /* If CC and AO are needed, implement them correctly */
-    explicit InterpreterFSM(const InterpreterFSM&) = delete;
-    explicit InterpreterFSM(InterpreterFSM&&) = delete;
-    /* specifies the assign operator of a intermediate buffer with delete */
-    InterpreterFSM& operator=(const InterpreterFSM&) = delete;
-    InterpreterFSM& operator=(InterpreterFSM&&) = delete;
-
-  public:
-    /*	set the page pointer and header */
+class InterpreterFSM final
+{
+    private:
+        friend class SegmentFSM;
+  
+    public:
+        InterpreterFSM();
+        explicit InterpreterFSM(const InterpreterFSM&) = delete;
+        explicit InterpreterFSM(InterpreterFSM&&) = delete;
+        InterpreterFSM& operator=(const InterpreterFSM&) = delete;
+        InterpreterFSM& operator=(InterpreterFSM&&) = delete;
+public:
+    /**
+     * @brief set the page pointer and header
+     * 
+     * @param aPP the page pointer
+     */
     inline void attach(byte *aPP) noexcept;
-    /*	unset the page pointer and header */
+    /**
+     * @brief unset the page pointer and header
+     */
     void detach() noexcept;
 
-  public:
+    public:
     /**
      *	@brief	initialize the FSM through setting all bits to 0 and the header
      *
@@ -78,29 +83,27 @@ class InterpreterFSM final {
     PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes) noexcept;
     PageStatus getPageStatus(const uint aPageNo) noexcept;
 
-  public:
-    /* Getter */
-    inline byte *pagePtr() noexcept { return _pp; }
-    inline uint32_t getNextFSMPage() noexcept { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
-    inline fsm_header_t *getHeaderPtr() noexcept { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
-    inline uint getMaxPagesPerFSM() noexcept { return (_pageSize - sizeof(fsm_header_t)) * 2; }
+    public:
+        /**
+         * @brief Set the PageSize
+         * 
+         * @param aPageSize the page size
+         */
+        static void setPageSize(const size_t aPageSize);
+        // Getter
+        inline byte*         pagePtr() noexcept { return _pp; }
+        inline uint32_t      getNextFSMPage() noexcept { return _header->_nextFSM; } // 0 if not existing, a physical index otherwise
+        inline fsm_header_t* getHeaderPtr() noexcept { return (fsm_header_t *)(_pp + _pageSize - sizeof(fsm_header_t)); }
+        inline uint          getMaxPagesPerFSM() noexcept { return (_pageSize - sizeof(fsm_header_t)) * 2; }
 
     private:
-        friend class SegmentFSM;
-        /*	size of the page */
-        static size_t _pageSize;
-        /*	Set page size */
-        static void setPageSize(const size_t aPageSize);
-
-
-  private:
-    /*	pointer to the beginning of the page */
-    byte *_pp;
-    /*	FSIP Header */
-    fsm_header_t *_header;
+        static size_t _pageSize; // size of the page
+        byte*         _pp;       // pointer to the beginning of the page
+        fsm_header_t* _header;   // FSIP Header
 };
 
-void InterpreterFSM::attach(byte *aPP) noexcept {
+void InterpreterFSM::attach(byte* aPP) noexcept
+{
     _pp = aPP;
     _header = getHeaderPtr();
 }

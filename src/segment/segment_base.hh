@@ -76,23 +76,38 @@ class SegmentBase
         void printPageToFile(uint aPageNo,bool afromDisk = false);
 
 	public:
-		virtual PID getNewPage() = 0; // alloc free page, add it to managing vector and return its index in the partition
+        /**
+         * @brief alloc free page, add it to managing vector and return its index in the partition
+         * 
+         * @return PID the pageID
+         */
+		virtual PID getNewPage() = 0;
 		inline const PID& getPageID(uint aPageNo){ return _pages.at(aPageNo).first; }
 
 	public:
-		inline size_t           getPageSize() const noexcept { return _partition.getPageSize(); }
-		inline size_t           getPageSize() noexcept { return _partition.getPageSize(); }
-		inline uint16_t         getID() const noexcept { return _segID; }
-		inline uint16_t         getID() noexcept { return _segID; }
-		inline uint32_vt        getIndexPages() const noexcept { return _indexPages; }
-		inline uint32_vt        getIndexPages() noexcept { return _indexPages; }
-		/* Return how many pages can be handled by one indexPage. */
-		inline int              getIndexPageCapacity() const noexcept { return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
-		inline int              getIndexPageCapacity() noexcept { return static_cast<const SegmentBase&>(*this).getIndexPageCapacity(); }
-		inline size_t           getNoPages() const noexcept { return _pages.size(); }
-		inline size_t           getNoPages() noexcept { return _pages.size(); }
-		inline const PartitionBase&   getPartition() const noexcept { return _partition; }
-		inline PartitionBase&   getPartition() noexcept { return _partition; }
+        // Getter
+		inline size_t               getPageSize() const noexcept { return _partition.getPageSize(); }
+		inline size_t               getPageSize() noexcept { return _partition.getPageSize(); }
+		inline uint16_t             getID() const noexcept { return _segID; }
+		inline uint16_t             getID() noexcept { return _segID; }
+		inline uint32_vt            getIndexPages() const noexcept { return _indexPages; }
+		inline uint32_vt            getIndexPages() noexcept { return _indexPages; }
+		inline size_t               getNoPages() const noexcept { return _pages.size(); }
+		inline size_t               getNoPages() noexcept { return _pages.size(); }
+		inline const PartitionBase& getPartition() const noexcept { return _partition; }
+		inline PartitionBase&       getPartition() noexcept { return _partition; }
+        /**
+		 * @brief Return how many pages can be handled by one indexPage.
+		 * 
+		 * @return int the capacity
+		 */
+		inline int getIndexPageCapacity() const noexcept { return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
+		inline int getIndexPageCapacity() noexcept { return static_cast<const SegmentBase&>(*this).getIndexPageCapacity(); }
+        /** TODO
+         * @brief 
+         * 
+         * @return std::string 
+         */
         inline std::string to_string() const noexcept { return std::string("ID : ") + std::to_string(getID()); }
         inline std::string to_string() noexcept { return static_cast<const SegmentBase&>(*this).to_string(); }
 

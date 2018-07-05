@@ -49,6 +49,11 @@ class SegmentManager
             return lSegmentManagerInstance;
         }
 
+        /** TODO
+         * @brief 
+         * 
+         * @param aControlBlock 
+         */
         void init(const CB& aControlBlock) noexcept;
 
 	public:
@@ -134,13 +139,17 @@ class SegmentManager
 		void storeSegments();
         //subpart which is the same for all differently segment types. Mainly inserts the tuple on disk an into data structures
 		void createSegmentSub (const Segment_T& aSegT);
-        //wrapper needed as segment base destructor is private
+        /** 
+         * @brief delete segment, wrapper needed as segment base destructor is private
+         * 
+         * @param aSegment the segment to delete
+         */
         void deleteSegment(SegmentFSM_SP*& aSegment);
         //part of installation
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
 	private:
-		uint16_t                         _counterSegmentID;           // ID Counter for Segments
+		uint16_t                                   _counterSegmentID; // ID Counter for Segments
 		std::unordered_map<uint16_t, SegmentBase*> _segments;         // Stores all managed segment objects by ID
 
 		std::unordered_map<uint16_t, Segment_T>    _segmentsByID;     // Stores all segment Tuples by ID in map
@@ -156,7 +165,6 @@ template<typename Tuple_T>
 void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint16_t aID)
 {
     // type=0 if segment, type=1 if partition
-
     // open master Segment by name and load it
     SegmentFSM_SP* lSegments = (SegmentFSM_SP*)getSegment(aMasterName);
     byte* lPage;
@@ -171,33 +179,36 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
     byte* lTuplePointer;
     for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
-      lPage = lSegments->getPage(i, LOCK_MODE::kSHARED);
+        lPage = lSegments->getPage(i, LOCK_MODE::kSHARED);
 
-   	  lInterpreter.attach(lPage);
-      j = 0;
-   	  while( j < lInterpreter.noRecords())
-   	  {
-          Tuple_T lTuple;
-          lTuplePointer = lInterpreter.getRecord(j);
-          if(lTuplePointer){
-            lTuple.toMemory(lInterpreter.getRecord(j));
-            TRACE(std::to_string(j)+" "+lTuple.to_string());
+     	lInterpreter.attach(lPage);
+        j = 0;
+   	    while( j < lInterpreter.noRecords())
+   	    {
+            Tuple_T lTuple;
+            lTuplePointer = lInterpreter.getRecord(j);
+            if(lTuplePointer)
+            {
+                lTuple.toMemory(lInterpreter.getRecord(j));
+                TRACE(std::to_string(j)+" "+lTuple.to_string());
 
-            if(lTuple.ID() == aID){
-                //mark deleted
-                lSegments->getPage(i, LOCK_MODE::kEXCLUSIVE);
-                lInterpreter.deleteRecordSoft(j);
-                lSegments->releasePage(i, true);
-                TRACE("Tuple deleted successfully.");
-                return;
+                if(lTuple.ID() == aID)
+                {
+                    // mark deleted
+                    lSegments->getPage(i, LOCK_MODE::kEXCLUSIVE);
+                    lInterpreter.deleteRecordSoft(j);
+                    lSegments->releasePage(i, true);
+                    TRACE("Tuple deleted successfully.");
+                    return;
+                }
             }
-          }
-          else{
+            else
+            {
               TRACE(std::to_string(j)+ " deleted tuple");
-          }
+            }
         ++j;
         lSegments->releasePage(i);
-    }
+        }
     }
     const std::string lErrMsg("Deletion of tuple went wrong - tuple not found.");
     TRACE(lErrMsg);

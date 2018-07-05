@@ -50,5 +50,4 @@ class PartitionRaw : public PartitionBase
 	     *	@brief	runs format on partition, setting all pages as free
 	     */
 	    void remove() override;
-
 };

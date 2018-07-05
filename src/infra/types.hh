@@ -4,6 +4,7 @@
  *           Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *
  */
+ 
 #pragma once
 
 #include <cstddef>
@@ -56,7 +57,8 @@ struct control_block_t
 };
 using CB = control_block_t;
 
-inline std::ostream& operator<<(std::ostream& strm, const CB& cb) {
+inline std::ostream& operator<<(std::ostream& strm, const CB& cb)
+{
     strm << "The following parameters are set:\n"
          << "Install: " << cb.install() << "\n"
          << "Master Partition Path: " << cb.mstrPart() << "\n"
@@ -70,7 +72,7 @@ inline std::ostream& operator<<(std::ostream& strm, const CB& cb) {
 struct page_id_t
 {
     uint8_t _fileID;
-    uint32_t _pageNo; // correct? 
+    uint32_t _pageNo;
 
     uint8_t fileID() const noexcept { return _fileID; }
     uint32_t pageNo() const noexcept { return _pageNo; }
@@ -88,7 +90,7 @@ struct page_id_t
     std::string to_string() const noexcept
     {
         return std::string("File ID : '") + std::to_string(_fileID) + std::string("', Page : '") + std::to_string(_pageNo) + std::string("'");
-     }
+    }
 
     std::string to_string()
     {

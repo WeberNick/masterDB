@@ -99,10 +99,10 @@ class LineReaderEdit {
     char               _commentchar;
     char*              _line;
     bool               _ok;
-    uint               _linesize; // for successfully read lines: line()[linesize()] == '\0'
+    uint               _linesize;         // for successfully read lines: line()[linesize()] == '\0'
     uint               _linecount;
     uint               _commentlinecount;
     uint64_t           _no_bytes_read;
-    uint               _noSplit;              // current number of splits
-    std::vector<char*> _splits; // array for splits
+    uint               _noSplit;          // current number of splits
+    std::vector<char*> _splits;           // array for splits
 };

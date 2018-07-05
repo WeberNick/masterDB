@@ -35,17 +35,14 @@ class BufferHashTable final
                 ~HashBucket() = default;
 
             public:
-                inline sMtx&    getMtx() noexcept { return _bucketMtx; }
-                inline BCB*     getBCB() noexcept { return _firstBCB; }
-                inline void     setBCB(BCB* aBCB) noexcept { _firstBCB = aBCB; }
+                inline sMtx& getMtx() noexcept { return _bucketMtx; }
+                inline BCB*  getBCB() noexcept { return _firstBCB; }
+                inline void  setBCB(BCB* aBCB) noexcept { _firstBCB = aBCB; }
 
             private:
-                //each bucket is protected by a mutex while being used
-                sMtx    _bucketMtx;     
-                //pointer to first control block
-                BCB*    _firstBCB;    
+                sMtx _bucketMtx; // each bucket is protected by a mutex while being used
+                BCB* _firstBCB;  // pointer to first control block
         };
-
 
 	public:
         BufferHashTable() = delete;
@@ -58,7 +55,7 @@ class BufferHashTable final
 
     public:
         inline size_t   getTableSize() noexcept { return _size; }
-        inline sMtx&    getBucketMtx(const size_t aHash);
+        inline sMtx&    getBucketMtx(const size_t aHash) noexcept;
         inline BCB*     getBucketBCB(const size_t aHash) noexcept { return _hashTable[aHash].getBCB(); }
         inline void     setBucketBCB(const size_t aHash, BCB* aBCB) noexcept { _hashTable[aHash].setBCB(aBCB); }
         std::vector<BCB*> getAllValidBCBs(); //get all BCBs from all Buckets in order to flush them
@@ -66,12 +63,9 @@ class BufferHashTable final
 	public:
 		size_t hash(const PID& aPageID) noexcept;
 
-
 	private:
-        //the size of the hash table
-		size_t          _size;      		
-        //the hash table maintaining the control blocks
-        std::unique_ptr<HashBucket[]>   _hashTable;
+		size_t _size; // the size of the hash table
+        std::unique_ptr<HashBucket[]> _hashTable; // the hash table maintaining the control blocks
 };
 
 sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept

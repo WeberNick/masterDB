@@ -1,5 +1,12 @@
 #include "segment_fsm_sp.hh"
 
+/** TODO
+ * @brief Construct a new SegmentFSM_SP::SegmentFSM_SP object
+ * 
+ * @param aSegID 
+ * @param aPartition 
+ * @param aControlBlock 
+ */
 SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock) :
     SegmentFSM(aSegID, aPartition, aControlBlock),
     _tids()
@@ -8,11 +15,18 @@ SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, c
 	TRACE("'SegmentFSM_SP' constructed");
 }
 
+/** TODO
+ * @brief Construct a new SegmentFSM_SP::SegmentFSM_SP object
+ * 
+ * @param aPartition 
+ * @param aControlBlock 
+ */
 SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock) :
     SegmentFSM(aPartition, aControlBlock)
 {}
 
-TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
+TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
+{
 	TRACE("trying to insert Tuple");
     // get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
@@ -22,7 +36,8 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	if(emptyfix){
 		lBCB = _bufMan.emptyfix(lPID);
 	}
-	else{
+	else
+    {
 		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
     //insert page into _pages data structure
@@ -39,8 +54,9 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
-	//if the page is new, it has to be initialised first.
-	if(emptyfix){
+	// if the page is new, it has to be initialised first.
+	if(emptyfix)
+    {
 		lInterpreter.initNewPage(lBufferPage);
 	}
 
@@ -66,10 +82,11 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
     return resultTID;
 }
 
-PID SegmentFSM_SP::getFreePage(const uint aNoOfBytes, bool& emptyfix) {
-    //overhead on page for one tuple insert
+PID SegmentFSM_SP::getFreePage(const uint aNoOfBytes, bool& emptyfix)
+{
+    // overhead on page for one tuple insert
     uint aOverhead= sizeof(sp_header_t) + sizeof(InterpreterSP::slot_t);
-    //slotted Page is 8byte aligned per tuple. Allign aNoBytes
+    // slotted Page is 8byte aligned per tuple. Allign aNoBytes
     uint lNoOfBytes = std::ceil( ( (double)aNoOfBytes)/8.0)*8;
     return SegmentFSM::getFreePage(lNoOfBytes, emptyfix, aOverhead);
 }
@@ -94,14 +111,16 @@ void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {
     fsm_header_t lHeader2;
     uint32_t l1FSM;
     _partition.open();
-	while (lnxIndex != 0) {
-		_partition.readPage(lPageBuffer,lnxIndex,_partition.getPageSize());
+	while (lnxIndex != 0)
+    {
+		_partition.readPage(lPageBuffer, lnxIndex, _partition.getPageSize());
         lHeader = *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t));
         _indexPages.push_back(lnxIndex);
         l1FSM = lHeader._firstFSM;
         _segID = lHeader._segID;
-        TRACE("written in header: segID "+std::to_string(lHeader._segID) + " firstFSM: "+std::to_string(lHeader._firstFSM));
-        for (uint i = 0; i < lHeader._currSize; ++i) {
+        TRACE("written in header: segID " + std::to_string(lHeader._segID) + " firstFSM: " + std::to_string(lHeader._firstFSM));
+        for (uint i = 0; i < lHeader._currSize; ++i)
+        {
             PID lTmpPID = {_partition.getID(), *(((uint32_t *)lPageBuffer) + i)};  
             _pages.push_back(page_t(lTmpPID, nullptr));
         }
@@ -109,8 +128,9 @@ void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {
     }
     TRACE("Load FSMs");
     _fsmPages.push_back(l1FSM);
-    while (_fsmPages.at(_fsmPages.size() -1) != 0) {
-        _partition.readPage(lPageBuffer,_fsmPages.at(_fsmPages.size()-1),_partition.getPageSize());
+    while (_fsmPages.at(_fsmPages.size() -1) != 0)
+    {
+        _partition.readPage(lPageBuffer, _fsmPages.at(_fsmPages.size()-1), _partition.getPageSize());
         lHeader2 = *(fsm_header_t *)(lPageBuffer + lPageSize - sizeof(fsm_header_t));
         _fsmPages.push_back(lHeader2._nextFSM);
     }
@@ -118,7 +138,9 @@ void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {
 	_partition.close();
     TRACE("Successfully load segment.");
 }
-void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize) {
+
+void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize)
+{
 	_partition.open();
     _partition.readPage(aPageBuffer,_pages[aPageNo].first._pageNo,aBufferSize);
 	TRACE(std::to_string(_pages[aPageNo].first._pageNo));
@@ -126,7 +148,8 @@ void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBu
 	TRACE("read page");
 }
 
-void SegmentFSM_SP::erase(){
+void SegmentFSM_SP::erase()
+{
 	SegmentFSM::erase();
 }
 

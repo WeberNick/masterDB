@@ -2,12 +2,20 @@
 
 size_t InterpreterSP::_pageSize = 4096;
 
-void InterpreterSP::setPageSize(const size_t aPageSize) noexcept {
+/**
+ * @brief Construct a new InterpreterSP:: InterpreterSP object
+ * 
+ */
+InterpreterSP::InterpreterSP() : 
+	_pp(nullptr), 
+	_header(nullptr), 
+	_slots(nullptr) 
+{}
+
+void InterpreterSP::setPageSize(const size_t aPageSize) noexcept
+{
     _pageSize = aPageSize;
 }
-
-InterpreterSP::InterpreterSP() : _pp(nullptr), _header(nullptr), _slots(nullptr) 
-{}
 
 void InterpreterSP::detach() noexcept
 {
@@ -32,7 +40,6 @@ void InterpreterSP::initNewPage(byte* aPP) noexcept
 	}
 }
 
-/* Give record size as parameter, determine where to write the record and return location as a pointer */
 std::pair<byte*, uint16_t> InterpreterSP::addNewRecord(const uint aRecordSize) noexcept
 {
 	const uint lRecordSize = ((aRecordSize + 7) & ~(uint) 0x07); // adjust for 8 byte alignment

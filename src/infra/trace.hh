@@ -62,8 +62,8 @@ class Trace final
         inline const std::ofstream& getLogStream() noexcept { return _logStream; }
 
     private:
-        std::string     _logPath;
-        std::ofstream   _logStream;
-        const CB*       _cb;
+        std::string   _logPath;
+        std::ofstream _logStream;
+        const CB*     _cb;
 };
 

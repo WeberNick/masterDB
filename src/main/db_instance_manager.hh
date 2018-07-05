@@ -33,16 +33,22 @@ class DatabaseInstanceManager final
 		~DatabaseInstanceManager();
 
 	public:
-		/**
-		 *  @brief  This function is the only way to get access to the PartitionManager instance
-		 *
-		 *  @return reference to the only PartitionManager instance
-		 */
-		static DatabaseInstanceManager& getInstance() noexcept {
+        /**
+         * @brief This function is the only way to get access to the PartitionManager instance
+         * 
+         * @return DatabaseInstanceManager& reference to the only PartitionManager instance
+         */
+		static DatabaseInstanceManager& getInstance() noexcept
+        {
 			static DatabaseInstanceManager lDBIM_Instance;
 			return lDBIM_Instance;
 		}
 
+        /** TODO
+         * @brief 
+         * 
+         * @param aControlBlock 
+         */
         void init(const CB& aControlBlock);
         
         /**
@@ -130,20 +136,20 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
     TRACE("Loading tuples from the master partition completed");
 }
 
-/*template<typename T_TupleType>
+/* template<typename T_TupleType>
 void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
     SegmentFSM_SP* lMasterSeg = _segMngr.loadSegmentFSM_SP(*_masterPartition, aIndex);
     int lFreeBytesPerPage = lMasterSeg->getMaxFreeBytes();
     // get size of master segment
-    int lCapazIst = lMasterSeg->getNoPages() * ( lFreeBytesPerPage / sizeof(T_TupleType) ) ;
+    int lCapazIst = lMasterSeg->getNoPages() * (lFreeBytesPerPage / sizeof(T_TupleType)) ;
     // get number of segments
     // estimate if size is big enough, if not add new pages
-    int lCapazSoll = aTuples.size()/sizeof(T_TupleType);
+    int lCapazSoll = aTuples.size() / sizeof(T_TupleType);
     if(lCapazIst-lCapazSoll < 0){
         // how many new pages?
-        int a =  (int) ceil(( lCapazSoll-lCapazIst) / ( lFreeBytesPerPage /sizeof(T_TupleType) ));
-        while(a>0){
+        int a =  (int) ceil((lCapazSoll-lCapazIst) / (lFreeBytesPerPage / sizeof(T_TupleType)));
+        while(a > 0){
             // alloc new pages
             lMasterSeg->getNewPage();
             ++a;
@@ -160,18 +166,20 @@ void DatabaseInstanceManager::store(std::vector<T_TupleType>& aTuples, const uin
     byte* lPos;
     for (uint i = 0; i < lMasterSeg->getNoPages(); ++i)
     {
-        //lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
+        // lMasterSeg->readPage(lPage, 0); fix this? dont know what it should do
         lInterpreter.attach(lPage);
         lInterpreter.initNewPage(lPage);
-        while(true){
-           lPos = lInterpreter.addNewRecord(sizeof(T_TupleType));
-           if (lPos == 0){
-               break;
-           }
-              *((T_TupleType*) lPos ) =  aTuples.at(lSegCounter);
+        while(true)
+        {
+            lPos = lInterpreter.addNewRecord(sizeof(T_TupleType));
+            if (lPos == 0)
+            {
+                break;
+            }
+            *((T_TupleType*) lPos ) =  aTuples.at(lSegCounter);
             ++lSegCounter;
         }
     }
-        delete[] lPage;
-        _segMngr.deleteSegment(lMasterSeg);
-}*/
+    delete[] lPage;
+    _segMngr.deleteSegment(lMasterSeg);
+} */

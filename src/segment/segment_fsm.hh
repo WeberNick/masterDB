@@ -81,7 +81,6 @@ class SegmentFSM : public SegmentBase
       */
     void erase() override;
 
-  protected:
-    /* Free Space Management pages of this segment, indicating the remaining space of every page in _pages. */
-    uint32_vt _fsmPages;
+    protected:
+        uint32_vt _fsmPages; // Free Space Management pages of this segment, indicating the remaining space of every page in _pages.
 };

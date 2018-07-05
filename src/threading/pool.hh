@@ -7,6 +7,8 @@
  * @todos   TBD
  */
 
+ // TODO go over this class
+
 #pragma once
 
 #include "../infra/exception.hh"

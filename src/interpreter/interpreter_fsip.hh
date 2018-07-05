@@ -22,6 +22,8 @@
 #include <string>
 
 class InterpreterFSIP final {
+  private:
+    friend class PartitionBase;
   public:
     /* standard constructor */
     InterpreterFSIP();
@@ -108,22 +110,23 @@ class InterpreterFSIP final {
 
     /*	write page loaded to a file. aPageIndex only for naming. */
     void debug(const uint aPageIndex);
+    /** TODO
+     * @brief 
+     * 
+     * @param aControlBlock 
+     */
+    static void init(const CB& aControlBlock);
 
-  private:
-        friend class PartitionBase;
-        /*	size of the page */
-        static size_t _pageSize;
+    private:
+        static size_t    _pageSize; // size of the page
         static const CB* _cb;
-        static void init(const CB& aControlBlock);
 
-  private:
-    /*	pointer to the beginning of the page */
-    byte *_pp;
-    /*	FSIP Header */
-    fsip_header_t *_header;
+        byte*            _pp;       // pointer to beginning of the page
+        fsip_header_t*   _header;   // FSIP Header
 };
 
-void InterpreterFSIP::attach(byte *aPP) noexcept {
+void InterpreterFSIP::attach(byte* aPP) noexcept
+{
     _pp = aPP;
     _header = get_hdr_ptr();
 }
