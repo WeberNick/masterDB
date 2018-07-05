@@ -16,30 +16,21 @@ BufferControlBlock::BufferControlBlock() :
 
 void BufferControlBlock::lock(LOCK_MODE aMode) noexcept
 {
-    TRACE("Trying to aquire '" + lockModeToString(aMode) + "' lock for BCB with PID : " + _pageID.to_string());
     switch(aMode)
     {
         case LOCK_MODE::kNOLOCK:
-            incrFixCount();
-            if(toType(getLockMode()) > toType(LOCK_MODE::kNOLOCK)){ break; } //BCB has a "higher" lock
-            else { setLockMode(aMode); }
             break;
         case LOCK_MODE::kSHARED:
-            _pageMtx.lock_shared();
-            setLockMode(aMode);  
-            incrFixCount();
+            lock_shared();
             break;
         case LOCK_MODE::kEXCLUSIVE:
-            _pageMtx.lock();
-            setLockMode(aMode);
-            setFixCount(1);
+            lock();
             break;
         default:
             TRACE("Lock type not supported");
             ASSERT_MSG("Invalid default-case of switch statement reached");
             break;
     }
-    TRACE("Lock '" + lockModeToString(aMode) + "' for BCB with PID : " + _pageID.to_string() + " aquired");
 }
 
 void BufferControlBlock::unlock() noexcept
@@ -50,9 +41,13 @@ void BufferControlBlock::unlock() noexcept
         case LOCK_MODE::kNOLOCK:
             break;
         case LOCK_MODE::kSHARED:
+            decrFixCount();
+            if(getFixCount() == 0) setLockMode(LOCK_MODE::kNOLOCK);
             _pageMtx.unlock_shared();
             break;
         case LOCK_MODE::kEXCLUSIVE:
+            decrFixCount();
+            setLockMode(LOCK_MODE::kNOLOCK);
             _pageMtx.unlock();
             break;
         default:
@@ -83,14 +78,10 @@ void BufferControlBlock::upgradeLock(LOCK_MODE aMode) noexcept
                 if(toType(getLockMode()) == toType(LOCK_MODE::kSHARED))
                 {
                     _pageMtx.unlock_shared();
-                    decrFixCount();
                 }
                 _pageMtx.lock();
                 setLockMode(aMode);
                 setFixCount(1);
-                break;
-            case LOCK_MODE::kNoType:
-            case LOCK_MODE::kLockModeSize:
                 break;
             default:
                 const std::string lErrMsg("Lock type not supported");

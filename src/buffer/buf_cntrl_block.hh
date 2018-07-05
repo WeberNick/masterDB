@@ -1,7 +1,7 @@
 /**
  *  @file 	buf_mngr.hh
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *  @brief  Class implementing a access control block for the buffer franes	
+ *  @brief  Class implementing a buffer control block for the buffer franes	
  *  @bugs	Currently no bugs known
  *  @todos	TBD
  *  @section TBD
@@ -20,6 +20,12 @@
 class BufferControlBlock;
 using BCB = BufferControlBlock;
 
+/**
+ * A buffer control block is associated with a page from a partition
+ * and is used to store meta data of the frame in the buffer pool.
+ * 
+ *
+ */
 class BufferControlBlock final
 {
     public:
@@ -49,10 +55,11 @@ class BufferControlBlock final
         inline void     setNextInChain(BCB* aBCB) noexcept { _nextInChain = aBCB; }
 
     public:
-        void lock(LOCK_MODE aMode) noexcept; // lock for given mode
+        void lock(LOCK_MODE aMode) noexcept;
         inline void lock() noexcept;         // lock exclusive
         inline bool try_lock() noexcept;
         inline void lock_shared() noexcept;  // lock shared
+        inline bool try_lock_shared() noexcept;
         void unlock() noexcept;
         void upgradeLock(LOCK_MODE aMode) noexcept;
         inline std::string to_string() noexcept;
@@ -70,7 +77,9 @@ class BufferControlBlock final
 
 void BufferControlBlock::lock() noexcept
 {
-    lock(LOCK_MODE::kEXCLUSIVE);
+    _pageMtx.lock();
+    setLockMode(LOCK_MODE::kEXCLUSIVE);
+    setFixCount(1);
 }
 
 bool BufferControlBlock::try_lock() noexcept
@@ -86,7 +95,20 @@ bool BufferControlBlock::try_lock() noexcept
 
 void BufferControlBlock::lock_shared() noexcept
 {
-    lock(LOCK_MODE::kSHARED);
+    _pageMtx.lock_shared();
+    setLockMode(LOCK_MODE::kSHARED);  
+    incrFixCount();
+}
+
+bool BufferControlBlock::try_lock_shared() noexcept
+{
+    const bool ret = _pageMtx.try_lock_shared();
+    if(ret)
+    {
+        setLockMode(LOCK_MODE::kSHARED);  
+        incrFixCount();
+    }
+    return ret;
 }
 
 std::string BufferControlBlock::to_string() noexcept 

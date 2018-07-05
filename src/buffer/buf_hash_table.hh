@@ -64,8 +64,8 @@ class BufferHashTable final
 		size_t hash(const PID& aPageID) noexcept;
 
 	private:
-		size_t _size; // the size of the hash table
-        std::unique_ptr<HashBucket[]> _hashTable; // the hash table maintaining the control blocks
+		const size_t _size; // the size of the hash table
+        const std::unique_ptr<HashBucket[]> _hashTable; // the hash table maintaining the control blocks
 };
 
 sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept

@@ -143,7 +143,7 @@ enum class PageStatus: int8_t
 enum class LOCK_MODE: int8_t
 {
     kNoType = -1,
-    kNOLOCK = 0,
+    kNOLOCK = 0, //not in use
     kSHARED = 1,
     kEXCLUSIVE = 2,
     kLockModeSize = 3
