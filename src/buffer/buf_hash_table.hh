@@ -58,14 +58,13 @@ class BufferHashTable final
 
     public:
         inline size_t   getTableSize() noexcept { return _size; }
-       // inline sMtx&    getBucketMtx(const size_t aHash){ return _hashTable[aHash].getMtx(); }
+        inline sMtx&    getBucketMtx(const size_t aHash);
         inline BCB*     getBucketBCB(const size_t aHash) noexcept { return _hashTable[aHash].getBCB(); }
         inline void     setBucketBCB(const size_t aHash, BCB* aBCB) noexcept { _hashTable[aHash].setBCB(aBCB); }
-        std::vector<BCB*> getAllValidBCBs();
+        std::vector<BCB*> getAllValidBCBs(); //get all BCBs from all Buckets in order to flush them
 
 	public:
 		size_t hash(const PID& aPageID) noexcept;
-        sMtx&    getBucketMtx(const size_t aHash) noexcept;
 
 
 	private:
@@ -74,3 +73,9 @@ class BufferHashTable final
         //the hash table maintaining the control blocks
         std::unique_ptr<HashBucket[]>   _hashTable;
 };
+
+sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
+{ 
+	TRACE("got Bucket Mutex of "+std::to_string(aHash));
+	return _hashTable[aHash].getMtx(); 
+}

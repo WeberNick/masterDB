@@ -51,7 +51,7 @@ void DatabaseInstanceManager::install()
 {
     TRACE("Installation of the database system starts...");
     Partition_T lMasterPartitionTuple;
-    const size_t lMstrPartGrowth = 1000;
+    const size_t lMstrPartGrowth = 100;
     _masterPartition = _partMngr.createMasterPartition(_cb->mstrPart(), lMstrPartGrowth, lMasterPartitionTuple);
     _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
     _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);

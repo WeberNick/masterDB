@@ -5,8 +5,6 @@ SegmentManager::SegmentManager() :
     _segments(),
 	_segmentsByID(),
 	_segmentsByName(),
-    _indexPages(), // one element which is the first page index??
-    _maxSegmentsPerPage(0),
     _masterSegSegName("SegmentMasterSegment"),
     _BufMngr( BufferManager::getInstance()),
     _cb(nullptr)
@@ -28,7 +26,6 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
     if(!_cb)
     {
         _cb = &aControlBlock;
-        _maxSegmentsPerPage = (_cb->pageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); // number of pages one segment page can manage
     TRACE("'SegementManager' initialized");
     }
 }
@@ -36,10 +33,11 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
 void SegmentManager::load(const seg_vt& aTuples) noexcept
 {
     // fill internal data structure with all relevant info
-    uint16_t maxID = 0;
+    uint16_t maxID = 0; //trying to find the maximal ID already assigned to a segment
     for(const auto& segTuple : aTuples)
     {
     std::cout<<segTuple<<std::endl;
+    //insert tuples into data structures
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
       TRACE(segTuple.to_string() + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
@@ -80,9 +78,10 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
 
 void SegmentManager::createSegmentSub(const Segment_T& aSegT){
     TRACE(std::string("(DELETE TRACE AFTER DEBUGGING) trying to insert the following tuple:\n") +aSegT.to_string() );
+    //insert into maps
     _segmentsByID[aSegT.ID()] = aSegT;
     _segmentsByName[aSegT.name()] = aSegT.ID();
-
+    //insert tuple on disk
     SegmentFSM_SP* lSegments = (SegmentFSM_SP*)getSegment(_masterSegSegName);
     lSegments->insertTuple<Segment_T>(aSegT);
 }
@@ -103,11 +102,12 @@ void SegmentManager::deleteSegment(SegmentFSM_SP*& aSegment)
 
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
-    TRACE("Deletion of Segment " + getSegment(aID)->to_string() + " starts...");
+    //@Nick: bitte nicht im TRACE getSegment nehmen. getSegment läd schon und kann abstürzen.
+    TRACE("Deletion of Segment " + std::to_string(aID) + " starts...");
     SegmentBase* lSeg = getSegment(aID);
-    lSeg->erase();
-    // delete object if exists
-    delete lSeg;
+    lSeg->erase(); //free all pages
+    // delete object itself, which now exists.
+    delete lSeg; 
     _segments.erase(aID);
 
     const Segment_T seg(_segmentsByID.at(aID));
@@ -134,7 +134,7 @@ void SegmentManager::deleteSegment(const std::string& aName)
 }
 
 void SegmentManager::deleteSegements(const uint8_t aPartitionID) {
-
+    //@Nick kann der Aufruf mehr als einen Treffer finden? Es gibt nämlich potentiell tausende.
     auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) { return elem.second.partID() == aPartitionID; }); 
     if(america != _segmentsByID.cend())
     {
@@ -162,7 +162,6 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
         SegmentBase* s;
         switch (lTuple.type())
         {
-            // DOES NOT WORK BECAUSE: partition muss noch geladen werden, und zwar die, auf der Segment steht.
             case 1: // SegmentFSM
                 s = new SegmentFSM(part, *_cb);
                 break;
@@ -240,21 +239,21 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
 {
     TRACE("Creation of master segments starts...");
      // create 2 Master Segments
-     // MasterSegParts
+     // Master Segment for Partitions
      SegmentFSM_SP* lPSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lPSeg->getID()] = lPSeg;
     
     Segment_T lPSegT(aPartition->getID(),lPSeg->getID(),aName,2,lPSeg->getIndexPages().at(0));
     TRACE("ID is "+std::to_string(aPartition->getID()));
     TRACE("MasterSegPart created");
-    // MasterSegSegs
+    // Master Segment for Segments
     SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lSSeg->getID()] = lSSeg;
 
     Segment_T lSSegT(aPartition->getID(), lSSeg->getID(), _masterSegSegName, 2, lSSeg->getIndexPages().at(0));
     TRACE("First Page is "+std::to_string(lSSeg->getIndexPages().at(0)));   
     TRACE("MasterSegSeg created.");
-    // store them into Segment Master
+    // store the to Segments into the Master Segment of Segments
     createSegmentSub(lSSegT);
     createSegmentSub(lPSegT);
     TRACE("Creation of master segments finished");

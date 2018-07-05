@@ -25,7 +25,18 @@ class SegmentBase
 
 	protected:
 		friend class SegmentManager;
+        /**
+         * @brief   constructs an entire segment both on disk and the object
+         * @param   aSegID          ID of the Segment to be set by SegmentManager
+         * @param   aPartition      Partition the segment shall be on
+         * @param   aControlBlock   self-explaining
+         */
 		explicit SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+        /**
+         * @brief   only constructs a segment object, no physicall representation is created. Used to load.
+         * @param   aPartition      Partition the segment is on
+         * @param   aControlBlock   self-explaining
+         */
 		explicit SegmentBase(PartitionBase& aPartition, const CB& aControlBlock);
         explicit SegmentBase() = delete;
 		explicit SegmentBase(const SegmentBase& aSegment) = delete;
@@ -86,8 +97,20 @@ class SegmentBase
         inline std::string to_string() noexcept { return static_cast<const SegmentBase&>(*this).to_string(); }
 
 	protected:
+        /**
+        * @brief   stores the segment to disk in order to shut down the system.
+        *          this does not write directly to disk but to buffer.
+        */
 		virtual void storeSegment() = 0;                          // serialization
+        /**
+        * @brief   loads the segment from disk on boot.
+        * @param   aPageIndex   The page index of first indexPage of the segment. 
+        *                       All data can be restored from there on.
+        */
 		virtual void loadSegment(const uint32_t aPageIndex) = 0;  // deserialization
+        /**
+        * @brief   erases the segment. This does not destroy the object itself but frees all its pages.
+        */
         virtual void erase();                                     // deletes the segment
 
     private:
@@ -98,9 +121,10 @@ class SegmentBase
 	protected:
 		/* An ID representing this Segment */
 		uint16_t        _segID;
-		/* Contains index pages which contain addresses of pages belonging to the segment (for serialization purposes). First element is considered as masterPageIndex */
+		/* Contains index pages which contain addresses of pages belonging to the segment (for serialization purposes). 
+           First element is considered as masterPageIndex */
 		uint32_vt       _indexPages;
-		/* A map containing all page ID's and their corresponding buffer control block */
+		/* A map containing all data page ID's and their corresponding buffer control block */
         pages_vt        _pages;
 		/* Partition the Segment belongs to */
 		PartitionBase&  _partition;

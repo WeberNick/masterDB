@@ -1,9 +1,10 @@
 /**
  * @file    segment_fsm_sp.hh
  * @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *          Jonas Thietke
  * @brief   Class implementing a Segment with Free Space Management for N-ary Storage Model (SP)
  * @bugs    Currently no bugs known.
- * @todos   -are all changes correct?
+ * @todos   no todos known.
  */
 
 #pragma once
@@ -28,8 +29,22 @@ class SegmentFSM_SP : public SegmentFSM
   private:
     friend class SegmentManager;
     explicit SegmentFSM_SP() = delete;
+    
+    /**
+    * @brief   constructs an entire segment both on disk and the object
+    * @param   aSegID          ID of the Segment to be set by SegmentManager
+    * @param   aPartition      Partition the segment shall be on
+    * @param   aControlBlock   self-explaining
+    */
     explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+    
+    /**
+    * @brief   only constructs a segment object, no physicall representation is created. Used to load.
+    * @param   aPartition      Partition the segment is on
+    * @param   aControlBlock   self-explaining
+    */
     explicit SegmentFSM_SP(PartitionBase& aPartition, const CB& aControlBlock);
+    
     explicit SegmentFSM_SP(const SegmentFSM_SP&) = delete;
     explicit SegmentFSM_SP(SegmentFSM_SP&&) = delete;
     SegmentFSM_SP& operator=(const SegmentFSM_SP&) = delete;
@@ -41,17 +56,51 @@ class SegmentFSM_SP : public SegmentFSM
     TID insertTuple(const Tuple_T& aTuple);
     TID insertTuple(byte* aTuple, const uint aTupleSize);
 
+    /**
+    * @brief   Inserts all tuples of the vector into a segment. Can handle vector larger than the size of a page
+    *          and can be therefore used as bulk insert. Tries to pack tuples as densely as possible.
+    * @param   aTupleVector vector containing all tuples to be inserted in form a of a class.
+    * @return   vector of all TIDs inserted
+    */
     template<typename Tuple_T>
     tid_vt insertTuples(const std::vector<Tuple_T>& aTupleVector);
+    /**
+    * @brief   Inserts all tuples of the vector into a segment. Calls insertTuple for every tuple provided.
+    *           generally, the templated method should be used whenever possible.
+    * @param   aTuples     vector containing all tuples to be inserted in form of pointers
+    * @param   aTupleSize  tuples are assumed to be fixed sized. This size holds for all.
+    * @return   vector of all TIDs inserted
+    */
     tid_vt insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
 
+    /**
+    * @brief   loads a tuple to which the TID is provided.
+    * @param   aTID   TID of tuple to be loaded
+    * @return  the tuple is loaded into main memory and returned
+    */
     template<typename Tuple_T>
     Tuple_T getTuple(const TID& aTID);
+    /**
+    * @brief   collects all valid TIDs of a segment.
+    * @return  the TIDs to all valid tuples of a segment.
+    */
     tid_vt scan();
 
+    /**
+    * @brief   gets a free page with enough space to store aNoOfBytes. Makes use of the getFreePage method
+    *           of the SegmentFSM but uses the paraters for slotted pages
+    * @param   aNoOfBytes  how many free bytes shall be requested?
+    * @param   emptyfix    used internally as second return value. Will tell if page has been already initialised or not.
+    * @return  the PID of a page having a sufficient amount of free space.
+    */    
     PID getFreePage(uint aNoOfBytes, bool& emptyfix);
 
     int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
+    
+    /*
+    The unbuffered methods work like the buffered ones but use their own small buffer with the size of a page.
+    Are used during boot as the buffer manager is not working until everything is loaded.
+    */
     void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
     void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
 
@@ -60,6 +109,9 @@ class SegmentFSM_SP : public SegmentFSM
     const tid_vt& getTIDs() noexcept { return _tids; }
 
     protected:
+        /**
+        * @brief   erases the segment. This does not destroy the object itself but frees all its pages.
+        */
 	    void erase() override;
 
     private:
@@ -143,7 +195,6 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
     try{
 	    lPID = SegmentFSM::getFreePage(lTotalSize, emptyfix, sizeof(sp_header_t));
     }
-    //exception handling buggy, will be fixed tomorrow
     catch(NSMException ex){
         //lTotalSize is bigger than size of a page. 
         //Now we try to approx the bin packing problem (NP hard) by a greedy algorithm...

@@ -18,12 +18,14 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize) {
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTupleSize, emptyfix);
 	BCB* lBCB;
-	if(emptyfix){//the page is new, use different command on buffer
+    //if the page is new, use different command on buffer
+	if(emptyfix){
 		lBCB = _bufMan.emptyfix(lPID);
 	}
 	else{
 		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
+    //insert page into _pages data structure
     auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); //get iterator to PID in page vector
     if(it != _pages.end())
     {
@@ -84,7 +86,7 @@ tid_vt SegmentFSM_SP::insertTuples(const byte_vpt& aTuples, const uint aTupleSiz
 
 void SegmentFSM_SP::loadSegmentUnbuffered(const uint32_t aPageIndex) {
     TRACE("Trying to load a Segment from Page "+std::to_string(aPageIndex)+ " on partition "+std::to_string(_partition.getID()));
-    // partition and bufferManager have to be set
+    // partition has to be set, buffer manager is not needed.
     size_t lPageSize = getPageSize();
     byte *lPageBuffer = new byte[_partition.getPageSize()];
     uint32_t lnxIndex = aPageIndex;

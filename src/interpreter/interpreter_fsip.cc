@@ -164,6 +164,7 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     if(freeOnThisPage == 0){
         return aNumberOfPages;
     }
+    //distance of first page to be freed to last one.
     int64_t ldist = ((int64_t)freeOnThisPage) - ((int64_t)aNumberOfPages);
     TRACE("ldist: "+std::to_string(ldist));
     byte* lPP = _pp;

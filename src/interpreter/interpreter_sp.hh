@@ -26,7 +26,7 @@ class InterpreterSP
             uint16_t _size; // of record contained
             uint8_t _status; //1 valid, 0 deleted
 		};
-		struct freeSpaceList_t{
+		struct freeSpaceList_t{//not used, code implemented but not tested as it was too much for scope of project
 			uint16_t _offset; //from beginning of page to next free space, 0 if invalid
 			uint16_t _size; //size of this free space
 		};
@@ -47,7 +47,7 @@ class InterpreterSP
         std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ; //return ptr where to insert tpl and its offset in the slots
 		int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable
 		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
-		byte* getRecord(const uint aRecordNo) noexcept ;
+		byte* getRecord(const uint aRecordNo) noexcept ; //gets a record, returns a nullptr if it does not exist or is marked invalid
 
 
 

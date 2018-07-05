@@ -53,9 +53,9 @@ class InterpreterFSM final {
     /**
      *	@brief	looks for the next free block in the FSIP and reserves the page
      *
-     *	@param	aPageStatus - 
+     *	@param	aPageStatus - the number of requested free bytes ancapsulated as a PageStatus
      *
-     * 	@return either an offset to the free block or -1 if no free block was found
+     * 	@return either an offset to the free block or INVALID if no free block was found
      */
     uint32_t getFreePage(const PageStatus aPageStatus) noexcept;
 
@@ -63,17 +63,17 @@ class InterpreterFSM final {
      *	@brief	change the status of page at the given logical position within the segment
      *
      *	@param	aPageNo - Page index inside the partition
-     *	@param	aPageStatus - 
+     *	@param	aPageStatus - the new PageStatus the page shall have
      */
     void changePageStatus(const uint aPageNo, const PageStatus aStatus) noexcept;
     
     /**
-     *  @brief
+     *  @brief  calculates a PageStatus, used to ask with this page status for sufficiently free space
      *
-     *  @param aSizeWithoutOverhead -
-     *  @param aNoOfBytes -
+     *  @param aSizeWithoutOverhead - Size of the page without overhead
+     *  @param aNoOfBytes - the number of bytes to be inserted
      *
-     *  @return 
+     *  @return a relative propotion of aNoOfBytes and the size of the page
      */
     PageStatus calcPageStatus(const uint aSizeWithoutOverhead, const uint aNoBytes) noexcept;
     PageStatus getPageStatus(const uint aPageNo) noexcept;

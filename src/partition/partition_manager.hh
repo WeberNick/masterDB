@@ -2,6 +2,7 @@
  *  @file   partition_manager.hh
  *  @author Nicolas Wipfler (nwipfler@mail.uni-mannheim.de),
  *          Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *          Jonas Thietke
  *  @brief  Singleton class managing all partitions
  *  @bugs   Currently no bugs known
  *  @todos  Currently no todos
@@ -62,12 +63,24 @@ class PartitionManager
         std::pair<PartitionFile*, bool>  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
         std::pair<PartitionRaw*, bool>   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
 
-        void            deletePartition(const uint8_t aID);
-        void            deletePartition(const std::string& aName);
+        void                deletePartition(const uint8_t aID);
+        void                deletePartition(const std::string& aName);
 
     public:
+        /**
+         * @brief   not just a getter, also loads the partition if it was not loaded before
+         * @param   aID - ID of the partition to be retrieved
+         * @return  pointer to the partition object
+         */
         PartitionBase*      getPartition(const uint8_t aID);
+        /**
+         * @brief   not just a getter, also loads the partition if it was not loaded before.
+         *          looks up ID to corresponding name and than call getPartition (aID)
+         * @param   aName - Name of the partition to be retrieved
+         * @return  pointer to the partition object
+         */
         PartitionBase*      getPartition(const std::string& aName);
+        
         const Partition_T&  getPartitionT(const uint8_t aID) const;
         Partition_T&        getPartitionT(const uint8_t aID);
         const Partition_T&  getPartitionT(const std::string& aName) const;

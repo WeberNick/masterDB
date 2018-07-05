@@ -52,20 +52,73 @@ class SegmentManager
         void init(const CB& aControlBlock) noexcept;
 
 	public:
+        /**
+         * @brief   used for booting, loads the segment manager
+         * @param   aTuples     all segment tuple found in the corresponding master segment.
+         */
 		void load(const seg_vt& aTuples) noexcept;
 
 	public:
+        /**
+         * @brief   creates a new Segment FSM both on disk and in all data structures
+         * @param   aPartition  Partition the segment shall be on
+         * @param   aName       name of the new segment. Needs to be globally unique.
+         * @return  pointer to this segment.
+         */
 		SegmentFSM*    createNewSegmentFSM(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
-		SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
+		/**
+         * @brief   creates a new Segment FSM both on disk and in all data structures
+         * @param   aPartition  Partition the segment shall be on
+         * @param   aName       name of the new segment. Needs to be globally unique.
+         * @return  pointer to this segment.
+         */
+        SegmentFSM_SP* createNewSegmentFSM_SP(PartitionBase& aPartition, const std::string& aName); // create and add new segment (persistent), return it
+        /**
+         * @brief   used for startup. Does not insert the segment into any data structures of the manager
+         * @param   aPartition  Partition object the segment is on
+         * @param   aIndex      page the segment shall be loaded from
+         * @return  returns pointer to the segment
+         * @see     segment_fsm.hh, db_instance_manager.hh
+         */
         SegmentFSM_SP* loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex);
+        /**
+         * @brief   deletes a Segment by its ID. Deletes the object, cleans it from all data structures and calls erase.
+         * @param   aID     ID of the segment to be erased
+         */
 		void deleteSegment(const uint16_t aID);
-		void deleteSegment(const std::string& aName);
+		/**
+         * @brief   deletes a Segment by its name. Deletes the object, cleans it from all data structures and calls erase.
+         *          The method looks up the segments ID and calls deleteSegement(aID)
+         * @param   aName     Name of the segment to be erased
+         */
+        void deleteSegment(const std::string& aName);
+        /**
+         * @brief   method to delete a tuple physically from disk. 
+         *          Scans a segment for the ID stored in the tuple type and deletes it.
+         * @param   aMasterName     Name of Segment to delete Tuple from. Is used for deleting either segments or partitions, but works for all.
+         * @param   aID             ID of Tuple to be deleted. ID must be part of Tuple_T
+         */
         template<typename Tuple_T>
 		void deleteTuplePhysically (const std::string& aMasterName, uint16_t aID);
+        /**
+         * @brief   deletes all segments of a given partition
+         * @param   aPartitionID    partition the segments are on.
+         */
         void deleteSegements(const uint8_t aPartitionID);
 
     public:
+        /**
+         * @brief   not just a getter, also loads the segment from disk if it was not loaded before
+         * @param   aSegmentID - ID of the segment to be retrieved
+         * @return  pointer to the segment object
+         */
 		SegmentBase*     getSegment(const uint16_t aSegmentID);
+        /**
+         * @brief   not just a getter, also loads the segment from disk if it was not loaded before.
+         *          looks up ID to corresponding name and than call getSegment (aSegmentID)
+         * @param   aName - Name of the segment to be retrieved
+         * @return  pointer to the segment object
+         */
 		SegmentBase*     getSegment(const std::string& aSegmentName);
         const Segment_T& getSegmentT(const uint16_t aID) const;
         Segment_T&       getSegmentT(const uint16_t aID);
@@ -77,28 +130,26 @@ class SegmentManager
 		inline uint      getNoSegments() noexcept { return _segments.size(); }	
 
 	private:
+        //stores all Segments currently loaded, used for shutdown.
 		void storeSegments();
+        //subpart which is the same for all differently segment types. Mainly inserts the tuple on disk an into data structures
 		void createSegmentSub (const Segment_T& aSegT);
         //wrapper needed as segment base destructor is private
         void deleteSegment(SegmentFSM_SP*& aSegment);
+        //part of installation
 		void createMasterSegments(PartitionFile* aPartition, const std::string& aName);
 
 	private:
-		uint16_t                         _counterSegmentID; // ID Counter for Segments
+		uint16_t                         _counterSegmentID;           // ID Counter for Segments
 		std::unordered_map<uint16_t, SegmentBase*> _segments;         // Stores all managed segment objects by ID
 
 		std::unordered_map<uint16_t, Segment_T>    _segmentsByID;     // Stores all segment Tuples by ID in map
 		std::unordered_map<std::string, uint16_t>  _segmentsByName;   // Stores Name/ID pair used for lookup in next table
 
-		/* Indices of Pages in the Partition where the SegmentManager itself is spread; Default is Page 1
-           TODO TO BE DELETED */
-		uint32_vt      _indexPages;		
-		uint32_t       _maxSegmentsPerPage; // Number of Pages that can be managed on one SegmentManager Page
-        std::string    _masterSegSegName;   // Name of Master segment containing all segments
+		std::string    _masterSegSegName;   // Name of Master segment containing all segments
 
         BufferManager& _BufMngr;
         const CB*      _cb;
-        // bool        _installed = false; // only true, if installed.
 };
 
 template<typename Tuple_T>

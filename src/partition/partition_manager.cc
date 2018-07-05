@@ -112,8 +112,10 @@ std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(cons
 
 void PartitionManager::createPartitionSub(const Partition_T& aParT)
 {
+    //insert into data structures
     _partitionsByID[aParT.ID()] = aParT;
     _partitionsByName[aParT.name()] = aParT.ID();
+    //insert tuple
     SegmentFSM_SP* lSeg = static_cast<SegmentFSM_SP*>(SegmentManager::getInstance().getSegment(_masterSegPartName));
     lSeg->insertTuple<Partition_T>(aParT);
 }
@@ -278,7 +280,7 @@ void PartitionManager::deletePartition(const std::string& aName)
         throw PartitionNotExistsException(FLF);
     }
 }
-
+//just creates an object which is deleted afterwards again.
 PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)
 {
    return new PartitionFile(aPart, *_cb); 

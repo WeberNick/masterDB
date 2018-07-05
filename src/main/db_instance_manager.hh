@@ -44,10 +44,20 @@ class DatabaseInstanceManager final
 		}
 
         void init(const CB& aControlBlock);
+        
+        /**
+         * @brief   shuts the system down. Shall be only called on a valid state of the system and therefore has to be called explicetely.
+         */
 		void shutdown();
 
 	private:
+        /**
+         * @brief   installs the system and places the master partition at the path defined in the control block
+         */
 		void install();
+        /**
+         * @brief   boots the system from a given master partition
+         */
 		void boot();
 
 	public:
@@ -56,18 +66,24 @@ class DatabaseInstanceManager final
         inline bool isRunning() noexcept { return _running; }
 
 	private:
+        /**
+         * @brief   loads a Master Segment and does not make use of the buffer.
+         * @param   aTuples     vector in which result is stores
+         * @param   aIndex      index from which master segment is loaded
+         */
 		template<typename T_TupleType>
 		void load(std::vector<T_TupleType>& aTuples, const uint aIndex);
-		template<typename T_TupleType> // probably of no use, physical tuples always up to date. BufMngr.flushall should be enough
+         // probably of no use, physical tuples always up to date. BufMngr.flushall is enough
+		template<typename T_TupleType>
 		void store(std::vector<T_TupleType>& aTuples, const uint aIndex);
 	
 	private:
-        std::string       _path;
+        std::string       _path;      // path to master partition
         PartitionFile*    _masterPartition;
         PartitionManager& _partMngr;
         SegmentManager&   _segMngr;
-        uint              _partIndex; // Index of first segment storing pages with partition tuples, should be 1
-        uint              _segIndex;  // Index of first segment storing pages with segment tuples, should be 3
+        uint              _partIndex; // Index of first page of segment storing pages with partition tuples, should be 1
+        uint              _segIndex;  // Index of first page of segment storing pages with segment tuples, should be 3
         const CB*         _cb;
         bool              _running;
 };
@@ -76,13 +92,6 @@ template <typename T_TupleType>
 void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint aIndex)
 {
     TRACE("Loading tuples from the master partition starts...");
-    /* part_t lMasterPartitionTuple = { 0, _partMngr._masterPartName, _cb->mstrPart(), 1, 20 };
-       PartitionManager& lPartMan = PartitionManager::getInstance();
-       lPartMan._partitionsByID[0]=lMasterPartitionTuple;
-       PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
-       SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex); */
-
-    // Partition_T(const uint8_t aPID, const std::string& aName, const std::string& aPath, const uint8_t aType, const uint16_t aGrowth);
     const uint8_t lPartitionID = 1;
     const std::string& lName = _partMngr.masterPartName();
     const std::string& lPathToMaster = _cb->mstrPart();

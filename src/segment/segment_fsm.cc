@@ -8,12 +8,13 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const C
     /* PagesToManage * 2 because one byte manages two pages (4 bits for one page). */
     uint32_t lNoPagesToManage = (_partition.getPageSize() - sizeof(fsm_header_t)) * 8 / 4;
     
-    //no need to alloxc index page as this is done by constructor of SegmentBase
+    //no need to alloc index page as this is done by constructor of SegmentBase
+    //alloc FSM
     uint lFSMIndex = _partition.allocPage();
     _fsmPages.push_back(lFSMIndex);
     _partition.close();
 
-    //initFSM
+    //init FSM using the buffer
     PID lPID = {_partition.getID(), lFSMIndex};
     BCB* lBCB = _bufMan.emptyfix(lPID);
     byte *lPagePointer = _bufMan.getFramePtr(lBCB);
@@ -33,8 +34,6 @@ SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
 
 void SegmentFSM::erase(){
     _partition.open();
-
-    //Remove all data pages
     PID lPID;
     lPID._fileID=_partition.getID();
     //remove all fsms
@@ -44,16 +43,17 @@ void SegmentFSM::erase(){
         _partition.freePage(iter);
     }
     _partition.close();
+    //remove all index and data pages
     SegmentBase::erase();
     
 }
 
-//returns flag if page empty or not. Partitionsobjekt evtl ersezten durch reine nummer, so selten, wie man sie jetzt noch braucht.
+//returns flag if page empty or not.
 PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfOverhead) {
     TRACE("Request for a page with " + std::to_string(aNoOfBytes) + " Bytes free");
     const uint lPageSizeInBytes = getPageSize() - aSizeOfOverhead;
     /* Check if page with enough space is available using FF algorithm. */
-    if(aNoOfBytes > lPageSizeInBytes){//exception again caught some line later, try to clean this....
+    if(aNoOfBytes > lPageSizeInBytes){
         std::string errMsg = "requested more space than the size of a page.";
         TRACE(errMsg);
         throw NSMException(FLF,errMsg);
@@ -65,55 +65,61 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfO
     lPID._fileID = _partition.getID();
     BCB* lBcb;
     TRACE(std::to_string(_fsmPages.size()));
+    //for every FSM page
     for (size_t i = 0; i < _fsmPages.size(); ++i) {
+        //load it
         uint32_t lFSMPage = _fsmPages[i];
         lPID._pageNo = lFSMPage;
         lBcb = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
         lPagePointer = _bufMan.getFramePtr(lBcb);
         fsmp.attach(lPagePointer);
+        //page status is global, but can only be calculated by an attached Interpreter.
         PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
+        
         if (lPageStatus == PageStatus::kNoType){
-            //something went completely wrong
+            //something went completely wrong, this exception should have been caught before.
+            //but stays here for safety.
             std::string errMsg = "asked the interpreter for more space than possible.";
             TRACE(errMsg);
             _bufMan.unfix(lBcb);
             throw NSMException(FLF,errMsg);
         }
-        std::string lMes = std::string("loop iteration ")+std::to_string(i)+" calculated PageStatus: "+std::to_string(static_cast<uint>(lPageStatus));
-        TRACE(lMes);
+
+        TRACE(std::string(" loop iteration ")+std::to_string(i)+" ca,lculated PageStatus: "+std::to_string(static_cast<uint>(lPageStatus)));
+        //get a free page
         uint32_t lIndex = fsmp.getFreePage(lPageStatus);
-        lMes=std::string("Interpreter getFreePage returns: ")+std::to_string(lIndex)+" at Segment "+std::to_string(_segID)+std::string(" _pages.size() is ")+std::to_string(_pages.size());
-        TRACE(lMes);
+        TRACE(std::string("Interpreter getFreePage returns: ")+std::to_string(lIndex)+" at Segment "+std::to_string(_segID)+std::string(" _pages.size() is ")+std::to_string(_pages.size()));
+
         if (lIndex != INVALID_32) {
-            /* If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet, otherwise the page already exists) */
             if (lIndex + i * fsmp.getMaxPagesPerFSM() >= _pages.size()) {
+                //If this is the case: alloc new page, add to _pages and return that index. (occurs if page does not exist yet)
+
                 _partition.open();
                 uint lPageIndex = _partition.allocPage();
                 lPID._pageNo = lPageIndex;
                 _pages.push_back(std::pair<PID, BCB*>(lPID, nullptr));
-
-                if(_pages.size() >= _indexPages.size() * (getPageSize()  - sizeof(segment_fsm_header_t))) //if there is more space needed to store stuff in the end, reserve another IndexPage
+                //if there is more space needed to store page indeces at shutdown, reserve another IndexPage
+                if(_pages.size() >= _indexPages.size() * (getPageSize()  - sizeof(segment_fsm_header_t)))
                 { 
                     uint lIndexPage = _partition.allocPage();
                     _indexPages.push_back(lIndexPage);
                 }
+
                 _partition.close();
                 emptyfix=true;
                 lBcb->setModified(true);
                 _bufMan.unfix(lBcb);
-                lMes=  std::string("successfully found a free page. on existing FSM but created new one");
-                TRACE(lMes);
+                TRACE("successfully found a free page. on existing FSM but created new one");
                 return lPID; 
             } else {
-                
+                //there is a page with sufficient free space already allocated
                 lPID._pageNo = _pages.at(i * fsmp.getMaxPagesPerFSM() + lIndex).first._pageNo;
                 lBcb->setModified(true);
                 _bufMan.unfix(lBcb);
-                lMes=std::string("successfully found a free page. existing page");
-                TRACE(lMes);
+                TRACE("successfully found a free page. existing page");
                 return lPID;
             }
-        } //if lIndex == -1
+        } //if lIndex == INVALID
         fsmp.detach();
         if(i != _fsmPages.size() -1) _bufMan.unfix(lBcb); 
     }
@@ -123,10 +129,6 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfO
     uint32_t lFSMIndex = _partition.allocPage();
     _fsmPages.push_back(lFSMIndex);
 
-   // PID lPID = {_partition.getID(),_fsmPages[_fsmPages.size() - 2]};
-    //BCB* lBcb = _bufMngr.fix(lPID);
-    //byte* lPP = _bufMan.getFramePtr(lBcb);
-    
     /* Insert NextFSM to header of current FSM, which is still loaded and locked. */
     (*((fsm_header_t*) (lPagePointer + getPageSize() - sizeof(fsm_header_t) )))._nextFSM = lFSMIndex;
     lBcb->setModified(true);
@@ -158,7 +160,6 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfO
     }
     _partition.close();
     
-    //lPID._pageNo = ((_fsmPages.size() - 1) * fsmp.getMaxPagesPerFSM()) + lFreePageIndex; was here before cannot be valid I guess.
     fsmp.detach();
     TRACE("Successfully found free page on segment. created new fsm and new page.");
     return lPID;
@@ -166,13 +167,12 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfO
 
 PID SegmentFSM::getNewPage() {
     bool emptyfix = true;
-    /***********************
-    *  Do this without marking the whole page as full  *
-    ***********************/
+    //doing this without marking the whole page as full had way to many border cases.
     TRACE("Successfully got new page on segment.");
-    return getFreePage(getPageSize() - sizeof(segment_fsm_header_t), emptyfix);
+    return getFreePage(getPageSize() - sizeof(basic_header_t), emptyfix);
 }
    /*     //reserve new page
+   //had way to many border cases to deal with.
     if (_partition.open() == -1) { return -1; }
     uint lPage = _partition.allocPage();
     if (lPage == -1) { return -1; }
@@ -195,18 +195,19 @@ PID SegmentFSM::getNewPage() {
     */
 
 void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
-    TRACE("Trying to load a Segment from Page "+std::to_string(aPageIndex)+ " on partition "+std::to_string(_partition.getID())+_partition.getPath());
+    TRACE("Trying to load a Segment from Page "+std::to_string(aPageIndex)+ " on partition "+std::to_string(_partition.getID())+" located at "+_partition.getPath());
     // partition and bufferManager have to be set
     size_t lPageSize = getPageSize();
     byte *lPageBuffer;
     uint32_t lnxIndex = aPageIndex;
-    segment_fsm_header_t lHeader;
-    fsm_header_t lHeader2;
-    uint32_t l1FSM;
+    segment_fsm_header_t lHeader; //header of fsm index page
+    fsm_header_t lHeader2;        //header of the fsm pages
+    uint32_t l1FSM;               //index of first fsm. stored at every index page.
     PID lPID;
     BCB* lBCB;
     TRACE(" ");
-    while (lnxIndex != 0) {
+    //load index Pages
+    while (lnxIndex != 0) {//next Index is 0 at last index page only.
         lPID =  {_partition.getID(),lnxIndex};
         lBCB = _bufMan.fix(lPID, LOCK_MODE::kSHARED);
         lPageBuffer = _bufMan.getFramePtr(lBCB);
@@ -234,23 +235,24 @@ void SegmentFSM::loadSegment(const uint32_t aPageIndex) {
         _fsmPages.push_back(lHeader2._nextFSM);
         _bufMan.unfix(lBCB);
     }
+    //last one will push a 0 onto _fsmPages. It is deleted again.
     if(_fsmPages.at(_fsmPages.size()-1)==0){
-            TRACE("Load FSMs");
         _fsmPages.erase(_fsmPages.end()-1);
     }
+    // DELETE AFTER DEBUGGING
     for (auto& a : _fsmPages){
         TRACE(std::to_string(a));
     }
     
-    TRACE("Successfully load segment.");
+    TRACE("Successfully loaded segment.");
 }
 
 void SegmentFSM::storeSegment() {
     size_t lPageSize = getPageSize();
     byte *lPageBuffer;
-    uint i = 0;
-    uint j = 0;
-    uint k;
+    uint i = 0; //counter for data pages
+    uint j = 0; //counter for index Pages
+    uint k;     //counter on individual page
     uint managedPages = _pages.size();
     uint maxPerPage = (lPageSize - sizeof(segment_fsm_header_t))/sizeof(uint32_t);
     segment_fsm_header_t lHeader;
@@ -260,8 +262,8 @@ void SegmentFSM::storeSegment() {
     // create last invalid index page:
     _indexPages.push_back(0);
     TRACE("IndexPages.size: "+std::to_string(_indexPages.size())+" on Segment "+std::to_string(_segID));
-    // for all index pages
 
+    // for all index pages
     while (j < _indexPages.size() - 1) {
         lPID={_partition.getID(),_indexPages.at(j)};
         lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
@@ -280,7 +282,6 @@ void SegmentFSM::storeSegment() {
         lHeader = {k, _fsmPages.at(0), _indexPages.at(j + 1), _segID, 1, 0, lBH};
         *(segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)) = lHeader;
         lBCB->setModified(true);
-       // TRACE("first fsm page: "+std::to_string(  ((segment_fsm_header_t *)(lPageBuffer + lPageSize - sizeof(segment_fsm_header_t)))->_firstFSM ));
         _bufMan.unfix(lBCB);
         ++j;
     }

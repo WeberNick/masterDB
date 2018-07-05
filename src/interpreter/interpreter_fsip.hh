@@ -79,10 +79,16 @@ class InterpreterFSIP final {
      */
     void freePage(const uint aPageIndex) noexcept;
 
+    /**
+     * @brief   if the partition is a PartitionFile Instance, it can grow. This method will mark accordingly many pages as free
+     * @param   aNumberOfPages - number of pages which shall be freed in general
+     * @param   aMaxPagesPerFSIP - how many pages can the be per FSIP? Is calculated by the partition and therefore handed over.
+     * @return  the number of pages which have to be freed on the next fsip (which is to be created by the partition)
+     */
     uint32_t grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP) noexcept;
 
   public:
-    /*  tters*/
+    /*  setters*/
     inline byte *pagePtr() noexcept { return _pp; }
     inline fsip_header_t *header() noexcept { return _header; }
     inline uint noManagedPages() noexcept { return header()->_managedPages; } // Remove noManagedPages()
@@ -96,11 +102,11 @@ class InterpreterFSIP final {
     /**
      *	@brief	get the Position of the next free page
      *
-     * 	@return either the position if successful or 0
+     * 	@return either the position if successfull or 0
      */
     uint getNextFreePage() noexcept;
 
-    /*	create the page with the given index in a file for debugging purposes */
+    /*	write page loaded to a file. aPageIndex only for naming. */
     void debug(const uint aPageIndex);
 
   private:

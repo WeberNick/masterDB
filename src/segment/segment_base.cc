@@ -64,12 +64,8 @@ void SegmentBase::writePage(const uint aPageNo)
     BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
-            TRACE("Trying to write Page");
-
         lBCB->setModified(true);
         _bufMan.flush(lBCB); 
-            TRACE("Trying to write Page");
-   
     }
 }
 

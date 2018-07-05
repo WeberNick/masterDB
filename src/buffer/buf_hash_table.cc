@@ -20,12 +20,6 @@ size_t BufferHashTable::hash(const PID& aPageID) noexcept
     return (aPageID.fileID() + aPageID.pageNo()) % _size;
 }
 
-sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
-{ 
-	TRACE("got Bucket Mutex of "+std::to_string(aHash));
-	return _hashTable[aHash].getMtx(); 
-}
-
 std::vector<BCB*> BufferHashTable::getAllValidBCBs(){
 	std::vector<BCB*> rtn;
 	BCB* lBCB = nullptr;

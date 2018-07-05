@@ -87,13 +87,9 @@ PageStatus InterpreterFSM::calcPageStatus(const uint aSizeWithoutOverhead, const
     if (aSizeWithoutOverhead < aNoBytes) {
         return PageStatus::kNoType;
     }
-
-    /* old version, let's try something shorter and easier
-    const uint lBucketSize = std::floor(aSizeWithoutOverhead / (double) toType(PageStatus::kPageStatusSize)); */
-    
+  
     const uint lBucketSize = aSizeWithoutOverhead / toType(PageStatus::kMAX);
     const uint lBucketNo = std::ceil(aNoBytes / (double)lBucketSize);
 
-    //????
     return (lBucketNo <= (uint)PageStatus::kMAX) ? static_cast<PageStatus>(lBucketNo) : PageStatus::kNoType;
 }
