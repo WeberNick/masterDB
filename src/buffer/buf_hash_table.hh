@@ -1,11 +1,12 @@
 /**
- *  @file 	buf_hash_table.hh
- *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *  @brief 	Class implementieng the hash table of the buffer manager
- *  @bugs	Currently no bugs known
- *  @todos	TBD
- *  @section TBD
+ *  @file 	 buf_hash_table.hh
+ *  @author	 Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *  @brief 	 Class implementieng the hash table of the buffer manager
+ *  @bugs	 Currently no bugs known
+ *  @todos	 -
+ *  @section TODO
  */
+
 #pragma once
 
 #include "../infra/types.hh"
@@ -54,22 +55,27 @@ class BufferHashTable final
         ~BufferHashTable();
 
     public:
-        inline size_t   getTableSize() noexcept { return _size; }
-        inline sMtx&    getBucketMtx(const size_t aHash) noexcept;
-        inline BCB*     getBucketBCB(const size_t aHash) noexcept { return _hashTable[aHash].getBCB(); }
-        inline void     setBucketBCB(const size_t aHash, BCB* aBCB) noexcept { _hashTable[aHash].setBCB(aBCB); }
-        std::vector<BCB*> getAllValidBCBs(); //get all BCBs from all Buckets in order to flush them
+        inline size_t     getTableSize() noexcept { return _size; }
+        inline sMtx&      getBucketMtx(const size_t aHash) noexcept;
+        inline BCB*       getBucketBCB(const size_t aHash) noexcept { return _hashTable[aHash].getBCB(); }
+        inline void       setBucketBCB(const size_t aHash, BCB* aBCB) noexcept { _hashTable[aHash].setBCB(aBCB); }
+        /**
+         * @brief Get all BufferControlBlocks from all Buckets in order to flush them
+         * 
+         * @return std::vector<BCB*> a vector containing the buffer control blocks of all buckets
+         */
+        std::vector<BCB*> getAllValidBCBs();
 
 	public:
 		size_t hash(const PID& aPageID) noexcept;
 
 	private:
-		const size_t _size; // the size of the hash table
+		const size_t _size;                             // the size of the hash table
         const std::unique_ptr<HashBucket[]> _hashTable; // the hash table maintaining the control blocks
 };
 
-sMtx&    BufferHashTable::getBucketMtx(const size_t aHash) noexcept
+sMtx& BufferHashTable::getBucketMtx(const size_t aHash) noexcept
 { 
-	TRACE("got Bucket Mutex of "+std::to_string(aHash));
+	TRACE("got Bucket Mutex of " + std::to_string(aHash));
 	return _hashTable[aHash].getMtx(); 
 }

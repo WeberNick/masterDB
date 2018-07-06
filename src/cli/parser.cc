@@ -1,16 +1,16 @@
 #include "parser.hh"
 
-/** TODO
+/**
  * @brief Construct a new CP::Command::Command object
  * 
- * @param aCP 
- * @param aName 
- * @param aHasParams 
- * @param aCommandLength 
- * @param aNumParams 
- * @param aFunc 
- * @param aMsg 
- * @param aUsageInfo 
+ * @param aCP a reference to the commandParser
+ * @param aName the name of the command
+ * @param aHasParams indicates whether the command has parameters
+ * @param aCommandLength the command length (e.g. CREATE PARTITION, commandLength = 2)
+ * @param aNumParams the number of parameters (e.g. CREATE PARTITION path name 8 equals numParams = 3)
+ * @param aFunc a function pointer to a commandparser member function implementing the command functionality
+ * @param aMsg a message to display the purpose of this command
+ * @param aUsageInfo a message to display usage information of this command
  */
 CP::Command::Command(const CP& aCP,
                      const char* aName,
@@ -32,7 +32,7 @@ CP::Command::Command(const CP& aCP,
 
 const char* CP::_HELP_FLAG = "-h";
 
-/** TODO
+/**
  * @brief Construct a new CommandParser::CommandParser object
  * 
  */
@@ -96,14 +96,17 @@ void CommandParser::runcli()
             else
             {
                 int rec;
+                std::string comname(com->_name);
                 if (com->_hasParams)
                 {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
+                    TRACE("Submitting Job " + comname + ".");
                     auto future = Pool::Default::submitJob(com->_func, this, &args);
                     rec = future.get();
                 }
                 else
                 {
+                    TRACE("Submitting Job " + std::string(com->_name) + ". having no parameters, thus nullptr!");
                     auto future = Pool::Default::submitJob(com->_func, this, nullptr);
                     rec = future.get();
                 }
@@ -206,8 +209,8 @@ int CP::com_create_p(const char_vpt* args) const
     catch(const InvalidArgumentException& iaex) 
     {
         std::cout << "Invalid argument was provided:" << std::endl;
-        std::cout << iaex.what() << "\n" << std::endl;
-        return CP::CommandStatus::WRONG;
+        // std::cout << iaex.what() << "\n" << std::endl;
+        return CP::CommandStatus::OK; // return OK instead of WRONG because iaex.what() already displays information
     }
     catch(const InvalidPathException& ipex) 
     {
@@ -320,9 +323,9 @@ int CP::com_insert_tuple(const char_vpt* args) const
     {
         if (type == "EMPLOYEE")
         {
-            if (args->size() != (2 + 3)) // hard coded because we only consider one relation
+            if (args->size() != (2 + 3)) // hard coded because we only consider one relation: Employee
             { 
-                std::cout << "Wrong number of arguments." << std::endl;
+                std::cout << "Wrong number of arguments for relation " << type << ".\n" << std::endl;
                 return CP::CommandStatus::OK;
             }
             else
@@ -333,6 +336,7 @@ int CP::com_insert_tuple(const char_vpt* args) const
                 Employee_T e(emp_name, emp_sal, emp_age);
                 TRACE("INSERT TUPLE EMPLOYEE");
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
+                std::cout << "Tuple insertion into " << type << " succeeded.\n" << std::endl;
             }
         }
         else
@@ -364,7 +368,7 @@ int CP::com_show_part(const char_vpt* args) const
         const string_vt& segNames = SegmentManager::getInstance().getSegmentNamesForPartition(partID);
         std::cout << "PartitionID:    " << partID << std::endl;
         std::cout << "Partition:      " << part.name() << std::endl;
-        //std::cout << "Partition Type: " << part.type() << std::endl;
+        // std::cout << "Partition Type: " << part.type() << std::endl;
         std::cout << "Segments:       ";
         if (segNames.size() == 0)
         {
@@ -417,7 +421,16 @@ int CP::com_show_seg(const char_vpt* args) const
         std::cout << "PartitionID:  " << seg.partID() << std::endl;
         std::cout << "Segment Type: " << seg.type() << std::endl;
         std::cout << std::endl;
-        // TODO tuples
+        /* SegmentFSM_SP* segFSM = ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)));
+        segFSM->scan();
+        const tid_vt& tids = segFSM->getTIDs();
+        std::cout << tids.size() << std::endl;
+        for (const auto& tid : tids)
+        {
+            std::cout << tid.tupleNo() << std::endl;
+            const Employee_T& emp = segFSM->getTuple<Employee_T>(tid);
+            std::cout << emp.salary() << std::endl;
+        } */
     }
     catch(const SegmentNotExistsException& oore)
     {
@@ -471,6 +484,12 @@ void CommandParser::printe() const
 {
     std::cout << "Good Bye.\n" << std::endl;
 }
+
+/* template <typename T>
+void CommandParser::pprinttup(T& tuple, )
+{
+
+} */
 
 // TODO
 /* void CommandParser::pprinttups(const std::string& caption, ) const

@@ -1,5 +1,10 @@
 #include "buf_hash_table.hh"
 
+/**
+ * @brief Construct a new BufferHashTable:: BufferHashTable object
+ * 
+ * @param aHashTableSize the size of the hash table
+ */
 BufferHashTable::BufferHashTable(const size_t aHashTableSize) :
 	_size(aHashTableSize),
 	_hashTable(std::make_unique<HashBucket[]>(_size))
