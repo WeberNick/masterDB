@@ -6,6 +6,7 @@
  *  @todos	TBD
  *  @section TBD
  */
+
 #pragma once
 
 #include "../infra/types.hh"
@@ -134,15 +135,10 @@ class SegmentBase
         byte* getPageX(const uint aPageNo);
 
 	protected:
-		/* An ID representing this Segment */
-		uint16_t        _segID;
-		/* Contains index pages which contain addresses of pages belonging to the segment (for serialization purposes). 
-           First element is considered as masterPageIndex */
-		uint32_vt       _indexPages;
-		/* A map containing all data page ID's and their corresponding buffer control block */
-        pages_vt        _pages;
-		/* Partition the Segment belongs to */
-		PartitionBase&  _partition;
+		uint16_t        _segID;      // An ID representing this Segment
+		uint32_vt       _indexPages; // Contains index pages which contain addresses of pages belonging to the segment (for serialization purposes). First element is considered as masterPageIndex
+        pages_vt        _pages;      // A vector of pairs containing all data page ID's and their corresponding buffer control block
+		PartitionBase&  _partition;  // Partition the Segment belongs to
         BufferManager&  _bufMan;
         const CB&       _cb;
 };

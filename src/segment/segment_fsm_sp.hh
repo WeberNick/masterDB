@@ -4,7 +4,7 @@
  *          Jonas Thietke
  * @brief   Class implementing a Segment with Free Space Management for N-ary Storage Model (SP)
  * @bugs    Currently no bugs known.
- * @todos   no todos known.
+ * @todos   -
  */
 
 #pragma once
@@ -26,83 +26,72 @@
 
 class SegmentFSM_SP : public SegmentFSM
 {
-  private:
-    friend class SegmentManager;
-    explicit SegmentFSM_SP() = delete;
+    private:
+        friend class SegmentManager;
+        explicit SegmentFSM_SP() = delete;
+        explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+        explicit SegmentFSM_SP(PartitionBase& aPartition, const CB& aControlBlock);
+        explicit SegmentFSM_SP(const SegmentFSM_SP&) = delete;
+        explicit SegmentFSM_SP(SegmentFSM_SP&&) = delete;
+        SegmentFSM_SP& operator=(const SegmentFSM_SP&) = delete;
+        SegmentFSM_SP& operator=(SegmentFSM_SP&&) = delete;
+        ~SegmentFSM_SP() = default;
+
+    public:
+        template<typename Tuple_T>
+        TID insertTuple(const Tuple_T& aTuple);
+        TID insertTuple(byte* aTuple, const uint aTupleSize);
     
-    /**
-    * @brief   constructs an entire segment both on disk and the object
-    * @param   aSegID          ID of the Segment to be set by SegmentManager
-    * @param   aPartition      Partition the segment shall be on
-    * @param   aControlBlock   self-explaining
-    */
-    explicit SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
+        /**
+        * @brief   Inserts all tuples of the vector into a segment. Can handle vector larger than the size of a page
+        *          and can be therefore used as bulk insert. Tries to pack tuples as densely as possible.
+        *
+        * @param   aTupleVector vector containing all tuples to be inserted in form a of a class.
+        * @return  vector of all TIDs inserted
+        */
+        template<typename Tuple_T>
+        tid_vt insertTuples(const std::vector<Tuple_T>& aTupleVector);
+        /**
+        * @brief   Inserts all tuples of the vector into a segment. Calls insertTuple for every tuple provided.
+        *          generally, the templated method should be used whenever possible.
+        *
+        * @param   aTuples     vector containing all tuples to be inserted in form of pointers
+        * @param   aTupleSize  tuples are assumed to be fixed sized. This size holds for all.
+        * @return  vector of all TIDs inserted
+        */
+        tid_vt insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
     
-    /**
-    * @brief   only constructs a segment object, no physicall representation is created. Used to load.
-    * @param   aPartition      Partition the segment is on
-    * @param   aControlBlock   self-explaining
-    */
-    explicit SegmentFSM_SP(PartitionBase& aPartition, const CB& aControlBlock);
+        /**
+        * @brief   loads a tuple to which the TID is provided.
+        *
+        * @param   aTID   TID of tuple to be loaded
+        * @return  the tuple is loaded into main memory and returned
+        */
+        template<typename Tuple_T>
+        Tuple_T getTuple(const TID& aTID);
+        /**
+        * @brief   collects all valid TIDs of a segment.
+        *
+        * @return  the TIDs to all valid tuples of a segment.
+        */
+        tid_vt scan();
     
-    explicit SegmentFSM_SP(const SegmentFSM_SP&) = delete;
-    explicit SegmentFSM_SP(SegmentFSM_SP&&) = delete;
-    SegmentFSM_SP& operator=(const SegmentFSM_SP&) = delete;
-    SegmentFSM_SP& operator=(SegmentFSM_SP&&) = delete;
-    ~SegmentFSM_SP() = default;
-
-  public:
-    template<typename Tuple_T>
-    TID insertTuple(const Tuple_T& aTuple);
-    TID insertTuple(byte* aTuple, const uint aTupleSize);
-
-    /**
-    * @brief   Inserts all tuples of the vector into a segment. Can handle vector larger than the size of a page
-    *          and can be therefore used as bulk insert. Tries to pack tuples as densely as possible.
-    * @param   aTupleVector vector containing all tuples to be inserted in form a of a class.
-    * @return   vector of all TIDs inserted
-    */
-    template<typename Tuple_T>
-    tid_vt insertTuples(const std::vector<Tuple_T>& aTupleVector);
-    /**
-    * @brief   Inserts all tuples of the vector into a segment. Calls insertTuple for every tuple provided.
-    *           generally, the templated method should be used whenever possible.
-    * @param   aTuples     vector containing all tuples to be inserted in form of pointers
-    * @param   aTupleSize  tuples are assumed to be fixed sized. This size holds for all.
-    * @return   vector of all TIDs inserted
-    */
-    tid_vt insertTuples(const byte_vpt& aTuples, const uint aTupleSize);
-
-    /**
-    * @brief   loads a tuple to which the TID is provided.
-    * @param   aTID   TID of tuple to be loaded
-    * @return  the tuple is loaded into main memory and returned
-    */
-    template<typename Tuple_T>
-    Tuple_T getTuple(const TID& aTID);
-    /**
-    * @brief   collects all valid TIDs of a segment.
-    * @return  the TIDs to all valid tuples of a segment.
-    */
-    tid_vt scan();
-
-    /**
-    * @brief   gets a free page with enough space to store aNoOfBytes. Makes use of the getFreePage method
-    *           of the SegmentFSM but uses the paraters for slotted pages
-    * @param   aNoOfBytes  how many free bytes shall be requested?
-    * @param   emptyfix    used internally as second return value. Will tell if page has been already initialised or not.
-    * @return  the PID of a page having a sufficient amount of free space.
-    */    
-    PID getFreePage(uint aNoOfBytes, bool& emptyfix);
-
-    int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
-    
-    /*
-    The unbuffered methods work like the buffered ones but use their own small buffer with the size of a page.
-    Are used during boot as the buffer manager is not working until everything is loaded.
-    */
-    void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
-    void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
+        /**
+        * @brief   gets a free page with enough space to store aNoOfBytes. Makes use of the getFreePage method
+        *          of the SegmentFSM but uses the paraters for slotted pages
+        * @param   aNoOfBytes  how many free bytes shall be requested?
+        * @param   emptyfix    used internally as second return value. Will tell if page has been already initialised or not.
+        * @return  the PID of a page having a sufficient amount of free space.
+        */    
+        PID getFreePage(uint aNoOfBytes, bool& emptyfix);
+        int getMaxFreeBytes() noexcept { return getPageSize() - sizeof(segment_fsm_sp_header_t) -sizeof(sp_header_t);}
+        
+        /*
+        * The unbuffered methods work like the buffered ones but use their own small buffer with the size of a page.
+        * Are used during boot as the buffer manager is not working until everything is loaded.
+        */
+        void loadSegmentUnbuffered(const uint32_t aPageIndex) ;
+        void readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBufferSize);   
 
     public:
         const tid_vt& getTIDs() const noexcept { return _tids; }
@@ -110,16 +99,17 @@ class SegmentFSM_SP : public SegmentFSM
 
     protected:
         /**
-        * @brief   erases the segment. This does not destroy the object itself but frees all its pages.
+        * @brief erases the segment. This does not destroy the object itself but frees all its pages.
+        *
         */
 	    void erase() override;
 
     private:
         template<typename Tuple_T>
-        void insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, size_t aStart,size_t aSize, tid_vt& result);
+        void insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, size_t aStart, size_t aSize, tid_vt& result);
 
     private:
-        tid_vt _tids;
+        tid_vt _tids; // vector of tuple ids contained in the segment
 };
 
 template<typename Tuple_T>
@@ -168,53 +158,62 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
     return resultTID;
 }
 
-//outer function
+// outer function
 template<typename Tuple_T>
-tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector){
+tid_vt SegmentFSM_SP::insertTuples(const std::vector<Tuple_T>& aTupleVector)
+{
     tid_vt result;
     insertTuplesSub(aTupleVector, 0,aTupleVector.size(),result);
     _tids.insert(_tids.cend(), result.cbegin(), result.cend());
     return result;
 }
 
-//inner function
+// inner function
 template<typename Tuple_T>
-void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, size_t aStart,size_t aSize, tid_vt& result){
+void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, size_t aStart,size_t aSize, tid_vt& result)
+{
     TRACE("trying to insert many Tuples");
 	// get page with enough space for the tuples and load it into memory
-    if((aStart<0) || (aStart + aSize > aTupleVector.size())){
-        TRACE("invalid boundaries: aStart: "+std::to_string(aStart)+" aSize: "+std::to_string(aSize)+" vectorSize: "+std::to_string(aTupleVector.size()));
+    if((aStart<0) || (aStart + aSize > aTupleVector.size()))
+    {
+        TRACE("invalid boundaries: aStart: " + std::to_string(aStart) + " aSize: " + std::to_string(aSize) + " vectorSize: " + std::to_string(aTupleVector.size()));
         throw InvalidArgumentException(FLF,"aStart and aSize are not set correctly");
     }
 
     bool emptyfix = false;
     size_t lTotalSize = 0;
-    for (size_t i = 0; i < aSize; ++i){
-        //slotted page is 8byte aligned, allign tuple size
+    for (size_t i = 0; i < aSize; ++i)
+    {
+        // slotted page is 8byte aligned, allign tuple size
         lTotalSize += std::ceil(((double) aTupleVector.at(aStart + i).size() )/8.0)*8;
         lTotalSize += sizeof(InterpreterSP::slot_t);
     }
     PID lPID;
-    try{
+    try
+    {
 	    lPID = SegmentFSM::getFreePage(lTotalSize, emptyfix, sizeof(sp_header_t));
     }
-    catch(NSMException ex){
-        //lTotalSize is bigger than size of a page. 
-        //Now we try to approx the bin packing problem (NP hard) by a greedy algorithm...
-        const uint lNoBucks = toType(PageStatus::kMAX); //how many buckets does the fsm use? just to make code more readable
+    catch(NSMException ex)
+    {
+        // lTotalSize is bigger than size of a page. 
+        // Now we try to approx the bin packing problem (NP hard) by a greedy algorithm...
+        const uint lNoBucks = toType(PageStatus::kMAX); // how many buckets does the fsm use? just to make code more readable
         const uint lPageSize = ((getPageSize() - sizeof(sp_header_t))/lNoBucks)*lNoBucks;
         uint lPartSize;
         uint begin = 0;
         uint end = 0;
-        while(begin < aSize){
+        while(begin < aSize)
+        {
             lPartSize = 0;
-            while ((lPartSize < lPageSize) & (end < aSize)){
-                //slotted page is 8byte aligned, allign tuple size
+            while ((lPartSize < lPageSize) & (end < aSize))
+            {
+                // slotted page is 8byte aligned, allign tuple size
                 lPartSize += std::ceil(((double) aTupleVector.at(aStart + end).size() )/8.0)*8;
                 lPartSize += sizeof(InterpreterSP::slot_t);
                 ++end;
             }
-            if(lPartSize > lPageSize){
+            if(lPartSize > lPageSize)
+            {
                 end-=1;
             }
             TRACE("bin: Tuples from "+std::to_string(begin)+" to "+std::to_string(end));
@@ -226,14 +225,16 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
         return;
     }
 	BCB* lBCB;
-    //fix page, if it is new, use different command on buffer
-	if(emptyfix){
+    // fix page, if it is new, use different command on buffer
+	if(emptyfix)
+    {
 		lBCB = _bufMan.emptyfix(lPID);
 	}
-	else{
+	else
+    {
 		lBCB = _bufMan.fix(lPID,  LOCK_MODE::kEXCLUSIVE); 
 	}
-    //get iterator to PID in page vector
+    // get iterator to PID in page vector
     auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); 
     if(it != _pages.end())
     {
@@ -244,23 +245,25 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
     {
         #pragma message ("TODO: @segment guys: same story as usual, can this be deleted? bug ever occured? Think about how this can happen!")
         TRACE("## This should not be printed");
-        //terminate and find bug
+        // terminate and find bug
         throw ReturnException(FLF);
     }
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
-	//if the page is new, it has to be initialised first.
-	if(emptyfix){
+	// if the page is new, it has to be initialised first.
+	if(emptyfix)
+    {
 		lInterpreter.initNewPage(lBufferPage);
 	}
 
 	// attach page to sp interpreter
 	lInterpreter.attach(lBufferPage);
 	    
-	for (size_t i = 0; i < aSize; ++i){
+	for (size_t i = 0; i < aSize; ++i)
+    {
         // if enough space is free on nsm page, the pointer will point to location on page where to insert a tuple
-        auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTupleVector.at(aStart + i).size()); //C++17 Syntax. Return is a pair, assign pair.first to tplPtr and pair.second to tplNo
+        auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTupleVector.at(aStart + i).size()); // C++17 Syntax. Return is a pair, assign pair.first to tplPtr and pair.second to tplNo
         const TID resultTID = {lPID.pageNo(), tplNo};
 	
 	    if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
@@ -275,15 +278,15 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
 	}
     
 	lInterpreter.detach();
-	//lBCB->setModified(true);
-	//_bufMan.unfix(lBCB);
-    TRACE("page to release: "+std::to_string(it-_pages.begin()));
-    releasePage(it-_pages.begin(),true);
+	// lBCB->setModified(true);
+	// _bufMan.unfix(lBCB);
+    TRACE("page to release: " + std::to_string(it - _pages.begin()));
+    releasePage(it - _pages.begin(),true);
     TRACE("Inserted tuples successfully.");
     return;
 }
 
-//not fully tested. used as convinience functionality
+// not fully tested. used as convenience functionality
 template<typename Tuple_T>
 Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
 {
@@ -301,10 +304,10 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
         { 
             result.toMemory(lTuplePtr); 
             #pragma message ("TODO: @Jonas is this comment still valid? Was this a bug elsewhere? Is it fixed?")
-            releasePage(index); //crashed the buffer...
+            releasePage(index); // crashed the buffer...
             return result;
         }
-        releasePage(index); //crashed the buffer...
+        releasePage(index); // crashed the buffer...
     }
     throw TupleNotFoundOrInvalidException(FLF);
 }

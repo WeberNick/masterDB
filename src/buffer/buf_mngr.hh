@@ -1,12 +1,12 @@
 /**
- *  @file 	buf_mngr.hh
- *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *          Jonas Thietke
- *  @brief 	Class implementieng the buffer manager	
- *  @bugs	Currently no bugs known
- *  @todos  -Exception Handling in readPageIn,
- *          -Should initNewPage be in buf mngr or somewhere else?
- *  @section TBD
+ *  @file 	 buf_mngr.hh
+ *  @author	 Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *           Jonas Thietke
+ *  @brief 	 Class implementieng the buffer manager	
+ *  @bugs	 Currently no bugs known
+ *  @todos   - Exception Handling in readPageIn,
+ *           - Should initNewPage be in buf mngr or somewhere else?
+ *  @section TODO
  */
 #pragma once
 
@@ -59,11 +59,12 @@ class BufferManager final
 
             private:
                 std::unique_ptr<size_t[]> _freeFrameList;
-                sMtx    _freeFrameListMtx;
-		        size_t 	_noFreeFrames;
+                sMtx                      _freeFrameListMtx;
+		        size_t 	                  _noFreeFrames;
 
         };
-       //linked list of free control blocks. protected by a mutex, also only accessible as a LIFO queue
+       
+        // linked list of free control blocks. protected by a mutex, also only accessible as a LIFO queue
         class FreeBCBs final
         {
             public:
@@ -84,7 +85,12 @@ class BufferManager final
                 inline size_t   getNoFreeBCBs() noexcept { return _noFreeBCBs; }
                 inline BCB*     popFromList();
                 inline void     insertToFreeBCBs(BCB* aBCB) noexcept;
-                void            resetBCB(BCB* aBCB) noexcept; //used to reset a BCB after the page it corresponds to was deleted
+                /**
+                 * @brief used to reset a BCB after the page it corresponds to was deleted
+                 * 
+                 * @param aBCB the BCB to reset
+                 */
+                void            resetBCB(BCB* aBCB) noexcept; //
 
             private:
                 inline size_t   incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
@@ -113,39 +119,43 @@ class BufferManager final
         }
 
         /** TODO
-         * @brief 
+         * @brief initializes the Buffer Manager
          * 
-         * @param aControlBlock 
+         * @param aControlBlock the global controlblock
          */
         void init(const CB& aControlBlock) noexcept;
 
     public:
         /**
-         * @brief   puts an existing page into the buffer, the main functionallity of the buffer
+         * @brief   puts an existing page into the buffer, the main functionality of the buffer, request access to a page and fix it
+         * 
          * @param   aPageID     ID of page to be loaded
          * @param   aMode       LOCK_MODE the requested page shall have in the end
          * @return  a BCB containing the requested page in the requested LOCK_MODE
-        /* request access to a page and fix it */
+         */
         BCB* fix(const PID& aPageID, LOCK_MODE aMode);
         /**
          * @brief   if the page does not exist yet, is does not have to be searched or loaded.
          *          Assumes the page not to loaded before, will produce unexpected behaviour if missused!
+         * 
          * @param   aPageID     page to be loaded and initialised
          * @return  a BCB containing the requested page exclusively locked
          */
         BCB* emptyfix(const PID& aPageID);
         /**
          * @brief   releases the page again so that it can be displaced if necessary
+         *
          * @param   aBufferControlBlock     BCB which shall be released
          */
         void unfix(BCB*& aBufferControlBlock);
         /** 
          * @brief   writes page to disk. Does not exclude it from the buffer
+         *
          * @param   aBufferControlBlock     BCB which shall be flushed
          */
         void  flush(BCB*& aBufferControlBlock);
         /**
-         * @brief   flushed the complete buffer. used for shutdown or to save a current state of the system.
+         * @brief   flushes the whole buffer. used for shutdown or to save a current state of the system.
          */
         void flushAll();
 
@@ -153,54 +163,58 @@ class BufferManager final
         byte* getFramePtr(BCB* aBCB);
 
     public:
-        inline size_t   getNoFrames() noexcept { return _noFrames; }
-        inline size_t   getFrameSize() noexcept { return _frameSize; }
+        inline size_t getNoFrames() noexcept { return _noFrames; }
+        inline size_t getFrameSize() noexcept { return _frameSize; }
         /**
          * @brief   if a BCB gets out of use, it has to be excluded from the buffer and inserted into the freeBCB List
-         * @param   aPID    PID of the page to be excluded from the buffer, the BCB is searched.
+         *
+         * @param   aPID PID of the page to be excluded from the buffer, the BCB is searched.
          */
-        void            resetBCB(const PID& aPID) noexcept;
+        void          resetBCB(const PID& aPID) noexcept;
         
     private:
         /**
          * @brief   prepares a BCB so that the page can be inserted into the buffer
+         *
          * @param   aPageID     PID the BCB shall contain afterwards
          * @return  the BCB the page shall be loaded into
          */
-        BCB*                locatePage(const PID& aPageID) noexcept;
+        BCB*               locatePage(const PID& aPageID) noexcept;
         /**
          * @brief   reads Page from Disk into a Buffer Frame
+         *
          * @param   lFBCB       free BCB which shall contain the page afterwards
          * @param   aPageID     the page that shall be read in
          */
-        void                readPageIn(BCB* lFBCB, const PID& aPageID);
+        void               readPageIn(BCB* lFBCB, const PID& aPageID);
         /**
          * @brief   if emptyfix is called, the page does not contain a header. 
          *          This method creates it and removes all data which was previously stored on the frame.
+         *
          * @param   aFBCB       BCB which contains the page
          * @param   aPageID     the page that shall be contained by this BCB afterwards
          * @param   aLSN        LSN of this page, needed to initialise a header
          */
-        void                initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
+        void               initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
         /**
          * @brief   every BCB contains a Frame to actually contain the page and there amount is limited.
          *          if the _freeFrames list contains frames, it just returns on
          *          if this is not the case, it chooses a BCB from the buffer by random to get evicted.
          */
-        size_t              getFrame() noexcept;
+        size_t             getFrame() noexcept;
 
     private:
         inline FreeFrames& getFreeFrames() noexcept { return _freeFrames; }
         inline FreeBCBs&   getFreeBCBs() noexcept { return _freeBCBs; }
 
 	private:
-		size_t                              _noFrames;
-		size_t 		                        _frameSize;;
-        std::unique_ptr<BufferHashTable>    _bufferHash;
-        std::unique_ptr<byte[]>             _bufferpool;
-        FreeFrames                          _freeFrames;
-        FreeBCBs                            _freeBCBs;
-        const CB*                           _cb;
+		size_t                           _noFrames;
+		size_t 		                     _frameSize;;
+        std::unique_ptr<BufferHashTable> _bufferHash;
+        std::unique_ptr<byte[]>          _bufferpool;
+        FreeFrames                       _freeFrames;
+        FreeBCBs                         _freeBCBs;
+        const CB*                        _cb;
 };
 
 

@@ -1,10 +1,10 @@
 /**
- *  @file 	buf_mngr.hh
- *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *  @brief  Class implementing a buffer control block for the buffer franes	
- *  @bugs	Currently no bugs known
- *  @todos	TBD
- *  @section TBD
+ *  @file 	 buf_mngr.hh
+ *  @author	 Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
+ *  @brief   Class implementing a buffer control block for the buffer franes	
+ *  @bugs	 Currently no bugs known
+ *  @todos	 -
+ *  @section TODO
  */
 
 #pragma once
@@ -23,8 +23,6 @@ using BCB = BufferControlBlock;
 /**
  * A buffer control block is associated with a page from a partition
  * and is used to store meta data of the frame in the buffer pool.
- * 
- *
  */
 class BufferControlBlock final
 {
@@ -71,7 +69,7 @@ class BufferControlBlock final
         LOCK_MODE   _mode;
         bool        _modified;
         size_t      _fixCount;
-        //LSN infos
+        // LSN infos
         BCB*        _nextInChain;   // hash overflow chain forward pointer
 };
 

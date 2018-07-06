@@ -1,12 +1,12 @@
 #include "segment_fsm_sp.hh"
 
-/** TODO
- * @brief Construct a new SegmentFSM_SP::SegmentFSM_SP object
- * 
- * @param aSegID 
- * @param aPartition 
- * @param aControlBlock 
- */
+/**
+* @brief   constructs an entire segment both on disk and the object in memory
+*
+* @param   aSegID          ID of the Segment to be set by SegmentManager
+* @param   aPartition      Partition the segment shall be on
+* @param   aControlBlock   self-explaining
+*/
 SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock) :
     SegmentFSM(aSegID, aPartition, aControlBlock),
     _tids()
@@ -15,12 +15,12 @@ SegmentFSM_SP::SegmentFSM_SP(const uint16_t aSegID, PartitionBase& aPartition, c
 	TRACE("'SegmentFSM_SP' constructed");
 }
 
-/** TODO
- * @brief Construct a new SegmentFSM_SP::SegmentFSM_SP object
- * 
- * @param aPartition 
- * @param aControlBlock 
- */
+/**
+* @brief   only constructs a segment object, no physicall representation is created. Used to load.
+*
+* @param   aPartition      Partition the segment is on
+* @param   aControlBlock   the global control block
+*/
 SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock) :
     SegmentFSM(aPartition, aControlBlock)
 {}
@@ -32,16 +32,17 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTupleSize, emptyfix);
 	BCB* lBCB;
-    //if the page is new, use different command on buffer
-	if(emptyfix){
+    // if the page is new, use different command on buffer
+	if(emptyfix)
+    {
 		lBCB = _bufMan.emptyfix(lPID);
 	}
 	else
     {
 		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
-    //insert page into _pages data structure
-    auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); //get iterator to PID in page vector
+    // insert page into _pages data structure
+    auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); // get iterator to PID in page vector
     if(it != _pages.end())
     {
         TRACE("## Page found! Assign BCB Pointer to _pages vector");
@@ -64,7 +65,7 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
 	lInterpreter.attach(lBufferPage);
 	// if enough space is free on nsm page, the pointer will point to location on page where to insert tuple
 	auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTupleSize);
-    const TID resultTID = {lPID.pageNo(), tplNo};
+    const TID resultTID = { lPID.pageNo(), tplNo };
 	
 	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{

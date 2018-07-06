@@ -1,7 +1,7 @@
 #include "buf_cntrl_block.hh"
 
-/** TODO
- * @brief Construct a new Buffer Control Block:: Buffer Control Block object
+/**
+ * @brief Construct a new BufferControlBlock::BufferControlBlock object
  * 
  */
 BufferControlBlock::BufferControlBlock() :
@@ -62,7 +62,7 @@ void BufferControlBlock::unlock() noexcept
 void BufferControlBlock::upgradeLock(LOCK_MODE aMode) noexcept
 {
     TRACE("Trying to upgrade lock from '" + lockModeToString(getLockMode()) + "' to '" + lockModeToString(aMode) + "' for BCB with PID : " + _pageID.to_string());
-    if(toType(getLockMode()) < toType(aMode)) //is upgrade needed?
+    if(toType(getLockMode()) < toType(aMode)) // is upgrade needed?
     {
         switch(aMode)
         {
