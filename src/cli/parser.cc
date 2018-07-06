@@ -425,10 +425,11 @@ int CP::com_show_seg(const char_vpt* args) const
         segFSM->scan();
         const tid_vt& tids = segFSM->getTIDs();
         std::cout << tids.size() << std::endl;
-        for (const auto& tid : tids)
+        const std::vector<Employee_T>& emps = segFSM->getTuples<Employee_T>(tids);
+        size_t i = 0;
+        for (const auto& emp : emps)
         {
-            std::cout << tid.tupleNo() << std::endl;
-            const Employee_T& emp = segFSM->getTuple<Employee_T>(tid);
+            std::cout << i++ << std::endl;
             std::cout << emp.salary() << std::endl;
         } */
     }
