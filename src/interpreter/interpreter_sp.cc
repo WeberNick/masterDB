@@ -67,19 +67,7 @@ int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo) noexcept {
 	slot(aRecordNo)._status=0;
 	return 1;
 }
-//actually delete it
-int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept {
-    #pragma message ("TODO: @Jonas, this is not used anyway, right? If so, please comment this function out, move it to the bottom of this file and delete its declaration in the header")
-	//TODO
-	//put free in front of Free Space List by
-		//check if there is list entry behind this record
-			//if yes, move this one at beginning and increment size
-			//if no, create new entry, put _header._nextFreeSpace as new offset
-		//do something with the slot...
-		//return 1
-	return -1;
 
-}
 byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
 	if(aRecordNo >= noRecords()) { 
 		return nullptr;
@@ -97,6 +85,19 @@ byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
 //Old Code from Jonas. Beginning of proper free space management on slotted pages
 
 /*
+//actually delete it
+int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept {
+    #pragma message ("TODO: @Jonas, this is not used anyway, right? If so, please comment this function out, move it to the bottom of this file and delete its declaration in the header")
+	//TODO
+	//put free in front of Free Space List by
+		//check if there is list entry behind this record
+			//if yes, move this one at beginning and increment size
+			//if no, create new entry, put _header._nextFreeSpace as new offset
+		//do something with the slot...
+		//return 1
+	return -1;
+
+}
 	if(lTotalSize <= freeSpace()) 
 	{
 		lResultRecord = pagePtr() + header()->_nextFreeSpace;

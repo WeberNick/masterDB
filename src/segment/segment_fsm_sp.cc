@@ -47,10 +47,6 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
         TRACE("## Page found! Assign BCB Pointer to _pages vector");
         it->second = lBCB;
     }
-    else
-    {
-        TRACE("## This should not be printed");
-    }
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
@@ -68,7 +64,7 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
 	
 	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
-        #pragma message ("TODO: @segment guys: Can this happen? The comment states it will only occur if getFreePage is buggy. Test getFreePage, make it as bug free as possible and remove this if-check and its throw-statement (I guess we can not recover from this anyway)")
+        #pragma message ("mMn sollte das hier bleiben, der Fehler ist realistisch und würde zwar ein krasses fehlverhalten bedeuten, aber sehr oft nicht zum Absturz fuehren.")
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
         throw NSMException(FLF, lErrMsg);

@@ -55,7 +55,6 @@ void BufferControlBlock::unlock() noexcept
             ASSERT_MSG("Invalid default-case of switch statement reached");
             break;
     }
-    decrFixCount();
     TRACE("BCB with lock '" + lockModeToString(getLockMode()) + "' and with PID : " + _pageID.to_string() + " unlocked");
 }
 

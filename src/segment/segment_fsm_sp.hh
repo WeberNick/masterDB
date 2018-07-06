@@ -81,6 +81,13 @@ class SegmentFSM_SP : public SegmentFSM
     template<typename Tuple_T>
     Tuple_T getTuple(const TID& aTID);
     /**
+    * @brief   loads several tuple to which the TIDs are provided. Tries to unlock pages only when necessary.
+    * @param   aTIDs   a vector of TIDs of tuple to be loaded
+    * @return  a vector of tuples loaded into main memory
+    */
+    template<typename Tuple_T>
+    std::vector<Tuple_T> getTuples(const tid_vt& aTIDs);
+    /**
     * @brief   collects all valid TIDs of a segment.
     * @return  the TIDs to all valid tuples of a segment.
     */
@@ -138,7 +145,14 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
     {
 		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
-	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
+	//insert page into _pages data structure
+    auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); //get iterator to PID in page vector
+    if(it != _pages.end())
+    {
+        TRACE("## Page found! Assign BCB Pointer to _pages vector");
+        it->second = lBCB;
+    }
+ 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
 	// if the page is new, it has to be initialised first.
@@ -153,7 +167,7 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
 	auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTuple.size()); // C++17 Syntax. Return is a pair, assign pair.first to tplPtr and pair.second to tplNo
     const TID resultTID = {lPID.pageNo(), tplNo};
 	
-	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
+	if(!tplPtr) // If true, not enough free space on nsm page => invalid state of the system
 	{
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
@@ -240,13 +254,6 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
         TRACE("## Page found! Assign BCB Pointer to _pages vector");
         it->second = lBCB;
     }
-    else
-    {
-        #pragma message ("TODO: @segment guys: same story as usual, can this be deleted? bug ever occured? Think about how this can happen!")
-        TRACE("## This should not be printed");
-        //terminate and find bug
-        throw ReturnException(FLF);
-    }
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
@@ -263,7 +270,7 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
         auto [tplPtr, tplNo] = lInterpreter.addNewRecord(aTupleVector.at(aStart + i).size()); //C++17 Syntax. Return is a pair, assign pair.first to tplPtr and pair.second to tplNo
         const TID resultTID = {lPID.pageNo(), tplNo};
 	
-	    if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
+	    if(!tplPtr) // If true, not enough free space on nsm page => some invalid state in system
 	    {
 		    const std::string lErrMsg("Not enough free space on nsm page.");
             TRACE(lErrMsg);
@@ -300,14 +307,63 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
         if(lTuplePtr)
         { 
             result.toMemory(lTuplePtr); 
-            #pragma message ("TODO: @Jonas is this comment still valid? Was this a bug elsewhere? Is it fixed?")
-            releasePage(index); //crashed the buffer...
+            releasePage(index); 
             return result;
         }
-        releasePage(index); //crashed the buffer...
+        releasePage(index);
     }
     throw TupleNotFoundOrInvalidException(FLF);
 }
+
+template<typename Tuple_T>
+std::vector<Tuple_T> SegmentFSM_SP::getTuples(const tid_vt& aTIDs)
+{
+    TRACE("Looking for a lot of tuples");
+    std::vector<Tuple_T> result;
+    result.reserve(aTIDs.size());
+    Tuple_T t;
+
+    size_t prev;
+    size_t curr = INVALID;
+    byte* lPagePtr;
+    InterpreterSP lInterpreter;
+
+    for(auto& tid : aTIDs){
+        TRACE("trying to get tuple "+tid.to_string());
+        
+        const auto it = std::find_if(_pages.begin(), _pages.end(), [&tid] (const auto& elem) { return elem.first.pageNo() == tid.pageNo(); }); //get iterator to PID in page vector
+        if(it != _pages.cend())
+        { 
+            prev = curr;
+            curr = it - _pages.cbegin();
+            lPagePtr = getPage(curr, LOCK_MODE::kSHARED);
+            
+            lInterpreter.attach(lPagePtr);
+            byte* lTuplePtr = lInterpreter.getRecord(tid.tupleNo());
+            if(lTuplePtr)
+            { 
+                t.toMemory(lTuplePtr);
+                result.push_back(t); 
+            }
+            else{
+                throw TupleNotFoundOrInvalidException(FLF);
+            }
+
+            if(curr != prev && prev != INVALID){
+                TRACE("released prev page");
+                releasePage(prev);
+            }
+        }
+        else{
+            throw TupleNotFoundOrInvalidException(FLF);
+        }
+    }
+    if(curr != INVALID){
+        releasePage(curr);
+    }
+    return result;
+}
+
 
 /*
 template<typename Tuple_T>

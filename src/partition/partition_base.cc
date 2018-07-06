@@ -97,7 +97,6 @@ uint32_t PartitionBase::allocPage()
         */
         
         // replacement of try/catch from here..
-        #pragma message ("TODO: Jonas: I replaced the throwing of exceptions in FSIP Interpreter with an Invalid return if no free pages on FSIP. Reason: Moerkotte's comment on exceptions in normal program flow. Can you please double check if the replacement of the commented try/catch with the following if-check is equivalent?")
 		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
         if(lAllocatedPageIndex == INVALID_32)
         {

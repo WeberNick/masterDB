@@ -60,7 +60,7 @@ class InterpreterSP
 		 * @return std::pair<byte*, uint16_t> the location where to write the new record
 		 */
 		std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ;
-		int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable
+		//int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable, not implemented
 		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
 		byte* getRecord(const uint aRecordNo) noexcept ; //gets a record, returns a nullptr if it does not exist or is marked invalid
 

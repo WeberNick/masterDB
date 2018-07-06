@@ -85,8 +85,9 @@ void testJonas1() {
             true
         };
         std::cout << lCB;
-    
     Trace::getInstance().init(lCB);
+        TRACE("yoyo");
+
     PartitionManager::getInstance().init(lCB);
     SegmentManager::getInstance().init(lCB);
     BufferManager::getInstance().init(lCB);
@@ -127,7 +128,13 @@ void testJonas1() {
     TRACE("get it back");
     size_t i = 0;
 
-    for (auto& a : res){
+    emps.clear();
+    emps = lSeg->getTuples<Employee_T>(res);
+    for(auto& e : emps){
+        std::cout<<i++<<"  " <<e.to_string()<<std::endl;
+    }
+    
+    /*for (auto& a : res){
 
         Employee_T e = lSeg->getTuple<Employee_T>(a);
         std::cout<<i++<<"  " <<e.to_string()<<std::endl;
@@ -180,7 +187,7 @@ void testJonas2(){
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/MasterPartition"),
             std::string(std::getenv("HOME")) + std::string("/MasterTeamProjekt/"),
             4096,
-            100000,
+            100,
             true
         };
         std::cout << lCB;
@@ -197,17 +204,12 @@ void testJonas2(){
     std::cout << "Path: " << lPath << std::endl;
     TRACE("create a new Partition");
     auto [lPart, created] = PartitionManager::getInstance().createPartitionFileInstance(lPath,"blub",100);
-    lPart->open();
-    for (size_t i = 0;i<50000;++i){
-        uint page = lPart->allocPage();
-        std::cout<<page<<std::endl;
-        if(i>10 && (i % 11 == 0)){
-            std::cout<<"free: "<<i-10<<std::endl;
-            lPart->freePage(i-10);
-        }
-    }
-    ((PartitionFile*)lPart)->printPage(0);
-    lPart->close();
+    SegmentFSM_SP* lSeg = SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bli");
+    Employee_T emp ("eins",2,3);
+    lSeg->insertTuple(emp);
+    DatabaseInstanceManager::getInstance().shutdown();
+    TRACE("SHUTDOWN COMPLETED");
+
 }
 void testJonas3(){
     const control_block_t lCB = {
@@ -219,13 +221,13 @@ void testJonas3(){
             true
         };
         std::cout << lCB;
-    
     Trace::getInstance().init(lCB);
+
     PartitionManager::getInstance().init(lCB);
     SegmentManager::getInstance().init(lCB);
     BufferManager::getInstance().init(lCB);
     DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
-
+    CommandParser::getInstance().init(lCB);
     /*TRACE("GET SEGMENT");
     SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment(1);
     TRACE("GET PAGE");
@@ -236,17 +238,21 @@ void testJonas3(){
   //  PartitionFile*  lPart = PartitionManager::getInstance().createPartitionFileInstance(std::getenv("HOME") + std::string("/MasterTeamProjekt/Partition"),"whatsoever",100);
  //   TRACE("create a Segment");
   //  SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().createNewSegmentFSM_SP(*lPart,"bliblablub");
-    SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bli");
+ /*   SegmentFSM_SP* lSeg = (SegmentFSM_SP*) SegmentManager::getInstance().getSegment("bli");
     TRACE("INSERT STUFF");
-    for(size_t i =0; i<20;++i){
+    string_vt ressult = SegmentManager::getInstance().getSegmentNames();
+    for(auto a : ressult){
+        std::cout<<a<<std::endl;
+    }
+    std::cout<<SegmentManager::getInstance().getSegmentT("bli").to_string()<<std::endl;
+
+    for(size_t i =0; i<1;++i){
         Employee_T emp ("zwei",i, 1);
         lSeg->insertTuple(emp);
     }
 
-    SegmentManager::getInstance().deleteSegment("bla");
-
     DatabaseInstanceManager::getInstance().shutdown();
-    TRACE("SHUTDOWN COMPLETED");
+    TRACE("SHUTDOWN COMPLETED");*/
 }
 
 void testTupleToDIsk()
@@ -506,7 +512,6 @@ int main(const int argc, const char* argv[]) {
         //BufferManager::getInstance().init(lCB);
         //DatabaseInstanceManager::getInstance().init(lCB); // installs or boots the DBS
 
-        
        // testNick();
         testJonas1();
     //  testJonas3();
