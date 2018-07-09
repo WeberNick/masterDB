@@ -19,6 +19,7 @@
 #include "exception.hh"
 #include "trace.hh"
 
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <string>
@@ -60,6 +61,7 @@ class Employee_T : public Tuple
         void toMemory(byte* aPtr) noexcept override;
     
     public:
+        static inline string_vt attributes() noexcept { return {"ID", "Age", "Name", "Salary"}; }
         // Getter
         inline uint64_t ID() const noexcept { return _id; }
         inline uint64_t ID() noexcept { return _id; }
@@ -76,22 +78,25 @@ class Employee_T : public Tuple
          */
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override;
+
+        // stringstream
+        inline string_vt values() const noexcept { return {std::to_string(_id), std::to_string(_age), _name, std::to_string(std::round(_salary))}; }
         
     private:
         static uint64_t _idCount;
         /* content of the tuple */
         uint64_t        _id;
-        double          _salary;
         uint8_t         _age;
         std::string     _name;  
+        double          _salary;        
 };
 
 std::string Employee_T::to_string() const noexcept 
 { 
-    return std::string("Employee (ID, Name, Age, Salary) : ") 
+    return std::string("Employee (ID, Age, Name, Salary) : ") 
         + std::to_string(_id) + std::string(", '") 
-        + _name + std::string("', ") 
         + std::to_string(_age) + std::string(", ") 
+        + _name + std::string("', ") 
         + std::to_string(_salary); 
 }
 

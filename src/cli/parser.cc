@@ -100,13 +100,11 @@ void CommandParser::runcli()
                 if (com->_hasParams)
                 {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                    TRACE("Submitting Job " + comname + ".");
                     auto future = Pool::Default::submitJob(com->_func, this, &args);
                     rec = future.get();
                 }
                 else
                 {
-                    TRACE("Submitting Job " + std::string(com->_name) + ". having no parameters, thus nullptr!");
                     auto future = Pool::Default::submitJob(com->_func, this, nullptr);
                     rec = future.get();
                 }
@@ -415,23 +413,16 @@ int CP::com_show_seg(const char_vpt* args) const
     try
     {
         const Segment_T& seg = SegmentManager::getInstance().getSegmentT(segName);
-        std::cout << "SegmentID:    " << seg.ID() << std::endl;
-        std::cout << "Segment:      " << seg.name() << std::endl;
-        std::cout << "Partition:    " << PartitionManager::getInstance().getPartitionName(seg.partID()) << std::endl;
-        std::cout << "PartitionID:  " << seg.partID() << std::endl;
-        std::cout << "Segment Type: " << seg.type() << std::endl;
+        std::cout << "SegmentID: " << seg.ID() << std::endl;
+        // std::cout << "Segment:      " << seg.name() << std::endl;
+        std::cout << "Partition: " << PartitionManager::getInstance().getPartitionName(seg.partID()) << std::endl;
+        // std::cout << "PartitionID:  " << seg.partID() << std::endl;
+        // std::cout << "Segment Type: " << seg.type() << std::endl;
         std::cout << std::endl;
-        /* SegmentFSM_SP* segFSM = ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)));
-        segFSM->scan();
-        const tid_vt& tids = segFSM->getTIDs();
-        std::cout << tids.size() << std::endl;
-        const std::vector<Employee_T>& emps = segFSM->getTuples<Employee_T>(tids);
-        size_t i = 0;
-        for (const auto& emp : emps)
-        {
-            std::cout << i++ << std::endl;
-            std::cout << emp.salary() << std::endl;
-        } */
+
+        SegmentFSM_SP* segFSM = (SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName));
+        const std::vector<Employee_T>& tups = segFSM->getTuples<Employee_T>(segFSM->scan());
+        pprinttups(tups);
     }
     catch(const SegmentNotExistsException& oore)
     {
@@ -486,17 +477,68 @@ void CommandParser::printe() const
     std::cout << "Good Bye.\n" << std::endl;
 }
 
-/* template <typename T>
-void CommandParser::pprinttup(T& tuple, )
+template <typename T>
+void CommandParser::pprinttups(const std::vector<T>& tuples) const
 {
+    const string_vt& attrs = T::attributes();
 
-} */
+    std::vector<uint8_t> spaces;
+    spaces.reserve(attrs.size());
+    for (const auto& a : attrs)
+    {
+        spaces.push_back(a.size()); // default init spaces with attribute length
+    }
+    for (const auto& tuple : tuples)
+    {
+        const string_vt& values = tuple.values();
+        for (size_t i = 0; i < values.size(); ++i)
+        {
+            auto& value = values.at(i);
+            if (value.size() > spaces.at(i))
+            {
+                spaces.at(i) = value.size(); 
+            }
+        }
+    }
 
-// TODO
-/* void CommandParser::pprinttups(const std::string& caption, ) const
+    printptable(spaces);
+    pprinttup(attrs, spaces);
+    printptable(spaces);
+    for (const auto& tuple : tuples)
+    {
+        pprinttup(tuple.values(), spaces);
+    }
+    printptable(spaces);
+    std::cout << std::endl;
+} 
+
+void CommandParser::pprinttup(const string_vt& values, const std::vector<uint8_t>& spaces) const
 {
+    std::string sep = "|";
+    for (size_t i = 0; i < values.size(); ++i)
+    {
+        std::cout << sep << " ";
+        sep = "";
+        const std::string& line = values.at(i);
+        std::cout << line;
+        for (size_t j = 0; j < spaces.at(i) - line.size(); ++j)
+            std::cout << " ";
+        std::cout << " |";
+    }
+    std::cout << std::endl;
+}
 
-} */
+void CommandParser::printptable(const std::vector<uint8_t>& spaces) const
+{
+    std::cout << "+";
+    for (auto& s : spaces)
+    {
+        for (uint8_t i = 0; i < s + 2; ++i)
+            std::cout << "-";
+        std::cout << "+";
+    }
+    std::cout << std::endl;
+}
 
 void CommandParser::pprints(const std::string& caption, const string_vt& list) const
 {
