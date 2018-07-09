@@ -44,7 +44,7 @@ CommandParser::CommandParser() :
         Command(*this, "DROP PARTITION",   true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
         Command(*this, "CREATE SEGMENT",   true,  2,  2,       &CP::com_create_s,     "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
         Command(*this, "DROP SEGMENT",     true,  2,  1,       &CP::com_drop_s,       "Drop a segment by its name. Segment names are globally unique, thus no partition has to be provided.", "DROP SEGMENT [str:segname]"),
-        Command(*this, "INSERT INTO",      true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment", "INSERT INTO [str:segname] [str:relation] [Args...]"),
+        Command(*this, "INSERT INTO",      true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment", "INSERT INTO [str:segname] [str:relation] [Args...]\n\nExample: Creation of an Employee with double:salary, int:age and string:name\n  INSERT INTO segname EMPLOYEE 80000 30 Mueller"),
         Command(*this, "SHOW PARTITION",   true,  2,  1,       &CP::com_show_part,    "Show detailed information for a partition.", "SHOW PARTITION [str:partname]"),
         Command(*this, "SHOW PARTITIONS",  false, 2,  0,       &CP::com_show_parts,   "Show all partitions.", "SHOW PARTITIONS"),
         Command(*this, "SHOW SEGMENT",     true,  2,  1,       &CP::com_show_seg,     "Show detailed information for a segment.", "SHOW SEGMENT [str:segname]"),
@@ -312,7 +312,7 @@ int CP::com_drop_s(const char_vpt* args) const
 
 int CP::com_insert_tuple(const char_vpt* args) const
 {
-    /* INSERT INTO Seg_Emp Employee 30 Mueller 8000 */
+    /* INSERT INTO Seg_Emp Employee 80000 30 Mueller */
     TRACE("Start to insert Tuple");
     std::string segName(args->at(0));
     std::string type(args->at(1));
@@ -323,14 +323,13 @@ int CP::com_insert_tuple(const char_vpt* args) const
         {
             if (args->size() != (2 + 3)) // hard coded because we only consider one relation: Employee
             { 
-                std::cout << "Wrong number of arguments for relation " << type << ".\n" << std::endl;
-                return CP::CommandStatus::OK;
+                return CP::CommandStatus::WRONG;
             }
             else
             {
-                int emp_age = atoi(args->at(2));
-                std::string emp_name(args->at(3));
-                double emp_sal = atof(args->at(4));
+                double emp_sal = atof(args->at(2));
+                int emp_age = atoi(args->at(3));
+                std::string emp_name(args->at(4));
                 Employee_T e(emp_name, emp_sal, emp_age);
                 TRACE("INSERT TUPLE EMPLOYEE");
                 ((SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName)))->insertTuple(e);
@@ -339,8 +338,8 @@ int CP::com_insert_tuple(const char_vpt* args) const
         }
         else
         {
-            std::cout << "Relation " << type << " is not supported." << std::endl;
-            return CP::CommandStatus::WRONG;
+            std::cout << "Relation " << type << " is not supported.\n" << std::endl;
+            return CP::CommandStatus::OK;
         }
     }
     catch(const SegmentNotExistsException& snee)
@@ -422,7 +421,7 @@ int CP::com_show_seg(const char_vpt* args) const
 
         SegmentFSM_SP* segFSM = (SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(segName));
         const std::vector<Employee_T>& tups = segFSM->getTuples<Employee_T>(segFSM->scan());
-        pprinttups(tups);
+        pprintelems(tups);
     }
     catch(const SegmentNotExistsException& oore)
     {
@@ -478,7 +477,7 @@ void CommandParser::printe() const
 }
 
 template <typename T>
-void CommandParser::pprinttups(const std::vector<T>& tuples) const
+void CommandParser::pprintelems(const std::vector<T>& tuples) const
 {
     const string_vt& attrs = T::attributes();
 
@@ -502,17 +501,17 @@ void CommandParser::pprinttups(const std::vector<T>& tuples) const
     }
 
     printptable(spaces);
-    pprinttup(attrs, spaces);
+    pprintelem(attrs, spaces);
     printptable(spaces);
     for (const auto& tuple : tuples)
     {
-        pprinttup(tuple.values(), spaces);
+        pprintelem(tuple.values(), spaces);
     }
     printptable(spaces);
     std::cout << std::endl;
 } 
 
-void CommandParser::pprinttup(const string_vt& values, const std::vector<uint8_t>& spaces) const
+void CommandParser::pprintelem(const string_vt& values, const std::vector<uint8_t>& spaces) const
 {
     std::string sep = "|";
     for (size_t i = 0; i < values.size(); ++i)

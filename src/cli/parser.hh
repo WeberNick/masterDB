@@ -118,8 +118,8 @@ class CommandParser
          */
         void printp(uint8_t length) const;
         template <typename T>
-        void pprinttups(const std::vector<T>& tuples) const;
-        void pprinttup(const string_vt& values, const std::vector<uint8_t>& spaces) const;
+        void pprintelems(const std::vector<T>& tuples) const;
+        void pprintelem(const string_vt& values, const std::vector<uint8_t>& spaces) const;
         void printptable(const std::vector<uint8_t>& spaces) const;
 
     private:

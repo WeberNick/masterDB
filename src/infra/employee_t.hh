@@ -21,8 +21,10 @@
 
 #include <cmath>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -61,16 +63,16 @@ class Employee_T : public Tuple
         void toMemory(byte* aPtr) noexcept override;
     
     public:
-        static inline string_vt attributes() noexcept { return {"ID", "Age", "Name", "Salary"}; }
+        static inline string_vt attributes() noexcept { return {"ID", "Salary", "Age", "Name"}; }
         // Getter
         inline uint64_t ID() const noexcept { return _id; }
         inline uint64_t ID() noexcept { return _id; }
+        inline double salary() const noexcept { return _salary; }
+        inline double salary() noexcept { return _salary; }
         inline uint8_t age() const noexcept { return _age; }
         inline uint8_t age() noexcept { return _age; }
         inline const std::string& name() const noexcept { return _name; }
         inline const std::string& name() noexcept { return _name; }
-        inline double salary() const noexcept { return _salary; }
-        inline double salary() noexcept { return _salary; }
         /** TODO
          * @brief 
          * 
@@ -79,25 +81,29 @@ class Employee_T : public Tuple
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override;
 
-        // stringstream
-        inline string_vt values() const noexcept { return {std::to_string(_id), std::to_string(_age), _name, std::to_string(std::round(_salary))}; }
+        inline string_vt values() const {
+            std::stringstream stream;
+            stream << std::fixed << std::setprecision(2) << _salary;
+            std::string _sal = stream.str();
+            return {std::to_string(_id), _sal, std::to_string(_age), _name};
+        }
         
     private:
         static uint64_t _idCount;
         /* content of the tuple */
         uint64_t        _id;
+        double          _salary;
         uint8_t         _age;
-        std::string     _name;  
-        double          _salary;        
+        std::string     _name;       
 };
 
 std::string Employee_T::to_string() const noexcept 
 { 
-    return std::string("Employee (ID, Age, Name, Salary) : ") 
+    return std::string("Employee (ID, Salary, Age, Name) : ") 
         + std::to_string(_id) + std::string(", '") 
+        + std::to_string(_salary)
         + std::to_string(_age) + std::string(", ") 
-        + _name + std::string("', ") 
-        + std::to_string(_salary); 
+        + _name + std::string("', ");
 }
 
 std::string Employee_T::to_string() noexcept 
