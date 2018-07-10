@@ -137,8 +137,8 @@ TID SegmentFSM_SP::insertTuple(const Tuple_T& aTuple)
     {
 		lBCB = _bufMan.fix(lPID, LOCK_MODE::kEXCLUSIVE); 
 	}
-	//insert page into _pages data structure
-    auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); //get iterator to PID in page vector
+	// insert page into _pages data structure
+    auto it = std::find_if(_pages.begin(), _pages.end(), [&lPID] (const auto& elem) { return elem.first == lPID; }); // get iterator to PID in page vector
     if(it != _pages.end())
     {
         TRACE("## Page found! Assign BCB Pointer to _pages vector");
@@ -308,7 +308,7 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
 {
     TRACE("Looking for tuple with TID " + aTID.to_string());
     Tuple_T result;
-    const auto it = std::find_if(_pages.begin(), _pages.end(), [&aTID] (const auto& elem) { return elem.first.pageNo() == aTID.pageNo(); }); //get iterator to PID in page vector
+    const auto it = std::find_if(_pages.begin(), _pages.end(), [&aTID] (const auto& elem) { return elem.first.pageNo() == aTID.pageNo(); }); // get iterator to PID in page vector
     if(it != _pages.cend())
     { 
         const size_t index = it - _pages.cbegin();
@@ -345,7 +345,7 @@ std::vector<Tuple_T> SegmentFSM_SP::getTuples(const tid_vt& aTIDs)
     {
         TRACE("trying to get tuple "+tid.to_string());
         
-        const auto it = std::find_if(_pages.begin(), _pages.end(), [&tid] (const auto& elem) { return elem.first.pageNo() == tid.pageNo(); }); //get iterator to PID in page vector
+        const auto it = std::find_if(_pages.begin(), _pages.end(), [&tid] (const auto& elem) { return elem.first.pageNo() == tid.pageNo(); }); // get iterator to PID in page vector
         if(it != _pages.cend())
         { 
             prev = curr;

@@ -30,7 +30,7 @@ Employee_T::Employee_T(const std::string& aName, const double aSalary, const uin
     _age(aAge),
     _name(aName)
 {
-    _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; //+1 for each string for \0
+    _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; // +1 for each string for \0
     TRACE("'Employee_T' object was constructed: " + to_string());
 }
 
@@ -53,7 +53,7 @@ Employee_T& Employee_T::operator=(const Employee_T& aEmployeeTuple)
 {
     if(this != &aEmployeeTuple)
     {
-        //exception safe copy assignment with swap would be overkill
+        // exception safe copy assignment with swap would be overkill
         _size    = aEmployeeTuple.size();
         _id      = aEmployeeTuple.ID();
         _salary  = aEmployeeTuple.salary();
@@ -69,7 +69,7 @@ void Employee_T::init(const std::string& aName, const double aSalary, const uint
     _salary = aSalary;
     _age = aAge;
     _name = aName;
-    _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; //+1 for each string for \0
+    _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; // +1 for each string for \0
     TRACE("'Employee_T' object was initialized: " + to_string());
 }
 
@@ -111,7 +111,7 @@ void Employee_T::toMemory(byte* aPtr) noexcept
 
     _name = std::string((const char*)aPtr);
     aPtr += _name.size() + 1;
-    _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; //+1 for each string for \0
+    _size = sizeof(_id) + sizeof(_salary) + sizeof(_age) + (_name.size() + 1) ; // +1 for each string for \0
     TRACE("Transformed 'Employee_T' object (" + to_string() + ") to its memory representation");
 }
 

@@ -56,7 +56,7 @@ Partition_T& Partition_T::operator=(const Partition_T& aPartitionTuple)
 {
     if(this != &aPartitionTuple)
     {
-        //exception safe copy assignment with swap would be overkill
+        // exception safe copy assignment with swap would be overkill
         _size    = aPartitionTuple.size();
         _pID     = aPartitionTuple.ID();
         _pName   = aPartitionTuple.name();
@@ -74,7 +74,7 @@ void Partition_T::init(const uint8_t aPID, const std::string& aName, const std::
     _pPath = aPath;
     _pType = aType;
     _pGrowth = aGrowth;
-    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
+    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); // +1 for each string for \0
     TRACE("'Partition_T' object was initialized: " + to_string());
 }
 
@@ -117,7 +117,7 @@ void Partition_T::toMemory(byte* aPtr) noexcept
     aPtr += sizeof(_pType);
     _pGrowth = *(uint16_t*)aPtr;
     aPtr += sizeof(_pGrowth);
-    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); //+1 for each string for \0
+    _size = sizeof(_pID) + (_pName.size() + 1) + (_pPath.size() + 1) + sizeof(_pType) + sizeof(_pGrowth); // +1 for each string for \0
     TRACE("Transformed 'Partition_T' object (" + to_string() + ") to its memory representation");
 }
 

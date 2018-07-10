@@ -5,10 +5,9 @@
  *  @bugs   -
  *
  *  @section DESCRIPTION
- *  todo 
- *  @section USE
- *  todo
+ *      TODO
  */
+
 #pragma once
 
 #include "types.hh"

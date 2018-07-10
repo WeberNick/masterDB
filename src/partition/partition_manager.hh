@@ -44,6 +44,60 @@ class PartitionManager
         ~PartitionManager(); // delete all partitions
 
     public:
+        /** TODO
+         * @brief Create a Partition File Instance object
+         *        creates instance of partition; creation of partition on disk happens in the respective partition class
+         * 
+         * @param aPath 
+         * @param aName 
+         * @param aGrowthIndicator 
+         * @return std::pair<PartitionFile*, bool> 
+         */
+        std::pair<PartitionFile*, bool> createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
+        std::pair<PartitionRaw*, bool>  createPartitionRawInstance(const std::string& aPath, const std::string& aName);
+
+        void deletePartition(const uint8_t aID);
+        void deletePartition(const std::string& aName);
+
+    public:
+        /**
+         * @brief   not just a getter, also loads the partition if it was not loaded before
+         *
+         * @param   aID - ID of the partition to be retrieved
+         * @return  pointer to the partition object
+         */
+        PartitionBase* getPartition(const uint8_t aID);
+        /**
+         * @brief   not just a getter, also loads the partition if it was not loaded before.
+         *          looks up ID to corresponding name and than call getPartition (aID)
+         * @param   aName - Name of the partition to be retrieved
+         * @return  pointer to the partition object
+         */
+        PartitionBase* getPartition(const std::string& aName);
+        
+        const Partition_T& getPartitionT(const uint8_t aID) const;
+        Partition_T&       getPartitionT(const uint8_t aID);
+        const Partition_T& getPartitionT(const std::string& aName) const;
+        Partition_T&       getPartitionT(const std::string& aName);
+        uint8_t            getPartitionID(const std::string& aName);
+        string_vt          getPartitionNames() noexcept;
+        std::string        getPartitionName(const uint8_t aID);
+
+        inline size_t      getNoPartitions() const noexcept { return _partitions.size(); }
+        inline size_t      getNoPartitions() noexcept { return _partitions.size(); }
+        
+        inline const std::string& getPathForPartition(const std::string& aName) const { return _partitionsByID.at(_partitionsByName.at(aName)).path(); }
+        inline const std::string& getMasterPartName() const noexcept { return _masterPartName; }
+        inline const std::string& getMasterSegPartName() const noexcept { return _masterSegPartName; }
+
+    public:
+        /** TODO
+         * @brief 
+         * 
+         * @param aTuples 
+         */
+        void load(const part_vt& aTuples);
+        
         /**
          *  @brief  This function is the only way to get access to the PartitionManager instance
          *  @return reference to the only PartitionManager instance
@@ -60,73 +114,24 @@ class PartitionManager
          * @param aControlBlock 
          */
         void init(const CB& aControlBlock) noexcept;
-
-    public:
-        /** TODO
-         * @brief 
-         * 
-         * @param aTuples 
-         */
-        void load(const part_vt& aTuples);
-
-    public:
-        /** TODO
-         * @brief Create a Partition File Instance object
-         *        creates instance of partition; creation of partition on disk happens in the respective partition class
-         * 
-         * @param aPath 
-         * @param aName 
-         * @param aGrowthIndicator 
-         * @return std::pair<PartitionFile*, bool> 
-         */
-        std::pair<PartitionFile*, bool>  createPartitionFileInstance(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator);
-        std::pair<PartitionRaw*, bool>   createPartitionRawInstance(const std::string& aPath, const std::string& aName);
-
-        void                deletePartition(const uint8_t aID);
-        void                deletePartition(const std::string& aName);
-
-    public:
-        /**
-         * @brief   not just a getter, also loads the partition if it was not loaded before
-         * @param   aID - ID of the partition to be retrieved
-         * @return  pointer to the partition object
-         */
-        PartitionBase*      getPartition(const uint8_t aID);
-        /**
-         * @brief   not just a getter, also loads the partition if it was not loaded before.
-         *          looks up ID to corresponding name and than call getPartition (aID)
-         * @param   aName - Name of the partition to be retrieved
-         * @return  pointer to the partition object
-         */
-        PartitionBase*      getPartition(const std::string& aName);
-        
-        const Partition_T&  getPartitionT(const uint8_t aID) const;
-        Partition_T&        getPartitionT(const uint8_t aID);
-        const Partition_T&  getPartitionT(const std::string& aName) const;
-        Partition_T&        getPartitionT(const std::string& aName);
-        uint8_t             getPartitionID(const std::string& aName);
-        string_vt           getPartitionNames() noexcept;
-        std::string         getPartitionName(const uint8_t aID);
-
-        inline size_t       getNoPartitions() const noexcept { return _partitions.size(); }
-        inline size_t       getNoPartitions() noexcept { return _partitions.size(); }
-        inline const std::string& getPathForPartition(const std::string& aName) const { return _partitionsByID.at(_partitionsByName.at(aName)).path(); }
-        inline const std::string& getMasterPartName() const noexcept { return _masterPartName; }
         
     private:
+        inline const std::string& masterPartName(){ return _masterPartName; }
+        inline const std::string& masterSegPartName(){ return _masterSegPartName; }
+
         /** TODO
          * @brief Create a Partition Sub object
          * 
          * @param aParT 
          */
-        void            createPartitionSub(const Partition_T& aParT); // has some issues if aParT is a const reference
+        void createPartitionSub(const Partition_T& aParT); // has some issues if aParT is a const reference
         /** TODO
          * @brief Create a Master Partition object
          * 
          * @param aPart 
          * @return PartitionFile* 
          */
-        PartitionFile*  createMasterPartition(const Partition_T& aPart);
+        PartitionFile* createMasterPartition(const Partition_T& aPart);
         /** TODO
          * @brief Create a Master Partition object
          *        Implements install functionality
@@ -136,18 +141,13 @@ class PartitionManager
          * @param aMasterTuple 
          * @return PartitionFile* 
          */
-        PartitionFile*  createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
+        PartitionFile* createMasterPartition(const std::string& aPath, const uint aGrowthIndicator, Partition_T& aMasterTuple);
         /** TODO
          * @brief 
          * 
          * @param aMasterTuple 
          */
-        void            insertMasterPartitionTuple(const Partition_T& aMasterTuple);
-
-    private:
-        // Getter
-        inline const std::string& masterPartName(){ return _masterPartName; }
-        inline const std::string& masterSegPartName(){ return _masterSegPartName; }
+        void insertMasterPartitionTuple(const Partition_T& aMasterTuple);
 
     private:
         uint8_t                                     _counterPartitionID;

@@ -63,14 +63,14 @@ size_t PartitionRaw::partSize()
             TRACE(lErrMsg);
             throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
     	}
-       	uint64_t lDisk_size = lSector_count * lSector_size; //in bytes
+       	uint64_t lDisk_size = lSector_count * lSector_size; // in bytes
         if(lDisk_size % _pageSize != 0)
         {
             const std::string lErrMsg = std::string("Partition size modulo page size is not equal to zero");
             TRACE(lErrMsg);
             throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
         } 
-        if(::close(lFileDescriptor) == -1) //call close in global namespace
+        if(::close(lFileDescriptor) == -1) // call close in global namespace
 		{
             const std::string lErrMsg = std::string("An error occured while closing the file: ") + std::string(std::strerror(errno));
             TRACE(lErrMsg);

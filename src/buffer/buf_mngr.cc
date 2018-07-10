@@ -45,7 +45,7 @@ void BufferManager::FreeFrames::push(size_t aFrameNo)
     getFreeFrameListMtx().unlock();
 }
 
-/** TODO
+/**
  * @brief Construct a new BufferManager::FreeBCBs::FreeBCBs object
  * 
  */
@@ -68,7 +68,7 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs) noexcept
         }
         BCB* newBCB = _BCBs[0].get();
         _freeBCBList = newBCB;
-        //create the initial list of free BCBs
+        // create the initial list of free BCBs
         for(const auto& u_ptr : _BCBs)
         {
             newBCB->setNextInChain(u_ptr.get());
@@ -162,12 +162,12 @@ BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
     if(lPageNotFound)
     {
         TRACE("## fix: Page not found in buffer pool. Trying to get a free frame for the page...");
-        TRACE( "Page "+std::to_string(aPageID.pageNo())+" not found");
+        TRACE( "Page " + std::to_string(aPageID.pageNo()) + " not found");
         // bucket has to be unlocked for further code.
         _bufferHash->getBucketMtx(lHashIndex).unlock_shared();
         /* page not in bufferpool. before it can be read, a free frame in the 
            bufferpool must be found or a page must be replaced */
-        lNextBCB = locatePage(aPageID); //get page in bufferpool
+        lNextBCB = locatePage(aPageID); // get page in bufferpool
         readPageIn(lNextBCB,aPageID);
         TRACE("## fix: Page is in the buffer pool now");
     }
@@ -207,7 +207,7 @@ void BufferManager::flush(BCB*& aBufferControlBlockPtr)
     {
         const PID lPageID = aBufferControlBlockPtr->getPID();  // page id of frame
         byte* lFramePtr = getFramePtr(aBufferControlBlockPtr); // pointer to the frame
-        PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); //get partition which contains the page to write
+        PartitionBase* lPart = PartitionManager::getInstance().getPartition(lPageID.fileID()); // get partition which contains the page to write
         lPart->open();  // open partition
         lPart->writePage(lFramePtr, lPageID.pageNo(), getFrameSize()); // write page back to disk
         lPart->close(); // close partition
@@ -249,7 +249,7 @@ BCB* BufferManager::locatePage(const PID& aPageID) noexcept
     lFBCB->setPID(aPageID);         // store requested page
     lFBCB->setModified(false);      // page is not modified
     // lFBCB->setFixCount(0);       // fix will be applied later
-    lFBCB->setNextInChain(nullptr); //BCB has no next BCB yet
+    lFBCB->setNextInChain(nullptr); // BCB has no next BCB yet
     // now the control block is linked to the hash table chain
     const size_t lHashIndex = _bufferHash->hash(aPageID); // compute hash for this page
     _bufferHash->getBucketMtx(lHashIndex).lock(); // lock hash bucket
@@ -274,7 +274,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID)
 {
     TRACE("Read page '" + aPageID.to_string() + "' from disk into the buffer pool");
     TRACE("The BCB is : " + lFBCB->to_string());
-    PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); //get partition which contains the requested page
+    PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); // get partition which contains the requested page
     lFBCB->lock_shared(); // why shared?
     byte* lFramePtr = getFramePtr(lFBCB); // get pointer to the free frame in the bufferpool
     lPart->open(); // open partition
@@ -308,7 +308,7 @@ size_t BufferManager::getFrame() noexcept
     size_t lRandomIndex;
     BCB* lHashChainEntry;
     // the following is a random replacement strategy for frames in the bufferpool. This, however is not
-    // tested at all. Need to think about this with Jonas! (todo: testing)
+    // tested at all. Need to think about this with Jonas! (testing)
     while(true)
     {
         lRandomIndex = lDistr(lRNG); // generate random index
@@ -340,12 +340,13 @@ size_t BufferManager::getFrame() noexcept
                     lHashChainEntry->getMtx().unlock(); // unlock chain entry and continue with next
                     _bufferHash->getBucketMtx(lRandomIndex).unlock(); // release lock on hash bucket
                     return lVictimIndex; // return frame index
-                }// frame is fixed or hash chain entry is locked, go to next entry
+                } // frame is fixed or hash chain entry is locked, go to next entry
                 lHashChainEntry = lHashChainEntry->getNextInChain(); // follow chain, get next entry
-                if(counter==20){
+                if(counter==20)
+                {
                     throw ReturnException(FLF);
                 }
-            }while(lHashChainEntry != nullptr);
+            } while(lHashChainEntry != nullptr);
             // no victim found, next in chain is nullptr, continue
             _bufferHash->getBucketMtx(lRandomIndex).unlock(); // release bucket mutex
         } // hash bucket is empty or locked, continue

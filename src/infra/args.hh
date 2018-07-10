@@ -11,8 +11,9 @@
  * 	Where '--' indicates a command will follow,
  *	'command' is the command name (e.g., 'pagesize'),
  *	'optional parameter' is an optional parameter only needed for certain commands (e.g., for 'pagesize' an integer
- *is needed)
+ *  is needed)
  */
+
 #pragma once 
 
 #include "argbase.hh"

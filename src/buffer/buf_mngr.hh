@@ -8,6 +8,7 @@
  *           - Should initNewPage be in buf mngr or somewhere else?
  *  @section TODO
  */
+
 #pragma once
 
 #include "../infra/types.hh"
@@ -79,22 +80,22 @@ class BufferManager final
                 void init(const size_t aNoFreeBCBs) noexcept;
 
             public:
-                inline BCB*     getFreeBCBList() noexcept { TRACE("first BCB in line is "+_freeBCBList->to_string());  return _freeBCBList; }
-                inline void     lock() noexcept { _freeBCBListMtx.lock(); }
-                inline void     unlock() noexcept { _freeBCBListMtx.unlock(); }
-                inline size_t   getNoFreeBCBs() noexcept { return _noFreeBCBs; }
-                inline BCB*     popFromList();
-                inline void     insertToFreeBCBs(BCB* aBCB) noexcept;
+                inline BCB*   getFreeBCBList() noexcept { TRACE("first BCB in line is " + _freeBCBList->to_string()); return _freeBCBList; }
+                inline void   lock() noexcept { _freeBCBListMtx.lock(); }
+                inline void   unlock() noexcept { _freeBCBListMtx.unlock(); }
+                inline size_t getNoFreeBCBs() noexcept { return _noFreeBCBs; }
+                inline BCB*   popFromList();
+                inline void   insertToFreeBCBs(BCB* aBCB) noexcept;
                 /**
                  * @brief used to reset a BCB after the page it corresponds to was deleted
                  * 
                  * @param aBCB the BCB to reset
                  */
-                void            resetBCB(BCB* aBCB) noexcept; //
+                void resetBCB(BCB* aBCB) noexcept; //
 
             private:
-                inline size_t   incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
-                inline size_t   decrNoFreeBCBs() noexcept { return --_noFreeBCBs; }
+                inline size_t incrNoFreeBCBs() noexcept { return ++_noFreeBCBs; }
+                inline size_t decrNoFreeBCBs() noexcept { return --_noFreeBCBs; }
 
             private:  
                 std::vector<std::unique_ptr<BCB>> _BCBs; // containing all BCB pointer. With this vector it is convenient to free the memory later 
@@ -118,10 +119,10 @@ class BufferManager final
             return lBufferManagerInstance;
         }
 
-        /** TODO
-         * @brief initializes the Buffer Manager
+        /**
+         * @brief Initialize the control block
          * 
-         * @param aControlBlock the global controlblock
+         * @param aControlBlock the control block
          */
         void init(const CB& aControlBlock) noexcept;
 
@@ -153,7 +154,7 @@ class BufferManager final
          *
          * @param   aBufferControlBlock     BCB which shall be flushed
          */
-        void  flush(BCB*& aBufferControlBlock);
+        void flush(BCB*& aBufferControlBlock);
         /**
          * @brief   flushes the whole buffer. used for shutdown or to save a current state of the system.
          */
@@ -170,7 +171,7 @@ class BufferManager final
          *
          * @param   aPID PID of the page to be excluded from the buffer, the BCB is searched.
          */
-        void          resetBCB(const PID& aPID) noexcept;
+        void resetBCB(const PID& aPID) noexcept;
         
     private:
         /**
@@ -179,14 +180,14 @@ class BufferManager final
          * @param   aPageID     PID the BCB shall contain afterwards
          * @return  the BCB the page shall be loaded into
          */
-        BCB*               locatePage(const PID& aPageID) noexcept;
+        BCB* locatePage(const PID& aPageID) noexcept;
         /**
          * @brief   reads Page from Disk into a Buffer Frame
          *
          * @param   lFBCB       free BCB which shall contain the page afterwards
          * @param   aPageID     the page that shall be read in
          */
-        void               readPageIn(BCB* lFBCB, const PID& aPageID);
+        void readPageIn(BCB* lFBCB, const PID& aPageID);
         /**
          * @brief   if emptyfix is called, the page does not contain a header. 
          *          This method creates it and removes all data which was previously stored on the frame.
@@ -195,13 +196,13 @@ class BufferManager final
          * @param   aPageID     the page that shall be contained by this BCB afterwards
          * @param   aLSN        LSN of this page, needed to initialise a header
          */
-        void               initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
+        void initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
         /**
          * @brief   every BCB contains a Frame to actually contain the page and there amount is limited.
          *          if the _freeFrames list contains frames, it just returns on
          *          if this is not the case, it chooses a BCB from the buffer by random to get evicted.
          */
-        size_t             getFrame() noexcept;
+        size_t getFrame() noexcept;
 
     private:
         inline FreeFrames& getFreeFrames() noexcept { return _freeFrames; }

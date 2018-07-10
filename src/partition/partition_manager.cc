@@ -113,7 +113,7 @@ std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(cons
     PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
     _partitions[lPartition->getID()] = lPartition;
     const uint pType = 0;
-    Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, INVALID_16); //MAX16 = invalid value to indicate 'no growth'
+    Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, INVALID_16); // MAX16 = invalid value to indicate 'no growth'
     createPartitionSub(lPartTuple);
     TRACE("Raw partition instance created.");
     return std::make_pair(static_cast<PartitionRaw*>(_partitions.at(lPartition->getID())), true);
@@ -121,10 +121,10 @@ std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(cons
 
 void PartitionManager::createPartitionSub(const Partition_T& aParT)
 {
-    //insert into data structures
+    // insert into data structures
     _partitionsByID[aParT.ID()] = aParT;
     _partitionsByName[aParT.name()] = aParT.ID();
-    //insert tuple
+    // insert tuple
     SegmentFSM_SP* lSeg = static_cast<SegmentFSM_SP*>(SegmentManager::getInstance().getSegment(_masterSegPartName));
     lSeg->insertTuple<Partition_T>(aParT);
 }
@@ -245,13 +245,13 @@ std::string PartitionManager::getPartitionName(const uint8_t aID)
     {
         return it->first;
     }
-    //for(const auto& part : _partitionsByName)
-    //{
-        //if (aID == part.second)
-        //{
-            //return part.first;
-        //}
-    //}
+    // for(const auto& part : _partitionsByName)
+    // {
+        // if (aID == part.second)
+        // {
+            // return part.first;
+        // }
+    // }
     throw PartitionNotExistsException(FLF);
 }
 
@@ -289,7 +289,7 @@ void PartitionManager::deletePartition(const std::string& aName)
         throw PartitionNotExistsException(FLF);
     }
 }
-//just creates an object which is deleted afterwards again.
+// just creates an object which is deleted afterwards again.
 PartitionFile* PartitionManager::createMasterPartition(const Partition_T& aPart)
 {
    return new PartitionFile(aPart, *_cb); 

@@ -113,7 +113,7 @@ void Segment_T::toMemory(byte* aPtr) noexcept
     _sType = *(uint8_t*)aPtr;
     aPtr += sizeof(_sType);
     _sFirstPage = *(uint32_t*)aPtr;
-    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); //+1 for each string for \0
+    _size = sizeof(_sPID) + sizeof(_sID) + (_sName.size() + 1) + sizeof(_sType) + sizeof(_sFirstPage); // +1 for each string for \0
     TRACE("Transformed 'Segment_T' object (" + to_string() + ") to its memory representation");
 }
 

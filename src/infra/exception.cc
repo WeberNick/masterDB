@@ -9,7 +9,7 @@ BaseException::BaseException(
 	_file(aFileName),
 	_line(aLineNumber),
 	_func(aFunctionName)
-	//_errMsg(aErrorMessage)
+	// _errMsg(aErrorMessage)
 {}
 
 BaseException::BaseException(

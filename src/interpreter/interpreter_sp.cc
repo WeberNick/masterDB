@@ -50,29 +50,33 @@ std::pair<byte*, uint16_t> InterpreterSP::addNewRecord(const uint aRecordSize) n
 	if(lTotalSize <= freeSpace()) 
 	{
 		lResultRecord = pagePtr() + header()->_nextFreeSpace;
-                //wie viel platz genau da?
+		// how much space is there?
 		header()->_nextFreeSpace += lRecordSize;               // remember pointer to next free record
 		header()->_freeSpace -= lTotalSize;
-		slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
+		slot(noRecords())._offset = lResultRecord - pagePtr(); // store offset of new record in slot
 		slot(noRecords())._size = lRecordSize;
 		slot(noRecords())._status=1;
-                //rest des slots setzen
+        // set remaining slot
         ++(header()->_noRecords);
 	}
 	return std::make_pair(lResultRecord, header()->_noRecords - 1);
 }
 
-//just mark deleted
-int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo) noexcept {
+// just mark deleted
+int InterpreterSP::deleteRecordSoft (uint16_t aRecordNo) noexcept
+{
 	slot(aRecordNo)._status=0;
 	return 1;
 }
 
-byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
-	if(aRecordNo >= noRecords()) { 
+byte* InterpreterSP::getRecord(uint aRecordNo) noexcept
+{
+	if(aRecordNo >= noRecords())
+	{ 
 		return nullptr;
 	}
-	else{
+	else
+	{
 		if(slot(aRecordNo)._status==0){
 			return nullptr;
 		}
@@ -82,60 +86,66 @@ byte* InterpreterSP::getRecord(uint aRecordNo) noexcept {
 	}
 }
 
-//Old Code from Jonas. Beginning of proper free space management on slotted pages
+// Old Code from Jonas. Beginning of proper free space management on slotted pages
 
 /*
-//actually delete it
-int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept {
+// actually delete it
+int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept
+{
     #pragma message ("TODO: @Jonas, this is not used anyway, right? If so, please comment this function out, move it to the bottom of this file and delete its declaration in the header")
-	//TODO
-	//put free in front of Free Space List by
-		//check if there is list entry behind this record
-			//if yes, move this one at beginning and increment size
-			//if no, create new entry, put _header._nextFreeSpace as new offset
-		//do something with the slot...
-		//return 1
+	// TODO
+	// put free in front of Free Space List by
+		// check if there is list entry behind this record
+			// if yes, move this one at beginning and increment size
+			// if no, create new entry, put _header._nextFreeSpace as new offset
+		// do something with the slot...
+		// return 1
 	return -1;
-
 }
-	if(lTotalSize <= freeSpace()) 
+	
+if(lTotalSize <= freeSpace()) 
+{
+	lResultRecord = pagePtr() + header()->_nextFreeSpace;
+	byte* lPrevPtr = 0;
+	// while there is not enough space and there are more elements in the free space list
+	while( ((freeSpaceList_t*) lResultRecord)->_size < lRecordSize & !(((freeSpaceList_t*) lResultRecord)->_offset==0))
 	{
-		lResultRecord = pagePtr() + header()->_nextFreeSpace;
-		byte* lPrevPtr = 0;
-		//while there is not enough space and there are more elements in the free space list
-		while( ((freeSpaceList_t*) lResultRecord)->_size < lRecordSize & !(((freeSpaceList_t*) lResultRecord)->_offset==0)){
-			//look up the next entry of the free space list
-			lPrevPtr = lResultRecord;
-			lResultRecord = pagePtr() + ((freeSpaceList_t*) lResultRecord)->_offset;
+		// look up the next entry of the free space list
+		lPrevPtr = lResultRecord;
+		lResultRecord = pagePtr() + ((freeSpaceList_t*) lResultRecord)->_offset;
+	}
+	// if not,  leave position out
+	if(((freeSpaceList_t*) lResultRecord)->_size < (lRecordSize+sizeof(freeSpaceList_t)))
+	{
+		if(lPrevPtr==0){ // if one has to change the header directly
+			header()->_nextFreeSpace = ((freeSpaceList_t*) lResultRecord)->_offset;
 		}
-		//if not,  leave position out
-		if(((freeSpaceList_t*) lResultRecord)->_size < (lRecordSize+sizeof(freeSpaceList_t))){
-			if(lPrevPtr==0){ // if one has to change the header directly
-				header()->_nextFreeSpace = ((freeSpaceList_t*) lResultRecord)->_offset;
-			}
-			else{
-				((freeSpaceList_t*) lPrevPtr)->_offset= ((freeSpaceList_t*) lResultRecord)->_offset;
-			}
+		else
+		{
+			((freeSpaceList_t*) lPrevPtr)->_offset= ((freeSpaceList_t*) lResultRecord)->_offset;
 		}
-		else{
-		//move pointer behind record if there is enough space
-		freeSpaceList_t temp = *(freeSpaceList_t*) lResultRecord;
-		uint16_t lNewFSLPos = lResultRecord+lRecordSize-pagePtr();
-		temp._size-=lRecordSize;
-		*((freeSpaceList_t*) pagePtr() + lNewFSLPos)=temp;
-		//edit previous pointer
-			if(lPrevPtr==0){ // if one has to change the header directly
-				header()->_nextFreeSpace = lNewFSLPos;
-			}
-			else{
-				((freeSpaceList_t*) lPrevPtr)->_offset = lNewFSLPos;
-			}
+	}
+	else
+	{
+	// move pointer behind record if there is enough space
+	freeSpaceList_t temp = *(freeSpaceList_t*) lResultRecord;
+	uint16_t lNewFSLPos = lResultRecord+lRecordSize-pagePtr();
+	temp._size-=lRecordSize;
+	*((freeSpaceList_t*) pagePtr() + lNewFSLPos)=temp;
+	// edit previous pointer
+		if(lPrevPtr==0)
+		{ // if one has to change the header directly
+			header()->_nextFreeSpace = lNewFSLPos;
 		}
-
-		header()->_freeSpace -= lTotalSize;
-		slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
-		slot(noRecords())._size =lRecordSize;
-		slot(noRecords())._status=1;
-                //rest des slots setzen
-		header()->_noRecords += 1;
-	}*/
+		else
+		{
+			((freeSpaceList_t*) lPrevPtr)->_offset = lNewFSLPos;
+		}
+	}
+	header()->_freeSpace -= lTotalSize;
+	slot(noRecords())._offset = lResultRecord - pagePtr();  // store offset of new record in slot
+	slot(noRecords())._size =lRecordSize;
+	slot(noRecords())._status=1;
+    // rest des slots setzen
+	header()->_noRecords += 1;
+} */

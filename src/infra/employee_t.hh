@@ -1,17 +1,15 @@
-/*********************************************************************
+/**
  * @file    segment_t.hh
  * @author 	Nick Weber
  * @date    Mai 07, 2018
  * @brief 	Tuple class for employees. Used for transforming to disk and memory representations
- * @bugs 	TBD
- * @todos 	TBD
+ * @bugs 	Currently no bugs known
+ * @todos 	-
  * 
  * @section	DESCRIPTION
- * TBD
- * 
- * @section USE
- * TBD
- ********************************************************************/ //TODO
+ * TODO
+ */
+
 #pragma once
 
 #include "tuple.hh"

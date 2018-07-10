@@ -1,9 +1,12 @@
 /**
- * @file   parser.hh
- * @author Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
- * @brief  Class implementing the parser for the command line interface
- * @bugs   Currently no bugs known
+ * @file    parser.hh
+ * @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
+ * @brief   Class implementing the parser for the command line interface
+ * @bugs    Currently no bugs known
+ * @todos   -
+ * @section TODO
  */
+
 #pragma once
 
 #include "../infra/employee_t.hh"
@@ -69,13 +72,13 @@ class CommandParser
         ~CommandParser() = default;
 
     private:
-        /** TODO
-         * @brief 
+        /**
+         * @brief run the command line interface
          * 
          */
         void runcli();
-        /** TODO
-         * @brief 
+        /**
+         * @brief find a command for
          * 
          * @param splits 
          * @return const Command* 
@@ -104,19 +107,7 @@ class CommandParser
          * 
          */
         void printe() const;
-        /** TODO
-         * @brief 
-         * 
-         * @param caption 
-         * @param list 
-         */
-        void pprints(const std::string& caption, const string_vt& list) const;
-        /** TODO
-         * @brief Print one line of + of size length+2
-         * 
-         * @param length the length which determines the printed line
-         */
-        void printp(uint8_t length) const;
+        
         template <typename T>
         void pprintelems(const std::vector<T>& tuples) const;
         void pprintelem(const string_vt& values, const std::vector<uint8_t>& spaces) const;
@@ -202,31 +193,32 @@ class CommandParser
         int com_exit(const char_vpt* args) const;
 
     public:
-        /** TODO
-         * @brief Get the Instance object
+        /**
+         * @brief execute multiple CLI commands in an automated fashion to test multithreaded execution
          * 
-         * @return CommandParser& 
+         * @param commands the command list
+         */
+        void multiexec(const string_vt& commands);
+
+    public:
+        /**
+         * @brief Get the CommandParser instance object
+         * 
+         * @return CommandParser& the CommandParser instance
          */
         static CommandParser& getInstance()
         {
             static CommandParser lComPars;
             return lComPars;
         }
-    
-        /** TODO
-         * @brief 
+        /**
+         * @brief Initialize the control block
          * 
-         * @param aControlBlock 
-         * @param aPrompt 
-         * @param aCommentChar 
+         * @param aControlBlock the control block
+         * @param aPrompt the prompt in the command line interface, defaults to " > "
+         * @param aCommentChar the comment char in the command line interface, defaults to " # "
          */
         void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
-        /** TODO
-         * @brief 
-         * 
-         * @param commands 
-         */
-        void multiexec(const string_vt& commands);
 
     private:
         static const char*                  _HELP_FLAG;

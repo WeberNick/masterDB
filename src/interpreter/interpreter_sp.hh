@@ -27,9 +27,10 @@ class InterpreterSP
             uint16_t _size;   // of record contained
             uint8_t _status;  // 1 valid, 0 deleted
 		};
-		struct freeSpaceList_t{//not used, code implemented but not tested as it was too much for scope of project
-			uint16_t _offset; //from beginning of page to next free space, 0 if invalid
-			uint16_t _size; //size of this free space
+		struct freeSpaceList_t // not used, code implemented but not tested as it was too much for scope of project
+		{ 
+			uint16_t _offset;  // from beginning of page to next free space, 0 if invalid
+			uint16_t _size;    // size of this free space
 		};
 
 	private:
@@ -60,9 +61,9 @@ class InterpreterSP
 		 * @return std::pair<byte*, uint16_t> the location where to write the new record
 		 */
 		std::pair<byte*, uint16_t> addNewRecord(const uint aRecordSize) noexcept ;
-		//int deleteRecordHard (uint16_t aRecordNo) noexcept ; //actually delete record so that it is not restorable, not implemented
-		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; //just mark as deleted
-		byte* getRecord(const uint aRecordNo) noexcept ; //gets a record, returns a nullptr if it does not exist or is marked invalid
+		// int deleteRecordHard (uint16_t aRecordNo) noexcept ; // actually delete record so that it is not restorable, not implemented
+		int deleteRecordSoft (uint16_t aRecordNo) noexcept ; // just mark as deleted
+		byte* getRecord(const uint aRecordNo) noexcept ;     // gets a record, returns a nullptr if it does not exist or is marked invalid
 
 	public:
 		inline byte*     	pagePtr() noexcept { return _pp; }

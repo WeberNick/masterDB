@@ -76,7 +76,7 @@ byte* SegmentBase::getPage(const uint aPageNo, LOCK_MODE aMode)
 void SegmentBase::writePage(const uint aPageNo)
 {
     TRACE("Trying to write Page");
-    BCB*& lBCB = _pages.at(aPageNo).second; //may throw if aPageNo not in map
+    BCB*& lBCB = _pages.at(aPageNo).second; // may throw if aPageNo not in map
     if(lBCB != nullptr)
     {
         lBCB->setModified(true);

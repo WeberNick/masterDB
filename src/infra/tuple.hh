@@ -1,17 +1,15 @@
-/*********************************************************************
+/**
  * @file    tuple.hh
  * @author 	Nick Weber
  * @date    Jun 30, 2018
  * @brief 	Abstract class providing an interface for all tuple types
- * @bugs 	TBD
- * @todos 	TBD
+ * @bugs 	Currently no bugs known
+ * @todos 	-
  * 
  * @section	DESCRIPTION
- * TBD
- * 
- * @section USE
- * TBD
- ********************************************************************/
+ *     TODO
+ */
+
 #pragma once
 
 #include "types.hh"
@@ -39,6 +37,7 @@ class Tuple
         inline size_t size() noexcept { return _size; }
         virtual std::string to_string() const noexcept = 0;
         virtual std::string to_string() noexcept = 0;
+        //virtual string_vt values() const = 0;
 
     protected:
         size_t _size; // size of class

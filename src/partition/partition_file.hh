@@ -6,6 +6,7 @@
  *  @todos   -Update LSN?
  *  @section TBD
  */
+
 #pragma once
 
 #include "partition_base.hh"

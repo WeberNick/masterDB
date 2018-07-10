@@ -41,11 +41,11 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
 void SegmentManager::load(const seg_vt& aTuples) noexcept
 {
     // fill internal data structure with all relevant info
-    uint16_t maxID = 0; //trying to find the maximal ID already assigned to a segment
+    uint16_t maxID = 0; // trying to find the maximal ID already assigned to a segment
     for(const auto& segTuple : aTuples)
     {
     std::cout<<segTuple<<std::endl;
-    //insert tuples into data structures
+    // insert tuples into data structures
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
       TRACE(segTuple.to_string() + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
@@ -87,10 +87,10 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
 
 void SegmentManager::createSegmentSub(const Segment_T& aSegT){
     TRACE(std::string("(DELETE TRACE AFTER DEBUGGING) trying to insert the following tuple:\n") +aSegT.to_string() );
-    //insert into maps
+    // insert into maps
     _segmentsByID[aSegT.ID()] = aSegT;
     _segmentsByName[aSegT.name()] = aSegT.ID();
-    //insert tuple on disk
+    // insert tuple on disk
     SegmentFSM_SP* lSegments = (SegmentFSM_SP*)getSegment(_masterSegSegName);
     lSegments->insertTuple<Segment_T>(aSegT);
 }
@@ -110,10 +110,10 @@ void SegmentManager::deleteSegment(SegmentFSM_SP*& aSegment)
 
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
-    //@Nick: bitte nicht im TRACE getSegment nehmen. getSegment läd schon und kann abstürzen.
+    // @Nick: bitte nicht im TRACE getSegment nehmen. getSegment läd schon und kann abstürzen.
     TRACE("Deletion of Segment " + std::to_string(aID) + " starts...");
     SegmentBase* lSeg = getSegment(aID);
-    lSeg->erase(); //free all pages
+    lSeg->erase(); // free all pages
     // delete object itself, which now exists.
     delete lSeg; 
     _segments.erase(aID);
@@ -142,7 +142,7 @@ void SegmentManager::deleteSegment(const std::string& aName)
 }
 
 void SegmentManager::deleteSegements(const uint8_t aPartitionID) {
-    //@Nich es gibt mehrere Treffer, bitte aendern.
+    #pragma message ("TODO: @Nick es gibt mehrere Treffer, bitte aendern.")
     auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) {
         return elem.second.partID() == aPartitionID;
     }); 
@@ -250,7 +250,7 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
      SegmentFSM_SP* lPSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lPSeg->getID()] = lPSeg;
     
-    Segment_T lPSegT(aPartition->getID(),lPSeg->getID(),aName,2,lPSeg->getIndexPages().at(0));
+    Segment_T lPSegT(aPartition->getID(), lPSeg->getID(), aName, 2, lPSeg->getIndexPages().at(0));
     TRACE("ID is "+std::to_string(aPartition->getID()));
     TRACE("MasterSegPart created");
     // Master Segment for Segments

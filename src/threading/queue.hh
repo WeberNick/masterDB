@@ -2,10 +2,9 @@
  * @file    queue.hh
  * @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *          Aljoscha Narr (alnarr@mail.uni-mannheim.de)
- * @brief   Class implementing a threadsafe queue for submitting jobs to the
- * thread pool.
- * @bugs    TBD
- * @todos   TBD
+ * @brief   Class implementing a threadsafe queue for submitting jobs to the thread pool.
+ * @bugs    Currently no bugs known
+ * @todos   -
  */
 
 #pragma once

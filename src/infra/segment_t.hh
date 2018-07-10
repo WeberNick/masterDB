@@ -1,20 +1,19 @@
 
-/*********************************************************************
+/**
  * @file    segment_t.hh
  * @author 	Nick Weber
  * @date    Mai 07, 2018
  * @brief 	Tuple class for segments. Used for transforming to disk and memory representations
- * @bugs 	TBD
- * @todos 	TBD
+ * @bugs 	Currently no bugs known
+ * @todos 	-
  * 
  * @section	DESCRIPTION
- * TBD
- * 
- * @section USE
- * TBD
- ********************************************************************/
+ *    TODO
+ */
+
 #pragma once
 
+//#include "../segment/segment_manager.hh"
 #include "tuple.hh"
 #include "types.hh"
 #include "exception.hh"
@@ -63,6 +62,7 @@ class Segment_T : public Tuple
         void toMemory(byte* aPtr) noexcept override;
     
     public:
+        static inline string_vt attributes() noexcept { return {"partID", "ID", "Name", "Type", "FirstPage"}; }
         // Getter
         inline uint8_t partID() const noexcept { return _sPID; }
         inline uint8_t partID() noexcept { return _sPID; }
@@ -81,6 +81,8 @@ class Segment_T : public Tuple
          */
         inline std::string to_string() const noexcept override;
         inline std::string to_string() noexcept override;
+
+        inline string_vt values() const { return {std::to_string(_sPID), std::to_string(_sID), _sName, segTypeToString(_sType), std::to_string(_sFirstPage)}; }
      
     private:
         /* Tuple content */

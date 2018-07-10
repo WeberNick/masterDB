@@ -1,19 +1,18 @@
-/*********************************************************************
+/**
  * @file    partition_t.hh
  * @author 	Nick Weber
  * @date    Mai 07, 2018
  * @brief 	Tuple class for partitions. Used for transforming to disk and memory representations
- * @bugs 	TBD
- * @todos 	TBD
+ * @bugs 	Currently no bugs known
+ * @todos 	-
  * 
  * @section	DESCRIPTION
- * TBD
- * 
- * @section USE
- * TBD
- ********************************************************************/
+ *     TODO
+ */
+
 #pragma once
 
+//#include "../partition/partition_manager.hh"
 #include "tuple.hh"
 #include "types.hh"
 #include "exception.hh"
@@ -62,6 +61,7 @@ class Partition_T : public Tuple
         void toMemory(byte* aPtr) noexcept override;
     
     public:
+        static inline string_vt attributes() noexcept { return {"ID", "Name", "Path", "Type", "Growth"}; }
         // Getter
         inline uint8_t ID() const noexcept { return _pID; }
         inline uint8_t ID() noexcept { return _pID; }
@@ -80,6 +80,8 @@ class Partition_T : public Tuple
          */
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override; 
+
+        inline string_vt values() const { return {std::to_string(_pID), _pName, _pPath, partTypeToString(_pType), std::to_string(_pGrowth)}; }
 
     private:
         /* Tuple content*/

@@ -73,7 +73,7 @@ uint InterpreterFSIP::getNextFreePage() noexcept
         if ((lPartBytes) != 0)
         {
             uint32_t lCalcFreePos = idx_lowest_bit_set<uint32_t>(lPartBytes); // find the first "leftmost" zero
-            // idx_complement_bit<uint64_t>(lPP,lCalcFreePos); //set the bit to 1
+            // idx_complement_bit<uint64_t>(lPP,lCalcFreePos); // set the bit to 1
             // std::cout<<" next free page is "<< (j*32) + lCalcFreePos <<std::endl;
             return ((j * 32) + lCalcFreePos);
             // change LSN
@@ -182,7 +182,7 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     {
         return aNumberOfPages;
     }
-    //distance of first page to be freed to last one.
+    // distance of first page to be freed to last one.
     int64_t ldist = ((int64_t)freeOnThisPage) - ((int64_t)aNumberOfPages);
     TRACE("ldist: " + std::to_string(ldist));
     byte* lPP = _pp;

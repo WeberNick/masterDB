@@ -363,9 +363,17 @@ int CP::com_show_part(const char_vpt* args) const
         const Partition_T& part = PartitionManager::getInstance().getPartitionT(partName);
         size_t partID = part.ID();
         const string_vt& segNames = SegmentManager::getInstance().getSegmentNamesForPartition(partID);
+        std::vector<Segment_T> partSegs;
+        partSegs.reserve(segNames.size());
+        for (const auto& name : segNames)
+        {
+            const Segment_T& seg_t = SegmentManager::getInstance().getSegmentT(name);
+            partSegs.push_back(seg_t);
+        }
         std::cout << "PartitionID:    " << partID << std::endl;
         std::cout << "Partition:      " << part.name() << std::endl;
         // std::cout << "Partition Type: " << part.type() << std::endl;
+        std::cout << std::endl;
         std::cout << "Segments:       ";
         if (segNames.size() == 0)
         {
@@ -374,7 +382,7 @@ int CP::com_show_part(const char_vpt* args) const
         else
         {
             std::cout << std::endl;
-            pprints(partName, segNames);
+            pprintelems(partSegs);
         }
     }
     catch(const PartitionNotExistsException& oore)
@@ -394,9 +402,10 @@ int CP::com_show_parts(const char_vpt* args) const
 {
     try
     {
-        const string_vt& names = PartitionManager::getInstance().getPartitionNames();
-        const std::string& cap = "Partitions";
-        pprints(cap, names);
+        const std::string& mspname = PartitionManager::getInstance().getMasterSegPartName();
+        SegmentFSM_SP* msegFSM = (SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(mspname));
+        const std::vector<Partition_T>& parts = msegFSM->getTuples<Partition_T>(msegFSM->scan());
+        pprintelems(parts);
     }
     catch(const std::exception& e)
     {
@@ -440,9 +449,10 @@ int CP::com_show_segs(const char_vpt* args) const
 {
     try
     {
-        const string_vt& names = SegmentManager::getInstance().getSegmentNames();
-        const std::string& cap = "Segments";
-        pprints(cap, names);
+        const std::string& mssname = SegmentManager::getInstance().getMasterSegSegName();
+        SegmentFSM_SP* ssegFSM = (SegmentFSM_SP*)(SegmentManager::getInstance().getSegment(mssname));
+        const std::vector<Segment_T>& segs = ssegFSM->getTuples<Segment_T>(ssegFSM->scan());
+        pprintelems(segs);
     }
     catch(const std::exception& e) 
     {
@@ -536,44 +546,6 @@ void CommandParser::printptable(const std::vector<uint8_t>& spaces) const
             std::cout << "-";
         std::cout << "+";
     }
-    std::cout << std::endl;
-}
-
-void CommandParser::pprints(const std::string& caption, const string_vt& list) const
-{
-    uint8_t longestStr = PartitionManager::getInstance().getMasterPartName().size();
-    if (caption.size() > longestStr)
-        longestStr = caption.size();
-    for (const std::string& line : list)
-    {
-        if (line.size() > longestStr)
-            longestStr = line.size();
-    }
-    printp(longestStr);
-    std::cout << "| " << caption;
-    for (size_t i = 0; i < longestStr - caption.size(); ++i)
-    {
-        std::cout << " ";
-    }
-    std::cout << " |" << std::endl;
-    printp(longestStr);
-    for (const std::string& line : list)
-    {
-        std::cout << "| " << line;
-        for (size_t i = 0; i < longestStr - line.size(); ++i)
-            std::cout << " ";
-        std::cout << " |" << std::endl;
-    }
-    printp(longestStr);
-    std::cout << std::endl;
-}
-
-void CommandParser::printp(uint8_t length) const
-{
-    std::cout << "+";
-    for (uint8_t i = 0; i < length + 2; ++i)
-        std::cout << "-";
-    std::cout << "+";
     std::cout << std::endl;
 }
 

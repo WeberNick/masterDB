@@ -6,6 +6,7 @@
  *  @todos	-
  *  @section TBD
  */
+
 #pragma once
 
 #include "../infra/types.hh"
@@ -22,18 +23,18 @@
 #include <unistd.h>
 
 #ifdef __linux__
-  #include <linux/fs.h>
-  #define P_NO_BLOCKS BLKGETSIZE
+    #include <linux/fs.h>
+    #define P_NO_BLOCKS BLKGETSIZE
   #define P_BLOCK_SIZE BLKSSZGET
 #elif __APPLE__
-  #include <sys/disk.h>
-  #define P_NO_BLOCKS DKIOCGETBLOCKCOUNT 
-  #define P_BLOCK_SIZE DKIOCGETBLOCKSIZE 
+    #include <sys/disk.h>
+    #define P_NO_BLOCKS DKIOCGETBLOCKCOUNT 
+    #define P_BLOCK_SIZE DKIOCGETBLOCKSIZE 
 #else
-	// unsupported
-  #define P_NO_BLOCKS 0 
-  #define P_BLOCK_SIZE 0 
-  #error SYSTEM IS NOT COMPATIBLE WITH NON-UNIX OPERATING SYSTEMS
+    // unsupported
+    #define P_NO_BLOCKS 0 
+    #define P_BLOCK_SIZE 0 
+    #error SYSTEM IS NOT COMPATIBLE WITH NON-UNIX OPERATING SYSTEMS
 #endif
 
 #include <iostream>
@@ -70,6 +71,7 @@ class PartitionBase
         /**
          *  @brief  Closes the partition. If the open count is greater than 1, it is decreased. Otherwise the
          *          partition will be closed and the file descriptor is set to -1
+         *
          *  @throws FileException on failure
          *  @see    infra/exception.hh
          */
@@ -78,6 +80,7 @@ class PartitionBase
         /**
          *  @brief  Allocates a new page in the partition
          *  @return an index to the allocated page
+         *
          *  @throws
          *  @see    interpreter/interpreter_fsip.hh, infra/exception.hh
          *  @note   doesn't use the buffer manager yet but retrieves its fsips directly
@@ -86,6 +89,7 @@ class PartitionBase
     
         /**
          *  @brief  Physically remove a page by setting its bit in the fsip
+         *
          *  @param  aPageIndex: an index indicating which page to remove
          *  @see    interpeter/interpreter_fsip.hh
          */
@@ -93,6 +97,7 @@ class PartitionBase
     
         /**
          *  @brief  Read a page from the partition into a main memory buffer
+         *
          *  @param  aBuffer: the buffer to read the page into
          *  @param  aPageIndex: an index indicating which page to read
          *  @param  aBufferSize: size of the buffer in bytes
@@ -103,6 +108,7 @@ class PartitionBase
     
         /**
          *  @brief  Write a page from a main memory buffer on the partition
+         *
          *  @param  aBuffer: where to write from
          *  @param  aPageIndex: an index indicating which page to write
          *  @param  aBufferSize: size of the buffer in bytes
@@ -134,17 +140,20 @@ class PartitionBase
     protected:
         /**
          *  @brief  Format the partition by initializing its fsip
+         *
          */
         void format();
     
         /**
          *  @brief  Physically create the partition. Needs to be implemented by respective partition type
+         *
          *  @see    partition_file.hh, partition_raw.hh
          */
         virtual void create() = 0;
     
         /**
          *  @brief  Physically removes the partition. Needs to be implemented by respective partition type
+         *
          *  @see    partition_file.hh, partition_raw.hh
          */
         virtual void remove() = 0;

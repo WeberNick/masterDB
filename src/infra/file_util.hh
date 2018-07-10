@@ -1,17 +1,14 @@
-/*********************************************************************
+/**
  * @file    file_util.hh
  * @author 	Nick Weber
  * @date    Jun 24, 2018
  * @brief 	
- * @bugs 	TBD
- * @todos 	TBD
+ * @bugs 	Currently no bugs known
+ * @todos 	-
  * 
  * @section	DESCRIPTION
- * TBD
- * 
- * @section USE
- * TBD
- ********************************************************************/
+ *  TBD
+ */
 #pragma once
 
 #include <iostream>
@@ -66,7 +63,7 @@ namespace FileUtil
         const fs::path lPath = aPath;
         fs::path lTmpPath;
         const auto end = --lPath.end();
-        for(auto it = lPath.begin(); it != end; ++it){ lTmpPath /= *it; } //iterate over path components and add them to tmp path
+        for(auto it = lPath.begin(); it != end; ++it){ lTmpPath /= *it; } // iterate over path components and add them to tmp path
         return fs::is_directory(lTmpPath);
     }
     /** TODO
@@ -77,7 +74,7 @@ namespace FileUtil
      */
     inline void resize(const std::string aPath, size_t aSize) noexcept
     {
-        fs::resize_file(aPath, aSize); //will throw if fails
+        fs::resize_file(aPath, aSize); // will throw if fails
     }
     /** TODO
      * @brief 

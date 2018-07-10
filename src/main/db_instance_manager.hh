@@ -5,8 +5,9 @@
  *  @bugs   Currently no bugs known
  *  @todos  Changes correct? Fix reworks
  *
- *  @section TBD
+ *  @section TODO
  */
+
 #pragma once
 
 #include "../infra/types.hh"
@@ -44,15 +45,16 @@ class DatabaseInstanceManager final
 			return lDBIM_Instance;
 		}
 
-        /** TODO
-         * @brief 
+        /**
+         * @brief Initialize and assign controlblock
          * 
-         * @param aControlBlock 
+         * @param aControlBlock the control block
          */
         void init(const CB& aControlBlock);
         
         /**
          * @brief   shuts the system down. Shall be only called on a valid state of the system and therefore has to be called explicetely.
+         *
          */
 		void shutdown();
 
@@ -63,6 +65,7 @@ class DatabaseInstanceManager final
 		void install();
         /**
          * @brief   boots the system from a given master partition
+         *
          */
 		void boot();
 

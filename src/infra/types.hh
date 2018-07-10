@@ -2,7 +2,10 @@
  *  @file    types.hh
  *  @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *           Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *
+ *  @brief   Implementing typedefs and enums used throughout the project
+ *  @bugs    Currently no bugs known
+ *  @todos   -
+ *  @section TODO
  */
  
 #pragma once
@@ -143,7 +146,7 @@ enum class PageStatus: int8_t
 enum class LOCK_MODE: int8_t
 {
     kNoType = -1,
-    kNOLOCK = 0, //not in use
+    kNOLOCK = 0, // not in use
     kSHARED = 1,
     kEXCLUSIVE = 2,
     kLockModeSize = 3
@@ -179,6 +182,38 @@ inline std::string lockModeToString(LOCK_MODE aMode)
             break;
     }
 }
+/**
+ * @brief  Translate type to a readable string representation
+ * 
+ * @param  aType the type
+ * @return const std::string the human-interpretable string
+ */
+inline std::string segTypeToString(int aType) // For Segments
+{
+    switch(aType)
+    {
+        case 1:
+            return "FSM";
+            break;
+        case 2:
+            return "FSM_SP";
+            break;
+        default:
+            return "NaN";
+    }
+}
 
-
-
+inline std::string partTypeToString(int aType) // For Partitions
+{
+    switch(aType)
+    {
+        case 1:
+            return "File";
+            break;
+        case 2:
+            return "Raw";
+            break;
+        default:
+            return "NaN";
+    }
+}
