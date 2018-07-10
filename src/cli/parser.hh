@@ -113,87 +113,104 @@ class CommandParser
          */
         void printe() const;
         
+        /**
+         * @brief pretty print elements of parameter vector tuples
+         * 
+         * @tparam T the type of the elements to be printed
+         * @param tuples the elements to print
+         */
         template <typename T>
         void pprintelems(const std::vector<T>& tuples) const;
+        /**
+         * @brief pretty print an element, helper function for pprintelems
+         * 
+         * @param values the values of the element
+         * @param spaces the positions of separation characters ("|")
+         */
         void pprintelem(const string_vt& values, const std::vector<uint8_t>& spaces) const;
+        /**
+         * @brief pretty print a horizontal line
+         * 
+         * @param spaces the posistions of separation characters ("+")
+         */
         void printptable(const std::vector<uint8_t>& spaces) const;
 
     private:
-        /** TODO
-         * @brief 
+        /**
+         * @brief implementing command functionality for printing a detailed help information
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_help(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /** 
+         * @brief implementing command functionality for creating a partition
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_create_p(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /** 
+         * @brief implementing command functionality for deleting a partition
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_drop_p(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /** 
+         * @brief implementing command functionality for creating a segment
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_create_s(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /** 
+         * @brief implementing command functionality for deleting a segment
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_drop_s(const char_vpt* args) const;
-        /** TODO
+        /**
          * @brief 
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_insert_tuple(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /**
+         * @brief implementing command functionality for showing information for a specific partition
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_show_part(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /**
+         * @brief implementing command functionality for showing information for all partitions
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_show_parts(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /**
+         * @brief implementing command functionality for showing information for a specific segment
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_show_seg(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /**
+         * @brief implementing command functionality for showing information for all segments
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_show_segs(const char_vpt* args) const;
-        /** TODO
-         * @brief 
+        /**
+         * @brief implementing command functionality for exiting the system
          * 
-         * @param args 
-         * @return int 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
          */
         int com_exit(const char_vpt* args) const;
 
