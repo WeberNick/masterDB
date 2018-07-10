@@ -4,7 +4,11 @@
  * @brief   Class implementing the parser for the command line interface
  * @bugs    Currently no bugs known
  * @todos   -
- * @section TODO
+ * @section DESCRIPTION
+ *  This class implements a command parser which serves as an interface for the user to control the system
+ *  and execute different tasks. Among the offered functionalities are: creation of partition/segment, insertion of 
+ *  tuples, displaying detailed information about different entities, and shutting down the database into a
+ *  persistent state.
  */
 
 #pragma once
@@ -53,7 +57,7 @@ class CommandParser
                 int (CP::*_func)(const char_vpt*) const; // com_create_s               - A function pointer implementing the logic of this command
                 const char* _helpMsg;                    // "Create .."                - A help message
                 const char* _usageInfo;                  // "Usage - str: partname .." - A detailed message on how to use the command
-    };
+        };
 
         enum CommandStatus
         {
@@ -78,32 +82,33 @@ class CommandParser
          */
         void runcli();
         /**
-         * @brief find a command for
+         * @brief detect a command from the given line which was typed in by the user
          * 
-         * @param splits 
-         * @return const Command* 
+         * @param splits an array of char* containing the split up user command
+         * @return const Command* the corresponding (valid) command
          */
         const Command* findCommand(const char_vpt* splits);
-        /** TODO
-         * @brief 
+        /** 
+         * @brief helper method to determine whether a certain command is supported
+         *        and thus is contained in the commands array
          * 
-         * @param arg 
-         * @return std::string 
+         * @param arg the command to check
+         * @return std::string the command string
          */
         std::string findCommand(const std::string& arg) const;
     
-        /** TODO
-         * @brief 
+        /**
+         * @brief print a welcome message
          * 
          */
         void printw() const;
-        /** TODO
-         * @brief 
+        /** 
+         * @brief print a help message
          * 
          */
         void printh() const;
-        /** TODO
-         * @brief 
+        /**
+         * @brief print an exit message
          * 
          */
         void printe() const;

@@ -92,8 +92,7 @@ byte* InterpreterSP::getRecord(uint aRecordNo) noexcept
 // actually delete it
 int InterpreterSP::deleteRecordHard (uint16_t aRecordNo) noexcept
 {
-    #pragma message ("TODO: @Jonas, this is not used anyway, right? If so, please comment this function out, move it to the bottom of this file and delete its declaration in the header")
-	// TODO
+    #pragma message ("TO DO: @Jonas, this is not used anyway, right? If so, please comment this function out, move it to the bottom of this file and delete its declaration in the header")
 	// put free in front of Free Space List by
 		// check if there is list entry behind this record
 			// if yes, move this one at beginning and increment size

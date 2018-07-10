@@ -129,11 +129,7 @@ class PartitionBase
         inline uint getSizeInPages() noexcept { return _sizeInPages; }
         inline uint8_t getID() const noexcept { return _partitionID; }
         inline uint8_t getID() noexcept { return _partitionID; }
-        /** TODO
-         * @brief 
-         * 
-         * @return std::string 
-         */
+  
         inline std::string to_string() const noexcept;
         inline std::string to_string() noexcept { return static_cast<const PartitionBase&>(*this).to_string(); }
 

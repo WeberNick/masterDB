@@ -71,11 +71,7 @@ class Employee_T : public Tuple
         inline uint8_t age() noexcept { return _age; }
         inline const std::string& name() const noexcept { return _name; }
         inline const std::string& name() noexcept { return _name; }
-        /** TODO
-         * @brief 
-         * 
-         * @return std::string 
-         */
+
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override;
 

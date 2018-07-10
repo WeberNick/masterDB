@@ -139,7 +139,7 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
         if(lTuple.ID() != aID)
         {
             #pragma message ("TODO: Can this happen? If not: Delete if-statement and exception")
-            TRACE("## Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk (TODO: Can this happen?)");
+            TRACE("## Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk.");
             throw PartitionNotExistsException(FLF);
         }
         PartitionBase* s;

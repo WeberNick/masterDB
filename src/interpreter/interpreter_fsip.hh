@@ -1,10 +1,10 @@
 /**
- *  @file	   interpreter_fsip.hh
+ *  @file	 interpreter_fsip.hh
  *  @author	 Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de),
              Jonas Thietke (jthietke@mail.uni-mannheim.de),
              Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	 A class implementing a Free Space Indicator Page (FSIP) interpreter for little Endian
- *  @bugs	   might not work for big Endian
+ *  @bugs	 Might not work for big Endian
  *  @todos	 Remove noManagedPages() and implement it correctly
  *  @section TODO
  */

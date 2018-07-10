@@ -3,8 +3,8 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief	A abstract class implementing the interface for every segment
  *  @bugs	Currently no bugs known
- *  @todos	TBD
- *  @section TBD
+ *  @todos	-
+ *  @section TODO
  */
 
 #pragma once
@@ -28,6 +28,7 @@ class SegmentBase
 		friend class SegmentManager;
         /**
          * @brief   constructs an entire segment both on disk and the object
+         *
          * @param   aSegID          ID of the Segment to be set by SegmentManager
          * @param   aPartition      Partition the segment shall be on
          * @param   aControlBlock   self-explaining
@@ -35,6 +36,7 @@ class SegmentBase
 		explicit SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock);
         /**
          * @brief   only constructs a segment object, no physicall representation is created. Used to load.
+         *
          * @param   aPartition      Partition the segment is on
          * @param   aControlBlock   self-explaining
          */
@@ -49,6 +51,7 @@ class SegmentBase
 	public:
         /**
          * @brief   Function to request a (logical) page in the given lock mode
+         *
          * @param   aPageNo: the (logical) page number
          * @param   aMode: a lock mode to lock the page in
          * @return  pointer to the buffer frame in which the page is located
@@ -58,6 +61,7 @@ class SegmentBase
 
         /**
          * @brief   Writes the page from the buffer pool to its partition (flush call)
+         *
          * @param   aPageNo: the (logical) page number to write
          * @see     buf_mngr.hh
          */
@@ -65,12 +69,14 @@ class SegmentBase
 
         /**
          * @brief   Release all locks on the page and unfix it
+         *
          * @param   aPageNo: the (logical) page number to release
          * @see     buf_mngr.hh
          */
         void releasePage(const uint aPageNo, const bool aModified = false);
         /**
          * @brief   Prints a data page of a segment to file coded in hex
+         *
          * @param   aPageNo: the logical page number to print
          * @param   afromDisk: if true, page is directly extracted from disk, if not, the page is buffered.
          */
@@ -104,11 +110,7 @@ class SegmentBase
 		 */
 		inline int getIndexPageCapacity() const noexcept { return (getPageSize() - sizeof(segment_index_header_t)) / sizeof(uint32_t); }
 		inline int getIndexPageCapacity() noexcept { return static_cast<const SegmentBase&>(*this).getIndexPageCapacity(); }
-        /** TODO
-         * @brief 
-         * 
-         * @return std::string 
-         */
+
         inline std::string to_string() const noexcept { return std::string("ID : ") + std::to_string(getID()); }
         inline std::string to_string() noexcept { return static_cast<const SegmentBase&>(*this).to_string(); }
 

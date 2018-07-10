@@ -74,11 +74,7 @@ class Segment_T : public Tuple
         inline uint8_t type() noexcept { return _sType; }
         inline uint32_t firstPage() const noexcept { return _sFirstPage; } 
         inline uint32_t firstPage() noexcept { return _sFirstPage; } 
-        /** TODO
-         * @brief 
-         * 
-         * @return std::string 
-         */
+ 
         inline std::string to_string() const noexcept override;
         inline std::string to_string() noexcept override;
 

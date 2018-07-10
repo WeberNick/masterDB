@@ -3,7 +3,7 @@
  *	@author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *	@brief	Implementation of command line arguements
  *	@bugs 	Currently no bugs known
- *	@todos	Currently no todos
+ *	@todos	-
  *
  *	@section DESCRIPTION
  *	This class implements the command line arguements. A command line arguement has the form:

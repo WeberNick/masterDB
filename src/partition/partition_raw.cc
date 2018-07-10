@@ -1,13 +1,5 @@
 #include "partition_raw.hh"
 
-/** TODO
- * @brief Construct a new PartitionRaw::PartitionRaw object
- * 
- * @param aPath 
- * @param aName 
- * @param aPartitionID 
- * @param aControlBlock 
- */
 PartitionRaw::PartitionRaw(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock)
 {
@@ -15,12 +7,6 @@ PartitionRaw::PartitionRaw(const std::string& aPath, const std::string& aName, c
     TRACE("'PartitionRaw' constructed");
 }
 
-/** TODO
- * @brief Construct a new PartitionRaw::PartitionRaw object
- * 
- * @param aTuple 
- * @param aControlBlock 
- */
 PartitionRaw::PartitionRaw(const Partition_T& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple.path(), aTuple.name(), aTuple.ID(), aControlBlock)
 {
@@ -28,10 +14,6 @@ PartitionRaw::PartitionRaw(const Partition_T& aTuple, const CB& aControlBlock):
     else _sizeInPages = 0;
 }
 
-/** TODO
- * @brief Destroy the PartitionRaw::PartitionRaw object
- * 
- */
 PartitionRaw::~PartitionRaw()
 {
     TRACE("'PartitionRaw' object destructed");

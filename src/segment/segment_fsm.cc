@@ -1,12 +1,5 @@
 #include "segment_fsm.hh"
 
-/** TODO
- * @brief Construct a new SegmentFSM::SegmentFSM object
- * 
- * @param aSegID 
- * @param aPartition 
- * @param aControlBlock 
- */
 SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const CB& aControlBlock) :
     SegmentBase(aSegID, aPartition, aControlBlock),
     _fsmPages()
@@ -34,12 +27,6 @@ SegmentFSM::SegmentFSM(const uint16_t aSegID, PartitionBase &aPartition, const C
     TRACE("'SegmentFSM' constructed ()");
 }
 
-/** TODO
- * @brief Construct a new SegmentFSM::SegmentFSM object
- * 
- * @param aPartition 
- * @param aControlBlock 
- */
 SegmentFSM::SegmentFSM(PartitionBase &aPartition, const CB& aControlBlock) :
     SegmentBase(aPartition, aControlBlock), 
     _fsmPages()

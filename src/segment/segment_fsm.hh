@@ -4,7 +4,7 @@
  *          Jonas Thietke
  * @brief   Class implementing Segment with Free Space Management
  * @bugs    Currently no bugs known.
- * @todos   TBD
+ * @todos   -
  */
 
 #pragma once

@@ -3,11 +3,9 @@
  * @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *          Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  * @brief   Class implementing a thread pool.
- * @bugs    TBD
- * @todos   TBD
+ * @bugs    Currently no bugs known
+ * @todos   -
  */
-
- // TODO go over this class
 
 #pragma once
 
@@ -31,185 +29,189 @@ namespace Pool
 {
     class ThreadPool
     {
-      private:
-        class IThreadTask
-        {
-          public:
-            IThreadTask() = default;
-            virtual ~IThreadTask() = default;
-            IThreadTask(const IThreadTask& rhs) = delete;
-            IThreadTask& operator=(const IThreadTask& rhs) = delete;
-            IThreadTask(IThreadTask&& other) = default;
-            IThreadTask& operator=(IThreadTask&& other) = default;
-
-            virtual void execute() = 0;
-        };
-
-        template <typename Func>
-        class ThreadTask : public IThreadTask
-        {
-          public:
-            ThreadTask(Func&& func) :
-                _func(std::move(func))
-            {}
-
-            ~ThreadTask() override = default;
-            ThreadTask(const ThreadTask& rhs) = delete;
-            ThreadTask& operator=(const ThreadTask& rhs) = delete;
-            ThreadTask(ThreadTask&& other) = default;
-            ThreadTask& operator=(ThreadTask&& other) = default;
-
-            void execute() override
+        private:
+            class IThreadTask
             {
-                _func();
-            }
+                public:
+                    IThreadTask() = default;
+                    virtual ~IThreadTask() = default;
+                    IThreadTask(const IThreadTask& rhs) = delete;
+                    IThreadTask& operator=(const IThreadTask& rhs) = delete;
+                    IThreadTask(IThreadTask&& other) = default;
+                    IThreadTask& operator=(IThreadTask&& other) = default;
+        
+                    virtual void execute() = 0;
+            };
 
-          private:
-            Func _func;
-        };
-
-      public:
-        /**
-         * A wrapper around a std::future that adds the behavior of futures returned from std::async.
-         * Specifically, this object will block and wait for execution to finish before going out of scope.
-         */
-        template <typename T>
-        class TaskFuture {
-          public:
-            TaskFuture(std::future<T>&& future) : 
-                _future(std::move(future))
-            {}
-
-            TaskFuture(const TaskFuture& rhs) = delete;
-            TaskFuture& operator=(const TaskFuture& rhs) = delete;
-            TaskFuture(TaskFuture&& other) = default;
-            TaskFuture& operator=(TaskFuture&& other) = default;
-            ~TaskFuture()
+            template <typename Func>
+            class ThreadTask : public IThreadTask
             {
-                if (_future.valid()) 
+                public:
+                    ThreadTask(Func&& func) :
+                        _func(std::move(func))
+                    {}
+
+                    ~ThreadTask() override = default;
+                    ThreadTask(const ThreadTask& rhs) = delete;
+                    ThreadTask& operator=(const ThreadTask& rhs) = delete;
+                    ThreadTask(ThreadTask&& other) = default;
+                    ThreadTask& operator=(ThreadTask&& other) = default;
+        
+                    void execute() override
+                    {
+                        _func();
+                    }
+
+                private:
+                    Func _func;
+            };
+
+        public:
+            /**
+             * A wrapper around a std::future that adds the behavior of futures returned from std::async.
+             * Specifically, this object will block and wait for execution to finish before going out of scope.
+             */
+            template <typename T>
+            class TaskFuture
+            {
+                public:
+                    TaskFuture(std::future<T>&& future) : 
+                        _future(std::move(future))
+                    {}
+
+                    TaskFuture(const TaskFuture& rhs) = delete;
+                    TaskFuture& operator=(const TaskFuture& rhs) = delete;
+                    TaskFuture(TaskFuture&& other) = default;
+                    TaskFuture& operator=(TaskFuture&& other) = default;
+                    ~TaskFuture()
+                    {
+                        if (_future.valid()) 
+                        {
+                            _future.get();
+                        }
+                    }
+        
+                    auto get() 
+                    {
+                        return _future.get();
+                    }
+
+                private:
+                    std::future<T> _future;
+            };
+
+        public:
+            ThreadPool() : ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u) {}
+   
+            /**
+             * @brief Creates all threads for pool
+             * 
+             * @param numThreads the number of threads
+             */
+            explicit ThreadPool(const std::uint32_t numThreads) : 
+                _done(false),
+                _workQueue(),
+                _threads()
+            {
+                try 
                 {
-                    _future.get();
+                    for (std::uint32_t i = 0u; i < numThreads; ++i) 
+                    {
+                        _threads.emplace_back(&ThreadPool::worker, this);
+                    }
+                    TRACE("All threads started successfully.");
+                }
+                catch (...)
+                {
+                    destroy_all();
+                    TRACE("Creation of threadpool did not succeed - all threads destroyed.");
+                    throw;
                 }
             }
-
-            auto get() 
-            {
-                return _future.get();
-            }
-
-          private:
-            std::future<T> _future;
-        };
-
-      public:
-        /**
-         * Constructor
-         */
-        ThreadPool() : ThreadPool(std::max(std::thread::hardware_concurrency(), 2u) - 1u) {}
-
-        /**
-         * Creates all threads for pool
-         */
-        explicit ThreadPool(const std::uint32_t numThreads) : 
-            _done(false),
-            _workQueue(),
-            _threads()
-        {
-            try 
-            {
-                for (std::uint32_t i = 0u; i < numThreads; ++i) 
-                {
-                    _threads.emplace_back(&ThreadPool::worker, this);
-                }
-                TRACE("All threads started successfully.");
-            }
-            catch (...)
+    
+            ThreadPool(const ThreadPool& rhs) = delete;
+            ThreadPool& operator=(const ThreadPool& rhs) = delete;
+            ~ThreadPool()
             {
                 destroy_all();
-                TRACE("Creation of threadpool did not succeed - all threads destroyed.");
-                throw;
             }
-        }
-
-        ThreadPool(const ThreadPool& rhs) = delete;
-
-        /**
-         * Non-assignable.
-         */
-        ThreadPool& operator=(const ThreadPool& rhs) = delete;
-
-        /**
-         * Destructor.
-         */
-        ~ThreadPool()
-        {
-            destroy_all();
-        }
-
-        /**
-         * Submit a job to be run by the thread pool.
-         */
-        template <typename Func, typename... Args>
-        auto submit(Func&& func, Args&&... args)
-        {
-            auto boundTask = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
-            using ResultType = std::result_of_t<decltype(boundTask)()>;
-            using PackagedTask = std::packaged_task<ResultType()>;
-            using TaskType = ThreadTask<PackagedTask>;
-
-            PackagedTask task(std::move(boundTask));
-            TaskFuture<ResultType> result(task.get_future());
-            _workQueue.push(std::make_unique<TaskType>(std::move(task)));
-            TRACE("New job submitted to Threadpool.");
-            return result;
-        }
-
-      private:
-        /**
-         * Constantly running function each thread uses to acquire work items from the queue.
-         */
-        void worker()
-        {
-            while (!_done)
+    
+            /**
+             * @brief Submit a job to be run by the thread pool.
+             *  
+             */
+            template <typename Func, typename... Args>
+            auto submit(Func&& func, Args&&... args)
             {
-                std::unique_ptr<IThreadTask> pTask(nullptr);
-                if (_workQueue.waitPop(pTask))
+                auto boundTask = std::bind(std::forward<Func>(func), std::forward<Args>(args)...);
+                using ResultType = std::result_of_t<decltype(boundTask)()>;
+                using PackagedTask = std::packaged_task<ResultType()>;
+                using TaskType = ThreadTask<PackagedTask>;
+    
+                PackagedTask task(std::move(boundTask));
+                TaskFuture<ResultType> result(task.get_future());
+                _workQueue.push(std::make_unique<TaskType>(std::move(task)));
+                TRACE("New job submitted to Threadpool.");
+                return result;
+            }
+
+        private:
+            /**
+             * @brief Constantly running function each thread uses to acquire work items from the queue.
+             * 
+             */
+            void worker()
+            {
+                while (!_done)
                 {
-                    pTask->execute();
+                    std::unique_ptr<IThreadTask> pTask(nullptr);
+                    if (_workQueue.waitPop(pTask))
+                    {
+                        pTask->execute();
+                    }
                 }
             }
-        }
 
-        /**
-         * Invalidates the queue and joins all running threads.
-         */
-        void destroy_all()
-        {
-            _done = true;
-            _workQueue.invalidate();
-            for (auto& thread : _threads)
+            /**
+             * @brief Invalidates the queue and joins all running threads.
+             * 
+             */
+            void destroy_all()
             {
-                if (thread.joinable())
+                _done = true;
+                _workQueue.invalidate();
+                for (auto& thread : _threads)
                 {
-                    thread.join();
+                    if (thread.joinable())
+                    {
+                        thread.join();
+                    }
                 }
             }
-        }
 
-      private:
-        std::atomic_bool _done;
-        ThreadQueue<std::unique_ptr<IThreadTask>> _workQueue;
-        std::vector<std::thread> _threads;
+        private:
+            std::atomic_bool _done;
+            ThreadQueue<std::unique_ptr<IThreadTask>> _workQueue;
+            std::vector<std::thread> _threads;
     };
 
     namespace Default
     {
+        /**
+         * @brief Get the ThreadPool singleton instance
+         * 
+         * @return ThreadPool& the instance
+         */
         inline ThreadPool& getInstance()
         {
             static ThreadPool defaultPool;
             return defaultPool;
         }
 
+        /**
+         * @brief Submit a job to the ThreadPool
+         * 
+         */
         template <typename Func, typename... Args>
         inline auto submitJob(Func&& func, Args&&... args)
         {

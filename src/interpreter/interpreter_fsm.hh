@@ -5,7 +5,7 @@
  *  @brief	 A class implementing a Free Space Management via an FSIP for segments for little Endian
  *  @bugs	 might not work for big Endian
  *  @todos   change comments (+ insert description for aPageStatus)
- *  @section TBD
+ *  @section TODO
  */
 
 #pragma once

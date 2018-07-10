@@ -5,7 +5,7 @@
  *          Jonas Thietke
  *  @brief  Singleton class managing all partitions
  *  @bugs   Currently no bugs known
- *  @todos  Currently no todos
+ *  @todos  -
  *
  *  @section DESCRIPTION
  *  This class manages all partition objects associated with a physical partition (raw or file) on disk.
@@ -108,10 +108,10 @@ class PartitionManager
             return lPartitionManagerInstance;
         }
         
-        /** TODO
-         * @brief 
+        /** 
+         * @brief Initialize and assign controlblock
          * 
-         * @param aControlBlock 
+         * @param aControlBlock the controlblock
          */
         void init(const CB& aControlBlock) noexcept;
         

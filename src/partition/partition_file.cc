@@ -1,14 +1,5 @@
 #include "partition_file.hh"
 
-/** TODO
- * @brief Construct a new PartitionFile::PartitionFile object
- * 
- * @param aPath 
- * @param aName 
- * @param aGrowthIndicator 
- * @param aPartitionID 
- * @param aControlBlock 
- */
 PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName, const uint16_t aGrowthIndicator, const uint8_t aPartitionID, const CB& aControlBlock) :
 	PartitionBase(aPath, aName, aPartitionID, aControlBlock),
 	_growthIndicator(aGrowthIndicator)
@@ -22,21 +13,11 @@ PartitionFile::PartitionFile(const std::string& aPath, const std::string& aName,
     TRACE("'PartitionFile' object constructed (For a new partition)");
 }
 
-/**
- * @brief Destroy the PartitionFile::PartitionFile object
- * 
- */
 PartitionFile::~PartitionFile()
 {
     TRACE("'PartitionFile' object destructed");
 }
 
-/** TODO
- * @brief Construct a new Partition File:: Partition File object
- * 
- * @param aTuple 
- * @param aControlBlock 
- */
 PartitionFile::PartitionFile(const Partition_T& aTuple, const CB& aControlBlock):
 	PartitionBase(aTuple.path(), aTuple.name(), aTuple.ID(), aControlBlock),
 	_growthIndicator(aTuple.growth())

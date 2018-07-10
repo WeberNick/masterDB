@@ -1,12 +1,5 @@
 #include "segment_base.hh"
 
-/**
- * @brief Construct a new SegmentBase::SegmentBase object
- * 
- * @param aSegID 
- * @param aPartition 
- * @param aControlBlock 
- */
 SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const CB& aControlBlock) : 
 	_segID(aSegID),
 	_indexPages(),
@@ -24,12 +17,6 @@ SegmentBase::SegmentBase(const uint16_t aSegID, PartitionBase& aPartition, const
     // no need to init pages, will be done in store.
 }
 
-/** TODO
- * @brief Construct a new SegmentBase::SegmentBase object
- * 
- * @param aPartition 
- * @param aControlBlock 
- */
 SegmentBase::SegmentBase(PartitionBase& aPartition, const CB& aControlBlock) : 
 	_segID(0),
 	_indexPages(),

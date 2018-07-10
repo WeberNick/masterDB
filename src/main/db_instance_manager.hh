@@ -3,7 +3,7 @@
  *  @author Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief  Singleton class managing everything needed for the DB instance to boot
  *  @bugs   Currently no bugs known
- *  @todos  Changes correct? Fix reworks
+ *  @todos  -
  *
  *  @section TODO
  */

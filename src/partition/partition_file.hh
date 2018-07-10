@@ -3,8 +3,8 @@
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A class implementing the interface of a partition stored in a file
  *  @bugs    Currently no bugs known
- *  @todos   -Update LSN?
- *  @section TBD
+ *  @todos   - Update LSN?
+ *  @section TODO
  */
 
 #pragma once
@@ -57,11 +57,7 @@ class PartitionFile : public PartitionBase
         // Getter
         inline uint16_t getGrowthIndicator() const noexcept { return _growthIndicator; }
         inline uint16_t getGrowthIndicator() noexcept { return _growthIndicator; }
-        /** TODO
-         * @brief 
-         * 
-         * @return std::string 
-         */
+        
         inline std::string to_string() const noexcept;
         inline std::string to_string() noexcept { return static_cast<const PartitionFile&>(*this).to_string(); }
 

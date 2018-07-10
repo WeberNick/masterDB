@@ -1,13 +1,5 @@
 #include "partition_base.hh"
 
-/** TODO
- * @brief Construct a new PartitionBase::PartitionBase object
- * 
- * @param aPath 
- * @param aName 
- * @param aPartitionID 
- * @param aControlBlock 
- */
 PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName, const uint8_t aPartitionID, const CB& aControlBlock) : 
 	_partitionPath(aPath),
 	_partitionName(aName),
@@ -21,10 +13,6 @@ PartitionBase::PartitionBase(const std::string& aPath, const std::string& aName,
     InterpreterFSIP::init(aControlBlock);
 }
 
-/**
- * @brief Destroy the PartitionBase::PartitionBase object
- * 
- */
 PartitionBase::~PartitionBase() = default;
 
 void PartitionBase::open()

@@ -290,7 +290,6 @@ string_vt SegmentManager::getSegmentNamesForPartition(uint8_t aPID) noexcept
 /* old Code
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
 {
-    // TODO: use code that can be reused, delete rest
     std::cout<<"store Segement Manager"<<std::endl;
     aPartition.open();
     // store all segments
@@ -334,8 +333,6 @@ int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
 
 int SegmentManager::loadSegmentManager(PartitionBase& aPartition)
 {
-    // TODO: use code that can be reused, delete rest
-
     // maxSegmentsPerPage and aPartition to be set in constructor
     // load yourself by building a vector of pageIndexes where Segments are stored
     byte *lPageBuffer = new byte[aPartition.getPageSize()];

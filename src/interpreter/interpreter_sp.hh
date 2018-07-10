@@ -3,7 +3,7 @@
  *  @author Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief  A page interpreter class to operate on slotted pages (NSM)
  *  @bugs   Currently no bugs known
- *  @todos  Currently no todos
+ *  @todos  -
  *
  *  @section DESCRIPTION
  *  TODO
