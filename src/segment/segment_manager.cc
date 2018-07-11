@@ -142,14 +142,20 @@ void SegmentManager::deleteSegment(const std::string& aName)
 }
 
 void SegmentManager::deleteSegements(const uint8_t aPartitionID) {
-    #pragma message ("TODO: @Nick es gibt mehrere Treffer, bitte aendern.")
-    auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) {
+    #pragma message ("TODO: @Nick es gibt mehrere Treffer, bitte aendern. So lange steht hier wieder meine alte loesung.")
+    for (auto america : _segmentsByID){
+        if (america.second.partID() == aPartitionID){
+            deleteSegment(america.first);
+        }
+    }
+    
+   /* auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) {
         return elem.second.partID() == aPartitionID;
     }); 
     if(america != _segmentsByID.cend())
     {
         deleteSegment(america->first);
-    }
+    }*/
 }
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
