@@ -5,6 +5,10 @@
  * @brief   Class implementing a thread pool.
  * @bugs    Currently no bugs known
  * @todos   -
+ * @section DESCRIPTION
+ *          This class is implementing a thread pool by using an underlying threadsafe queue.
+ *          The pool is using a wrapper around the std::future class to add asynchronous behaviour.
+ *          There are std::thread::hardware_concurrency() - 1 threads created.
  */
 
 #pragma once

@@ -1,13 +1,14 @@
 /**
  * @file    segment_t.hh
- * @author 	Nick Weber
- * @date    Mai 07, 2018
+ * @author 	Nick Weber,
+ *          Aljoscha Narr
  * @brief 	Tuple class for employees. Used for transforming to disk and memory representations
  * @bugs 	Currently no bugs known
  * @todos 	-
  * 
  * @section	DESCRIPTION
- * TODO
+ *          This class implements a tuple representation for employees. The employee object is containing a name, salary and age value. 
+ *          The object can be transformed either to disk or memory representation.
  */
 
 #pragma once
@@ -38,25 +39,25 @@ class Employee_T : public Tuple
         ~Employee_T() = default;
 
     public:
-        /** TODO
-         * @brief 
+        /**
+         * @brief           Initialize the employee attributes
          * 
-         * @param aName 
-         * @param aSalary 
-         * @param aAge 
+         * @param aName     Name of the employee
+         * @param aSalary   Salary of the employee
+         * @param aAge      Age of the employee
          */
         void init(const std::string& aName, const double aSalary, const uint8_t aAge) noexcept;
-        /** TODO
-         * @brief 
+        /**
+         * @brief       Transform the employe object to its disk representation
          * 
-         * @param aPtr 
+         * @param aPtr  Pointer to the beginning of the disk representation
          */
         void toDisk(byte* aPtr) const noexcept override;
         void toDisk(byte* aPtr) noexcept override;
-        /** TODO
-         * @brief 
+       /**
+         * @brief       Transform the employe object to its memory representation
          * 
-         * @param aPtr 
+         * @param aPtr  Pointer to the beginning of the memory representation
          */
         void toMemory(byte* aPtr) noexcept override;
     

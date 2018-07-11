@@ -1,12 +1,13 @@
 /**
  *  @file	 interpreter_fsip.hh
- *  @author	 Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de),
-             Jonas Thietke (jthietke@mail.uni-mannheim.de),
+ *  @author	 Jonas Thietke (jthietke@mail.uni-mannheim.de),
              Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	 A class implementing a Free Space Indicator Page (FSIP) interpreter for little Endian
  *  @bugs	 Might not work for big Endian
  *  @todos	 Remove noManagedPages() and implement it correctly
- *  @section TODO
+ * @section  DESCRIPTION
+ *          This class implements a free space indicator page (FSIP) that is used to see which pages are free (value of 0) to use or occupied (value of 1).
+ *          The correct interpretation of the pages status is only working for little endian.
  */
 
 #pragma once
@@ -39,9 +40,16 @@ class InterpreterFSIP final
         
 
     public:
-        /*	set the page pointer and header */
+        /**
+         * @brief       Set the page pointer and header
+         * 
+         * @param aPP   The page pointer
+         */
         inline void attach(byte *aPP) noexcept;
-        /*	unset the page pointer and header */
+        /**
+         * @brief Unset the page pointer and header
+         * 
+         */
         void detach() noexcept;
 
     public:

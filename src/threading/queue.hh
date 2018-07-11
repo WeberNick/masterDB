@@ -2,9 +2,12 @@
  * @file    queue.hh
  * @author  Nicolas Wipfler (nwipfler@mail.uni-mannheim.de)
  *          Aljoscha Narr (alnarr@mail.uni-mannheim.de)
- * @brief   Class implementing a threadsafe queue for submitting jobs to the thread pool.
+ * @brief   Class implementing a threadsafe queue for submitting jobs to the thread pool. Implemented as wrapper around basic queue.
  * @bugs    Currently no bugs known
  * @todos   -
+ * @section DESCRIPTION
+ *          This class is implementing a templated waiting queue in a threadsafe manner by using a wrapper around the general queue implementation.
+ *          The queue is used to submit jobs to the overlying thread pool.
  */
 
 #pragma once
@@ -17,25 +20,23 @@
 #include <mutex>
 #include <queue>
 
-/**
- * Thread-safe queue for adding new tasks.
- * Implemented as wrapper around basic queue
- */
 template <typename T>
 class ThreadQueue
 {
     public:
-        /**
-         * Destructor.
-         */
+    /**
+     * @brief   Destruction by invalidating the queue.
+     * 
+     */
         ~ThreadQueue(void)
         {
             invalidate();
         }
-    
         /**
-         * Trying to get the first value in the queue.
-         * Returns true if a value was successfully written to the out parameter, false otherwise.
+         * @brief       Trying to get the first value in the queue.
+         * 
+         * @param out   Output parameter in which the value is written.
+         * @return      True if value was successfully written to the out parameter, false otherwise
          */
         bool tryPop(T& out)
         {
@@ -48,11 +49,11 @@ class ThreadQueue
             _queue.pop();
             return true;
         }
-    
         /**
-         * Get the first value in the queue.
-         * Will block until a value is available unless clear is called or the instance is destructed.
-         * Returns true if a value was successfully written to the out parameter, false otherwise.
+         * @brief       Get the first value in the queue.  Will block until a value is available unless clear is called or the instance is destructed.
+         * 
+         * @param out   Output parameter in which the value is written.
+         * @return      True if if a value was successfully written to the out parameter, false otherwise.
          */
         bool waitPop(T& out)
         {
@@ -69,9 +70,10 @@ class ThreadQueue
             _queue.pop();
             return true;
         }
-    
         /**
-         * Push a new value onto the queue.
+         * @brief           Push a new value onto the queue.
+         * 
+         * @param value     Value to be pushed on the queue
          */
         void push(T value)
         {
@@ -79,18 +81,19 @@ class ThreadQueue
             _queue.push(std::move(value));
             _condition.notify_one();
         }
-    
         /**
-         * Check whether or not the queue is empty.
+         * @brief   Check whether or not the queue is empty.
+         * 
+         * @return  True if queue is empty, false otherwise
          */
         bool empty(void) const
         {
             std::lock_guard<std::mutex> lock(_mutex);
             return _queue.empty();
         }
-    
         /**
-         * Clear all items from the queue.
+         * @brief   Clear all items from the queue.
+         * 
          */
         void clear(void)
         {
@@ -101,9 +104,9 @@ class ThreadQueue
             }
             _condition.notify_all();
         }
-    
         /**
-         * Invalidate the queue.
+         * @brief   Invalidate the whole queue.
+         * 
          */
         void invalidate(void)
         {
@@ -111,9 +114,10 @@ class ThreadQueue
             _valid = false;
             _condition.notify_all();
         }
-    
         /**
-         * Returns whether or not this queue is valid.
+         * @brief   Returns whether or not this queue is valid.
+         * 
+         * @return  True if queue is valid, false otherwise     
          */
         bool isValid(void) const
         {
@@ -122,8 +126,8 @@ class ThreadQueue
         }
 
     private:
-        std::atomic_bool _valid{ true };
-        mutable std::mutex _mutex;
+        std::atomic_bool _valid{ true };    
+        mutable std::mutex _mutex;        
         std::queue<T> _queue;
         std::condition_variable _condition;
 };

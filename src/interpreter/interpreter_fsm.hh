@@ -4,8 +4,10 @@
              Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	 A class implementing a Free Space Management via an FSIP for segments for little Endian
  *  @bugs	 might not work for big Endian
- *  @todos   change comments (+ insert description for aPageStatus)
- *  @section TODO
+ *  @todos   -
+ *  @section DESCRIPTION
+ *           This class implements a free space management for segments by using 16 different buckets to determine how full or empty the page is.
+ *           The correct interpretation of the pages status is only working for little endian.
  */
 
 #pragma once
