@@ -48,16 +48,16 @@ class Employee_T : public Tuple
          */
         void init(const std::string& aName, const double aSalary, const uint8_t aAge) noexcept;
         /**
-         * @brief       Transform the employe object to its disk representation
+         * @brief       Transform the employee object to its disk representation
          * 
-         * @param aPtr  Pointer to the beginning of the disk representation
+         * @param aPtr  Pointer to the beginning of the memory representation
          */
         void toDisk(byte* aPtr) const noexcept override;
         void toDisk(byte* aPtr) noexcept override;
        /**
-         * @brief       Transform the employe object to its memory representation
+         * @brief       Transform the employee object to its memory representation.
          * 
-         * @param aPtr  Pointer to the beginning of the memory representation
+         * @param aPtr  Pointer to the memory location where the disk representation is stored.
          */
         void toMemory(byte* aPtr) noexcept override;
     
