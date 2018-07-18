@@ -1,17 +1,5 @@
 #include "parser.hh"
 
-/**
- * @brief Construct a new CP::Command::Command object
- * 
- * @param aCP a reference to the commandParser
- * @param aName the name of the command
- * @param aHasParams indicates whether the command has parameters
- * @param aCommandLength the command length (e.g. CREATE PARTITION, commandLength = 2)
- * @param aNumParams the number of parameters (e.g. CREATE PARTITION path name 8 equals numParams = 3)
- * @param aFunc a function pointer to a commandparser member function implementing the command functionality
- * @param aMsg a message to display the purpose of this command
- * @param aUsageInfo a message to display usage information of this command
- */
 CP::Command::Command(const CP& aCP,
                      const char* aName,
                      const bool aHasParams,
@@ -32,13 +20,11 @@ CP::Command::Command(const CP& aCP,
 
 const char* CP::_HELP_FLAG = "-h";
 
-/**
- * @brief Construct a new CommandParser::CommandParser object
- * 
- */
 CommandParser::CommandParser() :
     _commands
     {
+        Command(*this, "INSTALL",          true,  1,  1,       &CP::com_install,      "Installs the database system, storing the master partition at a given path", "INSTALL [str:path]"),
+        Command(*this, "BOOT",             true,  1,  1,       &CP::com_boot,         "Boots the database system using the master partition at a given path", "BOOT [str:path]"),
         Command(*this, "HELP",             false, 1,  0,       &CP::com_help,         "Displays usage information.", "HELP"),
         Command(*this, "CREATE PARTITION", true,  2,  3,       &CP::com_create_p,     "Create a partition at a given path to a partition file with a name and a growth indicator of at least 8.", "CREATE PARTITION [str:path_to_partfile] [str:name] [int:growth_indicator >= 8]"),
         Command(*this, "DROP PARTITION",   true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
@@ -164,6 +150,20 @@ std::string CommandParser::findCommand(const std::string& arg) const
             return name;
     }
     return "";
+}
+
+int CP::com_install(const char_vpt* args) const
+{
+    std::string path(args->at(0));
+
+    return CP::CommandStatus::OK;
+}
+
+int CP::com_boot(const char_vpt* args) const
+{
+    std::string path(args->at(0));
+    
+    return CP::CommandStatus::OK;
 }
 
 int CP::com_help(const char_vpt* args) const

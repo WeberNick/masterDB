@@ -137,6 +137,20 @@ class CommandParser
 
     private:
         /**
+         * @brief implementing command functionality for installling the dbs
+         * 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
+         */
+        int com_install(const char_vpt* args) const;
+        /**
+         * @brief implementing command functionality for booting the dbs
+         * 
+         * @param args the argument vector consisting of the processed user input
+         * @return int the return code
+         */
+        int com_boot(const char_vpt* args) const;
+        /**
          * @brief implementing command functionality for printing a detailed help information
          * 
          * @param args the argument vector consisting of the processed user input
@@ -172,7 +186,7 @@ class CommandParser
          */
         int com_drop_s(const char_vpt* args) const;
         /**
-         * @brief 
+         * @brief implementing command functionality for inserting a tuple into a relation
          * 
          * @param args the argument vector consisting of the processed user input
          * @return int the return code
@@ -244,7 +258,7 @@ class CommandParser
 
     private:
         static const char*                  _HELP_FLAG;
-        const std::array<const Command, 11> _commands;
+        const std::array<const Command, 13> _commands;
         size_t                              _maxCommandLength;
     
         LineReaderEdit _reader;

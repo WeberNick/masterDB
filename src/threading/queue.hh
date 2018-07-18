@@ -28,7 +28,7 @@ class ThreadQueue
      * @brief   Destruction by invalidating the queue.
      * 
      */
-        ~ThreadQueue(void)
+        ~ThreadQueue()
         {
             invalidate();
         }
@@ -86,7 +86,7 @@ class ThreadQueue
          * 
          * @return  True if queue is empty, false otherwise
          */
-        bool empty(void) const
+        bool empty() const
         {
             std::lock_guard<std::mutex> lock(_mutex);
             return _queue.empty();
@@ -95,7 +95,7 @@ class ThreadQueue
          * @brief   Clear all items from the queue.
          * 
          */
-        void clear(void)
+        void clear()
         {
             std::lock_guard<std::mutex> lock(_mutex);
             while (!_queue.empty())
@@ -108,7 +108,7 @@ class ThreadQueue
          * @brief   Invalidate the whole queue.
          * 
          */
-        void invalidate(void)
+        void invalidate()
         {
             std::lock_guard<std::mutex> lock(_mutex);
             _valid = false;
@@ -119,7 +119,7 @@ class ThreadQueue
          * 
          * @return  True if queue is valid, false otherwise     
          */
-        bool isValid(void) const
+        bool isValid() const
         {
             std::lock_guard<std::mutex> lock(_mutex);
             return _valid;

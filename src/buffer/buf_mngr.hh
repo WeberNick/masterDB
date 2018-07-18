@@ -210,7 +210,7 @@ class BufferManager final
 
 	private:
 		size_t                           _noFrames;
-		size_t 		                     _frameSize;;
+		size_t 		                     _frameSize;
         std::unique_ptr<BufferHashTable> _bufferHash;
         std::unique_ptr<byte[]>          _bufferpool;
         FreeFrames                       _freeFrames;
