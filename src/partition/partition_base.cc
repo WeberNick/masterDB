@@ -85,7 +85,7 @@ uint32_t PartitionBase::allocPage()
         */
         
         // replacement of try/catch from here..
-		lAllocatedPageIndex = fsip.getNewPage(lPagePointer, LSN, _partitionID);	// Request free block from FSIP
+		lAllocatedPageIndex = fsip.getNewPage(lPagePointer);	// Request free block from FSIP
         if(lAllocatedPageIndex == INVALID_32)
         {
 			uint lIndexOfNextFSIP = lIndexOfFSIP + (1 + getMaxPagesPerFSIP()); // Prepare next offset to FSIP

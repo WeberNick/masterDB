@@ -84,7 +84,7 @@ uint InterpreterFSIP::getNextFreePage() noexcept
 }
 
 // TODO: added LSN and PID to param list, pls update header for allocated block
-uint32_t InterpreterFSIP::getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID)
+uint32_t InterpreterFSIP::getNewPage(byte *aPP)
 {
     if (_header->_freeBlocksCount == 0)
     {

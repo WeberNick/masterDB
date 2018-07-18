@@ -69,12 +69,10 @@ class InterpreterFSIP final
          *	@brief	looks for the next free block in the FSIP and reserves the page
          *
          *	@param	aPP - Pointer to the start of the page
-         *	@param	aLSN - Log Sequence Number
-         *	@param	aPID - The ID of the partition this page is stored in
          *
          * 	@return an offset to the free block or an INVALID value if no free pages are present
          */
-        uint32_t getNewPage(byte *aPP, const uint64_t aLSN, const uint8_t aPID);
+        uint32_t getNewPage(byte *aPP);
     
         /**
          *	@brief	reserve the page at the given index position
