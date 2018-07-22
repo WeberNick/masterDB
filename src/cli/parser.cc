@@ -5,7 +5,7 @@ CP::Command::Command(const CP& aCP,
                      const bool aHasParams,
                      const size_t aCommandLength,
                      const size_t aNumParams,
-                     int (CP::*aFunc)(const char_vpt*) const,
+                     CommandStatus (CP::*aFunc)(const char_vpt*) const,
                      const char* aMsg,
                      const char* aUsageInfo) :
     _cp(aCP),
@@ -30,7 +30,7 @@ CommandParser::CommandParser() :
         Command(*this, "DROP PARTITION",   true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
         Command(*this, "CREATE SEGMENT",   true,  2,  2,       &CP::com_create_s,     "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
         Command(*this, "DROP SEGMENT",     true,  2,  1,       &CP::com_drop_s,       "Drop a segment by its name. Segment names are globally unique, thus no partition has to be provided.", "DROP SEGMENT [str:segname]"),
-        Command(*this, "INSERT INTO",      true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment", "INSERT INTO [str:segname] [str:relation] [Args...]\n\nExample: Creation of an Employee with double:salary, int:age and string:name\n  INSERT INTO segname EMPLOYEE 80000 30 Mueller"),
+        Command(*this, "INSERT INTO",      true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment.", "INSERT INTO [str:segname] [str:relation] [Args...]\n\nExample: Creation of an Employee with double:salary, int:age and string:name\n  INSERT INTO segname EMPLOYEE 80000 30 Mueller"),
         Command(*this, "SHOW PARTITION",   true,  2,  1,       &CP::com_show_part,    "Show detailed information for a partition.", "SHOW PARTITION [str:partname]"),
         Command(*this, "SHOW PARTITIONS",  false, 2,  0,       &CP::com_show_parts,   "Show all partitions.", "SHOW PARTITIONS"),
         Command(*this, "SHOW SEGMENT",     true,  2,  1,       &CP::com_show_seg,     "Show detailed information for a segment.", "SHOW SEGMENT [str:segname]"),
@@ -66,50 +66,62 @@ void CommandParser::runcli()
         const Command* com = findCommand(&splits);
         if (com != NULL)
         {
-            if (splits.size() == com->_comLength + 1 && *splits[splits.size() - 1] == *CP::_HELP_FLAG)
-            {
-                std::cout << "Help information for command: " << com->_name << "\n"
-                          << "Purpose:\n  " << com->_helpMsg << "\n"
-                          << "Usage:\n  " << com->_usageInfo << "\n"
-                          << std::endl;
-            }
-            else if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID))
-            {
-                std::cout << "Wrong number of args.\n"
-                          << "Usage:\n  " << com->_usageInfo << "\n"
-                          << std::endl;
-            }
+            std::string comname(com->_name);
+            if (!DatabaseInstanceManager::getInstance().isRunning() && !(comname == "INSTALL" || comname == "BOOT")) {
+                std::cout << "The database system is not running yet." << "\n"
+                          << "If you have already installed it, you can boot the system by providing a path to the master partition." << "\n"
+                          << "If you have not yet installed the database system, you can install it by " << "\n"
+                          << "  providing a valid path to a directory where you want to store the master partition." << "\n"
+                          << "Type \"INSTALL -h\" or \"BOOT -h\" for more information." << std::endl;
+                continue;
+            } 
             else
             {
-                int rec;
-                std::string comname(com->_name);
-                if (com->_hasParams)
+                if (splits.size() == com->_comLength + 1 && *splits[splits.size() - 1] == *CP::_HELP_FLAG)
                 {
-                    const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                    auto future = Pool::Default::submitJob(com->_func, this, &args);
-                    rec = future.get();
+                    std::cout << "Help information for command: " << com->_name << "\n"
+                              << "Purpose:\n  " << com->_helpMsg << "\n"
+                              << "Usage:\n  " << com->_usageInfo << "\n"
+                              << std::endl;
+                }
+                else if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID))
+                {
+                    std::cout << "Wrong number of args.\n"
+                              << "Usage:\n  " << com->_usageInfo << "\n"
+                              << std::endl;
                 }
                 else
                 {
-                    auto future = Pool::Default::submitJob(com->_func, this, nullptr);
-                    rec = future.get();
-                }
-                if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR)
-                {
-                    break;
-                }
-                else if (rec == CP::CommandStatus::WRONG)
-                {
-                    std::cout << "Wrong type or value of some argument.\n"
-                              << "Usage - " << com->_usageInfo << "\n"
-                              << std::endl;
-                }
-                else if (rec == CP::CommandStatus::OK)
-                {
-                    continue;
+                    int rec;
+                    if (com->_hasParams)
+                    {
+                        const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
+                        auto future = Pool::Default::submitJob(com->_func, this, &args);
+                        rec = future.get();
+                    }
+                    else
+                    {
+                        auto future = Pool::Default::submitJob(com->_func, this, nullptr);
+                        rec = future.get();
+                    }
+                    if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR)
+                    {
+                        break;
+                    }
+                    else if (rec == CP::CommandStatus::WRONG)
+                    {
+                        std::cout << "Wrong type or value of some argument.\n"
+                                  << "Usage - " << com->_usageInfo << "\n"
+                                  << std::endl;
+                    }
+                    else if (rec == CP::CommandStatus::OK)
+                    {
+                        continue;
+                    }
                 }
             }
-        } else
+        }
+        else
         {
             std::cout << "Invalid command, type:\n"
                       << "  'HELP'       for a list of commands or\n"
@@ -152,33 +164,45 @@ std::string CommandParser::findCommand(const std::string& arg) const
     return "";
 }
 
-int CP::com_install(const char_vpt* args) const
+CommandStatus CP::com_install(const char_vpt* args) const
 {
     std::string path(args->at(0));
-
+    if(!FileUtil::hasValidDir(path))
+    {
+        std::cout << "The given path is invalid. Cannot create a master partition at this path.\n" << std::endl;
+        return CP::CommandStatus::OK;
+    }
+    _cb->C_INSTALL = true; // install
+    DatabaseInstanceManager::getInstance().init(*_cb); // installs the DBS
     return CP::CommandStatus::OK;
 }
 
-int CP::com_boot(const char_vpt* args) const
+CommandStatus CP::com_boot(const char_vpt* args) const
 {
     std::string path(args->at(0));
-    
+    if(!(FileUtil::exists(path)))
+    {
+        std::cout << "Given path to the master partition is invalid.\n" << std::endl;
+        return CP::CommandStatus::OK;
+    }
+    _cb->C_INSTALL = false; // boot
+    DatabaseInstanceManager::getInstance().init(*_cb); // boots the DBS
     return CP::CommandStatus::OK;
 }
 
-int CP::com_help(const char_vpt* args) const
+CommandStatus CP::com_help(const char_vpt* args) const
 {
     printh();
     return CP::CommandStatus::OK;
 }
 
-int CP::com_exit(const char_vpt* args) const
+CommandStatus CP::com_exit(const char_vpt* args) const
 {
     printe();
     return CP::CommandStatus::EXIT;
 }
 
-int CP::com_create_p(const char_vpt* args) const
+CommandStatus CP::com_create_p(const char_vpt* args) const
 {
     std::string path(args->at(0));
     std::string partName(args->at(1));
@@ -207,14 +231,14 @@ int CP::com_create_p(const char_vpt* args) const
     catch(const InvalidArgumentException& iaex) 
     {
         std::cout << "Invalid argument was provided:" << std::endl;
-        // std::cout << iaex.what() << "\n" << std::endl;
+        std::cout << iaex.what() << "\n" << std::endl;
         return CP::CommandStatus::OK; // return OK instead of WRONG because iaex.what() already displays information
     }
     catch(const InvalidPathException& ipex) 
     {
         std::cout << "The provided path is invalid:" << std::endl;
         std::cout << ipex.what() << "\n" << std::endl;
-        return CP::CommandStatus::WRONG;
+        return CP::CommandStatus::OK; // return OK instead of WRONG because iaex.what() already displays information
     }
     catch(const PartitionFullException& ex) 
     {
@@ -234,7 +258,7 @@ int CP::com_create_p(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_drop_p(const char_vpt* args) const
+CommandStatus CP::com_drop_p(const char_vpt* args) const
 {
     std::string partName(args->at(0));    
     try
@@ -255,7 +279,7 @@ int CP::com_drop_p(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_create_s(const char_vpt* args) const
+CommandStatus CP::com_create_s(const char_vpt* args) const
 {
     const std::string partName(args->at(0));
     const std::string segName(args->at(1));
@@ -289,7 +313,7 @@ int CP::com_create_s(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_drop_s(const char_vpt* args) const
+CommandStatus CP::com_drop_s(const char_vpt* args) const
 {
     std::string segName(args->at(0));
     try
@@ -310,7 +334,7 @@ int CP::com_drop_s(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_insert_tuple(const char_vpt* args) const
+CommandStatus CP::com_insert_tuple(const char_vpt* args) const
 {
     /* INSERT INTO Seg_Emp Employee 80000 30 Mueller */
     TRACE("Start to insert Tuple");
@@ -355,7 +379,7 @@ int CP::com_insert_tuple(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_show_part(const char_vpt* args) const
+CommandStatus CP::com_show_part(const char_vpt* args) const
 {
     std::string partName(args->at(0));
     try
@@ -398,7 +422,7 @@ int CP::com_show_part(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_show_parts(const char_vpt* args) const
+CommandStatus CP::com_show_parts(const char_vpt* args) const
 {
     try
     {
@@ -415,7 +439,7 @@ int CP::com_show_parts(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_show_seg(const char_vpt* args) const
+CommandStatus CP::com_show_seg(const char_vpt* args) const
 {
     std::string segName(args->at(0));
     try
@@ -445,7 +469,7 @@ int CP::com_show_seg(const char_vpt* args) const
     return CP::CommandStatus::OK;
 }
 
-int CP::com_show_segs(const char_vpt* args) const
+CommandStatus CP::com_show_segs(const char_vpt* args) const
 {
     try
     {

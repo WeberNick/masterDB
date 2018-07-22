@@ -44,7 +44,7 @@ constexpr uint16_t INVALID_16 = std::numeric_limits<uint16_t>::max();
 
 struct control_block_t
 {
-    const bool _install;
+    bool _install;
     const std::string _masterPartition;
     const std::string _tracePath;
     const size_t _pageSize;
