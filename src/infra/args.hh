@@ -1,7 +1,7 @@
 /**
  *	@file 	args.hh
  *	@author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *	@brief	Implementation of command line arguements
+ *	@brief	Implementation of command line arguments
  *	@bugs 	Currently no bugs known
  *	@todos	-
  *

@@ -34,14 +34,12 @@ void InterpreterFSIP::initNewFSIP(byte *aPP, const uint64_t aLSN,
         ++i;
     }
     // only the first bits to 0, remaining to 1
-    max = (_pageSize - sizeof(fsip_header_t)) / 4; // neues Limit
+    max = (_pageSize - sizeof(fsip_header_t)) / 4; //new limit
     uint32_t lMask = 0;
     if (i < max)
     {
         lMask = ~lMask;
         lMask = lMask << (aNoBlocks % 32);
-        // former line was this, seems to be wrong
-        // lMask = lMask >> (32-(aNoBlocks % 32));
         *(((uint32_t *)aPP) + i) = lMask;
         ++i;
     }
@@ -59,7 +57,6 @@ void InterpreterFSIP::initNewFSIP(byte *aPP, const uint64_t aLSN,
     basic_header_t lBTemp = {aLSN, aPageIndex, aPID, lVersion, lUnused, lUnused};
     fsip_header_t temp = {aNoBlocks, 0, aNoBlocks, lVersion, lUnused, lUnused, lUnused, lBTemp};
     *_header = temp;
-    // debug(aPageIndex);
 }
 
 uint InterpreterFSIP::getNextFreePage() noexcept
@@ -73,8 +70,6 @@ uint InterpreterFSIP::getNextFreePage() noexcept
         if ((lPartBytes) != 0)
         {
             uint32_t lCalcFreePos = idx_lowest_bit_set<uint32_t>(lPartBytes); // find the first "leftmost" zero
-            // idx_complement_bit<uint64_t>(lPP,lCalcFreePos); // set the bit to 1
-            // std::cout<<" next free page is "<< (j*32) + lCalcFreePos <<std::endl;
             return ((j * 32) + lCalcFreePos);
             // change LSN
             break;
@@ -83,7 +78,6 @@ uint InterpreterFSIP::getNextFreePage() noexcept
     return 0;
 }
 
-// TODO: added LSN and PID to param list, pls update header for allocated block
 uint32_t InterpreterFSIP::getNewPage(byte *aPP)
 {
     if (_header->_freeBlocksCount == 0)
@@ -103,7 +97,6 @@ uint32_t InterpreterFSIP::getNewPage(byte *aPP)
 
     _header->_nextFreePage = getNextFreePage();
     --(_header->_freeBlocksCount);
-    // debug(_header->_basicHeader._pageIndex);
     return lPosFreeBlock + 1 + _header->_basicHeader._pageIndex;
 }
 
@@ -119,34 +112,19 @@ void InterpreterFSIP::reservePage(const uint aPageIndex) noexcept
     // check if free
     uint32_t test = *lPP;
     test &= lMask;
-    /* if (test != 0) {
-        const std::string lErrMsg = std::string("FSIP was not able to reserve the requested page");
-        TRACE(lErrMsg);
-        throw FSIPException(FLF, lErrMsg) } */
-    // reserve if free
     *lPP = *lPP | (lMask);
     --(_header->_freeBlocksCount);
     _header->_nextFreePage = getNextFreePage();
-    // debug(aPageIndex);
 }
 
 void InterpreterFSIP::freePage(const uint aPageIndex) noexcept
 {
     uint lPageIndex = aPageIndex;
     lPageIndex -= _header->_basicHeader._pageIndex + 1;
-    TRACE("lPageIndex "+std::to_string(lPageIndex));
-    TRACE("next free Page: "+std::to_string(_header->_nextFreePage));
-
     if (_header->_nextFreePage > lPageIndex)
     {
         _header->_nextFreePage = lPageIndex;
     }
-    TRACE("next free Page: "+std::to_string(_header->_nextFreePage));
-
-    // uint8_t lBitindex = 7 - (lPageIndex % 8);
-    // uint8_t lMask = 1;
-    // lMask << lBitindex;
-    // lCurrByte &= lMask;
     uint32_t *lPP = (uint32_t *)_pp;
     lPP += (lPageIndex / 32);
     uint32_t lBitindex = (lPageIndex % 32);
@@ -154,7 +132,6 @@ void InterpreterFSIP::freePage(const uint aPageIndex) noexcept
     lMask <<= lBitindex;
     *lPP = *lPP & (~lMask);
     ++(_header->_freeBlocksCount);
-    // debug(aPageIndex);
 }
 
 void InterpreterFSIP::debug(const uint aPageIndex)
@@ -184,7 +161,6 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     }
     // distance of first page to be freed to last one.
     int64_t ldist = ((int64_t)freeOnThisPage) - ((int64_t)aNumberOfPages);
-    TRACE("ldist: " + std::to_string(ldist));
     byte* lPP = _pp;
     uint8_t lMask = 0;
     uint remainingPages; // to be set on this FSIP
@@ -198,11 +174,9 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
         // free rest of page by setting remainingPages to rest of bits.
         remainingPages = aMaxPagesPerFSIP - header()->_managedPages;
     }
-    TRACE("remainingPages " + std::to_string(remainingPages));
     // free from _managedPages remainnigPages many
     header()->_freeBlocksCount += remainingPages; // mark how many new free pages there will be.
     // first byte aligned or not
-    TRACE("managedPages " + std::to_string(header()->_managedPages));
         if(header()->_managedPages % 8 !=0)
         {
             // changed to shift right, negate result
@@ -210,32 +184,26 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
             *(((uint8_t *)lPP) + (header()->_managedPages) / 8) = ~lMask;
             remainingPages -= 8 - (header()->_managedPages % 8);
             start = header()->_managedPages / 8 + 1;
-            TRACE(std::to_string(lMask));
         }
         else
         {
             start = header()->_managedPages / 8;
         }
-        TRACE("start "+std::to_string(start));
         // free all aligned bytes
         size_t i = 0;
         size_t max = remainingPages / 8;
-        TRACE("max " + std::to_string(max));
         while( i < max)
         {
             *(((uint8_t *)lPP) + i + start) = 0;
             remainingPages -= 8;
             ++i;
         }
-        
-        TRACE("remainingPages " + std::to_string(remainingPages));
         // if there are some left
         if(remainingPages !=0 )
         {
             lMask = 0;
             // changed to shift left
             lMask = (~lMask) << remainingPages;
-            TRACE(std::to_string(remainingPages)+" mask to this: "+std::to_string(lMask));
            *(((uint8_t *)lPP) + i + start) &= lMask;
         }
         // next free page is position up to which pages were managed till now.
@@ -252,9 +220,7 @@ uint32_t InterpreterFSIP::grow(const uint aNumberOfPages, const uint aMaxPagesPe
     else
     {
         // free rest of page by setting remainingPages to rest of bits.
-        // header()->_freeBlocksCount = 
         header()->_managedPages = aMaxPagesPerFSIP;
-        // debug(header()->_basicHeader._pageIndex);
         return static_cast<uint32_t>((-1) * ldist); // contains pages to be managed by next fsip
     }
 }

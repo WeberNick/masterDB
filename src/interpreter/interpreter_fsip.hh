@@ -4,10 +4,10 @@
              Aljoscha Narr (alnarr@mail.uni-mannheim.de)
  *  @brief	 A class implementing a Free Space Indicator Page (FSIP) interpreter for little Endian
  *  @bugs	 Might not work for big Endian
- *  @todos	 Remove noManagedPages() and implement it correctly
- * @section  DESCRIPTION
- *          This class implements a free space indicator page (FSIP) that is used to see which pages are free (value of 0) to use or occupied (value of 1).
- *          The correct interpretation of the pages status is only working for little endian.
+ *  @todos	 -
+ *  @section  DESCRIPTION
+ *  This class implements a free space indicator page (FSIP) that is used to see which pages are free (value of 0) to use or occupied (value of 1).
+ *  The correct interpretation of the pages status is only working for little endian.
  */
 
 #pragma once
@@ -91,7 +91,7 @@ class InterpreterFSIP final
          * @brief   if the partition is a PartitionFile Instance, it can grow. This method will mark accordingly many pages as free
          *
          * @param   aNumberOfPages - number of pages which shall be freed in general
-         * @param   aMaxPagesPerFSIP - how many pages can the be per FSIP? Is calculated by the partition and therefore handed over.
+         * @param   aMaxPagesPerFSIP - Is calculated by the partition and therefore handed over.
          * @return  the number of pages which have to be freed on the next fsip (which is to be created by the partition)
          */
         uint32_t grow(const uint aNumberOfPages, const uint aMaxPagesPerFSIP) noexcept;
@@ -126,7 +126,7 @@ class InterpreterFSIP final
          */
         void debug(const uint aPageIndex);
         /**
-         * @brief Initialize and assign controlblock
+         * @brief Initialize and assign control block
          * 
          * @param aControlBlock the control block
          */

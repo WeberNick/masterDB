@@ -28,7 +28,7 @@
 #include <new>
 
 /**
- * @brief Singleton class implementing 
+ * @brief Singleton class implementing a buffer manager
  */
 class BufferManager final
 {
@@ -199,7 +199,7 @@ class BufferManager final
         void initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN);
         /**
          * @brief   every BCB contains a Frame to actually contain the page and there amount is limited.
-         *          if the _freeFrames list contains frames, it just returns on
+         *          if the _freeFrames list contains frames, it just returns one
          *          if this is not the case, it chooses a BCB from the buffer by random to get evicted.
          */
         size_t getFrame() noexcept;

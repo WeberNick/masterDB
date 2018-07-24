@@ -137,24 +137,19 @@ BCB* BufferManager::fix(const PID& aPageID, LOCK_MODE aMode)
 
     while(lNextBCB != nullptr && lPageNotFound) // as long as there are allocated CBs
     {
-        TRACE("One step in the chain (DELETE TRACE AFTER DEBUGGING)");
         if(lNextBCB->getPID() == aPageID) // is there a CB for the requested page
         {
-            TRACE("## fix: Page found in buffer pool.");
             // page found
             lPageNotFound = false;
-            TRACE("  (DELETE TRACE AFTER DEBUGGING)");
             while(lNextBCB->getFrameIndex() == INVALID) // page is being brought in
             {
                 // do nothing
-                TRACE("  (DELETE TRACE AFTER DEBUGGING)");
             }
             
             _bufferHash->getBucketMtx(lHashIndex).unlock_shared(); // release
         }
         else
         {
-            TRACE("  (DELETE TRACE AFTER DEBUGGING)");
             lNextBCB = lNextBCB->getNextInChain(); // follow hash chain
         }
     }
@@ -275,7 +270,7 @@ void BufferManager::readPageIn(BCB* lFBCB, const PID& aPageID)
     TRACE("Read page '" + aPageID.to_string() + "' from disk into the buffer pool");
     TRACE("The BCB is : " + lFBCB->to_string());
     PartitionBase* lPart = PartitionManager::getInstance().getPartition(aPageID.fileID()); // get partition which contains the requested page
-    lFBCB->lock_shared(); // why shared?
+    lFBCB->lock_shared(); 
     byte* lFramePtr = getFramePtr(lFBCB); // get pointer to the free frame in the bufferpool
     lPart->open(); // open partition
     TRACE("Reading the page from disk into the buffer pool...");
@@ -358,7 +353,7 @@ size_t BufferManager::getFrame() noexcept
 void BufferManager::initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN)
 {
     byte* lFramePtr = getFramePtr(aFBCB);
-    // LSN,PageIndex,PartitionID,Version, unused,unused
+    // LSN,PageIndex,PartitionID,Version,unused,unused
     basic_header_t lBH = {aLSN, aPageID.pageNo(), aPageID.fileID(), 1, 0, 0};
     lFramePtr += getFrameSize() - sizeof(basic_header_t);
     *((basic_header_t*) lFramePtr) = lBH;

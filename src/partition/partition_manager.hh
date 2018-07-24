@@ -69,7 +69,7 @@ class PartitionManager
         PartitionBase* getPartition(const uint8_t aID);
         /**
          * @brief   not just a getter, also loads the partition if it was not loaded before.
-         *          looks up ID to corresponding name and than call getPartition (aID)
+         *          looks up ID to corresponding name and then call getPartition (aID)
          * @param   aName - Name of the partition to be retrieved
          * @return  pointer to the partition object
          */
@@ -134,7 +134,7 @@ class PartitionManager
         PartitionFile* createMasterPartition(const Partition_T& aPart);
         /** TODO
          * @brief Create a Master Partition object
-         *        Implements install functionality
+         *        Implements instal functionality
          * 
          * @param aPath 
          * @param aGrowthIndicator 

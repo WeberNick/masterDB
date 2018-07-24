@@ -1,7 +1,6 @@
 /**
  *  @author Nick Weber
  *  @brief  Implements tracing functionality
- *  @todo   If multi threaded access causes problems, add mutex
  *  @bugs   -
  *
  *  @section DESCRIPTION

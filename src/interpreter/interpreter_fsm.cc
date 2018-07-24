@@ -26,7 +26,7 @@ void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN,
                                 const uint32_t aPageIndex, const uint8_t aPID,
                                 const uint32_t aNoPages) noexcept
 {
-    // all 0, updagte header updaten
+    // first set all 0, update header
     uint max = (_pageSize - sizeof(fsm_header_t)) / 8;
     for (uint i = 0; i < max; ++i)
     {
@@ -38,7 +38,6 @@ void InterpreterFSM::initNewFSM(byte *aPP, const uint64_t aLSN,
     // basic_header: LSN, PageIndex, PartitionId, Version, unused, unused
     basic_header_t lBH = { aLSN, aPageIndex, aPID, 1, 0, 0 };
     fsm_header_t lHeader = { aNoPages, 0, lBH };  
-    // # why 0 nextSegment? 0 is invalid, should be correct this way
     *((fsm_header_t *)(aPP + (max * 8))) = lHeader;
 }
 
@@ -57,7 +56,6 @@ uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept
         if (toType(lPageStatus) + toType(aPageStatus) < toType(max))
         {
             lPageStatus = static_cast<PageStatus>(toType(lPageStatus) + toType(aPageStatus));
-            // TRACE("fits, new PageStatus is "+std::to_string(static_cast<uint>(lPageStatus)));
             changePageStatus(i, lPageStatus);
             return i;
         }

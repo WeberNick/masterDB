@@ -48,7 +48,6 @@ void SegmentManager::load(const seg_vt& aTuples) noexcept
     // insert tuples into data structures
       _segmentsByID[segTuple.ID()] = segTuple;
       _segmentsByName[segTuple.name()] = segTuple.ID();
-      TRACE(segTuple.to_string() + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
       if( maxID <= segTuple.ID()){
           maxID = segTuple.ID();
       }
@@ -86,7 +85,6 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
 }
 
 void SegmentManager::createSegmentSub(const Segment_T& aSegT){
-    TRACE(std::string("(DELETE TRACE AFTER DEBUGGING) trying to insert the following tuple:\n") +aSegT.to_string() );
     // insert into maps
     _segmentsByID[aSegT.ID()] = aSegT;
     _segmentsByName[aSegT.name()] = aSegT.ID();
@@ -110,8 +108,6 @@ void SegmentManager::deleteSegment(SegmentFSM_SP*& aSegment)
 
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
-    // @Nick: bitte nicht im TRACE getSegment nehmen. getSegment läd schon und kann abstürzen.
-    TRACE("Deletion of Segment " + std::to_string(aID) + " starts...");
     SegmentBase* lSeg = getSegment(aID);
     lSeg->erase(); // free all pages
     // delete object itself, which now exists.
