@@ -103,7 +103,7 @@ std::pair<PartitionFile*, bool> PartitionManager::createPartitionFileInstance(co
     }
     // if this line is reached, something went wrong
     // examples are a given path to existing file which is not a partition
-    throw PartitionException(FLF, "Given path to file exists, but file is not a Partition.");
+    throw PartitionException(FLF, "Given path to file exists, but file is not a Partition. The file may be a Partition belonging to another masterPartition");
 }
 
 std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
@@ -260,7 +260,7 @@ void PartitionManager::deletePartition(const uint8_t aID)
     TRACE("Deletion of partition with ID " + std::to_string(aID) + " starts...");
     // delete all Segments on that partition
     SegmentManager& lSegMan = SegmentManager::getInstance();
-    lSegMan.deleteSegements(aID);
+    lSegMan.deleteSegments(aID);
 
     // delete partition
     PartitionBase* lPart = getPartition(aID);
@@ -268,6 +268,7 @@ void PartitionManager::deletePartition(const uint8_t aID)
     // delete object
     delete lPart; // TODO: evtl raus
     _partitions.erase(aID);
+
     const Partition_T lpart(_partitionsByID.at(aID));
     // delete tuple on disk
     lSegMan.deleteTuplePhysically<Partition_T>(_masterSegPartName, aID);

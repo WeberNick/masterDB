@@ -13,7 +13,7 @@ SegmentManager::SegmentManager() :
     _BufMngr( BufferManager::getInstance()),
     _cb(nullptr)
 {
-    TRACE("'SegementManager' constructed");
+    TRACE("'SegmentManager' constructed");
 }
 
 /**
@@ -26,7 +26,7 @@ SegmentManager::~SegmentManager()
     {
         delete elem.second;
     }
-    TRACE("'SegementManager' destructed");
+    TRACE("'SegmentManager' destructed");
 }
 
 void SegmentManager::init(const CB& aControlBlock) noexcept
@@ -34,7 +34,7 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
     if(!_cb)
     {
         _cb = &aControlBlock;
-        TRACE("'SegementManager' initialized");
+        TRACE("'SegmentManager' initialized");
     }
 }
 
@@ -109,15 +109,17 @@ void SegmentManager::deleteSegment(SegmentFSM_SP*& aSegment)
 
 void SegmentManager::deleteSegment(const uint16_t aID)
 {
+    TRACE("Start to delete Segment.");
     SegmentBase* lSeg = getSegment(aID);
+
     lSeg->erase(); // free all pages
     // delete object itself, which now exists.
     delete lSeg; 
     _segments.erase(aID);
-
+    
     const Segment_T seg(_segmentsByID.at(aID));
     // delete tuple on disk
-    deleteTuplePhysically<Segment_T>(_masterSegSegName,aID);
+    deleteTuplePhysically<Segment_T>(_masterSegSegName, aID);
 
     // delete tuple in memory
     _segmentsByName.erase(seg.name());
@@ -138,13 +140,14 @@ void SegmentManager::deleteSegment(const std::string& aName)
     }
 }
 
-void SegmentManager::deleteSegements(const uint8_t aPartitionID)
+void SegmentManager::deleteSegments(const uint8_t aPartitionID)
 {
-    for (auto america : _segmentsByID)
+    for (auto segit = _segmentsByID.begin(); segit != _segmentsByID.end();)
     {
-        if (america.second.partID() == aPartitionID)
+        auto america = segit++; // avoid complications with map::erase in deleteSegment method
+        if (america->second.partID() == aPartitionID)
         {
-            deleteSegment(america.first);
+            deleteSegment(america->first);
         }
     }
 }
@@ -183,7 +186,7 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 
 SegmentBase* SegmentManager::getSegment(const std::string& aSegmentName)
 {
-   TRACE("trying to get Segment by Name, Name: " + aSegmentName);
+   TRACE("Trying to get Segment by Name, Name: " + aSegmentName);
    try
    {
        return (SegmentBase*)getSegment(_segmentsByName.at(aSegmentName));
@@ -287,11 +290,11 @@ string_vt SegmentManager::getSegmentNamesForPartition(uint8_t aPID) noexcept
 /* old Code
 int SegmentManager::storeSegmentManager(PartitionBase& aPartition)
 {
-    std::cout<<"store Segement Manager"<<std::endl;
+    std::cout<<"store Segment Manager"<<std::endl;
     aPartition.open();
     // store all segments
     storeSegments();
-    std::cout<<"stored segements"<<std::endl;
+    std::cout<<"stored segments"<<std::endl;
     // store yourself
     auto lsegmentsIterator = _segments.begin();
     // uint lsegmentsCounter = 0;

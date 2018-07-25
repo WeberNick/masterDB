@@ -78,7 +78,7 @@ class SegmentManager
 		void deleteSegment(const uint16_t aID);
 		/**
          * @brief   deletes a Segment by its name. Deletes the object, cleans it from all data structures and calls erase.
-         *          The method looks up the segments ID and calls deleteSegement(aID)
+         *          The method looks up the segments ID and calls deleteSegment(aID)
          * @param   aName     Name of the segment to be erased
          */
         void deleteSegment(const std::string& aName);
@@ -95,7 +95,7 @@ class SegmentManager
          *
          * @param   aPartitionID    partition the segments are on.
          */
-        void deleteSegements(const uint8_t aPartitionID);
+        void deleteSegments(const uint8_t aPartitionID);
 
         // Getter
         /**
@@ -191,10 +191,7 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
     byte* lPage;
     InterpreterSP lInterpreter;
 
-    TRACE("trying to delete: " + std::to_string(aID));
-    TRACE("from Segment " + std::to_string(lSegments->getID()) + " " + _segmentsByID.at(lSegments->getID()).name());
-    TRACE("originally searched for " + aMasterName);
-
+    TRACE("Trying to delete: " + std::to_string(aID) + " from Segment " + std::to_string(lSegments->getID()) + " " + _segmentsByID.at(lSegments->getID()).name() + ", originally searched for " + aMasterName);
     // search all pages for tuple
     uint j;
     byte* lTuplePointer;
