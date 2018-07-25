@@ -20,7 +20,8 @@
    >      indicates print from main
    bold   indicates print from other methods
    normal indicates terminal output (e.g. output from creation of partition with linux command) */
-int main(const int argc, const char* argv[]) {
+int main(const int argc, const char* argv[])
+{
     /* Parse Command Line Arguments */
     Args lArgs;
     argdesc_vt lArgDesc;
@@ -42,12 +43,21 @@ int main(const int argc, const char* argv[]) {
         return -1;
     }
 
-    bool                C_INSTALL                   = false; // will be set in parser, depending on user input
-    const std::string   C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
-    const std::string   C_TRACE_DIR_PATH            = lArgs.tracePath();
-    const size_t        C_PAGE_SIZE                 = 4096;
-    const size_t        C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
-    const bool          C_TRACE_ACTIVATED           = lArgs.trace();
+    bool              C_INSTALL                   = false; // will be set in parser, depending on user input
+    std::string       C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
+    const std::string C_TRACE_DIR_PATH            = lArgs.tracePath();
+    const size_t      C_PAGE_SIZE                 = 4096;
+    const size_t      C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
+    const bool        C_TRACE_ACTIVATED           = lArgs.trace();
+    
+    control_block_t lCB = {	
+        C_INSTALL,	
+        C_MASTER_PARTITION_PATH,	
+        C_TRACE_DIR_PATH,	
+        C_PAGE_SIZE,	
+        C_BUFFER_POOL_SIZE,	
+        C_TRACE_ACTIVATED	
+    };
 
     // Actual programm starts here.     
     try
@@ -58,7 +68,9 @@ int main(const int argc, const char* argv[]) {
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
         CommandParser::getInstance().init(lCB, "mdb > ", '#');
-    } catch(const ReturnException& ex) {
+    }
+    catch(const ReturnException& ex)
+    {
         // Any exceptions from which there is no recovery possible, are catched here 
         std::cerr << ex.what() << std::endl;
         return EXIT_FAILURE;

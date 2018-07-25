@@ -35,6 +35,14 @@ using CP = CommandParser;
 class CommandParser
 {
     private:
+        enum class CommandStatus: int8_t
+        {
+            EXIT          = -1,  // regular exit
+            CONTINUE      =  0,  // ok, continue with next command
+            WRONG         =  1,  // wrong type of an argument
+            UNKNOWN_ERROR =  2   // unknown error, irregular exit
+        };
+
         class Command
         {
             public:
@@ -43,7 +51,7 @@ class CommandParser
                     const bool aHasParams,
                     const size_t aCommandLength,
                     const size_t aNumParams,
-                    CommandStatus (CP::*aFunc)(const char_vpt*) const,
+                    CP::CommandStatus (CP::*aFunc)(const char_vpt*) const,
                     const char* aMsg,
                     const char* aUsageInfo);
                 Command& operator=(const Command& aCommand);
@@ -54,17 +62,9 @@ class CommandParser
                 bool _hasParams;                                   // true                       - Whether the command has parameters
                 size_t _comLength;                                 // 2                          - The number of words the command consists of (CREATE and SEGMENT)
                 size_t _numParams;                                 // 2                          - The number of parameters
-                CommandStatus (CP::*_func)(const char_vpt*) const; // com_create_s               - A function pointer implementing the logic of this command
+                CP::CommandStatus (CP::*_func)(const char_vpt*) const; // com_create_s               - A function pointer implementing the logic of this command
                 const char* _helpMsg;                              // "Create .."                - A help message
                 const char* _usageInfo;                            // "Usage - str: partname .." - A detailed message on how to use the command
-        };
-
-        enum class CommandStatus: int8_t
-        {
-            EXIT  = -1, // regular exit
-            OK    = 0,  // ok, continue with next command
-            WRONG = 1,  // wrong type of an argument
-            ERROR = 2   // error (not fatal), recover and continue
         };
 
     public:
@@ -150,6 +150,13 @@ class CommandParser
          * @return CommandStatus the return code
          */
         CommandStatus com_boot(const char_vpt* args) const;
+        /**
+         * @brief implementing command functionality for shutting down the dbs
+         * 
+         * @param args the argument vector consisting of the processed user input
+         * @return CommandStatus the return code
+         */
+        CommandStatus com_shutdown(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for printing a detailed help information
          * 
@@ -254,13 +261,13 @@ class CommandParser
          * @param aPrompt the prompt in the command line interface, defaults to " > "
          * @param aCommentChar the comment char in the command line interface, defaults to " # "
          */
-        void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
+        void init(CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
 
     private:
         static const char*                  _HELP_FLAG;
-        const std::array<const Command, 13> _commands;
+        const std::array<const Command, 14> _commands;
         size_t                              _maxCommandLength;
     
         LineReaderEdit _reader;
-        const CB*      _cb;
+        CB*            _cb;
 };

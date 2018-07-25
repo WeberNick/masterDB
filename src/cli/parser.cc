@@ -5,7 +5,7 @@ CP::Command::Command(const CP& aCP,
                      const bool aHasParams,
                      const size_t aCommandLength,
                      const size_t aNumParams,
-                     CommandStatus (CP::*aFunc)(const char_vpt*) const,
+                     CP::CommandStatus (CP::*aFunc)(const char_vpt*) const,
                      const char* aMsg,
                      const char* aUsageInfo) :
     _cp(aCP),
@@ -23,8 +23,9 @@ const char* CP::_HELP_FLAG = "-h";
 CommandParser::CommandParser() :
     _commands
     {
-        Command(*this, "INSTALL",          true,  1,  1,       &CP::com_install,      "Installs the database system, storing the master partition at a given path", "INSTALL [str:path]"),
-        Command(*this, "BOOT",             true,  1,  1,       &CP::com_boot,         "Boots the database system using the master partition at a given path", "BOOT [str:path]"),
+        Command(*this, "INSTALL",          true,  1,  1,       &CP::com_install,      "Installs the database system, storing the master partition at a given path", "INSTALL [str:path]\nExample:\n  INSTALL /Users/Nicolas/Desktop/MasterPartition"),
+        Command(*this, "BOOT",             true,  1,  1,       &CP::com_boot,         "Boots the database system using the master partition at a given path", "BOOT [str:path]\nExample:\n  BOOT /Users/Nicolas/Desktop/MasterPartition"),
+        Command(*this, "SHUTDOWN",         false, 1,  0,       &CP::com_shutdown,     "Shuts down the database system. Enables you to boot with another masterPartition without exiting", "SHUTDOWN"),
         Command(*this, "HELP",             false, 1,  0,       &CP::com_help,         "Displays usage information.", "HELP"),
         Command(*this, "CREATE PARTITION", true,  2,  3,       &CP::com_create_p,     "Create a partition at a given path to a partition file with a name and a growth indicator of at least 8.", "CREATE PARTITION [str:path_to_partfile] [str:name] [int:growth_indicator >= 8]"),
         Command(*this, "DROP PARTITION",   true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
@@ -42,7 +43,7 @@ CommandParser::CommandParser() :
     _cb(nullptr)
 {}
 
-void CommandParser::init(const CB& aControlBlock, const char* aPrompt, const char aCommentChar) {
+void CommandParser::init(CB& aControlBlock, const char* aPrompt, const char aCommentChar) {
     if (!_cb)
     {   
         _cb = &aControlBlock;
@@ -67,14 +68,21 @@ void CommandParser::runcli()
         if (com != NULL)
         {
             std::string comname(com->_name);
-            if (!DatabaseInstanceManager::getInstance().isRunning() && !(comname == "INSTALL" || comname == "BOOT")) {
+            if (!DatabaseInstanceManager::getInstance().isRunning() && !(comname == "INSTALL" || comname == "BOOT")
+                && comname != "HELP" && comname != "EXIT")
+            {
                 std::cout << "The database system is not running yet." << "\n"
                           << "If you have already installed it, you can boot the system by providing a path to the master partition." << "\n"
                           << "If you have not yet installed the database system, you can install it by " << "\n"
                           << "  providing a valid path to a directory where you want to store the master partition." << "\n"
-                          << "Type \"INSTALL -h\" or \"BOOT -h\" for more information." << std::endl;
+                          << "Type \"INSTALL -h\" or \"BOOT -h\" for more information." << "\n" << std::endl;
                 continue;
-            } 
+            }
+            else if (DatabaseInstanceManager::getInstance().isRunning() && (comname == "INSTALL" || comname == "BOOT"))
+            {
+                std::cout << "The database system is already running @masterPartition: \"" << _cb->mstrPart() << "\")" << "\n" << std::endl;
+                continue;
+            }
             else
             {
                 if (splits.size() == com->_comLength + 1 && *splits[splits.size() - 1] == *CP::_HELP_FLAG)
@@ -92,19 +100,19 @@ void CommandParser::runcli()
                 }
                 else
                 {
-                    int rec;
+                    CP::CommandStatus rec;
                     if (com->_hasParams)
                     {
                         const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
                         auto future = Pool::Default::submitJob(com->_func, this, &args);
-                        rec = future.get();
+                        rec = (CP::CommandStatus) future.get();
                     }
                     else
                     {
                         auto future = Pool::Default::submitJob(com->_func, this, nullptr);
-                        rec = future.get();
+                        rec = (CP::CommandStatus) future.get();
                     }
-                    if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR)
+                    if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::UNKNOWN_ERROR)
                     {
                         break;
                     }
@@ -114,7 +122,7 @@ void CommandParser::runcli()
                                   << "Usage - " << com->_usageInfo << "\n"
                                   << std::endl;
                     }
-                    else if (rec == CP::CommandStatus::OK)
+                    else if (rec == CP::CommandStatus::CONTINUE)
                     {
                         continue;
                     }
@@ -129,7 +137,7 @@ void CommandParser::runcli()
                       << std::endl;
         }
     }
-    DatabaseInstanceManager::getInstance().shutdown();
+    DatabaseInstanceManager::getInstance().shutdown(); // only in case of error abortion
 }
 
 const CP::Command* CommandParser::findCommand(const char_vpt* splits)
@@ -164,45 +172,87 @@ std::string CommandParser::findCommand(const std::string& arg) const
     return "";
 }
 
-CommandStatus CP::com_install(const char_vpt* args) const
+CP::CommandStatus CP::com_install(const char_vpt* args) const
 {
     std::string path(args->at(0));
     if(!FileUtil::hasValidDir(path))
     {
         std::cout << "The given path is invalid. Cannot create a master partition at this path.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
-    _cb->C_INSTALL = true; // install
-    DatabaseInstanceManager::getInstance().init(*_cb); // installs the DBS
-    return CP::CommandStatus::OK;
+    try
+    {
+        _cb->_install = true; // install
+        _cb->_masterPartition = path;
+        DatabaseInstanceManager::getInstance().init(*_cb); // installs the DBS
+        std::cout << "Installed the datbase system successfully at " << path << "." << "\n" << std::endl;
+    }
+    catch(const PartitionExistsException& pex)
+    {
+        std::cout << "A (Master-)Partition already exists at this location. Please try again by providing an alternative path or consider booting the system." << "\n" << std::endl;
+        return CP::CommandStatus::CONTINUE;
+    }
+    catch(const std::exception& e) 
+    {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
+        return CP::CommandStatus::UNKNOWN_ERROR;
+    }
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_boot(const char_vpt* args) const
+CP::CommandStatus CP::com_boot(const char_vpt* args) const
 {
     std::string path(args->at(0));
     if(!(FileUtil::exists(path)))
     {
-        std::cout << "Given path to the master partition is invalid.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        std::cout << "The given path to the masterPartition is invalid." << "\n" << std::endl;
+        return CP::CommandStatus::CONTINUE;
     }
-    _cb->C_INSTALL = false; // boot
-    DatabaseInstanceManager::getInstance().init(*_cb); // boots the DBS
-    return CP::CommandStatus::OK;
+    try
+    {
+        _cb->_install = false; // boot
+        _cb->_masterPartition = path;
+        DatabaseInstanceManager::getInstance().init(*_cb); // boots the DBS
+        std::cout << "Booted the datbase system successfully from \"" << path << "\"." << "\n" << std::endl;
+    }
+    catch(const PartitionNotExistsException& pex)
+    {
+        std::cout << "No MasterPartition exists at this path. Consider installing the database system." << "\n" << std::endl;
+        return CP::CommandStatus::CONTINUE;
+    }
+    catch(const std::exception& e) 
+    {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
+        return CP::CommandStatus::UNKNOWN_ERROR;
+    }
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_help(const char_vpt* args) const
+CP::CommandStatus CP::com_shutdown(const char_vpt* args) const
+{
+    DatabaseInstanceManager::getInstance().shutdown();
+    std::cout << "Successfully shutdown database running @masterPartition: \"" << _cb->mstrPart() << "\"." << "\n" << std::endl;
+    return CP::CommandStatus::CONTINUE;
+}
+
+CP::CommandStatus CP::com_help(const char_vpt* args) const
 {
     printh();
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_exit(const char_vpt* args) const
+CP::CommandStatus CP::com_exit(const char_vpt* args) const
 {
+    if (DatabaseInstanceManager::getInstance().isRunning())
+    {
+        DatabaseInstanceManager::getInstance().shutdown();
+        std::cout << "System was shut down successfully. ";
+    }
     printe();
     return CP::CommandStatus::EXIT;
 }
 
-CommandStatus CP::com_create_p(const char_vpt* args) const
+CP::CommandStatus CP::com_create_p(const char_vpt* args) const
 {
     std::string path(args->at(0));
     std::string partName(args->at(1));
@@ -226,39 +276,39 @@ CommandStatus CP::com_create_p(const char_vpt* args) const
     {
          const std::string& partLoc = PartitionManager::getInstance().getPathForPartition(partName);
          std::cout << "Partition \"" << partName << "\" already exists at \"" << partLoc << "\".\n" << std::endl;
-         return CP::CommandStatus::OK;
+         return CP::CommandStatus::CONTINUE;
     }
     catch(const InvalidArgumentException& iaex) 
     {
         std::cout << "Invalid argument was provided:" << std::endl;
         std::cout << iaex.what() << "\n" << std::endl;
-        return CP::CommandStatus::OK; // return OK instead of WRONG because iaex.what() already displays information
+        return CP::CommandStatus::CONTINUE; // return OK instead of WRONG because iaex.what() already displays information
     }
     catch(const InvalidPathException& ipex) 
     {
         std::cout << "The provided path is invalid:" << std::endl;
         std::cout << ipex.what() << "\n" << std::endl;
-        return CP::CommandStatus::OK; // return OK instead of WRONG because iaex.what() already displays information
+        return CP::CommandStatus::CONTINUE; // return OK instead of WRONG because iaex.what() already displays information
     }
     catch(const PartitionFullException& ex) 
     {
         std::cout << "Partition Full.\n" << std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
     catch(const fs::filesystem_error& fse) 
     {
         std::cout << "Filesystem Exception.\n" << std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
     catch(const std::exception& e) 
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_drop_p(const char_vpt* args) const
+CP::CommandStatus CP::com_drop_p(const char_vpt* args) const
 {
     std::string partName(args->at(0));    
     try
@@ -269,17 +319,17 @@ CommandStatus CP::com_drop_p(const char_vpt* args) const
     catch(const PartitionNotExistsException& pnee)
     {
         std::cout << "Partition \"" << partName << "\" does not exist. Nothing was dropped.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_create_s(const char_vpt* args) const
+CP::CommandStatus CP::com_create_s(const char_vpt* args) const
 {
     const std::string partName(args->at(0));
     const std::string segName(args->at(1));
@@ -298,22 +348,22 @@ CommandStatus CP::com_create_s(const char_vpt* args) const
     catch(const SegmentExistsException& see)
     {
         std::cout << "Segment \"" << segName << "\" already exists for Partition \"" << partName << "\".\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const PartitionNotExistsException& pnee)
     {
         std::cout << "Partition \"" << partName << "\" does not exist. Segment \"" << segName << "\" could not be created.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_drop_s(const char_vpt* args) const
+CP::CommandStatus CP::com_drop_s(const char_vpt* args) const
 {
     std::string segName(args->at(0));
     try
@@ -324,17 +374,17 @@ CommandStatus CP::com_drop_s(const char_vpt* args) const
     catch(const SegmentNotExistsException& snee)
     {
         std::cout << "Segment \"" << segName << "\" does not exist. Nothing was dropped.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_insert_tuple(const char_vpt* args) const
+CP::CommandStatus CP::com_insert_tuple(const char_vpt* args) const
 {
     /* INSERT INTO Seg_Emp Employee 80000 30 Mueller */
     TRACE("Start to insert Tuple");
@@ -363,23 +413,23 @@ CommandStatus CP::com_insert_tuple(const char_vpt* args) const
         else
         {
             std::cout << "Relation " << type << " is not supported.\n" << std::endl;
-            return CP::CommandStatus::OK;
+            return CP::CommandStatus::CONTINUE;
         }
     }
     catch(const SegmentNotExistsException& snee)
     {
         std::cout << "Segment \"" << segName << "\" does not exist. Could not insert Tuple.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_show_part(const char_vpt* args) const
+CP::CommandStatus CP::com_show_part(const char_vpt* args) const
 {
     std::string partName(args->at(0));
     try
@@ -412,17 +462,17 @@ CommandStatus CP::com_show_part(const char_vpt* args) const
     catch(const PartitionNotExistsException& oore)
     {
         std::cout << "Partition \"" << partName << "\" does not exist.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_show_parts(const char_vpt* args) const
+CP::CommandStatus CP::com_show_parts(const char_vpt* args) const
 {
     try
     {
@@ -434,12 +484,12 @@ CommandStatus CP::com_show_parts(const char_vpt* args) const
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_show_seg(const char_vpt* args) const
+CP::CommandStatus CP::com_show_seg(const char_vpt* args) const
 {
     std::string segName(args->at(0));
     try
@@ -459,17 +509,17 @@ CommandStatus CP::com_show_seg(const char_vpt* args) const
     catch(const SegmentNotExistsException& oore)
     {
         std::cout << "Segment \"" << segName << "\" does not exist.\n" << std::endl;
-        return CP::CommandStatus::OK;
+        return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
-CommandStatus CP::com_show_segs(const char_vpt* args) const
+CP::CommandStatus CP::com_show_segs(const char_vpt* args) const
 {
     try
     {
@@ -481,9 +531,9 @@ CommandStatus CP::com_show_segs(const char_vpt* args) const
     catch(const std::exception& e) 
     {
         std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
-        return CP::CommandStatus::ERROR;
+        return CP::CommandStatus::UNKNOWN_ERROR;
     }
-    return CP::CommandStatus::OK;
+    return CP::CommandStatus::CONTINUE;
 }
 
 void CommandParser::printw() const
@@ -593,19 +643,19 @@ void CommandParser::multiexec(const string_vt& commands)
             }
             else
             {
-                int rec;
+                CP::CommandStatus rec;
                 if (com->_hasParams)
                 {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
                     auto future = Pool::Default::submitJob(com->_func, this, &args);
-                    rec = future.get();
+                    rec = (CP::CommandStatus) future.get();
                 }
                 else
                 {
                     auto future = Pool::Default::submitJob(com->_func, this, nullptr);
-                    rec = future.get();
+                    rec = (CP::CommandStatus) future.get();
                 }
-                if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::ERROR)
+                if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::UNKNOWN_ERROR)
                 {
                     delete[] cstr;
                     break;

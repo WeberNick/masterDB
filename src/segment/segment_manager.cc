@@ -34,7 +34,7 @@ void SegmentManager::init(const CB& aControlBlock) noexcept
     if(!_cb)
     {
         _cb = &aControlBlock;
-    TRACE("'SegementManager' initialized");
+        TRACE("'SegementManager' initialized");
     }
 }
 
@@ -44,13 +44,13 @@ void SegmentManager::load(const seg_vt& aTuples) noexcept
     uint16_t maxID = 0; // trying to find the maximal ID already assigned to a segment
     for(const auto& segTuple : aTuples)
     {
-    std::cout<<segTuple<<std::endl;
-    // insert tuples into data structures
-      _segmentsByID[segTuple.ID()] = segTuple;
-      _segmentsByName[segTuple.name()] = segTuple.ID();
-      if( maxID <= segTuple.ID()){
-          maxID = segTuple.ID();
-      }
+        // insert tuples into data structures
+        _segmentsByID[segTuple.ID()] = segTuple;
+        _segmentsByName[segTuple.name()] = segTuple.ID();
+        if( maxID <= segTuple.ID())
+        {
+            maxID = segTuple.ID();
+        }
     }
     _counterSegmentID = maxID+1;
 }
@@ -84,7 +84,8 @@ SegmentFSM_SP* SegmentManager::createNewSegmentFSM_SP(PartitionBase& aPartition,
     return static_cast<SegmentFSM_SP*>(getSegment(lSegment->getID()));
 }
 
-void SegmentManager::createSegmentSub(const Segment_T& aSegT){
+void SegmentManager::createSegmentSub(const Segment_T& aSegT)
+{
     // insert into maps
     _segmentsByID[aSegT.ID()] = aSegT;
     _segmentsByName[aSegT.name()] = aSegT.ID();
@@ -95,9 +96,9 @@ void SegmentManager::createSegmentSub(const Segment_T& aSegT){
 
 SegmentFSM_SP* SegmentManager::loadSegmentFSM_SP(PartitionBase& aPartition, const uint aIndex)
 {
-  SegmentFSM_SP* lSegment = new SegmentFSM_SP(aPartition,*_cb);
-  lSegment->loadSegmentUnbuffered(aIndex);
-  return lSegment;
+    SegmentFSM_SP* lSegment = new SegmentFSM_SP(aPartition,*_cb);
+    lSegment->loadSegmentUnbuffered(aIndex);
+    return lSegment;
 }
 
 void SegmentManager::deleteSegment(SegmentFSM_SP*& aSegment)
@@ -137,21 +138,15 @@ void SegmentManager::deleteSegment(const std::string& aName)
     }
 }
 
-void SegmentManager::deleteSegements(const uint8_t aPartitionID) {
-    #pragma message ("TODO: @Nick es gibt mehrere Treffer, bitte aendern. So lange steht hier wieder meine alte loesung.")
-    for (auto america : _segmentsByID){
-        if (america.second.partID() == aPartitionID){
+void SegmentManager::deleteSegements(const uint8_t aPartitionID)
+{
+    for (auto america : _segmentsByID)
+    {
+        if (america.second.partID() == aPartitionID)
+        {
             deleteSegment(america.first);
         }
     }
-    
-   /* auto america = std::find_if(_segmentsByID.cbegin(), _segmentsByID.cend(), [aPartitionID] (const auto& elem) {
-        return elem.second.partID() == aPartitionID;
-    }); 
-    if(america != _segmentsByID.cend())
-    {
-        deleteSegment(america->first);
-    }*/
 }
 
 SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
