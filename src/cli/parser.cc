@@ -23,20 +23,21 @@ const char* CP::_HELP_FLAG = "-h";
 CommandParser::CommandParser() :
     _commands
     {
-        Command(*this, "INSTALL",          true,  1,  1,       &CP::com_install,      "Installs the database system, storing the master partition at a given path", "INSTALL [str:path]\nExample:\n  INSTALL /Users/Nicolas/Desktop/MasterPartition"),
-        Command(*this, "BOOT",             true,  1,  1,       &CP::com_boot,         "Boots the database system using the master partition at a given path", "BOOT [str:path]\nExample:\n  BOOT /Users/Nicolas/Desktop/MasterPartition"),
-        Command(*this, "SHUTDOWN",         false, 1,  0,       &CP::com_shutdown,     "Shuts down the database system. Enables you to boot with another masterPartition without exiting", "SHUTDOWN"),
-        Command(*this, "HELP",             false, 1,  0,       &CP::com_help,         "Displays usage information.", "HELP"),
-        Command(*this, "CREATE PARTITION", true,  2,  3,       &CP::com_create_p,     "Create a partition at a given path to a partition file with a name and a growth indicator of at least 8.", "CREATE PARTITION [str:path_to_partfile] [str:name] [int:growth_indicator >= 8]"),
-        Command(*this, "DROP PARTITION",   true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
-        Command(*this, "CREATE SEGMENT",   true,  2,  2,       &CP::com_create_s,     "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
-        Command(*this, "DROP SEGMENT",     true,  2,  1,       &CP::com_drop_s,       "Drop a segment by its name. Segment names are globally unique, thus no partition has to be provided.", "DROP SEGMENT [str:segname]"),
-        Command(*this, "INSERT INTO",      true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment.", "INSERT INTO [str:segname] [str:relation] [Args...]\n\nExample: Creation of an Employee with double:salary, int:age and string:name\n  INSERT INTO segname EMPLOYEE 80000 30 Mueller"),
-        Command(*this, "SHOW PARTITION",   true,  2,  1,       &CP::com_show_part,    "Show detailed information for a partition.", "SHOW PARTITION [str:partname]"),
-        Command(*this, "SHOW PARTITIONS",  false, 2,  0,       &CP::com_show_parts,   "Show all partitions.", "SHOW PARTITIONS"),
-        Command(*this, "SHOW SEGMENT",     true,  2,  1,       &CP::com_show_seg,     "Show detailed information for a segment.", "SHOW SEGMENT [str:segname]"),
-        Command(*this, "SHOW SEGMENTS",    false, 2,  0,       &CP::com_show_segs,    "Show all segments for a given partition.", "SHOW SEGMENTS"),
-        Command(*this, "EXIT",             false, 1,  0,       &CP::com_exit,         "Shut down masterDB and exit.", "EXIT")
+        Command(*this, "INSTALL",              true,  1,  1,       &CP::com_install,      "Installs the database system, storing the master partition at a given path", "INSTALL [str:path]\nExample:\n  INSTALL /usr/system/MasterPartition"),
+        Command(*this, "BOOT",                 true,  1,  1,       &CP::com_boot,         "Boots the database system using the master partition at a given path", "BOOT [str:path]\nExample:\n  BOOT /usr/system/MasterPartition"),
+        Command(*this, "SHUTDOWN",             false, 1,  0,       &CP::com_shutdown,     "Shuts down the database system. Enables you to boot with another masterPartition without exiting", "SHUTDOWN"),
+        Command(*this, "HELP",                 false, 1,  0,       &CP::com_help,         "Displays usage information.", "HELP"),
+        Command(*this, "CREATE PARTITION",     true,  2,  3,       &CP::com_create_p,     "Create a partition at a given path to a partition file with a name and a growth indicator of at least 8.", "CREATE PARTITION [str:path_to_partfile] [str:name] [int:growth_indicator >= 8]"),
+        Command(*this, "CREATE RAW PARTITION", true,  3,  3,       &CP::com_create_rp,    "Create a raw partition at a given path to a partition", "")
+        Command(*this, "DROP PARTITION",       true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
+        Command(*this, "CREATE SEGMENT",       true,  2,  2,       &CP::com_create_s,     "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
+        Command(*this, "DROP SEGMENT",         true,  2,  1,       &CP::com_drop_s,       "Drop a segment by its name. Segment names are globally unique, thus no partition has to be provided.", "DROP SEGMENT [str:segname]"),
+        Command(*this, "INSERT INTO",          true,  2,  INVALID, &CP::com_insert_tuple, "Insert a tuple into a segment.", "INSERT INTO [str:segname] [str:relation] [Args...]\n\nExample: Creation of an Employee with double:salary, int:age and string:name\n  INSERT INTO segname EMPLOYEE 80000 30 Mueller"),
+        Command(*this, "SHOW PARTITION",       true,  2,  1,       &CP::com_show_part,    "Show detailed information for a partition.", "SHOW PARTITION [str:partname]"),
+        Command(*this, "SHOW PARTITIONS",      false, 2,  0,       &CP::com_show_parts,   "Show all partitions.", "SHOW PARTITIONS"),
+        Command(*this, "SHOW SEGMENT",         true,  2,  1,       &CP::com_show_seg,     "Show detailed information for a segment.", "SHOW SEGMENT [str:segname]"),
+        Command(*this, "SHOW SEGMENTS",        false, 2,  0,       &CP::com_show_segs,    "Show all segments for a given partition.", "SHOW SEGMENTS"),
+        Command(*this, "EXIT",                 false, 1,  0,       &CP::com_exit,         "Shut down masterDB and exit.", "EXIT")
     },
     _maxCommandLength(0),
     _reader(),
@@ -184,7 +185,14 @@ CP::CommandStatus CP::com_install(const char_vpt* args) const
     {
         _cb->_install = true; // install
         _cb->_masterPartition = path;
-        DatabaseInstanceManager::getInstance().init(*_cb); // installs the DBS
+        if(DatabaseInstanceManager::getInstance().isInit())
+        {
+            DatabaseInstanceManager::getInstance().install();
+        }
+        else
+        {
+            DatabaseInstanceManager::getInstance().init(*_cb); // installs the DBS
+        }
         std::cout << "Installed the datbase system successfully at " << path << "." << "\n" << std::endl;
     }
     catch(const PartitionExistsException& pex)
@@ -212,7 +220,14 @@ CP::CommandStatus CP::com_boot(const char_vpt* args) const
     {
         _cb->_install = false; // boot
         _cb->_masterPartition = path;
-        DatabaseInstanceManager::getInstance().init(*_cb); // boots the DBS
+        if(DatabaseInstanceManager::getInstance().isInit())
+        {
+            DatabaseInstanceManager::getInstance().boot();
+        }
+        else
+        {
+            DatabaseInstanceManager::getInstance().init(*_cb); // boots the DBS
+        }
         std::cout << "Booted the datbase system successfully from \"" << path << "\"." << "\n" << std::endl;
     }
     catch(const PartitionNotExistsException& pex)

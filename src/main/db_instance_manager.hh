@@ -57,8 +57,6 @@ class DatabaseInstanceManager final
          *
          */
 		void shutdown();
-
-	private:
         /**
          * @brief   installs the system and places the master partition at the path defined in the control block
          */
@@ -73,6 +71,7 @@ class DatabaseInstanceManager final
 		inline PartitionManager& getPartMngr() noexcept { return _partMngr; }
 		inline SegmentManager& getSegMngr() noexcept { return _segMngr; }
         inline bool isRunning() noexcept { return _running; }
+        inline bool isInit() noexcept { return _cb != nullptr; }
 
 	private:
         /**
