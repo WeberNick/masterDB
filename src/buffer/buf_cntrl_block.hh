@@ -1,7 +1,7 @@
 /**
  *  @file 	 buf_mngr.hh
  *  @author	 Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *  @brief   Class implementing a buffer control block for the buffer franes	
+ *  @brief   Class implementing a buffer control block for the buffer frames	
  *  @bugs	 Currently no bugs known
  *  @todos	 -
  *  @section TODO

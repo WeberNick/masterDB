@@ -30,9 +30,13 @@ DatabaseInstanceManager::~DatabaseInstanceManager()
 
 void DatabaseInstanceManager::init(const CB& aControlBlock)
 {
-    if(!_cb)
+    if (!_cb)
     {
         _cb = &aControlBlock;
+        TRACE("'DatabaseInstanceManager' CB initialized.");
+    }
+    if (!isRunning())
+    {
         if(_cb->install())
         {
             install();
@@ -42,7 +46,6 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
             boot();
         }
         _running = true;
-        TRACE("'DatabaseInstanceManager' initialized");
     }
 }
 
@@ -75,11 +78,12 @@ void DatabaseInstanceManager::boot()
 void DatabaseInstanceManager::shutdown()
 {
     TRACE("Shutting down the database system starts...");
-    // if (isRunning()) {
+    if (isRunning())
+    {
         // stop transactions
         _segMngr.storeSegments();     
         BufferManager::getInstance().flushAll();
-        // _running = false;
-    // }
+        _running = false;
+    }
     TRACE("Finished shutting down the database system!");
 }

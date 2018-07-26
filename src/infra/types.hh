@@ -44,15 +44,15 @@ constexpr uint16_t INVALID_16 = std::numeric_limits<uint16_t>::max();
 
 struct control_block_t
 {
-    const bool _install;
-    const std::string _masterPartition;
+    bool _install;
+    std::string _masterPartition;
     const std::string _tracePath;
     const size_t _pageSize;
     const size_t _noBufFrames;
     const bool _trace;
 
     bool install() const noexcept { return _install; }
-    const std::string& mstrPart() const noexcept { return _masterPartition; }
+    std::string mstrPart() const noexcept { return _masterPartition; }
     const std::string& tracePath() const noexcept { return _tracePath; }
     size_t pageSize() const noexcept { return _pageSize; }
     size_t frames() const noexcept { return _noBufFrames; }

@@ -3,7 +3,7 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief	Implementation of a raw device partition
  *  @bugs	Currently no bugs known
- *  @todos	Implement all functionalities
+ *  @todos	-
  *  @section TBD
  */
 

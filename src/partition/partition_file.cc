@@ -37,7 +37,7 @@ uint32_t PartitionFile::allocPage()
     }
     catch(const PartitionFullException& ex)
     {
-        // Before the exception is thrown, the partition (file) will be clossed by the alloc call in partition base...
+        // Before the exception is thrown, the partition (file) will be closed by the alloc call in partition base...
         // Open file again for recovering from the exception
         open();
         // extend

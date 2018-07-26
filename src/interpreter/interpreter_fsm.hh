@@ -6,8 +6,8 @@
  *  @bugs	 might not work for big Endian
  *  @todos   -
  *  @section DESCRIPTION
- *           This class implements a free space management for segments by using 16 different buckets to determine how full or empty the page is.
- *           The correct interpretation of the pages status is only working for little endian.
+ *  This class implements a free space management for segments by using 16 different buckets to determine how full or empty the page is.
+ *  The correct interpretation of the pages status is only working for little endian.
  */
 
 #pragma once
@@ -54,14 +54,14 @@ class InterpreterFSM final
          *	@param	aLSN - Log Sequence Number
          *	@param	aPageIndex - Page index inside the partition
          *	@param	aPID - The ID of the partition this page is stored in
-         *	@param	aNoPages - Number of stored Pages in FSMP
+         *	@param	aNoPages - Number of stored Pages in FSM
          */
         void initNewFSM(byte *aPP, const uint64_t aLSN, const uint32_t aPageIndex, const uint8_t aPID, const uint32_t aNoPages) noexcept;
     
         /**
          *	@brief	looks for the next free block in the FSIP and reserves the page
          *
-         *	@param	aPageStatus - the number of requested free bytes ancapsulated as a PageStatus
+         *	@param	aPageStatus - the number of requested free bytes encapsulated as a PageStatus
          *
          * 	@return either an offset to the free block or INVALID if no free block was found
          */

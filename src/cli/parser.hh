@@ -35,40 +35,40 @@ using CP = CommandParser;
 class CommandParser
 {
     private:
+        enum class CommandStatus: int8_t
+        {
+            EXIT          = -1,  // regular exit
+            CONTINUE      =  0,  // ok, continue with next command
+            WRONG         =  1,  // wrong type of an argument
+            UNKNOWN_ERROR =  2   // unknown error, irregular exit
+        };
+
         class Command
         {
             public:
-                explicit Command(const CP& aCP,
+                Command(const CP& aCP,
                     const char* aName,
                     const bool aHasParams,
                     const size_t aCommandLength,
                     const size_t aNumParams,
-                    int (CP::*aFunc)(const char_vpt*) const,
+                    CP::CommandStatus (CP::*aFunc)(const char_vpt*) const,
                     const char* aMsg,
                     const char* aUsageInfo);
                 Command& operator=(const Command& aCommand);
 
-            public:                                      // Examples:
-                const CP& _cp;                           //                            - Reference to the Command Parser instance
-                const char* _name;                       // "CREATE SEGMENT"           - The name of the command
-                bool _hasParams;                         // true                       - Whether the command has parameters
-                size_t _comLength;                       // 2                          - The number of words the command consists of (CREATE and SEGMENT)
-                size_t _numParams;                       // 2                          - The number of parameters
-                int (CP::*_func)(const char_vpt*) const; // com_create_s               - A function pointer implementing the logic of this command
-                const char* _helpMsg;                    // "Create .."                - A help message
-                const char* _usageInfo;                  // "Usage - str: partname .." - A detailed message on how to use the command
-        };
-
-        enum CommandStatus
-        {
-            EXIT  = -1, // regular exit
-            OK    = 0,  // ok, continue with next command
-            WRONG = 1,  // wrong type of an argument
-            ERROR = 2   // error (not fatal), recover and continue
+            public:                                                // Examples:
+                const CP& _cp;                                     //                            - Reference to the Command Parser instance
+                const char* _name;                                 // "CREATE SEGMENT"           - The name of the command
+                bool _hasParams;                                   // true                       - Whether the command has parameters
+                size_t _comLength;                                 // 2                          - The number of words the command consists of (CREATE and SEGMENT)
+                size_t _numParams;                                 // 2                          - The number of parameters
+                CP::CommandStatus (CP::*_func)(const char_vpt*) const; // com_create_s               - A function pointer implementing the logic of this command
+                const char* _helpMsg;                              // "Create .."                - A help message
+                const char* _usageInfo;                            // "Usage - str: partname .." - A detailed message on how to use the command
         };
 
     public:
-        explicit CommandParser();
+        CommandParser();
         explicit CommandParser(const CommandParser&) = delete;
         explicit CommandParser(CommandParser&&) = delete;
         CommandParser& operator=(const CommandParser&) = delete;
@@ -140,93 +140,100 @@ class CommandParser
          * @brief implementing command functionality for installling the dbs
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_install(const char_vpt* args) const;
+        CommandStatus com_install(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for booting the dbs
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_boot(const char_vpt* args) const;
+        CommandStatus com_boot(const char_vpt* args) const;
+        /**
+         * @brief implementing command functionality for shutting down the dbs
+         * 
+         * @param args the argument vector consisting of the processed user input
+         * @return CommandStatus the return code
+         */
+        CommandStatus com_shutdown(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for printing a detailed help information
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_help(const char_vpt* args) const;
+        CommandStatus com_help(const char_vpt* args) const;
         /** 
          * @brief implementing command functionality for creating a partition
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_create_p(const char_vpt* args) const;
+        CommandStatus com_create_p(const char_vpt* args) const;
         /** 
          * @brief implementing command functionality for deleting a partition
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_drop_p(const char_vpt* args) const;
+        CommandStatus com_drop_p(const char_vpt* args) const;
         /** 
          * @brief implementing command functionality for creating a segment
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_create_s(const char_vpt* args) const;
+        CommandStatus com_create_s(const char_vpt* args) const;
         /** 
          * @brief implementing command functionality for deleting a segment
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_drop_s(const char_vpt* args) const;
+        CommandStatus com_drop_s(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for inserting a tuple into a relation
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_insert_tuple(const char_vpt* args) const;
+        CommandStatus com_insert_tuple(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for showing information for a specific partition
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_show_part(const char_vpt* args) const;
+        CommandStatus com_show_part(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for showing information for all partitions
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_show_parts(const char_vpt* args) const;
+        CommandStatus com_show_parts(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for showing information for a specific segment
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_show_seg(const char_vpt* args) const;
+        CommandStatus com_show_seg(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for showing information for all segments
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_show_segs(const char_vpt* args) const;
+        CommandStatus com_show_segs(const char_vpt* args) const;
         /**
          * @brief implementing command functionality for exiting the system
          * 
          * @param args the argument vector consisting of the processed user input
-         * @return int the return code
+         * @return CommandStatus the return code
          */
-        int com_exit(const char_vpt* args) const;
+        CommandStatus com_exit(const char_vpt* args) const;
 
     public:
         /**
@@ -254,13 +261,13 @@ class CommandParser
          * @param aPrompt the prompt in the command line interface, defaults to " > "
          * @param aCommentChar the comment char in the command line interface, defaults to " # "
          */
-        void init(const CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
+        void init(CB& aControlBlock, const char* aPrompt = "mdb > ", const char aCommentChar = '#');
 
     private:
         static const char*                  _HELP_FLAG;
-        const std::array<const Command, 13> _commands;
+        const std::array<const Command, 14> _commands;
         size_t                              _maxCommandLength;
     
         LineReaderEdit _reader;
-        const CB*      _cb;
+        CB*            _cb;
 };

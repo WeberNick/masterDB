@@ -1,7 +1,7 @@
 /**
  *	@file 	args.hh
  *	@author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
- *	@brief	Implementation of command line arguements
+ *	@brief	Implementation of command line arguments
  *	@bugs 	Currently no bugs known
  *	@todos	-
  *
@@ -33,9 +33,6 @@ class Args
         inline bool test() noexcept { return _test; }
         inline void test(const bool &x) noexcept { _test = x; }
     
-        inline bool install() noexcept { return _install; }
-        inline void install(const bool &x) noexcept { _install = x; }
-    
         inline bool trace() noexcept { return _trace; }
         inline void trace(const bool &x) noexcept { _trace = x; }
     
@@ -54,11 +51,10 @@ class Args
     private:
         bool        _help;
         bool        _test;
-	      bool        _install;
         bool        _trace;
         uint        _segmentIndexPage;
         uint        _noBufFrames;
-	      std::string _masterPartition;
+	    std::string _masterPartition;
         std::string _tracePath;
 };
 
