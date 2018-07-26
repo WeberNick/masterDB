@@ -59,7 +59,6 @@ uint32_t PartitionBase::allocPage()
 	do
 	{
 		readPage(lPagePointer, lIndexOfFSIP, _pageSize); // Read FSIP into buffer
-		TRACE(std::to_string(lIndexOfFSIP));
         /*
         try
         {
@@ -145,17 +144,15 @@ uint32_t PartitionBase::allocPage()
 
 void PartitionBase::freePage(const uint32_t aPageIndex)
 {
-	byte* lPagePointer = new byte[_pageSize];
+    std::unique_ptr<byte[]> lPagePointer = std::make_unique<byte[]>(_pageSize);
+
 	uint32_t fsipIndex = (aPageIndex / (getMaxPagesPerFSIP()+1))*getMaxPagesPerFSIP();
-	TRACE(std::to_string(fsipIndex));
-	readPage(lPagePointer, fsipIndex , _pageSize); // fsip auf der aPageIndex verwaltet wird
+	readPage(lPagePointer.get(), fsipIndex , _pageSize); // fsip auf der aPageIndex verwaltet wird
 	InterpreterFSIP fsip;
-	fsip.attach(lPagePointer);
-	TRACE(std::to_string(aPageIndex));
+	fsip.attach(lPagePointer.get());
 	fsip.freePage(aPageIndex);
 	fsip.detach();
-	writePage(lPagePointer, fsipIndex,_pageSize);
-	delete[] lPagePointer;
+	writePage(lPagePointer.get(), fsipIndex,_pageSize);
 }
 
 void PartitionBase::readPage(byte* aBuffer, const uint32_t aPageIndex, const uint aBufferSize)
@@ -180,7 +177,7 @@ void PartitionBase::writePage(const byte* aBuffer, const uint32_t aPageIndex, co
 
 void PartitionBase::format()
 {
-	byte* lPagePointer = new byte[_pageSize];
+    std::unique_ptr<byte[]> lPagePointer = std::make_unique<byte[]>(_pageSize);
 	const uint lPagesPerFSIP = getMaxPagesPerFSIP();
 	uint lCurrentPageNo = 0;
 	InterpreterFSIP fsip;
@@ -191,17 +188,16 @@ void PartitionBase::format()
 	{
 		--remainingPages;
 		lNumberOfPagesToManage = ((remainingPages > lPagesPerFSIP) ? lPagesPerFSIP : remainingPages);
-		fsip.initNewFSIP(lPagePointer, LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
-		writePage(lPagePointer, lCurrentPageNo, _pageSize);
+		fsip.initNewFSIP(lPagePointer.get(), LSN, lCurrentPageNo, _partitionID, lNumberOfPagesToManage);
+		writePage(lPagePointer.get(), lCurrentPageNo, _pageSize);
 		lCurrentPageNo += (lPagesPerFSIP + 1);
 		remainingPages -= lNumberOfPagesToManage;
 	}
 	fsip.detach();
-	readPage(lPagePointer, LSN, _pageSize);
-	fsip.attach(lPagePointer);
-	writePage(lPagePointer, LSN, _pageSize);
+	readPage(lPagePointer.get(), LSN, _pageSize);
+	fsip.attach(lPagePointer.get());
+	writePage(lPagePointer.get(), LSN, _pageSize);
 	close();
-	delete[] lPagePointer;
 }
 
 uint PartitionBase::getMaxPagesPerFSIP() noexcept

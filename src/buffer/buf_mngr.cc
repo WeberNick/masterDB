@@ -80,7 +80,6 @@ void BufferManager::FreeBCBs::init(const size_t aNoFreeBCBs) noexcept
 
 void BufferManager::FreeBCBs::resetBCB(BCB* aBCB) noexcept
 {
-    TRACE("FU");
     aBCB->lock();
     insertToFreeBCBs(aBCB);
     aBCB->unlock();
@@ -213,11 +212,8 @@ void BufferManager::flushAll()
 {
     TRACE("Flush of the complete buffer starts...");
     std::vector<BCB*> lBCBs = _bufferHash->getAllValidBCBs();
-    TRACE("number of Pages to flush: " + std::to_string(lBCBs.size()));
     for (uint i = 0; i < lBCBs.size(); ++i){
-        TRACE("iteration: " + std::to_string(i));
         BCB* lBCB = lBCBs.at(i);
-        TRACE("Partition: " + std::to_string(lBCB->getPID().fileID()) + " Page: " + std::to_string(lBCB->getPID().pageNo()));
         flush(lBCB);
     }
     TRACE("Finished flushing the complete buffer");
@@ -361,20 +357,17 @@ void BufferManager::initNewPage(BCB* aFBCB, const PID& aPageID, uint64_t aLSN)
 void BufferManager::resetBCB(const PID& aPID) noexcept
 {
     const size_t lHashIndex = _bufferHash->hash(aPID);    // determine hash of requested page
-    TRACE("Partition: "+std::to_string(aPID.fileID())+" Page: "+std::to_string(aPID.pageNo()));
 
     _bufferHash->getBucketMtx(lHashIndex).lock();         // lock exclusively 
     BCB* lCurBCB = _bufferHash->getBucketBCB(lHashIndex); // initialize search in hash chain
 
     if(!lCurBCB)
     {
-        TRACE("Hash Bucket empty");
         _bufferHash->getBucketMtx(lHashIndex).unlock();
         return;
     }
     else if(lCurBCB->getPID() == aPID)
     {
-        TRACE("was first in bucket");
         _bufferHash->setBucketBCB(lHashIndex, lCurBCB->getNextInChain()); // delete from bucket
         getFreeFrames().push(lCurBCB->getFrameIndex());                   // free frame
         _freeBCBs.resetBCB(lCurBCB);                                      // free BCB
@@ -383,10 +376,8 @@ void BufferManager::resetBCB(const PID& aPID) noexcept
     }
     while(lCurBCB->getNextInChain()) // as long as there are allocated CBs
     {
-        TRACE("one step in the chain");
         if(lCurBCB->getNextInChain()->getPID() == aPID) // is there a CB for the requested page
         {
-            TRACE("page found");
             BCB* tmp = lCurBCB->getNextInChain()->getNextInChain();
             getFreeFrames().push(lCurBCB->getNextInChain()->getFrameIndex()); // free frame
             _freeBCBs.resetBCB(lCurBCB->getNextInChain()); // free BCB
@@ -400,7 +391,6 @@ void BufferManager::resetBCB(const PID& aPID) noexcept
         }
     }
     _bufferHash->getBucketMtx(lHashIndex).unlock();
-    TRACE("PID was not in Buffer");
 }
 
 size_t BufferManager::getFrame() noexcept
@@ -428,14 +418,11 @@ size_t BufferManager::getFrame() noexcept
         lRandomIndex = lDistr(lRNG); // generate random index
         lHashChainEntry = _bufferHash->getBucketBCB(lRandomIndex);
         // if chosen hash bucket is not empty, try to get exclusive lock on hash bucket
-        TRACE("trying to kick out bcb from bucket "+std::to_string(lRandomIndex));
         if(lHashChainEntry != nullptr && _bufferHash->getBucketMtx(lRandomIndex).try_lock())
         { // is this enough to work exclusively on hash chain?? maybe need to lock the BCB in chain??
-            TRACE("there is something in that bucket");
             // if the first one was free
             if(lHashChainEntry->getFixCount() == 0 && lHashChainEntry->try_lock())
             {
-                TRACE("was first in bucket");
                 const size_t lVictimIndex = lHashChainEntry->getFrameIndex(); // frame index of victim
                 // is the page in the frame modified? if so, flush it and check if successfull (== 0)
                 if(lHashChainEntry->getModified())
@@ -453,12 +440,10 @@ size_t BufferManager::getFrame() noexcept
             // if it was not the first one to be cleared out
             while(lHashChainEntry->getNextInChain()) // as long as there are allocated CBs
             {
-                TRACE("one step in the chain");
                 BCB* lNext = lHashChainEntry->getNextInChain();
                 // if the next one is free
                 if(lNext->getFixCount() == 0 && lNext->try_lock()) // is there a CB for the requested page
                 {
-                    TRACE("found a victim");
                     BCB* tmp = lNext->getNextInChain();
                     const size_t lVictimIndex = lNext->getFrameIndex();
                     // if modified

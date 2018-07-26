@@ -49,7 +49,6 @@ void PartitionManager::load(const part_vt& aTuples)
     {
         _partitionsByID[partTuple.ID()] = partTuple;
         _partitionsByName[partTuple.name()] = partTuple.ID();
-        TRACE(partTuple.to_string() + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
         if (partTuple.ID() > maxCounter)
         {
             maxCounter = partTuple.ID();
@@ -136,12 +135,12 @@ PartitionBase* PartitionManager::getPartition(const uint8_t aID)
     if (_partitions.find(aID) == _partitions.end()) {
         TRACE("## Partition instance with ID '" + std::to_string(aID) + "' not found in-memory. Looking on disk...");
         const Partition_T& lTuple = getPartitionT(aID);
-        if(lTuple.ID() != aID)
-        {
-            #pragma message ("TODO: Can this happen? If not: Delete if-statement and exception")
-            TRACE("## Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk.");
-            throw PartitionNotExistsException(FLF);
-        }
+        //if(lTuple.ID() != aID)
+        //{
+            //#pragma message ("TODO: Can this happen? If not: Delete if-statement and exception")
+            //TRACE("## Requested partition ID (" + std::to_string(aID) + ") does not match retrieved partition tuple ID (" + std::to_string(lTuple.ID()) + ") from disk.");
+            //throw PartitionNotExistsException(FLF);
+        //}
         PartitionBase* s;
         switch(lTuple.type()){
             case 1: // PartitionFile

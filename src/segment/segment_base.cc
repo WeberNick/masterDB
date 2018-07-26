@@ -108,20 +108,18 @@ byte* SegmentBase::getPageS(const uint aPageNo)
     BCB*& lBCB = lPair.second;
     if(lBCB == nullptr) // no valid BCB -> this segment has to request the page again
     {
-        TRACE("Fix it");
         lBCB = _bufMan.fix(lPID, LOCK_MODE::kSHARED);
         _pages.at(aPageNo).second = lBCB;
     }
     else
     {
-        TRACE("still got it, in mode " + lockModeToString(lBCB->getLockMode()));
         if(toType(lBCB->getLockMode()) < toType(LOCK_MODE::kSHARED))
         { // check if we have at least a shared lock on BCB
             lBCB->upgradeLock(LOCK_MODE::kSHARED);
         }
         else if (toType(lBCB->getLockMode()) > toType(LOCK_MODE::kSHARED)){
-            TRACE("you locked this page exclusively and are probably not aware of it...");
-            // how do we deal with this?
+            TRACE("A shared lock is not needed as a exclusive lock is already obtained...");
+            //Further handling of this?
         }
     }
     return _bufMan.getFramePtr(lBCB);

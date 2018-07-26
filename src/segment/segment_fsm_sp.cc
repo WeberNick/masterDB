@@ -27,7 +27,7 @@ SegmentFSM_SP::SegmentFSM_SP(PartitionBase &aPartition, const CB& aControlBlock)
 
 TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
 {
-	TRACE("trying to insert Tuple");
+	TRACE("Inserting tuple on this page (" + to_string() + ")");
     // get page with enough space for the tuple and load it into memory
 	bool emptyfix = false;
 	PID lPID = getFreePage(aTupleSize, emptyfix);
@@ -65,7 +65,6 @@ TID SegmentFSM_SP::insertTuple(byte* aTuple, const uint aTupleSize)
 	
 	if(!tplPtr) // If true, not enough free space on nsm page => getFreePage buggy
 	{
-        #pragma message ("mMn sollte das hier bleiben, der Fehler ist realistisch und würde zwar ein krasses fehlverhalten bedeuten, aber sehr oft nicht zum Absturz fuehren.")
 		const std::string lErrMsg("Not enough free space on nsm page.");
         TRACE(lErrMsg);
         throw NSMException(FLF, lErrMsg);
@@ -140,9 +139,7 @@ void SegmentFSM_SP::readPageUnbuffered(uint aPageNo, byte* aPageBuffer, uint aBu
 {
 	_partition.open();
     _partition.readPage(aPageBuffer,_pages[aPageNo].first._pageNo,aBufferSize);
-	TRACE(std::to_string(_pages[aPageNo].first._pageNo));
     _partition.close();
-	TRACE("read page");
 }
 
 void SegmentFSM_SP::erase()

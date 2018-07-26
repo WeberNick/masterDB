@@ -35,6 +35,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
         _cb = &aControlBlock;
         TRACE("'DatabaseInstanceManager' CB initialized.");
     }
+    #pragma message ("@NICO: PLEASE TAKE A LOOK AT THIS! Should this be removed after you have integrated installation/boot/shutdown in the CLI? @NICO@")
     if (!isRunning())
     {
         if(_cb->install())

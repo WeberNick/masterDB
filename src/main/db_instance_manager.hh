@@ -110,32 +110,25 @@ void DatabaseInstanceManager::load(std::vector<T_TupleType>& aTuples, const uint
 
     PartitionFile* lMasterPart = _partMngr.createMasterPartition(lMasterPartitionTuple);
     SegmentFSM_SP* lSegments = _segMngr.loadSegmentFSM_SP(*lMasterPart, aIndex);
-    byte* lPage = new byte[lMasterPart->getPageSize()];
-    TRACE(" getPageSize " + std::to_string(lMasterPart->getPageSize()) + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
+    std::unique_ptr<byte[]> lPage = std::make_unique<byte[]>(lMasterPart->getPageSize());
     InterpreterSP lInterpreter;
 
     for (size_t i = 0; i < lSegments->getNoPages(); ++i)
     {
-        lSegments->readPageUnbuffered(i, lPage, lMasterPart->getPageSize());
-        lInterpreter.attach(lPage);
-        TRACE("step" + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
+        lSegments->readPageUnbuffered(i, lPage.get(), lMasterPart->getPageSize());
+        lInterpreter.attach(lPage.get());
         for (uint j = 0; j < lInterpreter.noRecords(); ++j)
         {
-            TRACE("step " + std::to_string(j) + std::to_string(lInterpreter.noRecords()) + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
             T_TupleType temp;
             if (lInterpreter.getRecord(j))
             {
                 temp.toMemory(lInterpreter.getRecord(j));
-                TRACE(" " + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
                 aTuples.push_back(temp);
             }
-            TRACE(" " + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
         }
     }
-    TRACE(" " + std::string(" (DELETE TRACE AFTER DEBUGGING)"));
     _segMngr.deleteSegment(lSegments);
     delete lMasterPart;
-    delete[] lPage;
     TRACE("Loading tuples from the master partition completed");
 }
 

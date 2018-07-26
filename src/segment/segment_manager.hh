@@ -208,7 +208,6 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
             if(lTuplePointer)
             {
                 lTuple.toMemory(lInterpreter.getRecord(j));
-                // TRACE(std::to_string(j) + " " + lTuple.to_string());
 
                 if(lTuple.ID() == aID)
                 {
@@ -219,10 +218,6 @@ void SegmentManager::deleteTuplePhysically(const std::string& aMasterName, uint1
                     TRACE("Tuple deleted successfully.");
                     return;
                 }
-            }
-            else
-            {
-              TRACE(std::to_string(j)+ " deleted tuple");
             }
         ++j;
         lSegments->releasePage(i);

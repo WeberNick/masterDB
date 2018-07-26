@@ -80,7 +80,7 @@ class BufferManager final
                 void init(const size_t aNoFreeBCBs) noexcept;
 
             public:
-                inline BCB*   getFreeBCBList() noexcept { TRACE("first BCB in line is " + _freeBCBList->to_string()); return _freeBCBList; }
+                inline BCB*   getFreeBCBList() noexcept { return _freeBCBList; }
                 inline void   lock() noexcept { _freeBCBListMtx.lock(); }
                 inline void   unlock() noexcept { _freeBCBListMtx.unlock(); }
                 inline size_t getNoFreeBCBs() noexcept { return _noFreeBCBs; }
