@@ -3,7 +3,7 @@
  *  @author	Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief	An abstract class implementing the interface for every partition
  *  @bugs	Currently no bugs known
- *  @todos	-
+ *  @todos	Remove new/delete in allocPage and replace with unique ptr
  *  @section TBD
  */
 

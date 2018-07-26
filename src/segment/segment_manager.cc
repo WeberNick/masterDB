@@ -186,7 +186,6 @@ SegmentBase* SegmentManager::getSegment(const uint16_t aSegmentID)
 
 SegmentBase* SegmentManager::getSegment(const std::string& aSegmentName)
 {
-   TRACE("Trying to get Segment by Name, Name: " + aSegmentName);
    try
    {
        return (SegmentBase*)getSegment(_segmentsByName.at(aSegmentName));
@@ -251,15 +250,11 @@ void SegmentManager::createMasterSegments(PartitionFile* aPartition, const std::
     _segments[lPSeg->getID()] = lPSeg;
     
     Segment_T lPSegT(aPartition->getID(), lPSeg->getID(), aName, 2, lPSeg->getIndexPages().at(0));
-    TRACE("ID is "+std::to_string(aPartition->getID()));
-    TRACE("MasterSegPart created");
     // Master Segment for Segments
     SegmentFSM_SP* lSSeg = new SegmentFSM_SP(_counterSegmentID++, *aPartition, *_cb);
     _segments[lSSeg->getID()] = lSSeg;
 
     Segment_T lSSegT(aPartition->getID(), lSSeg->getID(), _masterSegSegName, 2, lSSeg->getIndexPages().at(0));
-    TRACE("First Page is "+std::to_string(lSSeg->getIndexPages().at(0)));   
-    TRACE("MasterSegSeg created.");
     // store the to Segments into the Master Segment of Segments
     createSegmentSub(lSSegT);
     createSegmentSub(lPSegT);

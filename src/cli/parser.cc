@@ -106,12 +106,14 @@ void CommandParser::runcli()
                     {
                         const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
                         auto future = Pool::Default::submitJob(com->_func, this, &args);
-                        rec = (CP::CommandStatus) future.get();
+                        //rec = (CP::CommandStatus) future.get();
+                        rec = static_cast<CP::CommandStatus>(future.get());
                     }
                     else
                     {
                         auto future = Pool::Default::submitJob(com->_func, this, nullptr);
-                        rec = (CP::CommandStatus) future.get();
+                        //rec = (CP::CommandStatus) future.get();
+                        rec = static_cast<CP::CommandStatus>(future.get());
                     }
                     if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::UNKNOWN_ERROR)
                     {
@@ -663,12 +665,14 @@ void CommandParser::multiexec(const string_vt& commands)
                 {
                     const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
                     auto future = Pool::Default::submitJob(com->_func, this, &args);
-                    rec = (CP::CommandStatus) future.get();
+                    //rec = (CP::CommandStatus) future.get();
+                    rec = static_cast<CP::CommandStatus>(future.get());
                 }
                 else
                 {
                     auto future = Pool::Default::submitJob(com->_func, this, nullptr);
-                    rec = (CP::CommandStatus) future.get();
+                    //rec = (CP::CommandStatus) future.get();
+                    rec = static_cast<CP::CommandStatus>(future.get());
                 }
                 if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::UNKNOWN_ERROR)
                 {

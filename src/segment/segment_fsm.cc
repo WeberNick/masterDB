@@ -138,8 +138,8 @@ PID SegmentFSM::getFreePage(const uint aNoOfBytes, bool& emptyfix, uint aSizeOfO
     fsmp.attach(lPagePointer);
     fsmp.initNewFSM(lPagePointer, 0, lFSMIndex, _partition.getID(), fsmp.getMaxPagesPerFSM());
     // find next free page
-    PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
-    uint32_t lFreePageIndex = fsmp.getFreePage(lPageStatus);
+    //PageStatus lPageStatus = fsmp.calcPageStatus(lPageSizeInBytes, aNoOfBytes);
+    //uint32_t lFreePageIndex = fsmp.getFreePage(lPageStatus);
 
     lBcb->setModified(true);
     _bufMan.unfix(lBcb);
