@@ -172,6 +172,13 @@ class CommandParser
          */
         CommandStatus com_create_p(const char_vpt* args) const;
         /** 
+         * @brief implementing command functionality for creating a raw partition
+         * 
+         * @param args the argument vector consisting of the processed user input
+         * @return CommandStatus the return code
+         */
+        CommandStatus com_create_rp(const char_vpt* args) const;
+        /** 
          * @brief implementing command functionality for deleting a partition
          * 
          * @param args the argument vector consisting of the processed user input
@@ -265,7 +272,7 @@ class CommandParser
 
     private:
         static const char*                  _HELP_FLAG;
-        const std::array<const Command, 14> _commands;
+        const std::array<const Command, 15> _commands;
         size_t                              _maxCommandLength;
     
         LineReaderEdit _reader;

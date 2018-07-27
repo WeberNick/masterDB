@@ -71,7 +71,6 @@ class DatabaseInstanceManager final
 		inline PartitionManager& getPartMngr() noexcept { return _partMngr; }
 		inline SegmentManager& getSegMngr() noexcept { return _segMngr; }
         inline bool isRunning() noexcept { return _running; }
-        inline bool isInit() noexcept { return _cb != nullptr; }
 
 	private:
         /**

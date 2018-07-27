@@ -42,8 +42,7 @@ int main(const int argc, const char* argv[])
         std::cerr << "The path where to store the trace file is invalid." << std::endl;
         return -1;
     }
-
-    bool              C_INSTALL                   = false; // will be set in parser, depending on user input
+    
     std::string       C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
     const std::string C_TRACE_DIR_PATH            = lArgs.tracePath();
     const size_t      C_PAGE_SIZE                 = 4096;
@@ -51,7 +50,6 @@ int main(const int argc, const char* argv[])
     const bool        C_TRACE_ACTIVATED           = lArgs.trace();
     
     control_block_t lCB = {	
-        C_INSTALL,	
         C_MASTER_PARTITION_PATH,	
         C_TRACE_DIR_PATH,	
         C_PAGE_SIZE,	
@@ -67,6 +65,7 @@ int main(const int argc, const char* argv[])
         PartitionManager::getInstance().init(lCB);
         SegmentManager::getInstance().init(lCB);
         BufferManager::getInstance().init(lCB);
+        DatabaseInstanceManager::getInstance().init(lCB);
         CommandParser::getInstance().init(lCB, "mdb > ", '#');
     }
     catch(const ReturnException& ex)

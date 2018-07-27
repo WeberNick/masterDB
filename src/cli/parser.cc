@@ -28,7 +28,7 @@ CommandParser::CommandParser() :
         Command(*this, "SHUTDOWN",             false, 1,  0,       &CP::com_shutdown,     "Shuts down the database system. Enables you to boot with another masterPartition without exiting", "SHUTDOWN"),
         Command(*this, "HELP",                 false, 1,  0,       &CP::com_help,         "Displays usage information.", "HELP"),
         Command(*this, "CREATE PARTITION",     true,  2,  3,       &CP::com_create_p,     "Create a partition at a given path to a partition file with a name and a growth indicator of at least 8.", "CREATE PARTITION [str:path_to_partfile] [str:name] [int:growth_indicator >= 8]"),
-        Command(*this, "CREATE RAW PARTITION", true,  3,  3,       &CP::com_create_rp,    "Create a raw partition at a given path to a partition", "")
+        Command(*this, "CREATE RAW PARTITION", true,  3,  2,       &CP::com_create_rp,    "Create a raw partition at a given path with a name.", "CREATE RAW PARTITION [str:path_to_partfile] [str:name]"),
         Command(*this, "DROP PARTITION",       true,  2,  1,       &CP::com_drop_p,       "Drop a partition by name.", "DROP PARTITION [str:name]"),
         Command(*this, "CREATE SEGMENT",       true,  2,  2,       &CP::com_create_s,     "Create a segment for a given partition with a name.", "CREATE SEGMENT [str:partname] [str:segname]"),
         Command(*this, "DROP SEGMENT",         true,  2,  1,       &CP::com_drop_s,       "Drop a segment by its name. Segment names are globally unique, thus no partition has to be provided.", "DROP SEGMENT [str:segname]"),
@@ -69,7 +69,20 @@ void CommandParser::runcli()
         if (com != NULL)
         {
             std::string comname(com->_name);
-            if (!DatabaseInstanceManager::getInstance().isRunning() && !(comname == "INSTALL" || comname == "BOOT")
+            if (splits.size() == com->_comLength + 1 && *splits[splits.size() - 1] == *CP::_HELP_FLAG)
+            {
+                std::cout << "Help information for command: " << com->_name << "\n"
+                          << "Purpose:\n  " << com->_helpMsg << "\n"
+                          << "Usage:\n  " << com->_usageInfo << "\n"
+                          << std::endl;
+            }
+            else if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID))
+            {
+                std::cout << "Wrong number of args.\n"
+                          << "Usage:\n  " << com->_usageInfo << "\n"
+                          << std::endl;
+            }
+            else if (!DatabaseInstanceManager::getInstance().isRunning() && !(comname == "INSTALL" || comname == "BOOT")
                 && comname != "HELP" && comname != "EXIT")
             {
                 std::cout << "The database system is not running yet." << "\n"
@@ -86,49 +99,31 @@ void CommandParser::runcli()
             }
             else
             {
-                if (splits.size() == com->_comLength + 1 && *splits[splits.size() - 1] == *CP::_HELP_FLAG)
+                CP::CommandStatus rec;
+                if (com->_hasParams)
                 {
-                    std::cout << "Help information for command: " << com->_name << "\n"
-                              << "Purpose:\n  " << com->_helpMsg << "\n"
-                              << "Usage:\n  " << com->_usageInfo << "\n"
-                              << std::endl;
-                }
-                else if ((splits.size() - com->_comLength) != com->_numParams && !(com->_numParams == INVALID))
-                {
-                    std::cout << "Wrong number of args.\n"
-                              << "Usage:\n  " << com->_usageInfo << "\n"
-                              << std::endl;
+                    const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
+                    auto future = Pool::Default::submitJob(com->_func, this, &args);
+                    rec = static_cast<CP::CommandStatus>(future.get());
                 }
                 else
                 {
-                    CP::CommandStatus rec;
-                    if (com->_hasParams)
-                    {
-                        const char_vpt args(&splits[com->_comLength], &splits[splits.size()]);
-                        auto future = Pool::Default::submitJob(com->_func, this, &args);
-                        //rec = (CP::CommandStatus) future.get();
-                        rec = static_cast<CP::CommandStatus>(future.get());
-                    }
-                    else
-                    {
-                        auto future = Pool::Default::submitJob(com->_func, this, nullptr);
-                        //rec = (CP::CommandStatus) future.get();
-                        rec = static_cast<CP::CommandStatus>(future.get());
-                    }
-                    if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::UNKNOWN_ERROR)
-                    {
-                        break;
-                    }
-                    else if (rec == CP::CommandStatus::WRONG)
-                    {
-                        std::cout << "Wrong type or value of some argument.\n"
-                                  << "Usage - " << com->_usageInfo << "\n"
-                                  << std::endl;
-                    }
-                    else if (rec == CP::CommandStatus::CONTINUE)
-                    {
-                        continue;
-                    }
+                    auto future = Pool::Default::submitJob(com->_func, this, nullptr);
+                    rec = static_cast<CP::CommandStatus>(future.get());
+                }
+                if (rec == CP::CommandStatus::EXIT || rec == CP::CommandStatus::UNKNOWN_ERROR)
+                {
+                    break;
+                }
+                else if (rec == CP::CommandStatus::WRONG)
+                {
+                    std::cout << "Wrong type or value of some argument.\n"
+                              << "Usage - " << com->_usageInfo << "\n"
+                              << std::endl;
+                }
+                else if (rec == CP::CommandStatus::CONTINUE)
+                {
+                    continue;
                 }
             }
         }
@@ -146,17 +141,22 @@ void CommandParser::runcli()
 const CP::Command* CommandParser::findCommand(const char_vpt* splits)
 {
     std::string com(splits->at(0));
-    std::string com_warg = "";
+    std::string com_warg  = ""; // handle commands of comlength 2
+    std::string com_wtarg = ""; // handle commands of comlength 3
     if (splits->size() > 1)
     {
-        com_warg = std::string(splits->at(0)) + " " + std::string(splits->at(1));
+        com_warg  += std::string(splits->at(0)) + " " + std::string(splits->at(1));
+    }
+    if (splits->size() > 2)
+    {
+        com_wtarg += std::string(splits->at(0)) + " " + std::string(splits->at(1)) + " " + std::string(splits->at(2));
     }
     std::transform(com.begin(), com.end(), com.begin(), ::toupper);
     std::transform(com_warg.begin(), com_warg.end(), com_warg.begin(), ::toupper);
     for (size_t i = 0; i < _commands.size() ; ++i)
     {
         std::string name(_commands[i]._name);
-        if (name == com || name == com_warg) 
+        if (name == com || name == com_warg || name == com_wtarg) 
         {
             return &_commands[i];
         }
@@ -185,16 +185,8 @@ CP::CommandStatus CP::com_install(const char_vpt* args) const
     }
     try
     {
-        _cb->_install = true; // install
         _cb->_masterPartition = path;
-        if(DatabaseInstanceManager::getInstance().isInit())
-        {
-            DatabaseInstanceManager::getInstance().install();
-        }
-        else
-        {
-            DatabaseInstanceManager::getInstance().init(*_cb); // installs the DBS
-        }
+        DatabaseInstanceManager::getInstance().install();
         std::cout << "Installed the datbase system successfully at " << path << "." << "\n" << std::endl;
     }
     catch(const PartitionExistsException& pex)
@@ -220,16 +212,8 @@ CP::CommandStatus CP::com_boot(const char_vpt* args) const
     }
     try
     {
-        _cb->_install = false; // boot
         _cb->_masterPartition = path;
-        if(DatabaseInstanceManager::getInstance().isInit())
-        {
-            DatabaseInstanceManager::getInstance().boot();
-        }
-        else
-        {
-            DatabaseInstanceManager::getInstance().init(*_cb); // boots the DBS
-        }
+        DatabaseInstanceManager::getInstance().boot();
         std::cout << "Booted the datbase system successfully from \"" << path << "\"." << "\n" << std::endl;
     }
     catch(const PartitionNotExistsException& pex)
@@ -287,6 +271,58 @@ CP::CommandStatus CP::com_create_p(const char_vpt* args) const
         else
         {
             std::cout << "PartitionFile at \"" << args->at(0) << "\" already exists, \"" << partName << "\" could not be created.\n" << std::endl;
+        }
+    }
+    catch(const PartitionExistsException& pex) 
+    {
+         const std::string& partLoc = PartitionManager::getInstance().getPathForPartition(partName);
+         std::cout << "Partition \"" << partName << "\" already exists at \"" << partLoc << "\".\n" << std::endl;
+         return CP::CommandStatus::CONTINUE;
+    }
+    catch(const InvalidArgumentException& iaex) 
+    {
+        std::cout << "Invalid argument was provided:" << std::endl;
+        std::cout << iaex.what() << "\n" << std::endl;
+        return CP::CommandStatus::CONTINUE; // return OK instead of WRONG because iaex.what() already displays information
+    }
+    catch(const InvalidPathException& ipex) 
+    {
+        std::cout << "The provided path is invalid:" << std::endl;
+        std::cout << ipex.what() << "\n" << std::endl;
+        return CP::CommandStatus::CONTINUE; // return OK instead of WRONG because iaex.what() already displays information
+    }
+    catch(const PartitionFullException& ex) 
+    {
+        std::cout << "Partition Full.\n" << std::endl;
+        return CP::CommandStatus::UNKNOWN_ERROR;
+    }
+    catch(const fs::filesystem_error& fse) 
+    {
+        std::cout << "Filesystem Exception.\n" << std::endl;
+        return CP::CommandStatus::UNKNOWN_ERROR;
+    }
+    catch(const std::exception& e) 
+    {
+        std::cout << "An error occurred: " << e.what() << "\nAbort.\n"<< std::endl;
+        return CP::CommandStatus::UNKNOWN_ERROR;
+    }
+    return CP::CommandStatus::CONTINUE;
+}
+
+CP::CommandStatus CP::com_create_rp(const char_vpt* args) const
+{
+    std::string path(args->at(0));
+    std::string partName(args->at(1));
+    try
+    {
+        const bool created = PartitionManager::getInstance().createPartitionRawInstance(path, partName).second;
+        if (created)
+        {
+            std::cout << "Successfully created Raw Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
+        } 
+        else
+        {
+            std::cout << "Partition at \"" << args->at(0) << "\" already exists, \"" << partName << "\" could not be created.\n" << std::endl;
         }
     }
     catch(const PartitionExistsException& pex) 
@@ -436,6 +472,11 @@ CP::CommandStatus CP::com_insert_tuple(const char_vpt* args) const
     catch(const SegmentNotExistsException& snee)
     {
         std::cout << "Segment \"" << segName << "\" does not exist. Could not insert Tuple.\n" << std::endl;
+        return CP::CommandStatus::CONTINUE;
+    }
+    catch(const PartitionFullException& pfe)
+    {
+        std::cout << "The Partition is full.\n" << std::endl;
         return CP::CommandStatus::CONTINUE;
     }
     catch(const std::exception& e)
