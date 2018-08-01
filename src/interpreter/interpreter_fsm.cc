@@ -51,7 +51,7 @@ uint32_t InterpreterFSM::getFreePage(const PageStatus aPageStatus) noexcept
     {
         PageStatus lPageStatus = getPageStatus(i);
         // if fits on page
-        bool fits = 0;
+        //bool fits = 0;
         PageStatus max = PageStatus::kPageStatusSize;
         if (toType(lPageStatus) + toType(aPageStatus) < toType(max))
         {

@@ -44,14 +44,12 @@ constexpr uint16_t INVALID_16 = std::numeric_limits<uint16_t>::max();
 
 struct control_block_t
 {
-    bool _install;
     std::string _masterPartition;
     const std::string _tracePath;
     const size_t _pageSize;
     const size_t _noBufFrames;
     const bool _trace;
 
-    bool install() const noexcept { return _install; }
     std::string mstrPart() const noexcept { return _masterPartition; }
     const std::string& tracePath() const noexcept { return _tracePath; }
     size_t pageSize() const noexcept { return _pageSize; }
@@ -63,7 +61,6 @@ using CB = control_block_t;
 inline std::ostream& operator<<(std::ostream& strm, const CB& cb)
 {
     strm << "The following parameters are set:\n"
-         << "Install: " << cb.install() << "\n"
          << "Master Partition Path: " << cb.mstrPart() << "\n"
          << "Path of Log File: " << cb.tracePath() << "\n"
          << "Page Size: " << cb.pageSize() << "\n"
@@ -74,10 +71,10 @@ inline std::ostream& operator<<(std::ostream& strm, const CB& cb)
 
 struct page_id_t
 {
-    uint8_t _fileID;
+    uint8_t  _fileID;
     uint32_t _pageNo;
 
-    uint8_t fileID() const noexcept { return _fileID; }
+    uint8_t  fileID() const noexcept { return _fileID; }
     uint32_t pageNo() const noexcept { return _pageNo; }
 
     bool operator==(const page_id_t& aOther) const noexcept

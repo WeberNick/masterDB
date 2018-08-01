@@ -107,15 +107,49 @@ std::pair<PartitionFile*, bool> PartitionManager::createPartitionFileInstance(co
 
 std::pair<PartitionRaw*, bool> PartitionManager::createPartitionRawInstance(const std::string& aPath, const std::string& aName)
 {
-    #pragma message ("TODO: Implement PartitionRaw functionality!")
-    // currently reformats the raw partition with every call.. need to use the getPartition procedure as above
-    PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
-    _partitions[lPartition->getID()] = lPartition;
-    const uint pType = 0;
-    Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, INVALID_16); // MAX16 = invalid value to indicate 'no growth'
-    createPartitionSub(lPartTuple);
-    TRACE("Raw partition instance created.");
-    return std::make_pair(static_cast<PartitionRaw*>(_partitions.at(lPartition->getID())), true);
+   //let's hope this works. Not tested as I don't have access to a computer being able to run our project.
+   TRACE("Request to create raw partition at path '" + aPath + "' with name '" + aName + "'");
+    if(!FileUtil::hasValidDir(aPath))
+    {
+        // return to caller and inform about invalid path
+        TRACE("## The given path ('" + aPath  + "') is invalid");
+        throw InvalidPathException(FLF, aPath);
+    }
+    // e.g. RawPartition at /home/username/partition exists, return corresponding partition
+    if(FileUtil::exists(aPath))
+    {
+        TRACE("## The given path exists. Check if a corresponding Partition_T tuple is maintained by the PartitionManager");
+        const auto& lByID = _partitionsByID;
+        const auto it = std::find_if(lByID.cbegin(), lByID.cend(), [&aPath](const auto& elem) { return elem.second.path() == aPath; });
+        if(it != lByID.cend())
+        {
+            TRACE("## Partition_T tuple is maintained by the PartitionManager. Search for corresponding PartitionRaw object.");
+            return std::make_pair(static_cast<PartitionRaw*>(getPartition(it->first)), false);
+        }
+    }
+    /* e.g. PartitionRaw at /home/username/otherfolder/ does not exist, but partition with name aName does already exist at another path
+       Throw Exception: Name of partition must be unique across destinations */
+    else if (_partitionsByName.find(aName) != _partitionsByName.end())
+    {
+        throw PartitionExistsException(FLF); 
+    }
+    // Everything OK: no PartitionRaw exists at aPath and no Partition exists with name aName
+    else
+    {
+        TRACE("## The all args are valid. Continue..."); 
+        const uint8_t pType = 0; // raw
+	PartitionRaw* lPartition = new PartitionRaw(aPath, aName, _counterPartitionID++, *_cb);
+	_partitions[lPartition->getID()] = lPartition;
+       Partition_T lPartTuple(lPartition->getID(), lPartition->getName(), lPartition->getPath(), pType, INVALID_16); // MAX16 = invalid value to indicate 'no growth'
+       createPartitionSub(lPartTuple);
+        TRACE("## Raw partition created and successfully added to the PartitionManager");
+       return std::make_pair(static_cast<PartitionRaw*>(_partitions.at(lPartition->getID())), true);
+    }
+    // if this line is reached, something went wrong
+    // examples are a given path to existing file which is not a partition
+    throw PartitionException(FLF, "Given path to file exists, but file is not a Partition. The file may be a Partition belonging to another masterPartition");
+
+
 }
 
 void PartitionManager::createPartitionSub(const Partition_T& aParT)
@@ -265,7 +299,7 @@ void PartitionManager::deletePartition(const uint8_t aID)
     PartitionBase* lPart = getPartition(aID);
     lPart->remove();
     // delete object
-    delete lPart; // TODO: evtl raus
+    delete lPart;
     _partitions.erase(aID);
 
     const Partition_T lpart(_partitionsByID.at(aID));

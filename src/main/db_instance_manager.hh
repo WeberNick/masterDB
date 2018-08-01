@@ -57,8 +57,6 @@ class DatabaseInstanceManager final
          *
          */
 		void shutdown();
-
-	private:
         /**
          * @brief   installs the system and places the master partition at the path defined in the control block
          */

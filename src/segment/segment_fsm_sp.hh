@@ -257,13 +257,6 @@ void SegmentFSM_SP::insertTuplesSub(const std::vector<Tuple_T>& aTupleVector, si
         TRACE("## Page found! Assign BCB Pointer to _pages vector");
         it->second = lBCB;
     }
-    else
-    {
-        #pragma message ("TODO: @segment guys: same story as usual, can this be deleted? bug ever occured? Think about how this can happen!")
-        TRACE("## This should not be printed");
-        // terminate and find bug
-        throw ReturnException(FLF);
-    }
 	byte* lBufferPage = _bufMan.getFramePtr(lBCB);
 
 	InterpreterSP lInterpreter;
@@ -319,11 +312,10 @@ Tuple_T SegmentFSM_SP::getTuple(const TID& aTID)
         if(lTuplePtr)
         { 
             result.toMemory(lTuplePtr); 
-            #pragma message ("TODO: @Jonas is this comment still valid? Was this a bug elsewhere? Is it fixed?")
-            releasePage(index); // crashed the buffer...
+            releasePage(index); 
             return result;
         }
-        releasePage(index); // crashed the buffer...
+        releasePage(index);
     }
     throw TupleNotFoundOrInvalidException(FLF);
 }

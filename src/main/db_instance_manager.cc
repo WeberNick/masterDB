@@ -33,20 +33,7 @@ void DatabaseInstanceManager::init(const CB& aControlBlock)
     if (!_cb)
     {
         _cb = &aControlBlock;
-        TRACE("'DatabaseInstanceManager' CB initialized.");
-    }
-    #pragma message ("@NICO: PLEASE TAKE A LOOK AT THIS! Should this be removed after you have integrated installation/boot/shutdown in the CLI? @NICO@")
-    if (!isRunning())
-    {
-        if(_cb->install())
-        {
-            install();
-        }
-        else
-        {
-            boot();
-        }
-        _running = true;
+        TRACE("'DatabaseInstanceManager' initialized.");
     }
 }
 
@@ -58,6 +45,7 @@ void DatabaseInstanceManager::install()
     _masterPartition = _partMngr.createMasterPartition(_cb->mstrPart(), lMstrPartGrowth, lMasterPartitionTuple);
     _segMngr.createMasterSegments(_masterPartition, _partMngr._masterSegPartName);
     _partMngr.insertMasterPartitionTuple(lMasterPartitionTuple);
+    _running = true;
     TRACE("Finished the installation of the database system!");
 }
 
@@ -73,6 +61,7 @@ void DatabaseInstanceManager::boot()
     _partMngr.load(lPartitionTuples);
     _segMngr.load(lSegmentTuples);
     _masterPartition = (PartitionFile*)_partMngr.getPartition(_partMngr._masterPartName);
+    _running = true;
     TRACE("Finished booting the database system!");
 }
 
