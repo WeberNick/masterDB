@@ -10,6 +10,50 @@
 #include <iostream>
 #include <cstdlib>
 
+void testRawPartitions()
+{
+    
+    bool              C_INSTALL                   = true;
+    std::string       C_MASTER_PARTITION_PATH     = "/home/nickwebe/Desktop/MasterPartition";
+    const std::string C_TRACE_DIR_PATH            = "/home/nickwebe/Desktop/";
+    const size_t      C_PAGE_SIZE                 = 4096;
+    const size_t      C_BUFFER_POOL_SIZE          = 10000;
+    const bool        C_TRACE_ACTIVATED           = true;
+    
+    control_block_t lCB = {	
+        C_INSTALL,	
+        C_MASTER_PARTITION_PATH,	
+        C_TRACE_DIR_PATH,	
+        C_PAGE_SIZE,	
+        C_BUFFER_POOL_SIZE,	
+        C_TRACE_ACTIVATED	
+    };
+
+    try
+    {
+        // init all global singletons
+        Trace::getInstance().init(lCB);
+        PartitionManager::getInstance().init(lCB);
+        SegmentManager::getInstance().init(lCB);
+        BufferManager::getInstance().init(lCB);
+        DatabaseInstanceManager::getInstance().init(lCB);
+    }
+    catch(const ReturnException& ex)
+    {
+        // Any exceptions from which there is no recovery possible, are catched here 
+        std::cerr << ex.what() << std::endl;
+    }
+
+    PartitionManager& lPartMngr = PartitionManager::getInstance();
+    SegmentManager& lSegMngr = SegmentManager::getInstance();
+
+    auto [lPart, created] = lPartMngr.createPartitionRawInstance("/mnt/hdd/", "MyPartition");
+
+
+
+}
+
+
 /***********************************************************************
 *  todo: test install, boot, (shutdown), buf manager, and everything  *
 ***********************************************************************/
