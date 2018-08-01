@@ -1,3 +1,4 @@
+/**
  *  @file    partition_file.hh
  *  @author  Nick Weber (nickwebe@pi3.informatik.uni-mannheim.de)
  *  @brief   A class implementing the interface of a partition stored in a file
