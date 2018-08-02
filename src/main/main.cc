@@ -39,29 +39,13 @@ int main(const int argc, const char* argv[])
         return -1;
     }
     
-    //std::string       C_MASTER_PARTITION_PATH     = lArgs.masterPartition();
-    //const std::string C_TRACE_DIR_PATH            = lArgs.tracePath();
-    //const size_t      C_PAGE_SIZE                 = 4096;
-    //const size_t      C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
-    //const bool        C_TRACE_ACTIVATED           = lArgs.trace();
-    
-    //control_block_t lCB = {	
-        //C_MASTER_PARTITION_PATH,	
-        //C_TRACE_DIR_PATH,	
-        //C_PAGE_SIZE,	
-        //C_BUFFER_POOL_SIZE,	
-        //C_TRACE_ACTIVATED	
-    //};
-
-
-    std::string       C_MASTER_PARTITION_PATH     = "/home/nickwebe/Desktop/MasterPartition";
-    const std::string C_TRACE_DIR_PATH            = "/home/nickwebe/Desktop/";
+    const std::string C_TRACE_DIR_PATH            = lArgs.tracePath();
     const size_t      C_PAGE_SIZE                 = 4096;
-    const size_t      C_BUFFER_POOL_SIZE          = 10000;
-    const bool        C_TRACE_ACTIVATED           = true;
+    const size_t      C_BUFFER_POOL_SIZE          = lArgs.bufferFrames();
+    const bool        C_TRACE_ACTIVATED           = lArgs.trace();
     
     control_block_t lCB = {	
-        C_MASTER_PARTITION_PATH,	
+        "Master Partition not Set",	
         C_TRACE_DIR_PATH,	
         C_PAGE_SIZE,	
         C_BUFFER_POOL_SIZE,	

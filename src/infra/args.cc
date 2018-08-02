@@ -14,7 +14,6 @@ void construct_arg_desc(argdesc_vt& x) {
 	x.push_back( new barg_t("--trace", false, &Args::trace, "sets the flag for tracing"));
 	x.push_back( new uarg_t("--segment-index-page", 1, &Args::segmentIndexPage, "the page index where to store the segment manager"));
 	x.push_back( new uarg_t("--frames", 100000, &Args::bufferFrames, "the size of the buffer pool (frames = no pages managed by buffer manager)"));
-	x.push_back( new sarg_t("--master", "NO DEFAULT", &Args::masterPartition, "path to master partition"));
     x.push_back( new sarg_t("--trace-path", "./", &Args::tracePath, "path to log files"));
 }
 
@@ -24,7 +23,6 @@ Args::Args() :
     _trace(false),
 	_segmentIndexPage(1),
     _noBufFrames(100000), // 100,000 Frames * 4KB Pages = 400MB Bufferpool
-	_masterPartition("NO DEFAULT"),
     _tracePath("./")
 {}
 

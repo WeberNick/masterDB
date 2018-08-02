@@ -42,9 +42,6 @@ class Args
         inline uint bufferFrames() noexcept { return _noBufFrames; }
         inline void bufferFrames(const uint &x) noexcept { _noBufFrames = x; }
     
-        inline const std::string masterPartition() noexcept { return _masterPartition; }
-        inline void masterPartition(const std::string &x) noexcept { _masterPartition = x; }
-        
         inline const std::string tracePath() noexcept { return _tracePath; }
         inline void tracePath(const std::string &x) noexcept { _tracePath = x; }
 
@@ -54,7 +51,6 @@ class Args
         bool        _trace;
         uint        _segmentIndexPage;
         uint        _noBufFrames;
-	    std::string _masterPartition;
         std::string _tracePath;
 };
 
