@@ -31,28 +31,28 @@ There are several tools you will need to install and execute the application. In
 ## Project Structure
 
 ### buffer
-Implementation of the buffer pool
+Implementation of the buffer pool.<br/>
 For further informations, take a look at [src/buffer/README.md](/src/buffer/README.md)
 ### cli
-Implementation of a command line interface. By executing queries via the command line interface, the system can be controlled.
+Implementation of a command line interface. By executing queries via the command line interface, the system can be controlled.<br/>
 For further informations, take a look at [src/cli/README.md](/src/cli/README.md)
 ### infra
-Various helper files and functionalities.
+Various helper files and functionalities.<br/>
 For further informations, take a look at [src/infra/README.md](/src/infra/README.md)
 ### interpreter
-Implementation of various low level page interpreter working on the bits and bytes of pages.
+Implementation of various low level page interpreter working on the bits and bytes of pages.<br/>
 For further informations, take a look at [src/interpreter/README.md](/src/interpreter/README.md)
 ### main
-Implementation of the database instance manager and main-method.
+Implementation of the database instance manager and main-method.<br/>
 For further informations, take a look at [src/main/README.md](/src/main/README.md)
 ### partition
-Implementation of raw partitions (partitions for raw/block devices), file partitions (working on files in the file system) and the partition manager (managing all partitions).
+Implementation of raw partitions (partitions for raw/block devices), file partitions (working on files in the file system) and the partition manager (managing all partitions).<br/>
 For further informations, take a look at [src/partition/README.md](/src/partition/README.md)
 ### segment
-Implementation of free space management segments (segments with a free space management of pages) and segments for the N-ary storage model (NSM)
+Implementation of free space management segments (segments with a free space management of pages) and segments for the N-ary storage model (NSM).<br/>
 For further informations, take a look at [src/segment/README.md](/src/segment/README.md)
 ### threading
-Implementation of the threadpool.
+Implementation of the threadpool.<br/>
 For further informations, take a look at [src/threading/README.md](/src/threading/README.md)
 
 ## Getting Started
