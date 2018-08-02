@@ -81,7 +81,7 @@ class Partition_T : public Tuple
         inline std::string to_string() const noexcept override; 
         inline std::string to_string() noexcept override; 
 
-        inline string_vt values() const { return {std::to_string(_pID), _pName, _pPath, partTypeToString(_pType), std::to_string(_pGrowth)}; }
+        inline string_vt values() const { return {std::to_string(_pID), _pName, _pPath, partTypeToString(_pType), (_pGrowth == INVALID_16) ? std::string(" - ") : std::to_string(_pGrowth)}; }
 
     private:
         /* Tuple content*/

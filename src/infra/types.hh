@@ -204,11 +204,11 @@ inline std::string partTypeToString(int aType) // For Partitions
 {
     switch(aType)
     {
+        case 0:
+            return "Raw";
+            break;
         case 1:
             return "File";
-            break;
-        case 2:
-            return "Raw";
             break;
         default:
             return "NaN";
