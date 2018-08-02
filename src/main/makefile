@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
+CXXFLAGS = -O3 -Wall -std=c++17
 CC = g++
 
 UNAME := $(shell uname)
@@ -85,7 +85,7 @@ main : db_instance_manager.o main.o
 	$(CC) main.o $(OBJ) -o main $(LINKER) $(READFLAG)
 
 main.o : main.cc $(HDR) $(MAIN_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) main.cc $(LINKER) $(READFLAG)
+	$(CC) -c $(CXXFLAGS) $(INCL) main.cc
 
 db_instance_manager.o : db_instance_manager.cc db_instance_manager.hh $(HDR) $(DBIM_HDR)
 	$(CC) -c $(CXXFLAGS) $(INCL) db_instance_manager.cc

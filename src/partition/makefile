@@ -1,7 +1,5 @@
-CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
+CXXFLAGS = -O3 -Wall -std=c++17
 CC = g++
-
-LINKER = -lstdc++fs
 
 INCL = -I../.. -I..
 
@@ -45,16 +43,16 @@ OBJ = \
 all : $(OBJ)
 
 partition_manager.o : partition_manager.cc partition_manager.hh $(HDR) $(PM_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) partition_manager.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_manager.cc
 
 partition_base.o : partition_base.cc partition_base.hh $(HDR) $(PB_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) partition_base.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_base.cc
 
 partition_file.o : partition_file.cc partition_file.hh $(HDR) $(PF_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) partition_file.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_file.cc
 
 partition_raw.o : partition_raw.cc partition_raw.hh $(HDR) $(PR_HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) partition_raw.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) partition_raw.cc
 
 clean :
 	rm -f *.o a.out

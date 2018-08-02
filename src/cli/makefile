@@ -1,18 +1,5 @@
-CXXFLAGS = -O3 -Wall -std=c++17 -static-libstdc++ -g
+CXXFLAGS = -O3 -Wall -std=c++17
 CC = g++
-
-UNAME := $(shell uname)
-
-ifeq ($(UNAME), Linux)
-READFLAG = -lreadline
-else
-READFLAG = -ledit
-endif
-
-LINKER = \
-	-lstdc++fs \
-	-lpthread \
-	\
 
 INCL = -I../.. -I..
 
@@ -52,13 +39,13 @@ datejd.o : datejd.cc datejd.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) datejd.cc
 
 linereaderedit.o : linereaderedit.cc linereaderedit.hh datejd.hh val_tt.hh stime.hh stimestamp.hh
-	$(CC) -c $(CXXFLAGS) $(INCL) linereaderedit.cc $(READFLAG)
+	$(CC) -c $(CXXFLAGS) $(INCL) linereaderedit.cc
 
 stimestamp.o : stimestamp.cc stimestamp.hh datejd.hh stime.hh
 	$(CC) -c $(CXXFLAGS) $(INCL) stimestamp.cc
 
 parser.o : parser.cc parser.hh $(HDR)
-	$(CC) -c $(CXXFLAGS) $(INCL) parser.cc $(LINKER)
+	$(CC) -c $(CXXFLAGS) $(INCL) parser.cc
 
 clean :
 	rm -f *.o a.out

@@ -21,13 +21,11 @@ PartitionRaw::~PartitionRaw()
 
 uint32_t PartitionRaw::allocPage()
 {
-    #pragma message ("TODO: If the alloc page fails because of a full partition, an exception will be thrown. As this is a raw device, it is not possible to grow the partition. Therefore, this needs to be catched from some higher level (CLI? Segments?) and the allocation (prob. a result of an tuple insertion) must fail gracefully.")
     return PartitionBase::allocPage();
 }
 
 size_t PartitionRaw::partSize()
 {
-    #pragma message ("TODO: Test if functionality actually works for raw devices")
 	if(isRawDevice())
 	{
 		int lFileDescriptor = ::open(_partitionPath.c_str(), O_RDONLY);
@@ -46,31 +44,31 @@ size_t PartitionRaw::partSize()
             throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
     	}
        	uint64_t lDisk_size = lSector_count * lSector_size; // in bytes
-        if(lDisk_size % _pageSize != 0)
-        {
-            const std::string lErrMsg = std::string("Partition size modulo page size is not equal to zero");
-            TRACE(lErrMsg);
-            throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
-        } 
         if(::close(lFileDescriptor) == -1) // call close in global namespace
 		{
             const std::string lErrMsg = std::string("An error occured while closing the file: ") + std::string(std::strerror(errno));
             TRACE(lErrMsg);
             throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
 		}
-       return (lDisk_size / _pageSize);
+        return lDisk_size;
     }
     return 0;
 }
 
 size_t PartitionRaw::partSizeInPages()
 {
-    return (partSize() / _pageSize);
+    const size_t lDisk_size = partSize();
+    if(lDisk_size % _pageSize != 0)
+    {
+        const std::string lErrMsg = std::string("Partition size modulo page size is not equal to zero");
+        TRACE(lErrMsg);
+        throw FileException(FLF, _partitionPath.c_str(), lErrMsg);
+    } 
+    return (lDisk_size / _pageSize);
 }
 
 void PartitionRaw::create()
 {
-    #pragma message ("TODO: Test if functionality actually works for raw devices")
 	if(exists())
 	{
 		if(isRawDevice())		

@@ -315,10 +315,7 @@ CP::CommandStatus CP::com_create_rp(const char_vpt* args) const
     std::string partName(args->at(1));
     try
     {
-        //const bool created = PartitionManager::getInstance().createPartitionRawInstance(path, partName).second;
-        auto [lPart, created] = PartitionManager::getInstance().createPartitionRawInstance(path, partName);
-        std::cout << "Size : " << lPart->partSize() << std::endl;
-        std::cout << "Size in Pages: " << lPart->partSizeInPages() << std::endl;
+        const bool created = PartitionManager::getInstance().createPartitionRawInstance(path, partName).second;
         if (created)
         {
             std::cout << "Successfully created Raw Partition \"" << partName << "\" at \"" << args->at(0) << "\".\n" << std::endl;
